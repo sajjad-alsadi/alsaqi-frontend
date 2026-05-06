@@ -1,0 +1,586 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useAppContext } from '../context/AppContext';
+import api from '../services/api';
+import { useTranslation } from 'react-i18next';
+import { 
+  User, Lock, Settings as SettingsIcon, Shield, 
+  Camera, Check, AlertCircle, LogOut, Globe, 
+  Bell, Layout as LayoutIcon, Info, X, Sun
+} from 'lucide-react';
+import { Language } from '../constants';
+import { motion, AnimatePresence } from 'motion/react';
+import AboutSection from '../components/AboutSection';
+import PDFSettingsSection from '../components/PDFSettingsSection';
+import { useDepartments } from '../hooks/useDepartments';
+import { PdfTemplateManagement } from '../components/PdfTemplateManagement';
+
+const Settings: React.FC = () => {
+  const { user, token, language, setLanguage, theme, setTheme, dashboardLayout, setDashboardLayout, updateUser } = useAppContext();
+  const { t, i18n } = useTranslation();
+  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'preferences' | 'security' | 'about' | 'pdf'>('profile');
+  const [profile, setProfile] = useState<any>(null);
+  const { departments } = useDepartments();
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Form states
+  const [profileForm, setProfileForm] = useState({ name: '', email: '', department: '', profile_picture: '' });
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [preferences, setPreferences] = useState({ 
+    notifications: true, 
+    layout: dashboardLayout,
+    theme: theme,
+    notifyOn: {
+      newAudit: true,
+      updates: true,
+      alerts: true,
+      users: true
+    }
+  });
+
+  const [showLogoutAllModal, setShowLogoutAllModal] = useState(false);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get('/profile');
+      const data = res.data;
+      setProfile(data);
+      setProfileForm({
+        name: data.name || '',
+        email: data.email || '',
+        department: data.department || '',
+        profile_picture: data.profile_picture || ''
+      });
+      setPreferences(prev => ({
+        ...prev,
+        notifications: data.notifications_enabled === 1,
+        layout: data.dashboard_layout || 'standard',
+        theme: data.theme || 'light'
+      }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.put('/profile', profileForm);
+      setMessage({ text: t('settings.profileUpdated'), type: 'success' });
+      updateUser(profileForm);
+      fetchProfile();
+    } catch (err: any) {
+      console.error(err);
+      const errorMsg = err.response?.data?.error || err.message || t('common.error');
+      setMessage({ text: errorMsg, type: 'error' });
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage({ text: t('settings.passwordsDoNotMatch'), type: 'error' });
+      return;
+    }
+    if (passwordForm.newPassword.length < 8) {
+      setMessage({ text: t('settings.passwordRequirements'), type: 'error' });
+      return;
+    }
+
+    try {
+      await api.post('/auth/update-password', {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      setMessage({ text: t('settings.passwordChanged'), type: 'success' });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || t('failedToChangePassword');
+      setMessage({ text: errorMsg, type: 'error' });
+    }
+  };
+
+  const handleLogoutAll = async () => {
+    try {
+      await api.post('/auth/logout-all');
+      window.location.reload(); // Force logout current session too
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileForm(prev => ({ ...prev, profile_picture: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePreferencesUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      await api.put('/preferences', {
+        language,
+        dashboard_layout: dashboardLayout,
+        theme: theme,
+        notifications_enabled: preferences.notifications
+      });
+      setMessage({ text: t('settings.profileUpdated'), type: 'success' });
+    } catch (err) {
+      setMessage({ text: t('settings.errorUpdatingPreferences'), type: 'error' });
+    }
+  };
+
+  if (loading) return <div className="p-10 text-center font-bold text-slate-400">{t('settings.loadingSettings')}</div>;
+
+  const tabs = [
+    { id: 'profile', label: t('common.profile'), icon: User },
+    { id: 'password', label: t('common.password'), icon: Lock },
+    { id: 'preferences', label: t('settings.preferences'), icon: SettingsIcon },
+    { id: 'security', label: t('settings.security'), icon: Shield },
+    { id: 'about', label: t('settings.aboutApplication'), icon: Info },
+  ];
+
+  if (user?.role === 'Admin' || user?.role === 'Administrator' || user?.role === 'Manager') {
+    tabs.push({ id: 'pdf', label: t('settings.pdfSettings'), icon: LayoutIcon });
+  }
+
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+            <SettingsIcon size={32} />
+          </div>
+          <div>
+            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('common.settings')}</h2>
+            <p className="text-sm text-slate-400 font-bold mt-2">{t('settings.manageAccountAndPreferences')}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-10">
+        {/* Sidebar Tabs */}
+        <div className="lg:w-80 space-y-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id as any);
+                setMessage(null);
+              }}
+              className={`w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] font-black transition-all duration-300 ${
+                activeTab === tab.id 
+                ? 'bg-primary text-white shadow-xl shadow-primary/20' 
+                : 'text-slate-400 hover:bg-white hover:text-primary'
+              }`}
+            >
+              <tab.icon size={20} />
+              <span className="uppercase tracking-widest text-xs">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="glass-card p-10"
+            >
+              {activeTab !== 'about' && message && (
+                <div className={`mb-8 p-6 rounded-[1.5rem] flex items-center gap-4 border ${
+                  message.type === 'success' 
+                  ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
+                  : 'bg-rose-50 border-rose-100 text-rose-700'
+                }`}>
+                  {message.type === 'success' ? <Check size={20} /> : <AlertCircle size={20} />}
+                  <span className="font-bold text-sm">{message.text}</span>
+                </div>
+              )}
+
+              {activeTab === 'about' && <AboutSection />}
+
+              {activeTab === 'profile' && (
+                <form onSubmit={handleProfileUpdate} className="space-y-8">
+                  <div className="flex flex-col md:flex-row items-center gap-10 mb-10">
+                    <div className="relative group">
+                      <div className="w-32 h-32 rounded-[2.5rem] bg-slate-100 overflow-hidden shadow-inner border-4 border-white">
+                        {profileForm.profile_picture ? (
+                          <img src={profileForm.profile_picture} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-300">
+                            <User size={48} />
+                          </div>
+                        )}
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute -bottom-2 -end-2 w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                      >
+                        <Camera size={18} />
+                      </button>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={handleFileChange}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-slate-800">{profile?.name}</h3>
+                      <p className="text-sm text-slate-400 font-bold uppercase tracking-widest mt-1">{profile?.job_title || profile?.role} • {profile?.department}</p>
+                      <p className="text-xs text-primary font-black mt-2">{t('settings.userId')}{profile?.employee_id || profile?.username || profile?.id}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.name')}</label>
+                      <input 
+                        type="text" 
+                        className="input-field"
+                        value={profileForm.name}
+                        onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.email')}</label>
+                      <input 
+                        type="email" 
+                        className="input-field"
+                        value={profileForm.email}
+                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.department')}</label>
+                      <select 
+                        className="input-field"
+                        value={profileForm.department}
+                        onChange={(e) => setProfileForm({ ...profileForm, department: e.target.value })}
+                      >
+                        <option value="">{t('plan.selectDepartment')}</option>
+                        {(Array.isArray(departments) ? departments : []).map(dept => (
+                          <option key={dept.id} value={dept.name}>{dept.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.role')}</label>
+                      <input 
+                        type="text" 
+                        disabled
+                        className="input-field bg-slate-50 opacity-60 cursor-not-allowed"
+                        value={profile?.role}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-8 border-t border-slate-100">
+                    <button type="submit" className="btn-primary">
+                      {t('settings.updateProfile')}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === 'password' && (
+                <form onSubmit={handlePasswordChange} className="space-y-8">
+                  <div className="max-w-md space-y-8">
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.currentPassword')}</label>
+                      <input 
+                        type="password" 
+                        required
+                        className="input-field"
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.newPassword')}</label>
+                      <input 
+                        type="password" 
+                        required
+                        className="input-field"
+                        value={passwordForm.newPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      />
+                      <p className="text-[10px] text-slate-400 font-bold mt-2">{t('settings.passwordRequirements')}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.confirmPassword')}</label>
+                      <input 
+                        type="password" 
+                        required
+                        className="input-field"
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-8 border-t border-slate-100">
+                    <button type="submit" className="btn-primary">
+                      {t('settings.changePassword')}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === 'preferences' && (
+                <form onSubmit={handlePreferencesUpdate} className="space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-4 mb-2">
+                        <Globe size={20} className="text-primary" />
+                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('common.language')}</h4>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button 
+                          type="button"
+                          onClick={() => setLanguage(Language.EN)}
+                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                            language === Language.EN ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
+                          }`}
+                        >
+                          {t('common.english')}
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setLanguage(Language.AR)}
+                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                            language === Language.AR ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
+                          }`}
+                        >
+                          {t('common.arabic')}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-4 mb-2">
+                        <Sun size={20} className="text-primary" />
+                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('settings.theme')}</h4>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button 
+                          type="button"
+                          onClick={() => setTheme('light')}
+                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                            theme === 'light' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
+                          }`}
+                        >
+                          {t('settings.light')}
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setTheme('dark')}
+                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                            theme === 'dark' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
+                          }`}
+                        >
+                          {t('settings.dark')}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-4 mb-2">
+                        <Bell size={20} className="text-primary" />
+                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('common.notifications')}</h4>
+                      </div>
+                      <label className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-slate-100 transition-colors">
+                        <span className="text-sm font-bold text-slate-600">{t('settings.notificationsEnabled')}</span>
+                        <input 
+                          type="checkbox" 
+                          className="w-6 h-6 rounded-lg border-2 border-slate-200 text-primary focus:ring-primary bg-transparent"
+                          checked={preferences.notifications}
+                          onChange={(e) => setPreferences({ ...preferences, notifications: e.target.checked })}
+                        />
+                      </label>
+
+                      {preferences.notifications && (
+                        <div className="space-y-3 ps-4 border-s-2 border-slate-100">
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary bg-transparent"
+                              checked={preferences.notifyOn.newAudit}
+                              onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, newAudit: e.target.checked } })}
+                            />
+                            <span className="text-xs font-bold text-slate-500">{t('settings.newAuditPlans')}</span>
+                          </label>
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary bg-transparent"
+                              checked={preferences.notifyOn.updates}
+                              onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, updates: e.target.checked } })}
+                            />
+                            <span className="text-xs font-bold text-slate-500">{t('settings.updatesAndChanges')}</span>
+                          </label>
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary bg-transparent"
+                              checked={preferences.notifyOn.alerts}
+                              onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, alerts: e.target.checked } })}
+                            />
+                            <span className="text-xs font-bold text-slate-500">{t('settings.systemAlerts')}</span>
+                          </label>
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary bg-transparent"
+                              checked={preferences.notifyOn.users}
+                              onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, users: e.target.checked } })}
+                            />
+                            <span className="text-xs font-bold text-slate-500">{t('settings.userActivities')}</span>
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="md:col-span-2 space-y-6">
+                      <div className="flex items-center gap-4 mb-2">
+                        <LayoutIcon size={20} className="text-primary" />
+                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('settings.dashboardLayout')}</h4>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        {['standard', 'compact', 'detailed'].map((l) => (
+                          <button 
+                            key={l}
+                            type="button"
+                            onClick={() => setDashboardLayout(l as "compact" | "standard" | "detailed")}
+                            className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                              dashboardLayout === l ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
+                            }`}
+                          >
+                            {t(`settings.${l}`)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-8 border-t border-slate-100">
+                    <button type="submit" className="btn-primary">
+                      {t('common.save')} {t('settings.preferences')}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === 'security' && (
+                <div className="space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-6">
+                      <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.loginActivity')}</h4>
+                      <div className="p-6 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">{t('settings.lastLogin')}</p>
+                        <p className="text-sm font-black text-slate-700">{profile?.last_login ? new Date(profile.last_login).toLocaleString() : t('settings.never')}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.activeSessions')}</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-6 bg-emerald-50 rounded-[1.5rem] border border-emerald-100">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
+                              <LayoutIcon size={20} />
+                            </div>
+                            <div>
+                              <p className="text-xs font-black text-emerald-800">{t('settings.currentSession')}</p>
+                              <p className="text-[10px] text-emerald-600 font-bold">{t('settings.activeNow')}</p>
+                            </div>
+                          </div>
+                          <span className="px-3 py-1 bg-white text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">{t('settings.online')}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-10 border-t border-slate-100">
+                    <div className="bg-rose-50 p-10 rounded-[2rem] border border-rose-100 flex flex-col md:flex-row items-center justify-between gap-8">
+                      <div>
+                        <h4 className="text-xl font-black text-rose-900 mb-2">{t('settings.logoutEverywhere')}</h4>
+                        <p className="text-sm text-rose-600 font-medium leading-relaxed">{t('settings.invalidateAllSessions')}</p>
+                      </div>
+                      <button 
+                        onClick={() => setShowLogoutAllModal(true)}
+                        className="px-10 py-4 bg-rose-600 text-white font-black rounded-[1.5rem] shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs flex items-center gap-3"
+                      >
+                        <LogOut size={18} />
+                        {t('settings.logoutAll')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'pdf' && (
+                <div className="space-y-10">
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-800 mb-2">{t('settings.pdfSettings')}</h3>
+                    <p className="text-sm text-slate-500 font-bold">{t('settings.pdfSettingsDesc')}</p>
+                  </div>
+                  <PDFSettingsSection />
+                  
+                  <div className="pt-10 border-t border-slate-100 mt-10">
+                    <PdfTemplateManagement />
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+      {showLogoutAllModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+              <h2 className="text-lg font-bold text-gray-900">{t('settings.logoutFromAllDevices')}</h2>
+              <button onClick={() => setShowLogoutAllModal(false)} className="p-1 hover:bg-gray-200 rounded-full"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-gray-600">
+                {t('settings.logoutFromAllDevicesConfirm')}
+              </p>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setShowLogoutAllModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{t('common.cancel')}</button>
+                <button 
+                  onClick={handleLogoutAll} 
+                  className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700"
+                >
+                  {t('settings.logoutFromAllDevices')}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Settings;

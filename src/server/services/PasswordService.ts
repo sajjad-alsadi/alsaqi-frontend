@@ -1,0 +1,134 @@
+import bcrypt from 'bcryptjs';
+import { db } from '../db/index';
+import { NotFoundError, ValidationError, AuthError } from '../utils/errors';
+
+export class PasswordService {
+  static async requestReset(username: string) {
+    const user = await db.prepare("SELECT id, username, name, department FROM users WHERE username = ?").get(username) as any;
+    
+    if (!user) {
+      return { success: true, message: "If the username exists, a request has been sent to the administrator." };
+    }
+
+    const existing = await db.prepare("SELECT id FROM password_reset_requests WHERE user_id = ? AND status = 'Pending'").get(user.id);
+    if (existing) {
+      return { success: true, message: "A request is already pending." };
+    }
+
+    await db.prepare(`INSERT INTO password_reset_requests (user_id, username, name, department) VALUES (?::uuid, ?::text, ?::text, ?::text)`)
+      .run(user.id, user.username, user.name, user.department);
+    
+    const admins = await db.prepare("SELECT id FROM users WHERE role = 'Admin'").all() as {id: number}[];
+    const alertMsg = `Password Reset Request\nUsername: ${user.username}\nName: ${user.name}\nDepartment: ${user.department || 'N/A'}`;
+    
+    return {
+      success: true,
+      user,
+      admins,
+      alertMsg
+    };
+  }
+
+  static async getResetStatus(username: string) {
+    const user = await db.prepare("SELECT id, requires_password_change FROM users WHERE username = ?").get(username) as any;
+    if (!user) return 'None';
+
+    if (user.requires_password_change === 0) return 'None';
+
+    const request = await db.prepare("SELECT status FROM password_reset_requests WHERE user_id = ? ORDER BY request_date DESC LIMIT 1").get(user.id) as any;
+    if (!request) return 'None';
+
+    return request.status;
+  }
+
+  static async approveReset(requestId: string, adminId: string) {
+    const request = await db.prepare("SELECT * FROM password_reset_requests WHERE id = ?").get(requestId) as any;
+    
+    if (!request) {
+      throw new NotFoundError("Request not found");
+    }
+
+    const tempPass = Math.random().toString(36).slice(-8) + "!";
+    const hashedTemp = bcrypt.hashSync(tempPass, 12);
+
+    await db.prepare("UPDATE users SET password = ?::text, requires_password_change = 1, failed_attempts = 0, locked_until = NULL, session_version = session_version + 1 WHERE id = ?::uuid")
+      .run(hashedTemp, request.user_id);
+
+    await db.prepare("UPDATE password_reset_requests SET status = 'Approved', resolved_date = CURRENT_TIMESTAMP, resolved_by = ?::uuid WHERE id = ?::uuid")
+      .run(adminId, requestId);
+
+    return {
+      tempPassword: tempPass,
+      username: request.username,
+      userId: request.user_id
+    };
+  }
+
+  static async changePassword(userId: string, newPassword: string) {
+    const user = await db.prepare("SELECT password, session_version, username, role FROM users WHERE id = ?").get(userId) as any;
+
+    if (!user) throw new NotFoundError("User not found");
+
+    if (bcrypt.compareSync(newPassword, user.password)) {
+      throw new ValidationError("New password cannot be the same as the current password");
+    }
+
+    const history = await db.prepare("SELECT password_hash FROM password_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 5").all(user.id) as { password_hash: string }[];
+    
+    for (const record of history) {
+      if (bcrypt.compareSync(newPassword, record.password_hash)) {
+        throw new ValidationError("Password has been used previously. Please choose a different one.");
+      }
+    }
+
+    const hashed = bcrypt.hashSync(newPassword, 12);
+    
+    const transaction = db.transaction(async () => {
+      await db.prepare("INSERT INTO password_history (user_id, password_hash) VALUES (?::uuid, ?::text)").run(user.id, user.password);
+      await db.prepare("UPDATE users SET password = ?::text, password_last_changed = CURRENT_TIMESTAMP, requires_password_change = 0, session_version = session_version + 1 WHERE id = ?::uuid").run(hashed, user.id);
+    });
+    
+    await transaction();
+    
+    const updatedUser = await db.prepare("SELECT id, username, role, session_version FROM users WHERE id = ?").get(user.id) as any;
+    return updatedUser;
+  }
+
+  static async updatePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await db.prepare("SELECT id, password, username, role FROM users WHERE id = ?").get(userId) as any;
+    
+    if (!user) throw new NotFoundError("User not found");
+
+    if (!bcrypt.compareSync(currentPassword, user.password)) {
+      throw new AuthError("Incorrect current password");
+    }
+
+    if (currentPassword === newPassword) {
+      throw new ValidationError("New password cannot be the same as the current password");
+    }
+
+    const history = await db.prepare("SELECT password_hash FROM password_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 5").all(user.id) as { password_hash: string }[];
+    
+    for (const record of history) {
+      if (bcrypt.compareSync(newPassword, record.password_hash)) {
+        throw new ValidationError("Password has been used previously. Please choose a different one.");
+      }
+    }
+
+    const hashed = bcrypt.hashSync(newPassword, 12);
+    
+    const transaction = db.transaction(async () => {
+      await db.prepare("INSERT INTO password_history (user_id, password_hash) VALUES (?::uuid, ?::text)").run(user.id, user.password);
+      await db.prepare("UPDATE users SET password = ?::text, password_last_changed = CURRENT_TIMESTAMP, requires_password_change = 0, session_version = session_version + 1 WHERE id = ?::uuid").run(hashed, user.id);
+    });
+    
+    await transaction();
+    
+    const updatedUser = await db.prepare("SELECT id, username, role, session_version FROM users WHERE id = ?").get(user.id) as any;
+    return updatedUser;
+  }
+
+  static async getResetRequests() {
+    return await db.prepare("SELECT * FROM password_reset_requests WHERE status = 'Pending' ORDER BY request_date DESC").all();
+  }
+}

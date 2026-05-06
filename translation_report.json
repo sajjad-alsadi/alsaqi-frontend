@@ -1,0 +1,494 @@
+{
+  "keys": {
+    "missingInEn": [
+      "modules.IntegrityManagement",
+      "modules.IntegrityManagementDesc",
+      "modules.IntegrityDashboard",
+      "modules.IntegrityConflicts",
+      "modules.IntegrityFraud",
+      "modules.IntegrityStats",
+      "errorTrends",
+      "Closed - Insufficient Evidence",
+      "status_in_progress",
+      "status_closed",
+      "status_open",
+      "systemErrorLogs.title",
+      "systemErrorLogs.errorTrends",
+      "systemErrorLogs.noAnalyticsData",
+      "systemErrorLogs.filterByModule",
+      "systemErrorLogs.filterByUserId",
+      "systemErrorLogs.allSeverities",
+      "systemErrorLogs.error",
+      "systemErrorLogs.warning",
+      "systemErrorLogs.info",
+      "systemErrorLogs.time",
+      "systemErrorLogs.module",
+      "systemErrorLogs.severity",
+      "systemErrorLogs.message",
+      "systemErrorLogs.noErrorsLogged",
+      "systemErrorLogs.stackTrace",
+      "systemErrorLogs.confirmClearLogs",
+      "SystemLogsManagement",
+      "SystemLogsManagementDesc",
+      "SystemLogsDashboard",
+      "SystemLogsAudit",
+      "SystemLogsErrors"
+    ],
+    "missingInAr": [
+      "systemErrorLogs"
+    ]
+  },
+  "hardcoded": [
+    {
+      "file": "src/components/Chatbot.tsx",
+      "lines": [
+        40,
+        124,
+        128,
+        145,
+        167,
+        168,
+        169,
+        170,
+        199,
+        200,
+        291
+      ]
+    },
+    {
+      "file": "src/components/LanguageSwitcher.tsx",
+      "lines": [
+        21
+      ]
+    },
+    {
+      "file": "src/components/Layout.tsx",
+      "lines": [
+        77,
+        78,
+        82
+      ]
+    },
+    {
+      "file": "src/components/PdfTemplateManagement.tsx",
+      "lines": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        42,
+        78,
+        79,
+        92,
+        95,
+        105,
+        108,
+        125,
+        126,
+        130,
+        139,
+        147,
+        179,
+        183,
+        192,
+        210,
+        221,
+        231,
+        244,
+        250,
+        251,
+        252,
+        263,
+        270,
+        271,
+        273,
+        280,
+        288,
+        291
+      ]
+    },
+    {
+      "file": "src/modules/AuditCharter.tsx",
+      "lines": [
+        150,
+        154,
+        163,
+        169,
+        175,
+        181
+      ]
+    },
+    {
+      "file": "src/modules/AuditPlan.tsx",
+      "lines": [
+        101
+      ]
+    },
+    {
+      "file": "src/modules/AuditTasks.tsx",
+      "lines": [
+        132
+      ]
+    },
+    {
+      "file": "src/modules/ComplianceMatrix.tsx",
+      "lines": [
+        44,
+        45,
+        46,
+        47,
+        51,
+        52,
+        53,
+        54,
+        109,
+        154,
+        157,
+        165,
+        173,
+        180,
+        192,
+        197,
+        237,
+        247,
+        254,
+        264,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        303,
+        307,
+        319,
+        328,
+        334,
+        335,
+        342,
+        355,
+        376,
+        377,
+        395,
+        397,
+        401,
+        404,
+        451,
+        460,
+        479,
+        480,
+        481,
+        482,
+        483,
+        513,
+        515,
+        518,
+        541,
+        542,
+        548,
+        559,
+        567,
+        585,
+        589,
+        608,
+        613,
+        615,
+        632,
+        633,
+        639,
+        640,
+        641,
+        667,
+        673,
+        677,
+        678,
+        681,
+        682,
+        686,
+        688,
+        693,
+        702,
+        707,
+        709,
+        714,
+        716,
+        728,
+        733,
+        739,
+        744,
+        745,
+        752,
+        756,
+        760,
+        768,
+        771,
+        788,
+        800,
+        807,
+        854,
+        872,
+        873,
+        874,
+        875,
+        894,
+        905,
+        918,
+        920,
+        932,
+        938,
+        945,
+        946,
+        952,
+        960
+      ]
+    },
+    {
+      "file": "src/modules/IntegrityManagement.tsx",
+      "lines": [
+        42,
+        43,
+        112,
+        119,
+        131,
+        138,
+        151,
+        152,
+        157,
+        162,
+        163,
+        166,
+        167
+      ]
+    },
+    {
+      "file": "src/modules/OrgStructure.tsx",
+      "lines": [
+        251,
+        253,
+        263,
+        271,
+        272,
+        273,
+        297,
+        317,
+        388,
+        544,
+        550,
+        566,
+        583,
+        597,
+        610,
+        617,
+        629,
+        642,
+        655,
+        668,
+        679,
+        690,
+        700,
+        707,
+        709
+      ]
+    },
+    {
+      "file": "src/modules/Recommendations.tsx",
+      "lines": [
+        111
+      ]
+    },
+    {
+      "file": "src/modules/Reports/hooks/useReports.ts",
+      "lines": [
+        188,
+        243
+      ]
+    },
+    {
+      "file": "src/modules/Settings.tsx",
+      "lines": [
+        374
+      ]
+    },
+    {
+      "file": "src/modules/SystemErrorLogs/SystemErrorAnalytics.tsx",
+      "lines": [
+        36,
+        70
+      ]
+    },
+    {
+      "file": "src/modules/SystemErrorLogs/index.tsx",
+      "lines": [
+        209,
+        215,
+        217,
+        225,
+        235,
+        238
+      ]
+    },
+    {
+      "file": "src/modules/SystemLogsManagement.tsx",
+      "lines": [
+        112,
+        119,
+        131,
+        138,
+        151,
+        152,
+        155,
+        160,
+        161,
+        164,
+        165
+      ]
+    },
+    {
+      "file": "src/server/db/migrations.ts",
+      "lines": [
+        715,
+        716,
+        718,
+        719,
+        720,
+        722,
+        1026
+      ]
+    },
+    {
+      "file": "src/server/services/SettingsService.ts",
+      "lines": [
+        52,
+        54,
+        55,
+        56,
+        57,
+        63
+      ]
+    },
+    {
+      "file": "src/services/erpIntegrationService.ts",
+      "lines": [
+        12,
+        13,
+        15,
+        16
+      ]
+    },
+    {
+      "file": "src/services/formatService.ts",
+      "lines": [
+        30,
+        53,
+        63,
+        66,
+        102
+      ]
+    },
+    {
+      "file": "src/services/hrIntegrationService.ts",
+      "lines": [
+        12,
+        13,
+        15,
+        16
+      ]
+    },
+    {
+      "file": "src/services/notificationService.ts",
+      "lines": [
+        40
+      ]
+    },
+    {
+      "file": "src/services/pdfService.ts",
+      "lines": [
+        18,
+        26,
+        30,
+        31,
+        32,
+        33
+      ]
+    },
+    {
+      "file": "src/utils/docxExport.ts",
+      "lines": [
+        32,
+        69,
+        85,
+        101,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        216,
+        228,
+        245,
+        248,
+        255,
+        256,
+        259,
+        260,
+        263,
+        264,
+        267,
+        268,
+        271,
+        272,
+        275,
+        276,
+        279,
+        280,
+        283,
+        284,
+        287,
+        288,
+        291,
+        292,
+        295,
+        296
+      ]
+    },
+    {
+      "file": "src/utils/format.ts",
+      "lines": [
+        4,
+        11
+      ]
+    },
+    {
+      "file": "src/utils/notificationHelpers.ts",
+      "lines": [
+        20,
+        25,
+        30,
+        34,
+        39,
+        45,
+        51
+      ]
+    },
+    {
+      "file": "src/utils/pdfExport.ts",
+      "lines": [
+        246,
+        283
+      ]
+    }
+  ]
+}

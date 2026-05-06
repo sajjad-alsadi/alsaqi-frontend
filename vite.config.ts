@@ -1,0 +1,40 @@
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import {defineConfig, loadEnv} from 'vite';
+
+export default defineConfig(({mode}) => {
+  const env = loadEnv(mode, '.', '');
+  return {
+    plugins: [react(), tailwindcss()],
+    define: {
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+    },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, '.'),
+      },
+    },
+    server: {
+      // HMR معطل في AI Studio
+      hmr: false,
+      
+      // ✅ أضف هذه لإيقاف WebSocket نهائياً
+      ws: false,
+      
+      // ✅ أو استخدم هذا البديل
+      // middlewareMode: true,
+    },
+    
+    // ✅ إذا استمرت المشكلة، أضف هذا:
+    optimizeDeps: {
+      force: true,
+    },
+    
+    // ✅ حل آخر: تعطيل الـ overlay للأخطاء
+    // (أحياناً يحاول الاتصال بالـ WS رغم HMR=false)
+    build: {
+      sourcemap: true,
+    },
+  };
+});

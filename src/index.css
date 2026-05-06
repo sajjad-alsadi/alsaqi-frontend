@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Tajawal", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Tajawal", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  /* Light Mode Palette */
+  --color-primary: #0a7d85;
+  --color-primary-hover: #086a71;
+  --color-bg-main: #f0f4f4;
+  --color-card: #ffffff;
+  --color-text-main: #1f2937;
+  --color-text-muted: #6b7280;
+  --color-border-soft: #d9e4e4;
+  
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #0ea5e9;
+}
+
+.dark {
+  --color-bg-main: #0f172a;
+  --color-card: #1e293b;
+  --color-text-main: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border-soft: #334155;
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-sans transition-colors duration-300 antialiased;
+  }
+  
+  /* Dark mode overrides for hardcoded Tailwind classes */
+  .dark .bg-white {
+    background-color: var(--color-card) !important;
+  }
+  .dark .text-gray-900, .dark .text-gray-800, .dark .text-slate-900, .dark .text-slate-800 {
+    color: var(--color-text-main) !important;
+  }
+  .dark .text-gray-700, .dark .text-gray-600, .dark .text-gray-500, .dark .text-slate-700, .dark .text-slate-600, .dark .text-slate-500 {
+    color: var(--color-text-muted) !important;
+  }
+  .dark .border-gray-200, .dark .border-gray-100, .dark .border-slate-200, .dark .border-slate-100 {
+    border-color: var(--color-border-soft) !important;
+  }
+  .dark .bg-gray-50, .dark .bg-slate-50, .dark .bg-gray-100, .dark .bg-slate-100 {
+    background-color: var(--color-bg-main) !important;
+  }
+}
+
+.glass-card {
+  @apply bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm hover:shadow-md rounded-[2rem] transition-all duration-300;
+}
+
+.sidebar-item {
+  @apply flex items-center gap-4 px-6 py-4 rounded-[2rem] transition-all duration-300 text-[var(--color-text-muted)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] font-semibold;
+}
+
+.sidebar-item.active {
+  @apply bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20 transform scale-[1.02];
+}
+
+.btn-primary {
+  @apply bg-[var(--color-primary)] text-white px-8 py-3 rounded-[2.5rem] font-bold shadow-md shadow-[var(--color-primary)]/20 hover:bg-[var(--color-primary-hover)] transition-all active:scale-95 flex items-center justify-center gap-2;
+}
+
+.btn-secondary {
+  @apply bg-white text-[var(--color-text-main)] border border-[var(--color-border-soft)] px-8 py-3 rounded-[2.5rem] font-bold shadow-sm hover:bg-gray-50 transition-all active:scale-95 flex items-center justify-center gap-2;
+}
+
+.btn-danger {
+  @apply bg-[var(--color-danger)] text-white px-8 py-3 rounded-[2.5rem] font-bold shadow-md shadow-[var(--color-danger)]/20 hover:bg-red-600 transition-all active:scale-95 flex items-center justify-center gap-2;
+}
+
+.input-field {
+  @apply w-full px-6 py-4 bg-white border border-[var(--color-border-soft)] rounded-[2rem] focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] outline-none transition-all text-[var(--color-text-main)] shadow-sm placeholder:text-[var(--color-text-muted)];
+}
+
+.input-label {
+  @apply block text-sm font-bold text-[var(--color-text-main)] mb-2 px-2;
+}
+
+.badge-success {
+  @apply bg-[var(--color-success)]/10 text-[var(--color-success)] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--color-success)]/20;
+}
+
+.badge-warning {
+  @apply bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--color-warning)]/20;
+}
+
+.badge-danger {
+  @apply bg-[var(--color-danger)]/10 text-[var(--color-danger)] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--color-danger)]/20;
+}
+
+.badge-info {
+  @apply bg-[var(--color-info)]/10 text-[var(--color-info)] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--color-info)]/20;
+}
+
+.badge-risk-critical {
+  @apply bg-rose-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-500/20;
+}
+
+.badge-risk-high {
+  @apply bg-orange-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20;
+}
+
+.badge-risk-med {
+  @apply bg-amber-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/20;
+}
+
+.badge-risk-low {
+  @apply bg-emerald-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20;
+}
+
+.table-container {
+  @apply w-full overflow-x-auto rounded-[2rem] border border-[var(--color-border-soft)] bg-white shadow-sm;
+}
+
+.table-header {
+  @apply bg-[var(--color-bg-main)] text-[var(--color-text-muted)] text-xs uppercase font-bold tracking-wider text-start px-6 py-4 border-b border-[var(--color-border-soft)];
+}
+
+.table-cell {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-main)] border-b border-[var(--color-border-soft)] transition-colors;
+}
+
+.table-row {
+  @apply hover:bg-[var(--color-bg-main)]/50 transition-colors;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
