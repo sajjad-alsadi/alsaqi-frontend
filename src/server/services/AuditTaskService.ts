@@ -75,6 +75,10 @@ export class AuditTaskService {
   }
 
   static async getTasks(params: any = {}) {
+    const page = parseInt(params.page) || 1;
+    const pageSize = parseInt(params.pageSize) || 20;
+    const offset = (page - 1) * pageSize;
+
     let query = `
       SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.assigned_to, t.priority,
              p.title as plan_title, u.name as assigned_name, e.name_en as audited_unit_name
@@ -83,13 +87,34 @@ export class AuditTaskService {
       LEFT JOIN users u ON t.assigned_to = u.id
       LEFT JOIN org_entities e ON t.audited_unit_id = e.id
     `;
+    
+    let countQuery = "SELECT COUNT(*) as total FROM audit_tasks t";
     const args: any[] = [];
+    let whereClause = "";
 
     if (params.plan_id) {
-      query += " WHERE t.plan_id = ?";
+      whereClause = " WHERE t.plan_id = ?";
       args.push(params.plan_id);
     }
 
-    return await db.prepare(query).all(...args);
+    query += whereClause + " ORDER BY t.created_at DESC LIMIT ? OFFSET ?";
+    countQuery += whereClause;
+
+    const [data, countRes] = await Promise.all([
+      db.prepare(query).all(...args, pageSize, offset),
+      db.prepare(countQuery).get(...args)
+    ]) as [any[], any];
+
+    const total = countRes?.total || 0;
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    };
   }
 }

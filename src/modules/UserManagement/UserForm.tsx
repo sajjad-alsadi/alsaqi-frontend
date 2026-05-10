@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { AccessScope } from '../../constants';
 import { ROLES } from '../../permissions';
+import { ChevronDown } from 'lucide-react';
 
 import { useFormat } from '../../services/formatService';
 import { useDepartments } from '../../hooks/useDepartments';
@@ -111,11 +112,25 @@ const UserForm: React.FC<UserFormProps> = ({
         </div>
         <div className="space-y-1">
           <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.role')}</label>
-          <select className="input-field !py-2 !text-xs" value={newUser.role || ROLES.VIEWER} onChange={e => onUpdateNewUser({ role: e.target.value })} disabled={isFormDisabled}>
-            {allRoles.map(role => (
-              <option key={role.id} value={role.name}>{getRoleLabel(role.name)}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select 
+              className="input-field appearance-none !py-2 !text-xs cursor-pointer pr-8"
+              value={newUser.role || ROLES.VIEWER} 
+              onChange={e => onUpdateNewUser({ role: e.target.value })} 
+              disabled={isFormDisabled}
+            >
+              {allRoles.length === 0 ? (
+                <option value="">{t('userManagement.form.loadingRoles') || '...جاري التحميل'}</option>
+              ) : (
+                allRoles.map(role => (
+                  <option key={role.id} value={role.name}>{getRoleLabel(role.name)}</option>
+                ))
+              )}
+            </select>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <ChevronDown size={14} />
+            </div>
+          </div>
         </div>
         <div className="lg:col-span-1 space-y-1">
           <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.notes')}</label>

@@ -1,29 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { riskService } from '../services/riskService';
 
 export const useRisks = (initialParams: any = {}) => {
-  const [risks, setRisks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchRisks = useCallback(async (params: any = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await riskService.getRisks(params);
-      const riskData = data.data || (Array.isArray(data) ? data : []);
-      setRisks(riskData);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch risks');
-      setRisks([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const risksQuery = useQuery({
+    queryKey: ['risks', initialParams],
+    queryFn: () => riskService.getRisks(initialParams),
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchRisks(initialParams);
-  }, [fetchRisks, JSON.stringify(initialParams)]);
+  const data = risksQuery.data || {};
+  const risks = (data.data || (Array.isArray(data) ? data : [])) as any[];
 
-  return { risks, loading, error, fetchRisks };
+  const fetchRisks = () => {
+    queryClient.invalidateQueries({ queryKey: ['risks'] });
+  };
+
+  return { 
+    risks, 
+    loading: risksQuery.isLoading || risksQuery.isFetching, 
+    error: risksQuery.error ? (risksQuery.error as any).message : null, 
+    fetchRisks 
+  };
 };

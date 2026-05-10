@@ -4,15 +4,39 @@ import { N8nService } from '../utils/n8nService';
 
 export class AuditService {
   static async getFindings(params: any = {}) {
+    const page = parseInt(params.page) || 1;
+    const pageSize = parseInt(params.pageSize) || 20;
+    const offset = (page - 1) * pageSize;
+
     let query = "SELECT * FROM audit_findings";
+    let countQuery = "SELECT COUNT(*) as total FROM audit_findings";
     const args: any[] = [];
-    
+    let whereClause = "";
+
     if (params.audit_id) {
-      query += " WHERE audit_id = ?";
+      whereClause = " WHERE audit_id = ?";
       args.push(params.audit_id);
     }
-    
-    return await db.prepare(query).all(...args);
+
+    query += whereClause + " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    countQuery += whereClause;
+
+    const [data, countRes] = await Promise.all([
+      db.prepare(query).all(...args, pageSize, offset),
+      db.prepare(countQuery).get(...args)
+    ]) as [any[], any];
+
+    const total = countRes?.total || 0;
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    };
   }
 
   static async createFinding(body: any) {

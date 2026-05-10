@@ -10,7 +10,15 @@ export const validateSchema = (schema: ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        next(new ValidationError("Invalid request data", error.format()));
+        const errorData = error.format();
+        let firstErrorMessage = "Invalid request data";
+        for (const key in errorData) {
+          if (key !== "_errors" && errorData[key as keyof typeof errorData]?._errors?.length) {
+            firstErrorMessage = errorData[key as keyof typeof errorData]._errors[0];
+            break;
+          }
+        }
+        next(new ValidationError(firstErrorMessage, errorData));
       } else {
         next(error);
       }

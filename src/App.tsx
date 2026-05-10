@@ -79,16 +79,15 @@ const AppContent: React.FC = () => {
           <Route path="/cms" element={<CorrespondenceSystem language={language} />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/integrity" element={<IntegrityManagement />} />
-          <Route path="/system-logs" element={<SystemLogsManagement />} />
           <Route path="/fraud" element={<Navigate to="/integrity" replace />} />
           <Route path="/coi" element={<Navigate to="/integrity" replace />} />
-          <Route path="/trail" element={<Navigate to="/system-logs" replace />} />
-          <Route path="/system-errors" element={<Navigate to="/system-logs" replace />} />
           <Route path="/compliance-matrix" element={<ComplianceMatrix />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/departments" element={<DepartmentManagement />} />
           
           {/* Admin Routes */}
+          <Route path="/system-logs" element={isAdmin ? <SystemLogsManagement /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/system-errors" element={isAdmin ? <Navigate to="/system-logs" replace /> : <Navigate to="/dashboard" replace />} />
           <Route path="/error-logs" element={isAdmin ? <SystemErrorLogs /> : <Navigate to="/dashboard" replace />} />
           <Route path="/trail" element={isAdmin ? <AuditTrail /> : <Navigate to="/dashboard" replace />} />
           <Route path="/users" element={isAdmin ? <UserManagement /> : <Navigate to="/dashboard" replace />} />

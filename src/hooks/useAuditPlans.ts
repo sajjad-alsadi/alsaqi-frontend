@@ -1,44 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { auditService } from '../services/auditService';
 
 export const useAuditPlans = (initialParams: any = {}) => {
-  const [plans, setPlans] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
-    total: 0,
-    page: 1,
-    limit: 15,
-    totalPages: 0
+  const queryClient = useQueryClient();
+
+  const plansQuery = useQuery({
+    queryKey: ['audit-plans', initialParams],
+    queryFn: () => auditService.getPlans(initialParams),
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
-  const fetchPlans = useCallback(async (params: any = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await auditService.getPlans(params);
-      if (data.data) {
-        setPlans(data.data);
-        setPagination(prev => ({
-          ...prev,
-          total: data.pagination.total,
-          totalPages: data.pagination.totalPages,
-          page: data.pagination.page,
-          limit: data.pagination.pageSize
-        }));
-      } else {
-        setPlans(Array.isArray(data) ? data : []);
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch audit plans');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const data = plansQuery.data || {};
+  const plans = (data.data || (Array.isArray(data) ? data : [])) as any[];
+  const pagination = {
+    total: data.pagination?.total || 0,
+    totalPages: data.pagination?.totalPages || 0,
+    page: data.pagination?.page || 1,
+    limit: data.pagination?.pageSize || 15
+  };
 
-  useEffect(() => {
-    fetchPlans(initialParams);
-  }, [fetchPlans, JSON.stringify(initialParams)]);
+  const fetchPlans = (_params?: any) => {
+    queryClient.invalidateQueries({ queryKey: ['audit-plans'] });
+  };
 
-  return { plans, loading, error, pagination, fetchPlans };
+  return { 
+    plans, 
+    loading: plansQuery.isLoading || plansQuery.isFetching, 
+    error: plansQuery.error ? (plansQuery.error as any).message : null, 
+    pagination, 
+    fetchPlans 
+  };
 };

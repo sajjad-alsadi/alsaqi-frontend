@@ -79,12 +79,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { id: 'departments', label: t('common.departments'), icon: Building, path: '/departments' },
     { id: 'reports', label: t('common.reportsAndAnalytics'), icon: BarChart3, path: '/reports' },
     { id: 'cms', label: t('common.cms'), icon: Network, path: '/cms' },
-    { id: 'system-logs', label: t('SystemLogsManagement', 'سجلات النظام'), icon: Terminal, path: '/system-logs' },
     { id: 'notifications', label: t('common.notifications'), icon: Bell, path: '/notifications', badge: unreadCount > 0 ? formatNumber(unreadCount) : undefined },
   ];
 
   if (user?.role === 'Admin' || user?.role === 'Administrator') {
     menuItems.push({ id: 'users', label: t('common.users'), icon: Users, path: '/users' });
+    menuItems.push({ id: 'system-logs', label: t('SystemLogsManagement', 'سجلات النظام'), icon: Terminal, path: '/system-logs' });
   }
 
   menuItems.push({ id: 'settings', label: t('common.settings'), icon: Settings, path: '/settings' });

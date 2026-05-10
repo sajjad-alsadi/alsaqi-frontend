@@ -32,10 +32,11 @@ api.interceptors.response.use(
     const originalRequest = config;
     
     // Don't log 401 on GET /profile or GET /auth/me as it's expected during initial session check
-    const isSessionCheck = response?.status === 401 && config?.method === 'get' && (config?.url === '/profile' || config?.url === '/auth/me');
-    const isRefreshRequest = config?.url === '/auth/refresh';
+    const isSessionCheck = response?.status === 401 && config?.method === 'get' && (config?.url?.includes('/profile') || config?.url?.includes('/auth/me'));
+    const isRefreshRequest = config?.url?.includes('/auth/refresh');
+    const isLoginRequest = config?.url?.includes('/auth/login');
     
-    if (!isSessionCheck && response?.status === 401 && !isRefreshRequest) {
+    if (!isSessionCheck && response?.status === 401 && !isRefreshRequest && !isLoginRequest) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

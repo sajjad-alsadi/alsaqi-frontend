@@ -20,7 +20,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
     ip: req.ip,
     userId: (req as any).user?.id,
     errorCode,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    stack: (process.env.NODE_ENV === 'development' && statusCode >= 500) ? err.stack : undefined,
     details
   };
 

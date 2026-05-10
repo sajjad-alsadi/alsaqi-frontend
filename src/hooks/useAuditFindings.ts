@@ -1,29 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { auditService } from '../services/auditService';
 
 export const useAuditFindings = (initialParams: any = {}) => {
-  const [findings, setFindings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchFindings = useCallback(async (params: any = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resp = await auditService.getFindings(params);
-      const data = resp.data || resp;
-      setFindings(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch audit findings');
-      setFindings([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const findingsQuery = useQuery({
+    queryKey: ['audit-findings', initialParams],
+    queryFn: () => auditService.getFindings(initialParams),
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchFindings(initialParams);
-  }, [fetchFindings, JSON.stringify(initialParams)]);
+  const data = findingsQuery.data || {};
+  const findings = (data.data || (Array.isArray(data) ? data : [])) as any[];
 
-  return { findings, loading, error, fetchFindings };
+  const fetchFindings = () => {
+    queryClient.invalidateQueries({ queryKey: ['audit-findings'] });
+  };
+
+  return { 
+    findings, 
+    loading: findingsQuery.isLoading || findingsQuery.isFetching, 
+    error: findingsQuery.error ? (findingsQuery.error as any).message : null, 
+    fetchFindings 
+  };
 };

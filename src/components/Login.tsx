@@ -57,7 +57,16 @@ const Login: React.FC = () => {
         login(result.user, result.token || 'authenticated'); 
       }
     } catch (err: any) {
-      setError(err.message || t('auth.loginFailed'));
+      const message = err.message || err.toString();
+      if (message === 'Invalid credentials') {
+        setError(t('auth.invalidCredentials') || 'Invalid username or password');
+      } else if (message === 'Account suspended') {
+        setError(t('auth.accountSuspended') || 'Your account has been suspended');
+      } else if (message === 'Account locked') {
+        setError(t('auth.accountLocked') || 'Your account is locked. Try again later.');
+      } else {
+        setError(message || t('auth.loginFailed') || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }

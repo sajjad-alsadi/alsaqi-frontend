@@ -22,7 +22,9 @@ export const createDashboardRoutes = (
   router.get(`/my-tasks`, authenticate, asyncHandler(async (req, res) => {
     const typedReq = req as unknown as any;
     const userId = typedReq.user.id;
-    const tasks = await DashboardService.getMyTasks(userId);
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const tasks = await DashboardService.getMyTasks(userId, limit, offset);
     res.json(tasks);
   }));
 

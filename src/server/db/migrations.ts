@@ -1,4 +1,5 @@
 import { db } from "./index";
+import { ROLES, MODULES, PERMISSIONS, DEFAULT_PERMISSIONS } from "../../permissions";
 
 export const runMigrations = async () => {
   // Test connection first to avoid multiple connection errors
@@ -1078,21 +1079,104 @@ export const runMigrations = async () => {
     console.warn("Could not drop legacy tables:", e);
   }
 
+  // Seed Roles and Permissions if missing
   try {
-    const adminExists = await db.prepare("SELECT 1 FROM users WHERE username = 'admin' LIMIT 1").get();
+    const rolesCount = await db.prepare("SELECT count(*) as count FROM roles").get();
+    if (rolesCount && (rolesCount as any).count === 0) {
+      console.log("[SEED] Seeding default roles and permissions...");
+      
+      // 1. Seed All Possible Permissions
+      const permissionMap: Record<string, string> = {};
+      for (const module of Object.values(MODULES)) {
+        for (const action of Object.values(PERMISSIONS)) {
+          const res = await db.prepare(
+            "INSERT INTO permissions (module, action, description) VALUES (?, ?, ?) ON CONFLICT (module, action) DO UPDATE SET module=EXCLUDED.module RETURNING id"
+          ).run(module, action, `${action} permission for ${module}`);
+          
+          if (res && res.lastInsertRowid) {
+            permissionMap[`${module}:${action}`] = res.lastInsertRowid;
+          }
+        }
+      }
+
+      // 2. Seed Roles and Link to Permissions
+      for (const [roleName, rolePerms] of Object.entries(DEFAULT_PERMISSIONS)) {
+        console.log(`[SEED] Seeding role: ${roleName}`);
+        const roleRes = await db.prepare(
+          "INSERT INTO roles (name, description) VALUES (?, ?) ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name RETURNING id"
+        ).run(roleName, `${roleName} default system role`);
+        
+        const roleId = roleRes.lastInsertRowid;
+
+        if (roleId) {
+          for (const [module, actions] of Object.entries(rolePerms)) {
+            for (const action of actions) {
+              const permissionId = permissionMap[`${module}:${action}`];
+              if (permissionId) {
+                await db.prepare(
+                  "INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING"
+                ).run(roleId, permissionId);
+              }
+            }
+          }
+        }
+      }
+      console.log("[SEED] Roles and permissions seeding completed.");
+    }
+  } catch (seedError) {
+    console.error("[SEED] Error during roles/permissions seeding:", seedError);
+  }
+
+  // Seed default Users (Admin and Test)
+  try {
+    const bcryptModule = await import("bcryptjs");
+    const bcrypt = bcryptModule.default || bcryptModule;
+    const password = "admin";
+    const hashedPassword = bcrypt.hashSync(password, 12);
+
+    // 1. Seed Admin
+    const adminExists = await db.prepare("SELECT * FROM users WHERE username = 'admin' LIMIT 1").get();
     if (!adminExists) {
-      console.log("Seeding default admin user...");
-      const bcryptModule = await import("bcryptjs");
-      const bcrypt = bcryptModule.default || bcryptModule;
-      const hashedPassword = bcrypt.hashSync("admin", 12);
+      console.log("[SEED] Admin user not found. Seeding...");
+      const adminRole = await db.prepare("SELECT id FROM roles WHERE name = ?").get(ROLES.ADMIN);
+      const roleId = adminRole ? adminRole.id : null;
+      console.log(`[SEED] Admin Role ID: ${roleId}`);
+
       await db.prepare(`
-        INSERT INTO users (username, password, name, role, department, status, created_at) 
-        VALUES ('admin', ?, 'System Administrator', 'Admin', 'Management', 'active', CURRENT_TIMESTAMP)
-      `).run(hashedPassword);
-      console.log("Default admin user seeded.");
+        INSERT INTO users (username, password, name, role, role_id, department, status, created_at) 
+        VALUES ('admin', ?, 'System Administrator', 'Admin', ?, 'Management', 'active', CURRENT_TIMESTAMP)
+      `).run(hashedPassword, roleId);
+      console.log("[SEED] Default admin user seeded.");
+    } else {
+      console.log("[SEED] Admin user already exists. Checking role_id...");
+      // Update role_id if missing or incorrect
+      const adminRole = await db.prepare("SELECT id FROM roles WHERE name = ?").get(ROLES.ADMIN);
+      if (adminRole && adminRole.id) {
+        console.log(`[SEED] Found Admin Role ID: ${adminRole.id}. Updating admin user...`);
+        const result = await db.prepare("UPDATE users SET role_id = ? WHERE username = 'admin' AND (role_id IS NULL OR role_id = '' OR role_id::text != ?)").run(adminRole.id, adminRole.id);
+        console.log(`[SEED] Admin update rows: ${result.changes}`);
+      }
+    }
+
+    // 2. Seed Test User
+    const testExists = await db.prepare("SELECT id FROM users WHERE username = 'test' LIMIT 1").get();
+    if (!testExists) {
+      console.log("[SEED] Test user not found. Seeding...");
+      const testHashedPassword = bcrypt.hashSync("test", 12);
+      const auditorRole = await db.prepare("SELECT id FROM roles WHERE name = ?").get(ROLES.INTERNAL_AUDITOR);
+      const roleId = auditorRole ? auditorRole.id : null;
+      console.log(`[SEED] Test User Role ID: ${roleId}`);
+
+      await db.prepare(`
+        INSERT INTO users (username, password, name, role, role_id, department, status, created_at) 
+        VALUES ('test', ?, 'Test Auditor', 'Internal Auditor', ?, 'Audit', 'active', CURRENT_TIMESTAMP)
+      `).run(testHashedPassword, roleId);
+      console.log("[SEED] Default test user seeded.");
+    } else {
+      console.log("[SEED] Test user exists.");
     }
   } catch (e) {
-    console.error("Error seeding default admin:", e);
+    console.error("Error seeding default users:", e);
   }
 
   console.log("Migrations completed successfully.");

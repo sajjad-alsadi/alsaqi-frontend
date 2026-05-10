@@ -5,7 +5,9 @@ export const loginUser = async (usernameOrEmail: string, password: string, remem
     const response = await api.post('/auth/login', { usernameOrEmail, password, rememberMe });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.error || 'Login failed');
+    const errorData = error.response?.data?.error;
+    const errorMessage = typeof errorData === 'object' ? errorData.message : (errorData || 'Login failed');
+    throw new Error(errorMessage);
   }
 };
 

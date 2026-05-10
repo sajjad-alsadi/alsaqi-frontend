@@ -41,122 +41,136 @@ export class DashboardService {
       .where("status = 'Active'")
       .whereIf(isFiltered, "category = ?", mappedDept);
 
-    // Execute queries concurrently using standardized payload
-    const promises = [
-      this.db.prepare(`
-        SELECT 
-          COUNT(*) as total,
-          COALESCE(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END), 0) as completed,
-          COALESCE(SUM(CASE WHEN status IN ('Fieldwork', 'Reporting') THEN 1 ELSE 0 END), 0) as in_progress,
-          COALESCE(SUM(CASE WHEN status != 'Closed' AND planned_end_date < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') THEN 1 ELSE 0 END), 0) as delayed
-        ${auditQb.buildCountQuery()}
-      `).get(...auditQb.buildParams()),
-      
-      this.db.prepare(`
-        SELECT 
-          COUNT(*) as total,
-          COALESCE(SUM(CASE WHEN f.status != 'Closed' THEN 1 ELSE 0 END), 0) as open_count,
-          COALESCE(SUM(CASE WHEN f.risk_level IN ('High', 'Critical') AND f.status != 'Closed' THEN 1 ELSE 0 END), 0) as high_risk_open
-        ${findingsQb.buildCountQuery()}
-      `).get(...findingsQb.buildParams()),
-      
-      this.db.prepare(`SELECT f.risk_level as level, COUNT(*) as count ${findingsQb.buildCountQuery()} GROUP BY f.risk_level`).all(...findingsQb.buildParams()),
-      
-      this.db.prepare(`
-        SELECT 
-          COUNT(*) as total,
-          COALESCE(SUM(CASE WHEN r.status != 'Implemented' THEN 1 ELSE 0 END), 0) as pending_count,
-          COALESCE(SUM(CASE WHEN r.status != 'Implemented' AND r.due_date < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') THEN 1 ELSE 0 END), 0) as overdue_count
-        ${recQb.buildCountQuery()}
-      `).get(...recQb.buildParams()),
-      
-      this.db.prepare(`
-        SELECT 
-          COUNT(*) as total,
-          COALESCE(SUM(CASE WHEN rating IN ('High', 'Critical') THEN 1 ELSE 0 END), 0) as high_count
-        ${riskQb.buildCountQuery()}
-      `).get(...riskQb.buildParams()),
-      
-      this.db.prepare(`SELECT rating as level, COUNT(*) as count ${riskQb.buildCountQuery()} GROUP BY rating`).all(...riskQb.buildParams()),
-      
-      this.db.prepare(`
-        SELECT 
-          (SELECT COUNT(*) FROM incoming_correspondence) as incoming_total,
-          (SELECT COUNT(*) FROM outgoing_letters) as outgoing_total,
-          (SELECT COUNT(*) FROM incoming_correspondence WHERE response_required = 1 AND status != 'Closed') as pending_responses
-      `).get(),
-      
-      this.db.prepare(`SELECT COUNT(*) as count ${complianceQb.buildCountQuery()}`).get(...complianceQb.buildParams()),
+    // Execute unified query to minimize mutex locking overhead
+    const bigQuery = `
+      SELECT
+        (SELECT json_build_object(
+          'total', COUNT(*),
+          'completed', COALESCE(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END), 0),
+          'in_progress', COALESCE(SUM(CASE WHEN status IN ('Fieldwork', 'Reporting') THEN 1 ELSE 0 END), 0),
+          'delayed', COALESCE(SUM(CASE WHEN status != 'Closed' AND planned_end_date < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') THEN 1 ELSE 0 END), 0)
+        ) ${auditQb.buildCountQuery()}) as audit_stats,
+        
+        (SELECT json_build_object(
+          'total', COUNT(*),
+          'open_count', COALESCE(SUM(CASE WHEN f.status != 'Closed' THEN 1 ELSE 0 END), 0),
+          'high_risk_open', COALESCE(SUM(CASE WHEN f.risk_level IN ('High', 'Critical') AND f.status != 'Closed' THEN 1 ELSE 0 END), 0)
+        ) ${findingsQb.buildCountQuery()}) as findings_stats,
 
-      this.db.prepare('SELECT id, "user", action, module, timestamp, details FROM audit_trail ORDER BY timestamp DESC LIMIT 10').all(),
-      this.db.prepare(`
-        SELECT 
-          type,
-          COUNT(*) as planned,
-          COALESCE(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END), 0) as completed
-        FROM audit_plans
-        GROUP BY type
-      `).all()
+        (SELECT json_agg(t) FROM (
+          SELECT f.risk_level as level, COUNT(*) as count ${findingsQb.buildCountQuery()} GROUP BY f.risk_level
+        ) t) as findings_by_risk,
+
+        (SELECT json_build_object(
+          'total', COUNT(*),
+          'pending_count', COALESCE(SUM(CASE WHEN r.status != 'Implemented' THEN 1 ELSE 0 END), 0),
+          'overdue_count', COALESCE(SUM(CASE WHEN r.status != 'Implemented' AND r.due_date < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') THEN 1 ELSE 0 END), 0)
+        ) ${recQb.buildCountQuery()}) as rec_stats,
+
+        (SELECT json_build_object(
+          'total', COUNT(*),
+          'high_count', COALESCE(SUM(CASE WHEN rating IN ('High', 'Critical') THEN 1 ELSE 0 END), 0)
+        ) ${riskQb.buildCountQuery()}) as risk_stats,
+
+        (SELECT json_agg(t) FROM (
+          SELECT rating as level, COUNT(*) as count ${riskQb.buildCountQuery()} GROUP BY rating
+        ) t) as risks_by_level,
+
+        (SELECT json_build_object(
+          'incoming_total', (SELECT COUNT(*) FROM incoming_correspondence),
+          'outgoing_total', (SELECT COUNT(*) FROM outgoing_letters),
+          'pending_responses', (SELECT COUNT(*) FROM incoming_correspondence WHERE response_required = 1 AND status != 'Closed')
+        )) as corr_stats,
+
+        (SELECT COUNT(*) ${complianceQb.buildCountQuery()}) as compliance_count,
+
+        (SELECT json_agg(t) FROM (
+          SELECT id, "user", action, module, timestamp, details FROM audit_trail ORDER BY timestamp DESC LIMIT 10
+        ) t) as recent_activity,
+
+        (SELECT json_agg(t) FROM (
+          SELECT 
+            type,
+            COUNT(*) as planned,
+            COALESCE(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END), 0) as completed
+          FROM audit_plans
+          GROUP BY type
+        ) t) as audit_progress
+    `;
+
+    const allParams = [
+      ...auditQb.buildParams(),
+      ...findingsQb.buildParams(),
+      ...findingsQb.buildParams(),
+      ...recQb.buildParams(),
+      ...riskQb.buildParams(),
+      ...riskQb.buildParams(),
+      ...complianceQb.buildParams()
     ];
 
-    const [
-      auditStats,
-      findingsStats,
-      findingsByRisk,
-      recStats,
-      riskStats,
-      risksByLevel,
-      corrStats,
-      complianceStats,
-      recentActivity,
-      auditProgress
-    ] = await Promise.all(promises) as any[];
+    const data = await this.db.prepare(bigQuery).get(...allParams);
 
     return {
       audits: {
-        total: Number(auditStats?.total || 0),
-        completed: Number(auditStats?.completed || 0),
-        in_progress: Number(auditStats?.in_progress || 0),
-        delayed: Number(auditStats?.delayed || 0),
-        progress_by_type: auditProgress || []
+        total: Number(data?.audit_stats?.total || 0),
+        completed: Number(data?.audit_stats?.completed || 0),
+        in_progress: Number(data?.audit_stats?.in_progress || 0),
+        delayed: Number(data?.audit_stats?.delayed || 0),
+        progress_by_type: data?.audit_progress || []
       },
       findings: {
         summary: {
-          total: Number(findingsStats?.total || 0),
-          open: Number(findingsStats?.open_count || 0),
-          high_risk_open: Number(findingsStats?.high_risk_open || 0)
+          total: Number(data?.findings_stats?.total || 0),
+          open: Number(data?.findings_stats?.open_count || 0),
+          high_risk_open: Number(data?.findings_stats?.high_risk_open || 0)
         },
-        byRisk: findingsByRisk
+        byRisk: data?.findings_by_risk || []
       },
       recommendations: {
-        total: Number(recStats?.total || 0),
-        open: Number(recStats?.pending_count || 0),
-        overdue: Number(recStats?.overdue_count || 0)
+        total: Number(data?.rec_stats?.total || 0),
+        open: Number(data?.rec_stats?.pending_count || 0),
+        overdue: Number(data?.rec_stats?.overdue_count || 0)
       },
       risks: {
         summary: {
-          total: Number(riskStats?.total || 0),
-          high: Number(riskStats?.high_count || 0)
+          total: Number(data?.risk_stats?.total || 0),
+          high: Number(data?.risk_stats?.high_count || 0)
         },
-        byLevel: risksByLevel
+        byLevel: data?.risks_by_level || []
       },
       correspondence: {
-        incoming_total: Number(corrStats?.incoming_total || 0),
-        outgoing_total: Number(corrStats?.outgoing_total || 0),
-        pending_responses: Number(corrStats?.pending_responses || 0)
+        incoming_total: Number(data?.corr_stats?.incoming_total || 0),
+        outgoing_total: Number(data?.corr_stats?.outgoing_total || 0),
+        pending_responses: Number(data?.corr_stats?.pending_responses || 0)
       },
       compliance: {
-        total: Number(complianceStats?.count || 0)
+        total: Number(data?.compliance_count || 0)
       },
-      activity: recentActivity
+      activity: data?.recent_activity || []
     };
   }
 
-  static async getMyTasks(userId: string | number) {
-    return await this.db.prepare(`
-      SELECT * FROM audit_tasks 
-      WHERE assigned_to = ?
-      ORDER BY created_at DESC
-    `).all(userId);
+  static async getMyTasks(userId: string | number, limit: number = 10, offset: number = 0) {
+    const query = `
+      SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.priority,
+             p.title as plan_title
+      FROM audit_tasks t
+      LEFT JOIN audit_plans p ON t.plan_id = p.id
+      WHERE t.assigned_to = ?
+      ORDER BY t.created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+    
+    const countQuery = "SELECT COUNT(*) as total FROM audit_tasks WHERE assigned_to = ?";
+
+    const [data, countRes] = await Promise.all([
+      this.db.prepare(query).all(userId, limit, offset),
+      this.db.prepare(countQuery).get(userId)
+    ]) as [any[], any];
+
+    return {
+      data,
+      total: countRes?.total || 0
+    };
   }
 }

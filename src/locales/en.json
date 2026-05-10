@@ -1001,8 +1001,11 @@
     "copyrightTextNew": "All rights reserved to Al Saqi Electronic Payment Services",
     "passwordChanged": "Password changed successfully",
     "loginTitle": "Login to System",
+    "loginFailed": "Login failed. Please check your credentials.",
     "resetPassword": "Reset Password",
     "invalidCredentials": "Invalid username or password",
+    "accountSuspended": "Your account has been suspended. Please contact the administrator.",
+    "accountLocked": "Your account has been temporarily locked due to multiple failed attempts. Please try again later.",
     "sessionExpired": "Session expired, please login again",
     "contactAdminModal": {
       "title": "Contact System Administrator",
