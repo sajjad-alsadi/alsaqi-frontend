@@ -44,6 +44,44 @@
   "allDepartments": "جميع الأقسام",
   "selectDepartment": "اختر القسم",
   "errorOccurred": "حدث خطأ ما، يرجى المحاولة مرة أخرى",
+  "invalidRequest": "طلب غير صالح",
+  "resourceNotFound": "المورد المطلوب غير موجود",
+  "internalServerError": "خطأ داخلي في الخادم",
+  "accessDenied": "الوصول مرفوض",
+  "unauthorized": "غير مصرح",
+  "forbidden": "محظور",
+  "notFound": "غير موجود",
+  "serverError": "خطأ في الخادم",
+  "failedLogin": "فشل تسجيل الدخول",
+  "accountLocked": "الحساب مقفل",
+  "sessionExpired": "انتهت الجلسة",
+  "loadingData": "جاري تحميل البيانات...",
+  "invalidFileData": "بيانات الملف غير صالحة",
+  "invalidPdfFormat": "صيغة PDF غير صالحة",
+  "errorProcessingFile": "خطأ في معالجة الملف",
+  "errorLoadingFile": "خطأ في تحميل الملف",
+  "zoomOut": "تصغير",
+  "zoomIn": "تكبير",
+  "failedToLoadPdf": "فشل تحميل ملف PDF",
+  "loadingFile": "جاري تحميل الملف...",
+  "changePassword": "تغيير كلمة المرور",
+  "passwordChangeRequired": "يجب تغيير كلمة المرور",
+  "passwordRequirements": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+  "forgotPassword": "نسيت كلمة المرور",
+  "forgotPasswordInstructions": "أدخل اسم المستخدم وسيتم إرسال طلب إعادة التعيين للمسؤول",
+  "enterUsername": "أدخل اسم المستخدم",
+  "resetPending": "طلب إعادة التعيين قيد الانتظار",
+  "resetRejected": "تم رفض طلب إعادة التعيين",
+  "resetApproved": "تمت الموافقة على طلب إعادة التعيين",
+  "searchAssistant": "مساعد البحث",
+  "localPolicySearch": "بحث محلي في السياسات والقوانين",
+  "askAboutPolicies": "اسأل عن السياسات أو القوانين...",
+  "logout": "تسجيل خروج",
+  "statusUpdated": "تم تحديث الحالة",
+  "planTasks": "مهام الخطة",
+  "compliant": "ملتزم",
+  "non_compliant": "غير ملتزم",
+  "under_review": "قيد المراجعة",
   "invalidData": "البيانات المدخلة غير صحيحة",
   "validationErrors": {
     "invalidOption": "القيمة المختارة غير صالحة، يرجى اختيار قيمة من القائمة",
@@ -450,6 +488,7 @@
     "cancelled": "ملغى",
     "status": {
       "active": "نشط",
+      "inactive": "غير نشط",
       "locked": "مقفل",
       "suspended": "موقوف",
       "pending": "معلق",
@@ -525,7 +564,13 @@
     "fileSelected": "تم اختيار الملف",
     "title": "العنوان",
     "type": "النوع",
-    "confirmDelete": "تأكيد الحذف"
+    "confirmDelete": "تأكيد الحذف",
+    "view": "عرض",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "refresh": "تحديث",
+    "export": "تصدير",
+    "clear": "مسح"
   },
   "legal": {
     "title": "القوانين والتشريعات",
@@ -855,7 +900,10 @@
     "programStatus": "حالة البرنامج",
     "compliance": "اختبار الامتثال",
     "substantive": "اختبار جوهري",
-    "analytical": "اختبار تحليلي"
+    "analytical": "اختبار تحليلي",
+    "standardizedAuditProcedures": "إجراءات التدقيق القياسية",
+    "proceduresList": "قائمة الإجراءات",
+    "exportAsChecklist": "تصدير كقائمة مرجعية"
   },
   "tasks": {
     "auditTasksReport": "مهام التدقيق",
@@ -928,7 +976,9 @@
     "cause": "السبب",
     "consequence": "الأثر (النتيجة)",
     "recommendation": "التوصية",
-    "riskLevel": "مستوى الخطر"
+    "riskLevel": "مستوى الخطر",
+    "editFinding": "تعديل الملاحظة",
+    "addFinding": "إضافة ملاحظة"
   },
   "reports": {
     "auditReport": "تقرير التدقيق",
@@ -993,7 +1043,17 @@
     "includeFindings": "تضمين الملاحظات",
     "selectFindingsToInclude": "اختر الملاحظات لتضمينها في التقرير",
     "noFindingsForThisAudit": "لم يتم تسجيل أي ملاحظات لهذا التدقيق.",
-    "reportTitle": "عنوان التقرير"
+    "reportTitle": "عنوان التقرير",
+    "count": "العدد",
+    "scheduleReportDesc": "جدولة إنشاء التقارير وتسليمها تلقائياً",
+    "frequency": "التكرار",
+    "daily": "يومي",
+    "weekly": "أسبوعي",
+    "monthly": "شهري",
+    "quarterly": "فصلي",
+    "recipients": "المستلمون",
+    "failedToGenerateDocument": "فشل إنشاء المستند",
+    "reportScheduledSuccess": "تم جدولة التقرير بنجاح"
   },
   "auth": {
     "login": "تسجيل دخول",
@@ -1123,7 +1183,9 @@
     "add": "إضافة",
     "delete": "حذف",
     "deleteConfirm": "تأكيد الحذف",
-    "deleteMessage": "هل أنت متأكد من حذف هذه التوصية؟ لا يمكن التراجع عن هذا الإجراء."
+    "deleteMessage": "هل أنت متأكد من حذف هذه التوصية؟ لا يمكن التراجع عن هذا الإجراء.",
+    "noRecommendationTextFound": "لم يتم العثور على نص التوصية",
+    "save": "حفظ"
   },
   "jobTitles": "المسميات الوظيفية",
   "userManagement": {
@@ -1190,7 +1252,9 @@
       "accessScope": "نطاق الوصول",
       "global": "شامل (النظام بالكامل)",
       "notes": "ملاحظات إضافية",
-      "additionalNotes": "أدخل أي تعليمات أو ملاحظات خاصة بهذا المستخدم..."
+      "additionalNotes": "أدخل أي تعليمات أو ملاحظات خاصة بهذا المستخدم...",
+      "loadingRoles": "جاري تحميل الأدوار...",
+      "contactInfo": "معلومات الاتصال"
     },
     "roles": {
       "title": "إدارة أدوار النظام",
@@ -1204,19 +1268,26 @@
       "title": "إدارة طلبات إعادة التعيين",
       "pendingRequests": "طلبات معلقة تتطلب موافقة لإصدار كلمات مرور مؤقتة.",
       "approve": "موافقة وإرسال",
-      "noPendingRequests": "لا توجد طلبات إعادة تعيين حالية"
+      "noPendingRequests": "لا توجد طلبات إعادة تعيين حالية",
+      "passwordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح",
+      "tempPasswordGeneratedNote": "تم إنشاء كلمة مرور مؤقتة. يرجى تزويدها للمستخدم."
     },
     "history": {
       "title": "سجل التدقيق والأمان",
       "subtitle": "تتبع عمليات الدخول وتغييرات البيانات الحساسة للأغراض الرقابية.",
       "loginHistory": "تاريخ الدخول",
-      "activityLogs": "سجل النشاط"
+      "activityLogs": "سجل النشاط",
+      "user": "المستخدم",
+      "ipAddress": "عنوان IP",
+      "action": "الإجراء",
+      "noLogs": "لا توجد سجلات"
     },
     "sessions": {
       "title": "إدارة الجلسات الحالية",
       "subtitle": "مراقبة الأجهزة والاتصالات النشطة حالياً بالنظام.",
       "revoke": "إنهاء الاتصال",
-      "noActiveSessions": "لا توجد جلسات نشطة حالياً"
+      "noActiveSessions": "لا توجد جلسات نشطة حالياً",
+      "active": "نشط"
     },
     "settings": {
       "title": "إعدادات أمان المستخدمين",
@@ -1239,7 +1310,14 @@
       "securityAdvisoryNote": "تغيير هذه الإعدادات يؤثر على كافة مستخدمي النظام بشكل فوري."
     },
     "supportRequests": {
-      "noRequests": "لا توجد طلبات دعم حالية"
+      "noRequests": "لا توجد طلبات دعم حالية",
+      "pending": "معلق",
+      "resolved": "تم الحل",
+      "rejected": "مرفوض",
+      "all": "الكل",
+      "noDetails": "لا توجد تفاصيل",
+      "resolve": "حل",
+      "reject": "رفض"
     }
   },
   "settings": {
@@ -1549,7 +1627,10 @@
     "instructions": "التعليمات",
     "previewAttachment": "معاينة المرفق",
     "viewAll": "عرض الكل",
-    "noMatchingResults": "لا توجد سجلات مطابقة."
+    "noMatchingResults": "لا توجد سجلات مطابقة.",
+    "method": "الطريقة",
+    "pending": "معلق",
+    "followUpTracking": "تتبع المتابعة"
   },
   "appName": "نظام تدقيق الساقي",
   "auditPlan": "خطة التدقيق السنوية",
@@ -2383,7 +2464,22 @@
     "nextReviewDate": "موعد المراجعة القادم",
     "requiredActions": "الإجراءات المطلوبة",
     "tryAdjustFilters": "حاول تعديل الفلاتر أو إضافة سجل جديد",
-    "overdueReviewsDesc": "قائمة السجلات التي تجاوزت موعد المراجعة الدورية المجدولة"
+    "overdueReviewsDesc": "قائمة السجلات التي تجاوزت موعد المراجعة الدورية المجدولة",
+    "noOverdue": "لا توجد مراجعات متأخرة",
+    "cancel": "إلغاء",
+    "saveChanges": "حفظ التغييرات",
+    "viewDetails": "عرض التفاصيل",
+    "issueDate": "تاريخ الإصدار",
+    "nextReview": "المراجعة القادمة",
+    "reqDesc": "وصف المتطلب",
+    "maturityEvaluation": "تقييم النضج",
+    "percentage": "النسبة المئوية",
+    "updateEvaluation": "تحديث التقييم",
+    "attachmentsDocs": "المرفقات والوثائق",
+    "originalDoc": "المستند الأصلي",
+    "viewAttachedFile": "عرض الملف المرفق",
+    "noFilesAttached": "لا توجد ملفات مرفقة",
+    "closeWindow": "إغلاق"
   },
   "integrityManagement": {
     "conflictsDesc": "مراقبة وتتبع إفصاحات تعارض المصالح للموظفين لضمان الشفافية.",

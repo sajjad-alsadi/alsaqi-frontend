@@ -44,6 +44,44 @@
   "allDepartments": "All Departments",
   "selectDepartment": "Select Department",
   "errorOccurred": "An error occurred, please try again",
+  "invalidRequest": "Invalid request",
+  "resourceNotFound": "Resource not found",
+  "internalServerError": "Internal server error",
+  "accessDenied": "Access denied",
+  "unauthorized": "Unauthorized",
+  "forbidden": "Forbidden",
+  "notFound": "Not found",
+  "serverError": "Server error",
+  "failedLogin": "Login failed",
+  "accountLocked": "Account locked",
+  "sessionExpired": "Session expired",
+  "loadingData": "Loading data...",
+  "invalidFileData": "Invalid file data",
+  "invalidPdfFormat": "Invalid PDF format",
+  "errorProcessingFile": "Error processing file",
+  "errorLoadingFile": "Error loading file",
+  "zoomOut": "Zoom out",
+  "zoomIn": "Zoom in",
+  "failedToLoadPdf": "Failed to load PDF",
+  "loadingFile": "Loading file...",
+  "changePassword": "Change Password",
+  "passwordChangeRequired": "Password change required",
+  "passwordRequirements": "Password must be at least 8 characters",
+  "forgotPassword": "Forgot Password",
+  "forgotPasswordInstructions": "Enter your username and a reset request will be sent to the admin",
+  "enterUsername": "Enter username",
+  "resetPending": "Reset request pending",
+  "resetRejected": "Reset request rejected",
+  "resetApproved": "Reset request approved",
+  "searchAssistant": "Search Assistant",
+  "localPolicySearch": "Local policy and law search",
+  "askAboutPolicies": "Ask about policies or laws...",
+  "logout": "Logout",
+  "statusUpdated": "Status updated",
+  "planTasks": "Plan Tasks",
+  "compliant": "Compliant",
+  "non_compliant": "Non-Compliant",
+  "under_review": "Under Review",
   "invalidData": "The entered data is invalid",
   "validationErrors": {
     "invalidOption": "The selected value is invalid, please choose from the list",
@@ -450,6 +488,7 @@
     "cancelled": "Cancelled",
     "status": {
       "active": "Active",
+      "inactive": "Inactive",
       "locked": "Locked",
       "suspended": "Suspended",
       "pending": "Pending",
@@ -525,7 +564,13 @@
     "fileSelected": "File selected",
     "title": "Title",
     "type": "Type",
-    "confirmDelete": "Confirm Delete"
+    "confirmDelete": "Confirm Delete",
+    "view": "View",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "refresh": "Refresh",
+    "export": "Export",
+    "clear": "Clear"
   },
   "legal": {
     "title": "Legal & Regulations",
@@ -855,7 +900,10 @@
     "programStatus": "Program Status",
     "compliance": "Compliance",
     "substantive": "Substantive",
-    "analytical": "Analytical"
+    "analytical": "Analytical",
+    "standardizedAuditProcedures": "Standardized Audit Procedures",
+    "proceduresList": "Procedures List",
+    "exportAsChecklist": "Export as Checklist"
   },
   "tasks": {
     "auditTasksReport": "Audit Tasks Report",
@@ -928,7 +976,9 @@
     "cause": "Cause",
     "consequence": "Consequence (Impact)",
     "recommendation": "Recommendation",
-    "riskLevel": "Risk Level"
+    "riskLevel": "Risk Level",
+    "editFinding": "Edit Finding",
+    "addFinding": "Add Finding"
   },
   "reports": {
     "auditReport": "Audit Report",
@@ -993,7 +1043,17 @@
     "includeFindings": "Include Findings",
     "selectFindingsToInclude": "Select findings to include in the report",
     "noFindingsForThisAudit": "No findings recorded for this audit.",
-    "reportTitle": "Report Title"
+    "reportTitle": "Report Title",
+    "count": "Count",
+    "scheduleReportDesc": "Schedule automatic report generation and delivery",
+    "frequency": "Frequency",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "recipients": "Recipients",
+    "failedToGenerateDocument": "Failed to generate document",
+    "reportScheduledSuccess": "Report scheduled successfully"
   },
   "auth": {
     "login": "Login",
@@ -1123,7 +1183,9 @@
     "add": "Add",
     "delete": "Delete",
     "deleteConfirm": "Confirm Delete",
-    "deleteMessage": "Are you sure you want to delete this recommendation? This action cannot be undone."
+    "deleteMessage": "Are you sure you want to delete this recommendation? This action cannot be undone.",
+    "noRecommendationTextFound": "No recommendation text found",
+    "save": "Save"
   },
   "jobTitles": "Job Titles",
   "userManagement": {
@@ -1190,7 +1252,9 @@
       "accessScope": "Access Scope",
       "global": "Global (Full System)",
       "notes": "Additional Notes",
-      "additionalNotes": "Enter any specific instructions or notes for this user..."
+      "additionalNotes": "Enter any specific instructions or notes for this user...",
+      "loadingRoles": "Loading roles...",
+      "contactInfo": "Contact Info"
     },
     "roles": {
       "title": "System Role Management",
@@ -1204,19 +1268,26 @@
       "title": "Reset Requests Management",
       "pendingRequests": "Pending requests requiring approval to issue temporary passwords.",
       "approve": "Approve & Send",
-      "noPendingRequests": "No pending reset requests"
+      "noPendingRequests": "No pending reset requests",
+      "passwordResetSuccess": "Password reset successful",
+      "tempPasswordGeneratedNote": "A temporary password has been generated. Please provide it to the user."
     },
     "history": {
       "title": "Audit & Security Logs",
       "subtitle": "Track login attempts and sensitive data changes for audit purposes.",
       "loginHistory": "Login History",
-      "activityLogs": "Activity Logs"
+      "activityLogs": "Activity Logs",
+      "user": "User",
+      "ipAddress": "IP Address",
+      "action": "Action",
+      "noLogs": "No logs available"
     },
     "sessions": {
       "title": "Current Sessions Management",
       "subtitle": "Monitor active devices and connections currently signed into the system.",
       "revoke": "Revoke Session",
-      "noActiveSessions": "No active sessions currently"
+      "noActiveSessions": "No active sessions currently",
+      "active": "Active"
     },
     "settings": {
       "title": "User Security Settings",
@@ -1239,7 +1310,14 @@
       "securityAdvisoryNote": "Changing these settings affects all system users immediately."
     },
     "supportRequests": {
-      "noRequests": "No current support requests"
+      "noRequests": "No current support requests",
+      "pending": "Pending",
+      "resolved": "Resolved",
+      "rejected": "Rejected",
+      "all": "All",
+      "noDetails": "No details",
+      "resolve": "Resolve",
+      "reject": "Reject"
     }
   },
   "settings": {
@@ -1544,7 +1622,10 @@
     "instructions": "Instructions",
     "previewAttachment": "Preview Attachment",
     "viewAll": "View All",
-    "noMatchingResults": "No matching records found."
+    "noMatchingResults": "No matching records found.",
+    "method": "Method",
+    "pending": "Pending",
+    "followUpTracking": "Follow-up Tracking"
   },
   "appName": "Al-Saqi Audit System",
   "auditPlan": "Annual Audit Plan",
@@ -2383,7 +2464,22 @@
     "nextReviewDate": "Next Review Date",
     "requiredActions": "Required Actions",
     "tryAdjustFilters": "Try adjusting filters or add a new record",
-    "overdueReviewsDesc": "Records that have exceeded their scheduled periodic review date"
+    "overdueReviewsDesc": "Records that have exceeded their scheduled periodic review date",
+    "noOverdue": "No overdue reviews",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "viewDetails": "View Details",
+    "issueDate": "Issue Date",
+    "nextReview": "Next Review",
+    "reqDesc": "Requirement Description",
+    "maturityEvaluation": "Maturity Evaluation",
+    "percentage": "Percentage",
+    "updateEvaluation": "Update Evaluation",
+    "attachmentsDocs": "Attachments & Documents",
+    "originalDoc": "Original Document",
+    "viewAttachedFile": "View attached file",
+    "noFilesAttached": "No files attached",
+    "closeWindow": "Close"
   },
   "integrityManagement": {
     "conflictsDesc": "Monitor and track employee conflict of interest disclosures to ensure transparency.",
