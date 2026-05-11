@@ -46,7 +46,7 @@ export const setupRoutes = (
   const globalApiLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
     max: 150, // limit each IP to 150 requests per windowMs
-    message: { error: "Too many requests from this IP, please try again after a minute" },
+    message: { error: "TOO_MANY_ATTEMPTS" },
     standardHeaders: true,
     legacyHeaders: false,
   });

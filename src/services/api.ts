@@ -70,6 +70,7 @@ api.interceptors.response.use(
     if (!isSessionCheck) {
       const errorData = response?.data?.error;
       const errorMessage = typeof errorData === 'object' ? errorData.message : (errorData || response?.data?.message || message);
+      const translatedMsg = translateError(errorMessage, i18n.language as 'ar' | 'en');
       
       if (response?.status === 503) {
         toast.error(i18n.t('serverStarting'));
@@ -77,14 +78,16 @@ api.interceptors.response.use(
         toast.error(i18n.t('networkError'));
       } else if (response?.status === 413) {
         toast.error(i18n.t('fileTooLarge'));
+      } else if (response?.status === 429) {
+        toast.error(translatedMsg || i18n.t('auth.tooManyAttempts'));
       } else if (response?.status === 400) {
-        toast.error(translateError(errorMessage, i18n.language as 'ar' | 'en') || i18n.t('invalidRequest'));
+        toast.error(translatedMsg || i18n.t('invalidRequest'));
       } else if (response?.status === 403) {
-        toast.error(i18n.t('accessDenied'));
+        toast.error(translatedMsg || i18n.t('accessDenied'));
       } else if (response?.status === 404) {
         toast.error(i18n.t('resourceNotFound'));
       } else if (response?.status >= 500) {
-        toast.error(i18n.t('internalServerError'));
+        toast.error(translatedMsg || i18n.t('internalServerError'));
       }
 
       // Log error to backend if it's not a 401 or 503

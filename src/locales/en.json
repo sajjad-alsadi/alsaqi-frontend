@@ -1119,7 +1119,8 @@
         "requestDetailsRequired": "Request Details are required"
       }
     },
-    "needHelp": "Forgot Password or Need Help?"
+    "needHelp": "Forgot Password or Need Help?",
+    "tooManyAttempts": "Too many login attempts, please try again later."
   },
   "dashboard": {
     "riskOverview": "Risk Overview",

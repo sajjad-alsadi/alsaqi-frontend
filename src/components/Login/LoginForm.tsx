@@ -73,7 +73,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <input
             type="text"
             className={`w-full ps-12 pe-4 py-3.5 bg-white border ${error ? 'border-rose-500' : 'border-slate-200'} rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium text-slate-900`}
-            placeholder="Enter your credentials"
+            placeholder={t('auth.usernameOrEmail')}
             value={username}
             onChange={(e) => {
               setUsername(e.target.value);
