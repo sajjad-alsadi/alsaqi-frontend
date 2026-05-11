@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuditPlans } from '../hooks/useAuditPlans';
 import { auditService } from '../services/auditService';
 import { AuditPlan } from '../types';
-import { Plus, Search, Filter, Download, MoreVertical, Calendar, User, Tag, Edit, Trash2, PlayCircle } from 'lucide-react';
+import { Plus, Search, Filter, Download, MoreVertical, Calendar, User, Tag, Edit, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { generatePdf, PdfSection } from '../utils/pdfExport';
 import InteractiveIcon from '../components/InteractiveIcon';
@@ -19,7 +19,6 @@ import AuditPlanForm from '../components/AuditPlanForm';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
-import AuditWorkspace from './AuditWorkspace';
 
 const AuditPlanModule: React.FC = () => {
   const { token } = useAppContext();
@@ -41,7 +40,6 @@ const AuditPlanModule: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<AuditPlan | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<string | number | null>(null);
-  const [executingPlanId, setExecutingPlanId] = useState<string | number | null>(null);
 
   const handleAddSuccess = () => {
     toast.success(t(selectedPlan ? 'updateSuccess' : 'createSuccess'));
@@ -262,14 +260,6 @@ const AuditPlanModule: React.FC = () => {
                   </td>
                   <td className="px-10 py-6 text-end flex items-center justify-end gap-2">
                     <InteractiveIcon 
-                      icon={PlayCircle}
-                      onClick={() => setExecutingPlanId(plan.id!)}
-                      tooltip={t('common.executeAudit')}
-                      variant="ghost"
-                      size={16}
-                      className="!p-2 !bg-[var(--color-primary)]/10 !text-[var(--color-primary)]"
-                    />
-                    <InteractiveIcon 
                       icon={Edit}
                       onClick={() => editPlan(plan)}
                       tooltip={t('plan.edit')}
@@ -306,12 +296,6 @@ const AuditPlanModule: React.FC = () => {
         totalItems={pagination.total}
       />
 
-      {executingPlanId && (
-        <AuditWorkspace 
-          planId={executingPlanId} 
-          onClose={() => setExecutingPlanId(null)} 
-        />
-      )}
     </div>
   );
 };

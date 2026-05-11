@@ -38,7 +38,7 @@ const DashboardRiskOverview: React.FC<DashboardRiskOverviewProps> = React.memo((
                 ))}
               </Pie>
               <Tooltip 
-                formatter={(value: any, name: string) => [formatNumber(value), t(name.toLowerCase())]}
+                formatter={(value: any, name: string) => [formatNumber(value), t((name || '').toLowerCase())]}
                 contentStyle={{ 
                   borderRadius: '1rem', 
                   border: '1px solid var(--color-border-soft)', 
@@ -58,7 +58,7 @@ const DashboardRiskOverview: React.FC<DashboardRiskOverviewProps> = React.memo((
         {(Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []).map((risk: any, idx: number) => (
           <div key={idx} className="flex items-center gap-2 bg-[var(--color-bg-main)] p-2 rounded-xl">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[idx % colors.length] }}></div>
-            <span className="text-xs font-bold text-[var(--color-text-main)] uppercase tracking-widest">{t(risk.level.toLowerCase())}: {formatNumber(risk.count)}</span>
+            <span className="text-xs font-bold text-[var(--color-text-main)] uppercase tracking-widest">{t((risk.level || '').toLowerCase())}: {formatNumber(risk.count)}</span>
           </div>
         ))}
       </div>

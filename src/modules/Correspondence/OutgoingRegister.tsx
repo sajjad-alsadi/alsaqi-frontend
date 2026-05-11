@@ -237,11 +237,11 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                   <td className="px-6 py-4 text-sm font-bold text-slate-700 max-w-xs truncate">{item.subject}</td>
                   <td className="px-6 py-4">
                     <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-[10px] font-black uppercase tracking-wider text-slate-500 border border-slate-200">
-                      {t(`correspondence.${item.classification.toLowerCase().replace(/\s+/g, '_')}`) || item.classification}
+                      {t(`correspondence.${(item.classification || '').toLowerCase().replace(/\s+/g, '_')}`) || item.classification}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700">
-                    {t(`correspondence.${item.sending_method.toLowerCase().replace(/\s+/g, '_')}`) || item.sending_method}
+                    {t(`correspondence.${(item.sending_method || '').toLowerCase().replace(/\s+/g, '_')}`) || item.sending_method}
                   </td>
                   <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                     {item.attachment_file && (

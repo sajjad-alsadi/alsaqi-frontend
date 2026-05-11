@@ -120,8 +120,8 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
     legacyHeaders: false,
     // Key by IP + username so that blocking one user doesn't affect others
     keyGenerator: (req: any) => {
-      const username = req.body?.usernameOrEmail || 'unknown';
-      return `${req.ip}_${username.toLowerCase()}`;
+      const username = (req.body && req.body.usernameOrEmail) ? String(req.body.usernameOrEmail).toLowerCase() : 'unknown';
+      return `${req.ip || 'no-ip'}_${username}`;
     },
   });
 

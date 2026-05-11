@@ -159,9 +159,9 @@ const AuditTrailModule: React.FC = () => {
                   </td>
                   <td className="px-10 py-6">
                     <span className={`inline-flex items-center px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                      log.action.toLowerCase().includes('delete') ? 'bg-rose-100 text-rose-600' :
-                      log.action.toLowerCase().includes('created') ? 'bg-emerald-100 text-emerald-600' :
-                      log.action.toLowerCase().includes('failed') ? 'bg-rose-100 text-rose-600' : 'bg-primary/10 text-primary'
+                      (log.action || '').toLowerCase().includes('delete') ? 'bg-rose-100 text-rose-600' :
+                      (log.action || '').toLowerCase().includes('created') ? 'bg-emerald-100 text-emerald-600' :
+                      (log.action || '').toLowerCase().includes('failed') ? 'bg-rose-100 text-rose-600' : 'bg-primary/10 text-primary'
                     }`}>
                       {translateAction(log.action)}
                     </span>

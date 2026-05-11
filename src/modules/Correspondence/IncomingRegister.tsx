@@ -150,6 +150,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
   };
 
   const getStatusLabel = (status: string) => {
+    if (!status) return '';
     return t(`correspondence.${status.toLowerCase().replace(/\s+/g, '_')}`);
   };
 
@@ -165,6 +166,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
   };
 
   const getPriorityLabel = (priority: string) => {
+    if (!priority) return '';
     return t(`correspondence.${priority.toLowerCase().replace(/\s+/g, '_')}`);
   };
 
