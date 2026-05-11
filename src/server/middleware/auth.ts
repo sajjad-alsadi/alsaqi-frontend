@@ -114,10 +114,15 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
 
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // Limit each IP to 10 login requests per windowMs
+    max: 10, // Limit each IP+username combination to 10 login requests per windowMs
     message: { error: "Too many login attempts, please try again later." },
     standardHeaders: true,
     legacyHeaders: false,
+    // Key by IP + username so that blocking one user doesn't affect others
+    keyGenerator: (req: any) => {
+      const username = req.body?.usernameOrEmail || 'unknown';
+      return `${req.ip}_${username.toLowerCase()}`;
+    },
   });
 
   return { authenticate, checkPermission, authorize, authLimiter, cache };
