@@ -163,7 +163,7 @@ export const PdfTemplateManagement: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTemplates.map(template => (
-              <div key={template.id} className="border-2 border-slate-100 rounded-[1.5rem] p-6 hover:shadow-xl hover:shadow-primary/5 transition-all bg-white relative group flex flex-col">
+              <div key={template.id} className="border-2 border-slate-100 rounded-xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all bg-white relative group flex flex-col">
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                     <FileText size={24} />
@@ -218,7 +218,7 @@ export const PdfTemplateManagement: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
             >
               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 className="text-xl font-black text-slate-800">

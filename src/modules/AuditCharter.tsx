@@ -105,7 +105,7 @@ const AuditCharter: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <BookOpen size={32} />
           </div>
           <div>
@@ -114,10 +114,10 @@ const AuditCharter: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="bg-slate-100 px-4 py-2 rounded-[1.5rem] text-sm font-bold text-slate-600">
+          <div className="bg-slate-100 px-4 py-2 rounded-xl text-sm font-bold text-slate-600">
             {t('common.version')}: {charterData.version}
           </div>
-          <div className="bg-slate-100 px-4 py-2 rounded-[1.5rem] text-sm font-bold text-slate-600">
+          <div className="bg-slate-100 px-4 py-2 rounded-xl text-sm font-bold text-slate-600">
             {t('common.date')}: {charterData.date}
           </div>
         </div>
@@ -195,7 +195,7 @@ const AuditCharter: React.FC = () => {
                 {section.items && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     {section.items.map((item, i) => (
-                      <div key={i} className="bg-slate-50 p-4 rounded-[1.5rem] border border-slate-100">
+                      <div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <h4 className="font-bold text-slate-800 mb-2">{item.term}</h4>
                         <p className="text-sm text-slate-600">{item.def}</p>
                       </div>

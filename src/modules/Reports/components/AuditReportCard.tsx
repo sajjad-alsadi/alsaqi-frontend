@@ -24,7 +24,7 @@ const AuditReportCard: React.FC<AuditReportCardProps> = ({
     <div className="glass-card p-6 flex flex-col justify-between group hover:border-[var(--color-primary)]/30 transition-all">
       <div>
         <div className="flex items-start justify-between mb-4">
-          <div className="w-12 h-12 bg-[var(--color-primary)]/10 rounded-[1.5rem] flex items-center justify-center text-[var(--color-primary)]">
+          <div className="w-12 h-12 bg-[var(--color-primary)]/10 rounded-xl flex items-center justify-center text-[var(--color-primary)]">
             <FileText size={24} />
           </div>
           <div className="flex flex-col items-end gap-1">
@@ -47,14 +47,14 @@ const AuditReportCard: React.FC<AuditReportCardProps> = ({
       <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--color-border-soft)]">
         <button 
           onClick={() => onDownload(report)}
-          className="flex-1 py-2 bg-[var(--color-bg-main)] hover:bg-[var(--color-border-soft)] rounded-[1.5rem] text-[var(--color-text-main)] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-[var(--color-border-soft)]"
+          className="flex-1 py-2 bg-[var(--color-bg-main)] hover:bg-[var(--color-border-soft)] rounded-xl text-[var(--color-text-main)] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-[var(--color-border-soft)]"
         >
           <Download size={16} />
           {t('common.download')}
         </button>
         <button 
           onClick={() => onDelete(report.id!)}
-          className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 rounded-[1.5rem] transition-colors"
+          className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 rounded-xl transition-colors"
         >
           <Trash2 size={18} />
         </button>

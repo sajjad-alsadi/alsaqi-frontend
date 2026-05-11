@@ -67,7 +67,7 @@ const UserSessions: React.FC<UserSessionsProps> = ({
           </motion.div>
         ))}
         {sessions.length === 0 && (
-          <div className="lg:col-span-2 py-20 text-center border-2 border-dashed border-[var(--color-border-soft)] rounded-[2.5rem]">
+          <div className="lg:col-span-2 py-20 text-center border-2 border-dashed border-[var(--color-border-soft)] rounded-2xl">
             <p className="text-[var(--color-text-muted)] font-bold">{t('userManagement.sessions.noActiveSessions')}</p>
           </div>
         )}

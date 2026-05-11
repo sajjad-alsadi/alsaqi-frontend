@@ -181,7 +181,7 @@ const SystemErrorLogs: React.FC = () => {
     <div className="min-h-screen bg-slate-50/50 p-6 space-y-10" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <AlertCircle size={32} />
           </div>
           <div>
@@ -243,7 +243,7 @@ const SystemErrorLogs: React.FC = () => {
       </Modal>
 
       {/* Search & Filters Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 bg-slate-100/50 rounded-[2.5rem] border border-slate-200/50 shadow-inner">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-inner">
         <div className="relative group">
           <input 
             type="text" 
@@ -294,7 +294,7 @@ const SystemErrorLogs: React.FC = () => {
       
       <SystemErrorAnalytics data={analytics} />
       
-      <div className="bg-white border border-slate-100 shadow-sm rounded-[2.5rem] overflow-hidden">
+      <div className="bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -348,7 +348,7 @@ const SystemErrorLogs: React.FC = () => {
                   {expandedRows.includes(log.id) && (
                     <tr className="bg-slate-50/30">
                       <td colSpan={5} className="px-8 py-6">
-                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+                        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
                           <div className="flex flex-col gap-2">
                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
                             <div className="relative group">

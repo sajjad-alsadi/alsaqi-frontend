@@ -129,7 +129,7 @@ const RiskRegister: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <ShieldAlert size={32} />
           </div>
           <div>
@@ -220,29 +220,29 @@ const RiskRegister: React.FC = () => {
             <p className="text-xs text-[var(--color-text-muted)] font-bold mb-8 uppercase tracking-wider">{risk.owner} • {t(risk.type?.toLowerCase() || '')}</p>
 
             <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="text-center p-4 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="text-center p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[9px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-2">{t('likelihood')}</p>
                 <p className="text-sm font-black text-[var(--color-text-main)] truncate">{risk.likelihood}</p>
               </div>
-              <div className="text-center p-4 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="text-center p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[9px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-2">{t('impact')}</p>
                 <p className="text-sm font-black text-[var(--color-text-main)] truncate">{risk.impact}</p>
               </div>
-              <div className="text-center p-4 bg-[var(--color-primary)] text-white rounded-[1.5rem] shadow-2xl shadow-[var(--color-primary)]/30">
+              <div className="text-center p-4 bg-[var(--color-primary)] text-white rounded-xl shadow-2xl shadow-[var(--color-primary)]/30">
                 <p className="text-[9px] text-white/70 uppercase font-black tracking-widest mb-2">{t('score')}</p>
                 <p className="text-lg font-black">{formatNumber(risk.score)}</p>
               </div>
             </div>
 
             <div className="space-y-4 flex-1">
-              <div className="flex items-start gap-3 p-4 bg-[var(--color-bg-soft)]/50 rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="flex items-start gap-3 p-4 bg-[var(--color-bg-soft)]/50 rounded-xl border border-[var(--color-border-soft)]">
                 <Activity size={16} className="text-[var(--color-primary)] mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-1">{t('controls')}</p>
                   <p className="text-xs font-bold text-[var(--color-text-main)] opacity-80 truncate">{risk.controls}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-4 bg-[var(--color-bg-soft)]/50 rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="flex items-start gap-3 p-4 bg-[var(--color-bg-soft)]/50 rounded-xl border border-[var(--color-border-soft)]">
                 <ArrowRight size={16} className="text-[var(--color-primary)] mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-1">{t('mitigation')}</p>
@@ -253,7 +253,7 @@ const RiskRegister: React.FC = () => {
 
             <button 
               onClick={() => setSelectedRisk(risk)}
-              className="w-full mt-10 py-4 bg-[var(--color-bg-soft)] text-xs font-black text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white rounded-[1.5rem] transition-all duration-300 flex items-center justify-center gap-3 uppercase tracking-widest"
+              className="w-full mt-10 py-4 bg-[var(--color-bg-soft)] text-xs font-black text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white rounded-xl transition-all duration-300 flex items-center justify-center gap-3 uppercase tracking-widest"
             >
               <Info size={18} />
               {t('details')}
@@ -279,41 +279,41 @@ const RiskRegister: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-1">{t('riskId')}</p>
                 <p className="text-sm font-black text-[var(--color-text-main)]">{selectedRisk.risk_id}</p>
               </div>
-              <div className="p-4 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-1">{t('status')}</p>
                 <p className="text-sm font-black text-[var(--color-text-main)]">{selectedRisk.status}</p>
               </div>
-              <div className="p-4 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-1">{t('targetDate')}</p>
                 <p className="text-sm font-black text-[var(--color-text-main)]">{formatDate(selectedRisk.target_date)}</p>
               </div>
-              <div className="p-4 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-1">{t('reviewDate')}</p>
                 <p className="text-sm font-black text-[var(--color-text-main)]">{formatDate(selectedRisk.review_date)}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              <div className="p-6 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)] text-center">
+              <div className="p-6 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)] text-center">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-2">{t('likelihood')}</p>
                 <p className="text-lg font-black text-[var(--color-text-main)]">{selectedRisk.likelihood}</p>
               </div>
-              <div className="p-6 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)] text-center">
+              <div className="p-6 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)] text-center">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-2">{t('impact')}</p>
                 <p className="text-lg font-black text-[var(--color-text-main)]">{selectedRisk.impact}</p>
               </div>
-              <div className="p-6 bg-[var(--color-primary)] text-white rounded-[1.5rem] shadow-xl shadow-[var(--color-primary)]/20 text-center">
+              <div className="p-6 bg-[var(--color-primary)] text-white rounded-xl shadow-xl shadow-[var(--color-primary)]/20 text-center">
                 <p className="text-[10px] text-white/70 uppercase font-black tracking-widest mb-2">{t('score')}</p>
                 <p className="text-2xl font-black">{formatNumber(selectedRisk.score)}</p>
               </div>
             </div>
 
             <div className="space-y-6">
-              <div className="p-6 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="p-6 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <div className="flex items-center gap-3 mb-4">
                   <Activity size={20} className="text-[var(--color-primary)]" />
                   <h4 className="text-sm font-black text-[var(--color-text-main)] uppercase tracking-widest opacity-80">{t('existingControls')}</h4>
@@ -325,7 +325,7 @@ const RiskRegister: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)]">
+              <div className="p-6 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <div className="flex items-center gap-3 mb-4">
                   <ArrowRight size={20} className="text-[var(--color-primary)]" />
                   <h4 className="text-sm font-black text-[var(--color-text-main)] uppercase tracking-widest opacity-80">{t('mitigationPlan')}</h4>
@@ -339,15 +339,15 @@ const RiskRegister: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              <div className="p-6 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)] text-center">
+              <div className="p-6 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)] text-center">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-2">{t('residualLikelihood')}</p>
                 <p className="text-lg font-black text-[var(--color-text-main)]">{selectedRisk.residual_likelihood}</p>
               </div>
-              <div className="p-6 bg-[var(--color-bg-soft)] rounded-[1.5rem] border border-[var(--color-border-soft)] text-center">
+              <div className="p-6 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)] text-center">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-black tracking-widest mb-2">{t('residualImpact')}</p>
                 <p className="text-lg font-black text-[var(--color-text-main)]">{selectedRisk.residual_impact}</p>
               </div>
-              <div className="p-6 bg-slate-800 text-white rounded-[1.5rem] shadow-xl text-center">
+              <div className="p-6 bg-slate-800 text-white rounded-xl shadow-xl text-center">
                 <p className="text-[10px] text-white/70 uppercase font-black tracking-widest mb-2">{t('residualScore')}</p>
                 <p className="text-2xl font-black">{formatNumber(selectedRisk.residual_score)}</p>
               </div>
@@ -356,7 +356,7 @@ const RiskRegister: React.FC = () => {
             <div className="flex justify-end pt-6 border-t border-[var(--color-border-soft)] sticky bottom-0 bg-[var(--color-card)]/80 backdrop-blur-md p-4 rounded-xl">
               <button 
                 onClick={() => setSelectedRisk(null)}
-                className="px-8 py-4 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] font-black rounded-[1.5rem] hover:bg-[var(--color-bg-soft)]/80 transition-colors uppercase tracking-widest text-xs"
+                className="px-8 py-4 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] font-black rounded-xl hover:bg-[var(--color-bg-soft)]/80 transition-colors uppercase tracking-widest text-xs"
               >
                 {t('close')}
               </button>
@@ -382,13 +382,13 @@ const RiskRegister: React.FC = () => {
                     setIsDeleteModalOpen(false);
                     setItemToDelete(null);
                   }}
-                  className="px-6 py-3 rounded-[2rem] bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
+                  className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
                 >
                   {t('common.cancel')}
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="px-6 py-3 rounded-[2rem] bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
+                  className="px-6 py-3 rounded-2xl bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
                 >
                   {t('delete')}
                 </button>

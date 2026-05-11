@@ -230,7 +230,7 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, onClick }) => (
   <div 
     onClick={onClick}
-    className={`${color} p-6 rounded-[2rem] border border-[var(--color-border-soft)] shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
+    className={`${color} p-6 rounded-2xl border border-[var(--color-border-soft)] shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
   >
     <div className="flex items-center justify-between mb-2">
       <span className="text-[var(--color-text-muted)] font-medium">{title}</span>

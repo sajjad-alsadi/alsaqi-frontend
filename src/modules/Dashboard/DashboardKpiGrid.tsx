@@ -26,30 +26,30 @@ const DashboardKpiGrid: React.FC<DashboardKpiGridProps> = React.memo(({ cards })
   const { formatNumber } = useFormat();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       {cards.map((card, idx) => (
         <motion.div 
           key={card.id}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: idx * 0.05 }}
+          transition={{ delay: idx * 0.04, duration: 0.3, ease: 'easeOut' }}
           onClick={() => card.link && navigate(card.link)}
-          className="glass-card p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all hover:shadow-md"
+          className="interactive-card p-5 group hover:border-[var(--color-primary)]/20"
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className={`w-12 h-12 rounded-[1.2rem] ${card.bg} ${card.color} flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform`}>
-              <card.icon size={24} />
+          <div className="flex items-start justify-between mb-3">
+            <div className={`w-11 h-11 rounded-xl ${card.bg} ${card.color} flex items-center justify-center group-hover:scale-105 transition-transform duration-200`}>
+              <card.icon size={22} />
             </div>
             {card.trend && (
-              <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg ${card.trendUp ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]'}`}>
-                {card.trendUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+              <div className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md ${card.trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                {card.trendUp ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
                 {formatNumber(card.trend)}
               </div>
             )}
           </div>
           <div>
-            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{card.title}</p>
-            <p className="text-3xl font-black text-[var(--color-text-main)]">{formatNumber(card.value)}</p>
+            <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{card.title}</p>
+            <p className="text-2xl font-bold text-[var(--color-text-main)]">{formatNumber(card.value)}</p>
           </div>
         </motion.div>
       ))}

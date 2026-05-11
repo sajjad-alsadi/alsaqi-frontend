@@ -40,7 +40,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2 bg-[var(--color-card)] p-1 rounded-[1.5rem] border border-[var(--color-border-soft)]">
+        <div className="flex items-center gap-2 bg-[var(--color-card)] p-1 rounded-xl border border-[var(--color-border-soft)]">
           <div className="px-3 text-[var(--color-text-muted)]">
             <Filter size={16} />
           </div>

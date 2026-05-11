@@ -34,7 +34,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className={`relative bg-[var(--color-card)] w-full ${sizeClasses[size]} rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-[var(--color-border-soft)]`}
+            className={`relative bg-[var(--color-card)] w-full ${sizeClasses[size]} rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-[var(--color-border-soft)]`}
           >
             <div className="px-8 py-6 border-b border-[var(--color-border-soft)] flex items-center justify-between shrink-0">
               <h3 className="text-xl font-bold text-[var(--color-text-main)]">{title}</h3>

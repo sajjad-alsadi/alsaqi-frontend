@@ -69,7 +69,7 @@ const Notifications: React.FC = () => {
     <div className="space-y-8" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <Bell size={32} />
           </div>
           <div>
@@ -222,7 +222,7 @@ const Notifications: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setNotificationToDelete(null);
               }}
-              className="px-6 py-3 rounded-[2rem] bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
             >
               {t('common.cancel')}
             </button>
@@ -234,7 +234,7 @@ const Notifications: React.FC = () => {
                   setNotificationToDelete(null);
                 }
               }}
-              className="px-6 py-3 rounded-[2rem] bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200"
+              className="px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200"
             >
               {t('delete')}
             </button>

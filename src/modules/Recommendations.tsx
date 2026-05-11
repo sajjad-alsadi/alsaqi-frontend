@@ -128,7 +128,7 @@ const RecommendationsModule: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <TrendingUp size={32} />
           </div>
           <div>
@@ -149,7 +149,7 @@ const RecommendationsModule: React.FC = () => {
             />
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={exportPDF} className="w-14 h-14 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-[1.5rem] text-[var(--color-text-main)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-all flex items-center justify-center shadow-sm">
+            <button onClick={exportPDF} className="w-14 h-14 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-[var(--color-text-main)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-all flex items-center justify-center shadow-sm">
               <Download size={24} />
             </button>
           </div>
@@ -193,13 +193,13 @@ const RecommendationsModule: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setRecToDelete(null);
               }}
-              className="px-6 py-3 rounded-[2rem] bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={confirmDelete}
-              className="px-6 py-3 rounded-[2rem] bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
             >
               {t('recommendations.delete')}
             </button>
@@ -254,7 +254,7 @@ const RecommendationsModule: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleEdit(rec)}
-                          className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 rounded-[1.5rem] transition-all"
+                          className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 rounded-xl transition-all"
                         >
                           <span className="text-[10px] font-black uppercase tracking-widest">{t('recommendations.edit')}</span>
                         </button>

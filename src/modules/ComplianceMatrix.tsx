@@ -626,7 +626,7 @@ export default function ComplianceMatrix() {
     <div className="p-4 sm:p-8 max-w-screen-2xl mx-auto" dir="rtl">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <ShieldCheck size={32} />
           </div>
           <div>
@@ -913,7 +913,7 @@ export default function ComplianceMatrix() {
                </div>
 
                <div className="space-y-6">
-                  <div className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
+                  <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm relative overflow-hidden group">
                     <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none"></div>
                     <div className="relative z-10">
                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">{t('complianceMatrix.maturityEvaluation', 'تقييم النضج')}</h3>

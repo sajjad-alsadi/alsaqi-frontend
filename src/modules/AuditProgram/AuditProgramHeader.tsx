@@ -24,7 +24,7 @@ const AuditProgramHeader: React.FC<AuditProgramHeaderProps> = ({
   return (
     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
       <div className="flex items-center gap-6">
-        <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+        <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
           <Library size={32} />
         </div>
         <div>

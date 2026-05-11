@@ -20,12 +20,12 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClose }) =>
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-[var(--color-card)] rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[var(--color-border-soft)]"
+        className="bg-[var(--color-card)] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[var(--color-border-soft)]"
       >
         <div className="p-10">
           <div className="flex items-start justify-between mb-10">
             <div className="flex items-center gap-8">
-              <div className="w-24 h-24 rounded-[2rem] bg-[var(--color-bg-soft)] border-4 border-[var(--color-card)] shadow-xl overflow-hidden">
+              <div className="w-24 h-24 rounded-2xl bg-[var(--color-bg-soft)] border-4 border-[var(--color-card)] shadow-xl overflow-hidden">
                 {user.profile_picture ? (
                   <img src={user.profile_picture} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (

@@ -308,13 +308,13 @@ const JobTitles: React.FC = () => {
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
             <button 
               onClick={() => setIsDeleteModalOpen(false)}
-              className="px-6 py-3 rounded-[2rem] bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={deleteTitle}
-              className="px-6 py-3 rounded-[2rem] bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/30"
+              className="px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/30"
             >
               {t('common.delete')}
             </button>
@@ -336,13 +336,13 @@ const JobTitles: React.FC = () => {
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
             <button 
               onClick={() => setIsStatusModalOpen(false)}
-              className="px-6 py-3 rounded-[2rem] bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={archiveTitle}
-              className="px-6 py-3 rounded-[2rem] bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
+              className="px-6 py-3 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
             >
               {t('common.save')}
             </button>

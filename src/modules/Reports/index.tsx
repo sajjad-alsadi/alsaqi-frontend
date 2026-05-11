@@ -98,7 +98,7 @@ const Reports: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <BarChart3 size={32} />
           </div>
           <div>
@@ -150,7 +150,7 @@ const Reports: React.FC = () => {
                       setIsScheduleModalOpen(true);
                       setError(null);
                     }}
-                    className="px-6 py-2.5 rounded-[1.5rem] bg-[var(--color-bg-main)] text-[var(--color-text-main)] text-xs font-black uppercase tracking-wider hover:bg-[var(--color-border-soft)] transition-all flex items-center gap-2 border border-[var(--color-border-soft)]"
+                    className="px-6 py-2.5 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] text-xs font-black uppercase tracking-wider hover:bg-[var(--color-border-soft)] transition-all flex items-center gap-2 border border-[var(--color-border-soft)]"
                   >
                     <Calendar size={18} />
                     {t('reports.scheduleReport')}
@@ -296,13 +296,13 @@ const Reports: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setItemToDelete(null);
               }}
-              className="px-6 py-3 rounded-[2rem] bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
             >
               {t('common.cancel')}
             </button>
             <button
               onClick={confirmDelete}
-              className="px-6 py-3 rounded-[2rem] bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
             >
               {t('common.delete')}
             </button>

@@ -151,7 +151,7 @@ const AuditTasksModule: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <CheckCircle2 size={32} />
           </div>
           <div>
@@ -177,7 +177,7 @@ const AuditTasksModule: React.FC = () => {
               onClick={exportPDF}
               tooltip={t('common.exportPdf')}
               variant="outline"
-              className="!w-14 !h-14 !rounded-[1.5rem]"
+              className="!w-14 !h-14 !rounded-xl"
               size={24}
             />
             <motion.button 
@@ -233,13 +233,13 @@ const AuditTasksModule: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setTaskToDelete(null);
               }}
-              className="px-6 py-3 rounded-[2rem] bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={confirmDelete}
-              className="px-6 py-3 rounded-[2rem] bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200"
+              className="px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200"
             >
               {t('common.delete')}
             </button>
@@ -254,12 +254,12 @@ const AuditTasksModule: React.FC = () => {
           title={previewItem.file_name}
           size="xl"
         >
-          <div className="h-[70vh] flex flex-col bg-slate-100 rounded-[2rem] overflow-hidden">
+          <div className="h-[70vh] flex flex-col bg-slate-100 rounded-2xl overflow-hidden">
             {previewItem.file_data?.startsWith('data:application/pdf') || /\.(pdf)$/i.test(previewItem.file_data || '') || (previewItem.file_data && !previewItem.file_data.startsWith('data:') && !previewItem.file_data.startsWith('http') && !previewItem.file_data.startsWith('/') && previewItem.file_data.length > 100) ? (
               <PdfViewer url={previewItem.file_data} />
             ) : previewItem.file_data?.startsWith('data:image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(previewItem.file_data || '') ? (
               <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
-                <img src={previewItem.file_data} alt={previewItem.file_name} className="max-w-full max-h-full object-contain shadow-xl rounded-[1.5rem]" />
+                <img src={previewItem.file_data} alt={previewItem.file_name} className="max-w-full max-h-full object-contain shadow-xl rounded-xl" />
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">

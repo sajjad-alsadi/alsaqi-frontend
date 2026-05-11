@@ -28,7 +28,7 @@ const SystemErrorAnalytics: React.FC<Props> = ({ data }) => {
   }, []);
 
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col group transition-all hover:shadow-xl hover:shadow-slate-200/50">
+    <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col group transition-all hover:shadow-xl hover:shadow-slate-200/50">
       <div className="flex items-center gap-3 mb-8">
         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-[var(--color-primary)] transition-colors">
           <BarChartIcon size={20} />

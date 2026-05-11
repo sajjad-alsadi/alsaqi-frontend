@@ -54,7 +54,7 @@ const IntegrityManagement: React.FC = () => {
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <Scale size={32} />
           </div>
           <div>
@@ -98,7 +98,7 @@ const IntegrityManagement: React.FC = () => {
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Quick Stats Bento Grid */}
-              <div className="p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm flex flex-col justify-between">
+              <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 mb-6">
                     <Users size={24} />
@@ -117,7 +117,7 @@ const IntegrityManagement: React.FC = () => {
                 </button>
               </div>
 
-              <div className="p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm flex flex-col justify-between">
+              <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 mb-6">
                     <ShieldAlert size={24} />
@@ -136,7 +136,7 @@ const IntegrityManagement: React.FC = () => {
                 </button>
               </div>
 
-              <div className="p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm flex flex-col justify-between group overflow-hidden relative">
+              <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between group overflow-hidden relative">
                 <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
                   <Scale size={120} className="text-primary" />
                 </div>

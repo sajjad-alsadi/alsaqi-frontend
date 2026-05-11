@@ -264,7 +264,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
       </div>
 
       <div className="flex justify-end gap-6 pt-8 border-t border-[var(--color-border-soft)] sticky bottom-0 bg-[var(--color-card)]/80 backdrop-blur-md p-4 rounded-xl">
-        <button type="button" onClick={onCancel} className="px-8 py-3 text-[var(--color-text-muted)] font-black uppercase tracking-widest hover:bg-[var(--color-bg-soft)] rounded-[1.5rem] transition-all">
+        <button type="button" onClick={onCancel} className="px-8 py-3 text-[var(--color-text-muted)] font-black uppercase tracking-widest hover:bg-[var(--color-bg-soft)] rounded-xl transition-all">
           {t('common.cancel')}
         </button>
         <button type="submit" disabled={isSubmitting} className="btn-primary disabled:opacity-50">

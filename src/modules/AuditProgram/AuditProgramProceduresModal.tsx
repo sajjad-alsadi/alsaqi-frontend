@@ -37,7 +37,7 @@ const AuditProgramProceduresModal: React.FC<AuditProgramProceduresModalProps> = 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-100"
+        className="relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-100"
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">

@@ -85,7 +85,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCa
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <FormField label={t('recommendations.recommendation')} className="md:col-span-2">
-          <div className="p-6 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-[1.5rem] border border-emerald-100 dark:border-emerald-900/30 text-sm font-black text-emerald-900 dark:text-emerald-400 leading-relaxed shadow-sm">
+          <div className="p-6 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/30 text-sm font-black text-emerald-900 dark:text-emerald-400 leading-relaxed shadow-sm">
             {findings.find(f => String(f.id) === String(findingId))?.recommendation || t('recommendations.noRecommendationTextFound')}
           </div>
         </FormField>
@@ -128,7 +128,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCa
         <button
           type="button"
           onClick={onCancel}
-          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-[1.5rem] transition-all"
+          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
         >
           {t('common.cancel')}
         </button>

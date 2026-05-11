@@ -46,7 +46,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {showSuccess && (
-        <div className="p-6 rounded-[1.5rem] flex items-center gap-4 border bg-[var(--color-success)]/10 border-[var(--color-success)]/20 text-[var(--color-success)]">
+        <div className="p-6 rounded-xl flex items-center gap-4 border bg-[var(--color-success)]/10 border-[var(--color-success)]/20 text-[var(--color-success)]">
           <CheckCircle size={20} />
           <span className="font-bold text-sm">{t('settingsSavedSuccessfully')}</span>
         </div>

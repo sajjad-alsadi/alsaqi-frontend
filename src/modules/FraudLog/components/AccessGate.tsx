@@ -80,7 +80,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-rose-500 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl shadow-rose-200">
+            <div className="w-16 h-16 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-2xl shadow-rose-200">
               <ShieldAlert size={32} />
             </div>
             <div>
@@ -99,7 +99,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
           </div>
           
           <div className="relative z-10 text-center max-w-2xl mx-auto">
-            <div className="w-24 h-24 bg-rose-100 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 text-rose-600 shadow-xl">
+            <div className="w-24 h-24 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-10 text-rose-600 shadow-xl">
               <AlertCircle size={48} />
             </div>
             <h3 className="text-3xl font-black text-slate-800 mb-6 tracking-tight">{t('integrity.accessRestricted')}</h3>
@@ -137,13 +137,13 @@ export const AccessGate: React.FC<AccessGateProps> = ({
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <button 
                   onClick={() => setIsRequestModalOpen(true)}
-                  className="px-10 py-4 bg-rose-600 text-white font-black rounded-[1.5rem] shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs"
+                  className="px-10 py-4 bg-rose-600 text-white font-black rounded-xl shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs"
                 >
                   {t('integrity.requestAccess')}
                 </button>
                 <button 
                   onClick={() => setIsPolicyOpen(true)}
-                  className="px-10 py-4 bg-white text-slate-400 font-black rounded-[1.5rem] border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-widest text-xs"
+                  className="px-10 py-4 bg-white text-slate-400 font-black rounded-xl border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-widest text-xs"
                 >
                   {t('integrity.viewPolicy')}
                 </button>

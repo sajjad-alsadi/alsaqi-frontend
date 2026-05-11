@@ -213,7 +213,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
         <button 
           type="button"
           onClick={onCancel}
-          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-[1.5rem] transition-all"
+          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
         >
           {t('common.cancel')}
         </button>

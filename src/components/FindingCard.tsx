@@ -35,7 +35,7 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
     >
       <div className="p-10 border-b border-[var(--color-border-soft)] flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[var(--color-bg-main)]">
         <div className="flex items-center gap-6">
-          <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-xl ${
+          <div className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-xl ${
             finding.risk_level === RiskLevel.HIGH ? 'bg-[var(--color-danger)] text-white shadow-[var(--color-danger)]/20' :
             finding.risk_level === RiskLevel.MEDIUM ? 'bg-[var(--color-warning)] text-white shadow-[var(--color-warning)]/20' : 'bg-[var(--color-primary)] text-white shadow-[var(--color-primary)]/20'
           }`}>
@@ -63,7 +63,7 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setActiveTab('recommendations')}
-            className="px-4 py-3 bg-[var(--color-card)] text-[var(--color-primary)] font-black rounded-[1.5rem] shadow-sm hover:bg-[var(--color-primary)] hover:text-white transition-all text-[10px] uppercase tracking-widest border border-[var(--color-border-soft)]"
+            className="px-4 py-3 bg-[var(--color-card)] text-[var(--color-primary)] font-black rounded-xl shadow-sm hover:bg-[var(--color-primary)] hover:text-white transition-all text-[10px] uppercase tracking-widest border border-[var(--color-border-soft)]"
           >
             {t('findings.viewRecommendations')}
           </motion.button>
@@ -87,7 +87,7 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
           <p className="text-[10px] text-[var(--color-primary)] uppercase font-black tracking-[0.2em]">{t('findings.consequence')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.consequence}</p>
         </div>
-        <div className="space-y-3 bg-[var(--color-success)]/5 p-6 rounded-[1.5rem] border border-[var(--color-success)]/20">
+        <div className="space-y-3 bg-[var(--color-success)]/5 p-6 rounded-xl border border-[var(--color-success)]/20">
           <p className="text-[10px] text-[var(--color-success)] uppercase font-black tracking-[0.2em]">{t('findings.recommendation')}</p>
           <p className="text-sm text-[var(--color-success)] leading-relaxed font-black">{finding.recommendation}</p>
         </div>

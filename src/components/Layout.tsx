@@ -138,7 +138,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   navigate(item.path);
                   setIsMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-3 rounded-[2rem] transition-all relative ${
+                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-3 rounded-2xl transition-all relative ${
                   activeTab === item.id 
                     ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' 
                     : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] hover:text-[var(--color-primary)] font-semibold'
@@ -176,7 +176,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               whileHover={{ scale: 1.02, x: isCollapsed ? 0 : (isRTL ? -4 : 4) }}
               whileTap={{ scale: 0.98 }}
               onClick={logout}
-              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-3 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors font-semibold text-sm rounded-[2rem] hover:bg-rose-500/10`}
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-3 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors font-semibold text-sm rounded-2xl hover:bg-rose-500/10`}
             >
               <LogOut size={20} />
               {!isCollapsed && <span>{t('common.logout')}</span>}

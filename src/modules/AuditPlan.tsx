@@ -109,7 +109,7 @@ const AuditPlanModule: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <Calendar size={32} />
           </div>
           <div>
@@ -135,7 +135,7 @@ const AuditPlanModule: React.FC = () => {
               onClick={exportPDF}
               tooltip={t('plan.exportToPdf')}
               variant="outline"
-              className="!w-14 !h-14 !rounded-[1.5rem]"
+              className="!w-14 !h-14 !rounded-xl"
               size={24}
             />
             <motion.button 
@@ -190,13 +190,13 @@ const AuditPlanModule: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setPlanToDelete(null);
               }}
-              className="px-6 py-3 rounded-[2rem] bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={confirmDelete}
-              className="px-6 py-3 rounded-[2rem] bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
             >
               {t('plan.delete')}
             </button>

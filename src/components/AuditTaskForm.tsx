@@ -169,7 +169,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
               {responsibleValue && (
                 <div className="flex flex-wrap gap-2">
                   {responsibleValue.split(', ').filter(Boolean).map(name => (
-                    <span key={name} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1.5 rounded-[1.5rem] text-sm font-bold flex items-center gap-2">
+                    <span key={name} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-2">
                       {name}
                       <button 
                         type="button" 
@@ -208,7 +208,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
         <button
           type="button"
           onClick={onCancel}
-          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-[1.5rem] transition-all"
+          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
         >
           {t('common.cancel')}
         </button>

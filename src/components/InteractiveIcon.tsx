@@ -104,7 +104,7 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute bottom-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-3 px-3 py-2 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest rounded-[1.5rem] shadow-2xl z-[100] whitespace-nowrap pointer-events-none border border-white/10"
+            className="absolute bottom-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-3 px-3 py-2 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-2xl z-[100] whitespace-nowrap pointer-events-none border border-white/10"
           >
             {tooltip}
             <div className="absolute top-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 border-[6px] border-transparent border-t-slate-900" />

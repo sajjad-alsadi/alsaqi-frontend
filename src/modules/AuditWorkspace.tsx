@@ -193,7 +193,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
           <div className="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-8">
             {activeTask ? (
               <>
-                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
+                <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <h3 className="text-2xl font-black text-slate-800 mb-2">{activeTask.title}</h3>
@@ -255,7 +255,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
 
                 {/* Observations & Work Done */}
                 <div className="grid grid-cols-1 gap-8">
-                  <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
+                  <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
                     <div className="flex justify-between items-center mb-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500">
@@ -281,7 +281,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                           <p className="text-sm font-bold">{t('common.noFindingsYet')}</p>
                         </div>
                       ) : (
-                        <div className="relative overflow-hidden w-full bg-slate-50 border border-slate-100 rounded-[2rem] p-6 h-[200px]">
+                        <div className="relative overflow-hidden w-full bg-slate-50 border border-slate-100 rounded-2xl p-6 h-[200px]">
                           <AnimatePresence mode="wait">
                             {findings.length > 0 && (
                               <motion.div
@@ -364,7 +364,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">{t('common.evidenceAndAttachments')}</h3>
             
             <div className="mb-8">
-              <div className="p-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] flex flex-col items-center justify-center text-center group hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer">
+              <div className="p-8 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-center group hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer">
                 <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 mb-4 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
                   <Upload size={24} />
                 </div>

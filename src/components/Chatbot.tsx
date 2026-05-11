@@ -172,7 +172,7 @@ const Chatbot: React.FC = () => {
             initial={{ opacity: 0, y: 30, scale: 0.95, filter: 'blur(10px)' }}
             animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 30, scale: 0.95, filter: 'blur(10px)' }}
-            className="fixed bottom-24 end-6 w-80 sm:w-[400px] h-[600px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-[var(--color-border-soft)] flex flex-col z-50 overflow-hidden backdrop-blur-xl"
+            className="fixed bottom-24 end-6 w-80 sm:w-[400px] h-[600px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-[var(--color-border-soft)] flex flex-col z-50 overflow-hidden backdrop-blur-xl"
           >
             {/* Header */}
             <div className="p-6 bg-[var(--color-primary)] text-white flex items-center justify-between shadow-lg shadow-[var(--color-primary)]/20">
@@ -206,7 +206,7 @@ const Chatbot: React.FC = () => {
                     }`}>
                       {msg.sender === 'user' ? <User size={18} /> : <Bot size={18} />}
                     </div>
-                    <div className={`max-w-[85%] p-4 rounded-[1.5rem] text-sm font-medium shadow-sm ${
+                    <div className={`max-w-[85%] p-4 rounded-xl text-sm font-medium shadow-sm ${
                       msg.sender === 'user' 
                         ? 'bg-[var(--color-primary)] text-white rounded-tr-none' 
                         : 'bg-white dark:bg-slate-800 border border-[var(--color-border-soft)] text-slate-700 dark:text-white rounded-tl-none'
@@ -256,7 +256,7 @@ const Chatbot: React.FC = () => {
                   <div className="w-10 h-10 rounded-2xl bg-[var(--color-primary)] text-white flex items-center justify-center shrink-0 shadow-sm">
                     <Bot size={18} />
                   </div>
-                  <div className="p-4 bg-white dark:bg-slate-800 border border-[var(--color-border-soft)] rounded-[1.5rem] rounded-tl-none shadow-sm">
+                  <div className="p-4 bg-white dark:bg-slate-800 border border-[var(--color-border-soft)] rounded-xl rounded-tl-none shadow-sm">
                     <Loader2 size={20} className="animate-spin text-[var(--color-primary)]" />
                   </div>
                 </div>
@@ -295,7 +295,7 @@ const Chatbot: React.FC = () => {
         whileHover={{ scale: 1.1, rotate: 5 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-8 end-8 w-16 h-16 bg-[var(--color-primary)] text-white rounded-[1.5rem] shadow-2xl shadow-[var(--color-primary)]/40 flex items-center justify-center z-50 border-2 border-white/20 backdrop-blur-sm transition-all"
+        className="fixed bottom-8 end-8 w-16 h-16 bg-[var(--color-primary)] text-white rounded-xl shadow-2xl shadow-[var(--color-primary)]/40 flex items-center justify-center z-50 border-2 border-white/20 backdrop-blur-sm transition-all"
       >
         {isOpen ? <X size={28} /> : <Search size={28} />}
       </motion.button>

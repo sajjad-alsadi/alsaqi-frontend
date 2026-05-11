@@ -32,7 +32,7 @@ const ResetRequests: React.FC<ResetRequestsProps> = ({
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-8 bg-[var(--color-success)]/10 border-2 border-[var(--color-success)]/20 rounded-[2rem] space-y-4"
+          className="p-8 bg-[var(--color-success)]/10 border-2 border-[var(--color-success)]/20 rounded-2xl space-y-4"
         >
           <div className="flex items-center gap-3 text-[var(--color-success)]">
             <CheckCircle size={24} />
@@ -86,7 +86,7 @@ const ResetRequests: React.FC<ResetRequestsProps> = ({
           </motion.div>
         ))}
         {requests.length === 0 && (
-          <div className="md:col-span-2 py-20 text-center border-2 border-dashed border-[var(--color-border-soft)] rounded-[2.5rem]">
+          <div className="md:col-span-2 py-20 text-center border-2 border-dashed border-[var(--color-border-soft)] rounded-2xl">
             <p className="text-[var(--color-text-muted)] font-bold">{t('userManagement.resets.noPendingRequests')}</p>
           </div>
         )}

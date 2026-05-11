@@ -161,7 +161,7 @@ const Settings: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <SettingsIcon size={32} />
           </div>
           <div>
@@ -181,7 +181,7 @@ const Settings: React.FC = () => {
                 setActiveTab(tab.id as any);
                 setMessage(null);
               }}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] font-black transition-all duration-300 ${
+              className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-black transition-all duration-300 ${
                 activeTab === tab.id 
                 ? 'bg-primary text-white shadow-xl shadow-primary/20' 
                 : 'text-slate-400 hover:bg-white hover:text-primary'
@@ -204,7 +204,7 @@ const Settings: React.FC = () => {
               className="glass-card p-10"
             >
               {activeTab !== 'about' && message && (
-                <div className={`mb-8 p-6 rounded-[1.5rem] flex items-center gap-4 border ${
+                <div className={`mb-8 p-6 rounded-xl flex items-center gap-4 border ${
                   message.type === 'success' 
                   ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
                   : 'bg-rose-50 border-rose-100 text-rose-700'
@@ -220,7 +220,7 @@ const Settings: React.FC = () => {
                 <form onSubmit={handleProfileUpdate} className="space-y-8">
                   <div className="flex flex-col md:flex-row items-center gap-10 mb-10">
                     <div className="relative group">
-                      <div className="w-32 h-32 rounded-[2.5rem] bg-slate-100 overflow-hidden shadow-inner border-4 border-white">
+                      <div className="w-32 h-32 rounded-2xl bg-slate-100 overflow-hidden shadow-inner border-4 border-white">
                         {profileForm.profile_picture ? (
                           <img src={profileForm.profile_picture} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
@@ -495,7 +495,7 @@ const Settings: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-6">
                       <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.loginActivity')}</h4>
-                      <div className="p-6 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                      <div className="p-6 bg-slate-50 rounded-xl border border-slate-100">
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">{t('settings.lastLogin')}</p>
                         <p className="text-sm font-black text-slate-700">{profile?.last_login ? new Date(profile.last_login).toLocaleString() : t('settings.never')}</p>
                       </div>
@@ -504,7 +504,7 @@ const Settings: React.FC = () => {
                     <div className="space-y-6">
                       <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.activeSessions')}</h4>
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between p-6 bg-emerald-50 rounded-[1.5rem] border border-emerald-100">
+                        <div className="flex items-center justify-between p-6 bg-emerald-50 rounded-xl border border-emerald-100">
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
                               <LayoutIcon size={20} />
@@ -521,14 +521,14 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="pt-10 border-t border-slate-100">
-                    <div className="bg-rose-50 p-10 rounded-[2rem] border border-rose-100 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="bg-rose-50 p-10 rounded-2xl border border-rose-100 flex flex-col md:flex-row items-center justify-between gap-8">
                       <div>
                         <h4 className="text-xl font-black text-rose-900 mb-2">{t('settings.logoutEverywhere')}</h4>
                         <p className="text-sm text-rose-600 font-medium leading-relaxed">{t('settings.invalidateAllSessions')}</p>
                       </div>
                       <button 
                         onClick={() => setShowLogoutAllModal(true)}
-                        className="px-10 py-4 bg-rose-600 text-white font-black rounded-[1.5rem] shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs flex items-center gap-3"
+                        className="px-10 py-4 bg-rose-600 text-white font-black rounded-xl shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs flex items-center gap-3"
                       >
                         <LogOut size={18} />
                         {t('settings.logoutAll')}

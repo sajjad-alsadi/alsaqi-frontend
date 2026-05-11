@@ -185,7 +185,7 @@ const AuditEvidence: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <FolderOpen size={32} />
           </div>
           <div>
@@ -326,7 +326,7 @@ const AuditEvidence: React.FC = () => {
                   setFormData({ type: 'Document' });
                   setFile(null);
                 }} 
-                className="px-8 py-4 rounded-[1.5rem] font-black text-slate-400 hover:bg-slate-100 transition-all uppercase tracking-widest text-xs"
+                className="px-8 py-4 rounded-xl font-black text-slate-400 hover:bg-slate-100 transition-all uppercase tracking-widest text-xs"
               >
                 {t('common.cancel')}
               </button>
@@ -431,7 +431,7 @@ const AuditEvidence: React.FC = () => {
         
         {filteredEvidence.length === 0 && !loading && (
           <div className="col-span-full glass-card p-20 text-center">
-            <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-slate-300 shadow-inner">
+            <div className="w-24 h-24 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-8 text-slate-300 shadow-inner">
               <AlertCircle size={48} />
             </div>
             <h3 className="text-2xl font-black text-slate-800 mb-3 tracking-tight">{t('evidence.noEvidenceFound')}</h3>
