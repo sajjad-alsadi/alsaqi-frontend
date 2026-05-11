@@ -1,10 +1,8 @@
 import React from 'react';
-import { LayoutDashboard, ShieldCheck, Download } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Language } from '../../constants';
 import { useFormat } from '../../services/formatService';
-
-import { generateAuditReport } from '../../services/pdfService';
 
 interface DashboardHeaderProps {
   language: string;
@@ -15,15 +13,6 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({ language, activeFilter, setActiveFilter }) => {
   const { t } = useTranslation();
   const { formatDate } = useFormat();
-
-  const handleExportPdf = async () => {
-    try {
-      await generateAuditReport({}, { language: language as 'ar' | 'en' });
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert(t('common.error'));
-    }
-  };
 
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -54,13 +43,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({ language, 
             </button>
           ))}
         </div>
-        <button 
-          onClick={handleExportPdf}
-          className="p-3 bg-[var(--color-card)] rounded-[1.5rem] shadow-sm border border-[var(--color-border-soft)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-all"
-          title={t('common.exportPdf')}
-        >
-          <Download size={20} />
-        </button>
       </div>
     </div>
   );
