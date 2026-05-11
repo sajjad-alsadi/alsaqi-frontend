@@ -723,6 +723,7 @@
     ]
   },
   "plan": {
+    "auditPlanReport": "خطة التدقيق",
     "strategicInternalAuditRoadmap": "خارطة الطريق الاستراتيجية للتدقيق الداخلي",
     "search": "بحث...",
     "exportToPdf": "تصدير إلى PDF",
@@ -844,6 +845,7 @@
     "analytical": "اختبار تحليلي"
   },
   "tasks": {
+    "auditTasksReport": "مهام التدقيق",
     "title": "مهام التدقيق",
     "detailedAuditProcedures": "إجراءات التدقيق التفصيلية وتنفيذ العمل الميداني",
     "addTask": "إضافة مهمة",
@@ -916,6 +918,8 @@
     "riskLevel": "مستوى الخطر"
   },
   "reports": {
+    "auditReport": "تقرير التدقيق",
+    "generalReport": "تقرير عام",
     "title": "التقارير والتحليلات",
     "executiveSubtitle": "ملخص تنفيذي وتقارير تدقيق تفصيلية",
     "executiveReports": "التقارير التنفيذية",
@@ -2363,7 +2367,9 @@
     "issuingAuthority": "الجهة المصدرة",
     "responsibilities": "المسؤولية والتبعيات",
     "nextReviewDate": "موعد المراجعة القادم",
-    "requiredActions": "الإجراءات المطلوبة"
+    "requiredActions": "الإجراءات المطلوبة",
+    "tryAdjustFilters": "حاول تعديل الفلاتر أو إضافة سجل جديد",
+    "overdueReviewsDesc": "قائمة السجلات التي تجاوزت موعد المراجعة الدورية المجدولة"
   },
   "integrityManagement": {
     "conflictsDesc": "مراقبة وتتبع إفصاحات تعارض المصالح للموظفين لضمان الشفافية.",

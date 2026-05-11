@@ -108,7 +108,7 @@ const RecommendationsModule: React.FC = () => {
       }))
     }];
 
-    await generatePdf(t('recommendations.title'), sections, token, i18n.language as 'en' | 'ar', t('recommendations.title', 'التوصيات'), {
+    await generatePdf(t('recommendations.title'), sections, token, i18n.language as 'en' | 'ar', t('recommendations.title'), {
       title: t('recommendations.title'),
       report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
       recommendations: filteredRecs

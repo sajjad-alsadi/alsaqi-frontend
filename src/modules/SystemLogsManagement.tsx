@@ -109,14 +109,14 @@ const SystemLogsManagement: React.FC = () => {
                   </div>
                   <h3 className="text-xl font-black text-slate-800 mb-2">{t('SystemLogsAudit')}</h3>
                   <p className="text-sm font-bold text-slate-400 leading-relaxed">
-                    {t('systemLogsManagement.auditDesc', 'تتبع كافة إجراءات المستخدمين، عمليات الدخول، والتعديلات على البيانات لضمان المرجعية.')}
+                    {t('systemLogsManagement.auditDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('audit')}
                   className="mt-8 flex items-center gap-2 text-blue-500 font-black text-sm group/btn"
                 >
-                  {t('systemLogsManagement.openLog', 'فتح السجل')} 
+                  {t('systemLogsManagement.openLog')} 
                   <Activity size={16} className="group-hover/btn:translate-x-1 transition-transform rtl:rotate-180" />
                 </button>
               </div>
@@ -128,14 +128,14 @@ const SystemLogsManagement: React.FC = () => {
                   </div>
                   <h3 className="text-xl font-black text-slate-800 mb-2">{t('SystemLogsErrors')}</h3>
                   <p className="text-sm font-bold text-slate-400 leading-relaxed">
-                    {t('systemLogsManagement.errorsDesc', 'مراقبة استثناءات النظام، أخطاء الخادم، والتنبيهات التقنية لتحسين استقرار التطبيق.')}
+                    {t('systemLogsManagement.errorsDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('errors')}
                   className="mt-8 flex items-center gap-2 text-rose-500 font-black text-sm group/btn"
                 >
-                  {t('systemLogsManagement.openLog', 'فتح السجل')} 
+                  {t('systemLogsManagement.openLog')} 
                   <Activity size={16} className="group-hover/btn:translate-x-1 transition-transform rtl:rotate-180" />
                 </button>
               </div>
@@ -148,21 +148,21 @@ const SystemLogsManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 mb-6 group-hover:scale-110 transition-transform">
                     <ShieldCheck size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('systemLogsManagement.systemHealth', 'سلامة النظام')}</h3>
-                  <p className="text-sm font-bold text-slate-400">{t('systemLogsManagement.serverStatus', 'حالة الخادم والخدمات السحابية')}</p>
+                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('systemLogsManagement.systemHealth')}</h3>
+                  <p className="text-sm font-bold text-slate-400">{t('systemLogsManagement.serverStatus')}</p>
                   <div className="mt-6 flex items-end gap-2">
                     <span className="text-5xl font-black tracking-tighter text-emerald-500">99.9%</span>
-                    <span className="text-slate-400 font-bold mb-1 text-xs uppercase tracking-widest">{t('systemLogsManagement.stable', 'مستقر')}</span>
+                    <span className="text-slate-400 font-bold mb-1 text-xs uppercase tracking-widest">{t('systemLogsManagement.stable')}</span>
                   </div>
                 </div>
                 <div className="relative z-10 space-y-3 mt-8 pt-6 border-t border-slate-100">
                   <div className="flex justify-between items-center text-xs font-bold text-slate-600">
-                    <span className="text-slate-400">{t('systemLogsManagement.auditToday', 'إجراءات التدقيق اليوم')}</span>
-                    <span>{stats.auditToday} {t('systemLogsManagement.actions', 'إجراء')}</span>
+                    <span className="text-slate-400">{t('systemLogsManagement.auditToday')}</span>
+                    <span>{stats.auditToday} {t('systemLogsManagement.actions')}</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-bold text-rose-500">
-                    <span>{t('systemLogsManagement.totalErrors', 'سجل الأخطاء (إجمالي)')}</span>
-                    <span>{stats.errorsCount} {t('systemLogsManagement.errorCount', 'خطأ')}</span>
+                    <span>{t('systemLogsManagement.totalErrors')}</span>
+                    <span>{stats.errorsCount} {t('systemLogsManagement.errorCount')}</span>
                   </div>
                 </div>
               </div>

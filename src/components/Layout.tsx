@@ -74,8 +74,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { id: 'evidence', label: t('common.evidence'), icon: FileText, path: '/evidence' },
     { id: 'recommendations', label: t('common.recommendations'), icon: TrendingUp, path: '/recommendations' },
     { id: 'risks', label: t('common.risks'), icon: ShieldAlert, path: '/risks' },
-    { id: 'compliance-matrix', label: t('common.complianceMatrix', 'مصفوفة الامتثال'), icon: ShieldCheck, path: '/compliance-matrix' },
-    { id: 'integrity', label: t('IntegrityManagement', 'إدارة النزاهة'), icon: Scale, path: '/integrity' },
+    { id: 'compliance-matrix', label: t('common.complianceMatrix'), icon: ShieldCheck, path: '/compliance-matrix' },
+    { id: 'integrity', label: t('IntegrityManagement'), icon: Scale, path: '/integrity' },
     { id: 'departments', label: t('common.departments'), icon: Building, path: '/departments' },
     { id: 'reports', label: t('common.reportsAndAnalytics'), icon: BarChart3, path: '/reports' },
     { id: 'cms', label: t('common.cms'), icon: Network, path: '/cms' },
@@ -84,7 +84,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (user?.role === 'Admin' || user?.role === 'Administrator') {
     menuItems.push({ id: 'users', label: t('common.users'), icon: Users, path: '/users' });
-    menuItems.push({ id: 'system-logs', label: t('SystemLogsManagement', 'سجلات النظام'), icon: Terminal, path: '/system-logs' });
+    menuItems.push({ id: 'system-logs', label: t('SystemLogsManagement'), icon: Terminal, path: '/system-logs' });
   }
 
   menuItems.push({ id: 'settings', label: t('common.settings'), icon: Settings, path: '/settings' });

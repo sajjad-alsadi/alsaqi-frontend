@@ -206,15 +206,15 @@ const SystemErrorLogs: React.FC = () => {
       <Modal 
         isOpen={isClearModalOpen} 
         onClose={() => !isClearing && setIsClearModalOpen(false)}
-        title={t('systemErrorLogs.confirmClearLogs', 'تأكيد مسح السجلات')}
+        title={t('systemErrorLogs.confirmClearLogs')}
       >
         <div className="p-6 text-center">
           <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldAlert size={32} />
           </div>
-          <h3 className="text-xl font-black text-slate-800 mb-2">{t('systemErrorLogs.importantAlert', 'تنبيه هام!')}</h3>
+          <h3 className="text-xl font-black text-slate-800 mb-2">{t('systemErrorLogs.importantAlert')}</h3>
           <p className="text-slate-500 font-bold mb-8 leading-relaxed">
-            {t('systemErrorLogs.clearLogsWarning', 'هل أنت متأكد من رغبتك في مسح كافة سجلات أخطاء النظام؟ لا يمكن التراجع عن هذا الإجراء بمجرد تنفيذه.')}
+            {t('systemErrorLogs.clearLogsWarning')}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -222,7 +222,7 @@ const SystemErrorLogs: React.FC = () => {
               disabled={isClearing}
               className="px-6 py-3 rounded-xl font-black text-slate-500 hover:bg-slate-50 transition-colors border border-slate-100"
             >
-              {t('common.cancel', 'إلغاء')}
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleClearLogs}
@@ -232,10 +232,10 @@ const SystemErrorLogs: React.FC = () => {
               {isClearing ? (
                 <>
                   <RefreshCw size={18} className="animate-spin" />
-                  {t('systemErrorLogs.clearing', 'جاري المسح...')}
+                  {t('systemErrorLogs.clearing')}
                 </>
               ) : (
-                t('systemErrorLogs.confirmDelete', 'تأكيد الحذف')
+                t('systemErrorLogs.confirmDelete')
               )}
             </button>
           </div>

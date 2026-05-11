@@ -96,7 +96,7 @@ const AuditPlanModule: React.FC = () => {
       }))
     }];
 
-    await generatePdf(t('auditPlan'), sections, token, (i18n.language === 'ar' ? 'ar' : 'en') as 'ar' | 'en', 'خطة التدقيق', {
+    await generatePdf(t('auditPlan'), sections, token, (i18n.language === 'ar' ? 'ar' : 'en') as 'ar' | 'en', t('plan.auditPlanReport'), {
       title: t('auditPlan'),
       report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
       plans: filteredPlans

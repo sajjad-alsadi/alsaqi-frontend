@@ -202,7 +202,16 @@
     "complianceOfficer": "Compliance Officer",
     "riskOfficer": "Risk Officer",
     "manager": "Manager",
-    "viewer": "Viewer"
+    "viewer": "Viewer",
+    "Internal Auditor": "Internal Auditor",
+    "Compliance Officer": "Compliance Officer",
+    "Risk Officer": "Risk Officer",
+    "Administrator": "System Administrator",
+    "Admin": "System Admin",
+    "Manager": "Manager",
+    "Staff": "Staff",
+    "Auditor": "Auditor",
+    "User": "User"
   },
   "common": {
     "executeAudit": "Execute Fieldwork",
@@ -714,6 +723,7 @@
     ]
   },
   "plan": {
+    "auditPlanReport": "Audit Plan Report",
     "strategicInternalAuditRoadmap": "Strategic Internal Audit Roadmap",
     "search": "Search...",
     "exportToPdf": "Export to PDF",
@@ -835,6 +845,7 @@
     "analytical": "Analytical"
   },
   "tasks": {
+    "auditTasksReport": "Audit Tasks Report",
     "title": "Audit Tasks",
     "detailedAuditProcedures": "Detailed audit procedures and fieldwork execution",
     "addTask": "Add Task",
@@ -907,6 +918,8 @@
     "riskLevel": "Risk Level"
   },
   "reports": {
+    "auditReport": "Audit Report",
+    "generalReport": "General Report",
     "title": "Reports & Analytics",
     "executiveSubtitle": "Executive summary and detailed audit reports",
     "executiveReports": "Executive Reports",
@@ -2354,7 +2367,9 @@
     "issuingAuthority": "Issuing Authority",
     "responsibilities": "Responsibilities & Dependencies",
     "nextReviewDate": "Next Review Date",
-    "requiredActions": "Required Actions"
+    "requiredActions": "Required Actions",
+    "tryAdjustFilters": "Try adjusting filters or add a new record",
+    "overdueReviewsDesc": "Records that have exceeded their scheduled periodic review date"
   },
   "integrityManagement": {
     "conflictsDesc": "Monitor and track employee conflict of interest disclosures to ensure transparency.",

@@ -36,7 +36,7 @@ const Chatbot: React.FC = () => {
       setMessages([
         {
           id: 'welcome',
-          text: t('chatbot.welcomeMessage', 'مرحباً! أنا مساعد البحث في السياسات والقوانين. كيف يمكنني مساعدتك اليوم؟'),
+          text: t('chatbot.welcomeMessage'),
           sender: 'bot',
           timestamp: new Date()
         }
@@ -118,9 +118,9 @@ const Chatbot: React.FC = () => {
 
       let reply = '';
       if (results.length > 0) {
-        reply = t('chatbot.foundResults', 'وجدت النتائج التالية المتعلقة ببحثك. يمكنك النقر على أي نتيجة للانتقال إليها:');
+        reply = t('chatbot.foundResults');
       } else {
-        reply = t('chatbot.noResults', 'عذراً، لم أجد أي سياسات أو قوانين مطابقة لبحثك.');
+        reply = t('chatbot.noResults');
       }
 
       const botMsg: Message = {
@@ -136,7 +136,7 @@ const Chatbot: React.FC = () => {
       console.error('Search error:', error);
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
-        text: t('chatbot.errorOccurred', 'حدث خطأ أثناء البحث.'),
+        text: t('chatbot.errorOccurred'),
         sender: 'bot',
         timestamp: new Date()
       };
@@ -157,10 +157,10 @@ const Chatbot: React.FC = () => {
 
   const getResultLabel = (type: string) => {
       switch (type) {
-        case 'policy': return t('internalPolicies', 'سياسة داخلية');
-        case 'instruction': return t('centralBankInstructions', 'تعليمات البنك المركزي');
-        case 'law': return t('legal.law', 'قانون');
-        default: return t('chatbot.result', 'نتيجة');
+        case 'policy': return t('internalPolicies');
+        case 'instruction': return t('centralBankInstructions');
+        case 'law': return t('legal.law');
+        default: return t('chatbot.result');
       }
   };
 
@@ -181,8 +181,8 @@ const Chatbot: React.FC = () => {
                   <Search size={24} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-black text-lg tracking-tight">{t('searchAssistant', 'مساعد البحث')}</h3>
-                  <p className="text-xs text-white/70 font-bold">{t('localPolicySearch', 'بحث محلي في السياسات والقوانين')}</p>
+                  <h3 className="font-black text-lg tracking-tight">{t('searchAssistant')}</h3>
+                  <p className="text-xs text-white/70 font-bold">{t('localPolicySearch')}</p>
                 </div>
               </div>
               <button 
@@ -273,7 +273,7 @@ const Chatbot: React.FC = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder={t('askAboutPolicies', 'اسأل عن السياسات أو القوانين...')}
+                    placeholder={t('askAboutPolicies')}
                     className="w-full bg-[var(--color-bg-main)] dark:bg-slate-800 border-none rounded-full px-6 py-4 text-sm font-medium text-slate-700 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-[var(--color-primary)]/30 outline-none transition-all"
                   />
                 </div>

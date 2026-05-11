@@ -147,11 +147,11 @@ const AuditCharter: React.FC = () => {
                     <div className="min-w-[800px] flex flex-col items-center">
                       <div className="relative flex flex-col items-center w-full">
                         <div className="bg-primary text-white font-bold py-4 px-8 rounded-xl shadow-lg relative z-10 w-64 text-center">
-                          {t('auditCharter.deptManager', 'Department Manager')}
+                          {t('auditCharter.deptManager')}
                         </div>
                         <div className="w-0.5 h-8 bg-slate-300"></div>
                         <div className="bg-slate-700 text-white font-bold py-3 px-6 rounded-lg relative z-10 w-56 text-center">
-                          {t('auditCharter.deputyManager', 'Deputy Manager')}
+                          {t('auditCharter.deputyManager')}
                         </div>
                         <div className="w-0.5 h-8 bg-slate-300"></div>
                         <div className="w-[75%] h-0.5 bg-slate-300"></div>
@@ -160,25 +160,25 @@ const AuditCharter: React.FC = () => {
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-sky-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.financialAuditDept', 'Financial Audit Department')}
+                              {t('auditCharter.financialAuditDept')}
                             </div>
                           </div>
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-emerald-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.auditDivision', 'Audit Division')}
+                              {t('auditCharter.auditDivision')}
                             </div>
                           </div>
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-amber-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.auditReconciliationDiv', 'Division of Auditing and Reconciliation of Settlements and Banks')}
+                              {t('auditCharter.auditReconciliationDiv')}
                             </div>
                           </div>
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-rose-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.itAuditDiv', 'IT Audit and Electronic Payment Systems Division')}
+                              {t('auditCharter.itAuditDiv')}
                             </div>
                           </div>
                         </div>

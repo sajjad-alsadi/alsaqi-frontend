@@ -129,7 +129,7 @@ const AuditTasksModule: React.FC = () => {
       }))
     }];
 
-    await generatePdf(t('tasks.title'), sections, token, (i18n.language === 'ar' ? 'ar' : 'en') as 'ar' | 'en', 'مهام التدقيق', {
+    await generatePdf(t('tasks.title'), sections, token, (i18n.language === 'ar' ? 'ar' : 'en') as 'ar' | 'en', t('tasks.auditTasksReport'), {
       title: t('tasks.title'),
       report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
       tasks: filteredTasks

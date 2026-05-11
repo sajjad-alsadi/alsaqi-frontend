@@ -91,21 +91,21 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onEdit, onAddChild, on
           <button 
             onClick={() => onAddChild(node.id)}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            title={t('addChildUnit', 'Add Sub-Unit')}
+            title={t('addChildUnit')}
           >
             <Plus size={16} />
           </button>
           <button 
             onClick={() => onEdit(node)}
             className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            title={t('editUnit', 'Edit Unit')}
+            title={t('editUnit')}
           >
             <Edit2 size={16} />
           </button>
           <button 
             onClick={() => onArchive(node)}
             className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-            title={t('archiveUnit', 'Archive Unit')}
+            title={t('archiveUnit')}
           >
             <Archive size={16} />
           </button>
@@ -166,7 +166,7 @@ const OrgStructure: React.FC = () => {
       setTreeData(res.data);
     } catch (e) {
       console.error(e);
-      toast.error(t('errorLoadingTree', 'Error loading organisational tree'));
+      toast.error(t('errorLoadingTree'));
     } finally {
       setTreeLoading(false);
     }
@@ -219,19 +219,19 @@ const OrgStructure: React.FC = () => {
 
   const handleArchive = async (node: Department) => {
     if (node.children && node.children.length > 0) {
-      toast.error(t('cannotDeleteParent', 'Cannot delete an entity that has sub-units. Move or delete them first.'));
+      toast.error(t('cannotDeleteParent'));
       return;
     }
 
-    if (!window.confirm(t('confirmArchiveUnit', 'Are you sure you want to archive this unit?'))) return;
+    if (!window.confirm(t('confirmArchiveUnit'))) return;
 
     try {
       await api.delete(`/departments/${node.id}`);
-      toast.success(t('archiveSuccess', 'Unit archived successfully'));
+      toast.success(t('archiveSuccess'));
       refresh();
       if (activeTab === 'tree') fetchTree();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t('archiveFailed', 'Failed to archive unit'));
+      toast.error(error.response?.data?.error || t('archiveFailed'));
     }
   };
 
@@ -248,9 +248,9 @@ const OrgStructure: React.FC = () => {
           </div>
           <div>
             <h1 className="text-4xl font-black text-slate-800 tracking-tight">
-              {t('organizationalStructure', 'الهيكل التنظيمي')}
+              {t('organizationalStructure')}
             </h1>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('orgStructureDesc', 'إدارة الوحدات الإدارية والمراكز الوظيفية للمؤسسة')}</p>
+            <p className="text-sm text-slate-400 font-bold mt-2">{t('orgStructureDesc')}</p>
           </div>
         </div>
         
@@ -260,7 +260,7 @@ const OrgStructure: React.FC = () => {
             className="btn-primary"
           >
             <Plus size={20} className={isRTL ? 'ml-2' : 'mr-2'} />
-            {t('addUnit', 'إضافة وحدة جديدة')}
+            {t('addUnit')}
           </button>
         )}
       </header>
@@ -268,9 +268,9 @@ const OrgStructure: React.FC = () => {
       {/* Tabs */}
       <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl w-fit">
         {[
-          { id: 'tree', icon: LayoutGrid, label: t('treeView', 'الشجرة التنظيمية') },
-          { id: 'table', icon: List, label: t('listView', 'القائمة') },
-          { id: 'stats', icon: BarChart3, label: t('statistics', 'إحصائيات') },
+          { id: 'tree', icon: LayoutGrid, label: t('treeView') },
+          { id: 'table', icon: List, label: t('listView') },
+          { id: 'stats', icon: BarChart3, label: t('statistics') },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -294,7 +294,7 @@ const OrgStructure: React.FC = () => {
             {treeLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-slate-400 font-bold">{t('loadingTree', 'جاري تحميل الشجرة...')}</p>
+                <p className="text-slate-400 font-bold">{t('loadingTree')}</p>
               </div>
             ) : treeData.length > 0 ? (
               <div className="space-y-1">
@@ -314,7 +314,7 @@ const OrgStructure: React.FC = () => {
                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 border border-slate-100">
                   <LayoutGrid size={40} />
                 </div>
-                <p className="text-slate-400 font-bold text-sm">{t('noStructureDefined', 'لم يتم تحديد الهيكل التنظيمي بعد')}</p>
+                <p className="text-slate-400 font-bold text-sm">{t('noStructureDefined')}</p>
               </div>
             )}
           </div>
@@ -327,7 +327,7 @@ const OrgStructure: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
                   type="text"
-                  placeholder={t('searchUnits', 'Search units...')}
+                  placeholder={t('searchUnits')}
                   className="input-field pl-10"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -339,7 +339,7 @@ const OrgStructure: React.FC = () => {
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                 >
-                  <option value="All">{t('allTypes', 'All Types')}</option>
+                  <option value="All">{t('allTypes')}</option>
                   {entityTypes.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
                 <select 
@@ -347,9 +347,9 @@ const OrgStructure: React.FC = () => {
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                  <option value="All">{t('allStatuses', 'All')}</option>
-                  <option value="Active">{t('active', 'Active')}</option>
-                  <option value="Inactive">{t('inactive', 'Inactive')}</option>
+                  <option value="All">{t('allStatuses')}</option>
+                  <option value="Active">{t('active')}</option>
+                  <option value="Inactive">{t('inactive')}</option>
                 </select>
               </div>
             </div>
@@ -359,13 +359,13 @@ const OrgStructure: React.FC = () => {
                 <table className="w-full text-sm text-left">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                      <th className="px-6 py-4">{t('code', 'Code')}</th>
-                      <th className="px-6 py-4">{t('unitName', 'Name (AR)')}</th>
-                      <th className="px-6 py-4">{t('entityType', 'Type')}</th>
-                      <th className="px-6 py-4">{t('parent', 'Parent')}</th>
-                      <th className="px-6 py-4">{t('manager', 'Manager')}</th>
-                      <th className="px-6 py-4">{t('status', 'Status')}</th>
-                      <th className="px-6 py-4 text-center">{t('actions', 'Actions')}</th>
+                      <th className="px-6 py-4">{t('code')}</th>
+                      <th className="px-6 py-4">{t('unitName')}</th>
+                      <th className="px-6 py-4">{t('entityType')}</th>
+                      <th className="px-6 py-4">{t('parent')}</th>
+                      <th className="px-6 py-4">{t('manager')}</th>
+                      <th className="px-6 py-4">{t('status')}</th>
+                      <th className="px-6 py-4 text-center">{t('actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -385,7 +385,7 @@ const OrgStructure: React.FC = () => {
                           {departments.find(d => d.id === item.parent_id)?.name_ar || '-'}
                         </td>
                         <td className="px-6 py-4 text-slate-500 font-medium">
-                          {item.manager_name || <span className="text-rose-400 italic text-[10px] font-bold">{t('notAssigned', 'غير معين')}</span>}
+                          {item.manager_name || <span className="text-rose-400 italic text-[10px] font-bold">{t('notAssigned')}</span>}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
@@ -418,10 +418,10 @@ const OrgStructure: React.FC = () => {
                 <div className="p-2 bg-green-100 text-green-700 rounded-xl">
                   <LayoutGrid size={24} />
                 </div>
-                <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full">{t('activeUnits', 'Active')}</span>
+                <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full">{t('activeUnits')}</span>
               </div>
               <h3 className="text-3xl font-black text-slate-900">{stats.activeUnits}</h3>
-              <p className="text-sm text-slate-400 font-bold">{t('totalActiveUnits', 'Total Active Units')}</p>
+              <p className="text-sm text-slate-400 font-bold">{t('totalActiveUnits')}</p>
             </div>
             
             <div className="glass-card p-6 space-y-2">
@@ -429,10 +429,10 @@ const OrgStructure: React.FC = () => {
                 <div className="p-2 bg-amber-100 text-amber-700 rounded-xl">
                   <User size={24} />
                 </div>
-                <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-full">{t('missingManager', 'Required')}</span>
+                <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-full">{t('missingManager')}</span>
               </div>
               <h3 className="text-3xl font-black text-slate-900">{stats.noManager}</h3>
-              <p className="text-sm text-slate-400 font-bold">{t('unitsWithoutManager', 'Units without Manager')}</p>
+              <p className="text-sm text-slate-400 font-bold">{t('unitsWithoutManager')}</p>
             </div>
 
             <div className="glass-card p-6 space-y-2">
@@ -440,14 +440,14 @@ const OrgStructure: React.FC = () => {
                 <div className="p-2 bg-slate-100 text-slate-700 rounded-xl">
                   <AlertCircle size={24} />
                 </div>
-                <span className="text-[10px] font-black text-slate-600 bg-slate-50 px-2 py-1 rounded-full">{t('inactiveLabel', 'Inactive')}</span>
+                <span className="text-[10px] font-black text-slate-600 bg-slate-50 px-2 py-1 rounded-full">{t('inactiveLabel')}</span>
               </div>
               <h3 className="text-3xl font-black text-slate-900">{stats.inactiveUnits}</h3>
-              <p className="text-sm text-slate-400 font-bold">{t('suspendedUnits', 'Inactive Units')}</p>
+              <p className="text-sm text-slate-400 font-bold">{t('suspendedUnits')}</p>
             </div>
 
             <div className="glass-card p-6 flex flex-col justify-center">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">{t('distributionByType', 'Distribution')}</h4>
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">{t('distributionByType')}</h4>
               <div className="space-y-3">
                 {Object.entries(stats.byType).map(([type, count]) => (
                   <div key={type} className="space-y-1">
@@ -519,15 +519,15 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
     try {
       if (editingNode?.id) {
         await api.put(`/departments/${editingNode.id}`, formData);
-        toast.success(t('updateSuccess', 'Unit updated successfully'));
+        toast.success(t('updateSuccess'));
       } else {
         await api.post('/departments', formData);
-        toast.success(t('createSuccess', 'Unit created successfully'));
+        toast.success(t('createSuccess'));
       }
       onSave();
       onClose();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t('saveFailed', 'Save failed'));
+      toast.error(error.response?.data?.error || t('saveFailed'));
     } finally {
       setLoading(false);
     }
@@ -541,13 +541,13 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editingNode?.id ? t('editUnit', 'تعديل وحدة') : t('newUnit', 'إضافة وحدة جديدة')} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={editingNode?.id ? t('editUnit') : t('newUnit')} size="lg">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Hash size={12} />
-              {t('unitCode', 'رمز الوحدة')} *
+              {t('unitCode')} *
             </label>
             <input 
               type="text"
@@ -563,7 +563,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <LayoutGrid size={12} />
-              {t('entityType', 'النوع')} *
+              {t('entityType')} *
             </label>
             <select 
               required
@@ -580,7 +580,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Info size={12} />
-              {t('nameAr', 'الاسم بالعربية')} *
+              {t('nameAr')} *
             </label>
             <input 
               type="text"
@@ -594,7 +594,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Info size={12} />
-              {t('nameEn', 'الاسم بالإنجليزية')}
+              {t('nameEn')}
             </label>
             <input 
               type="text"
@@ -607,14 +607,14 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Building2 size={12} />
-              {t('parentUnit', 'الوحدة الأعلى')}
+              {t('parentUnit')}
             </label>
             <select 
               className="input-field"
               value={formData.parent_id || ''}
               onChange={(e) => setFormData({ ...formData, parent_id: e.target.value || null })}
             >
-              <option value="">{t('rootLevel', 'مستوى جذري (لا يوجد)')}</option>
+              <option value="">{t('rootLevel')}</option>
               {departments
                 .filter(d => d.id !== editingNode?.id)
                 .map(d => (
@@ -626,7 +626,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <User size={12} />
-              {t('managerName', 'اسم المدير المسئول')}
+              {t('managerName')}
             </label>
             <input 
               type="text"
@@ -639,7 +639,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <MapPin size={12} />
-              {t('location', 'الموقع / الفرع')}
+              {t('location')}
             </label>
             <input 
               type="text"
@@ -652,7 +652,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Hash size={12} />
-              {t('costCenter', 'مركز التكلفة')}
+              {t('costCenter')}
             </label>
             <input 
               type="text"
@@ -665,7 +665,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           <div className="col-span-1 md:col-span-2 space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Plus size={12} />
-              {t('description', 'الوصف')}
+              {t('description')}
             </label>
             <textarea 
               className="input-field min-h-[80px]"
@@ -676,7 +676,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
 
           <div className="space-y-1">
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              {t('status', 'الحالة')}
+              {t('status')}
             </label>
             <div className="flex items-center gap-4 mt-2">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -687,7 +687,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
                   checked={formData.status === 'Active'}
                   onChange={() => setFormData({ ...formData, status: 'Active' })}
                 />
-                <span className="text-sm font-bold text-slate-700">{t('active', 'نشط')}</span>
+                <span className="text-sm font-bold text-slate-700">{t('active')}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input 
@@ -697,16 +697,16 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
                   checked={formData.status === 'Inactive'}
                   onChange={() => setFormData({ ...formData, status: 'Inactive' })}
                 />
-                <span className="text-sm font-bold text-slate-700">{t('inactive', 'غير نشط')}</span>
+                <span className="text-sm font-bold text-slate-700">{t('inactive')}</span>
               </label>
             </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-6 border-t">
-          <button type="button" onClick={onClose} className="btn-secondary">{t('cancel', 'إلغاء')}</button>
+          <button type="button" onClick={onClose} className="btn-secondary">{t('cancel')}</button>
           <button type="submit" disabled={loading} className="btn-primary min-w-[120px]">
-            {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : (editingNode?.id ? t('update', 'تحديث') : t('create', 'إضافة'))}
+            {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : (editingNode?.id ? t('update') : t('create'))}
           </button>
         </div>
       </form>

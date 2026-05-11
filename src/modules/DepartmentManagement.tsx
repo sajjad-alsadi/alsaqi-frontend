@@ -28,7 +28,7 @@ const DepartmentManagement: React.FC = () => {
       refresh();
     } catch (error: any) {
       console.error("Error adding department:", error);
-      const msg = error.response?.data?.error || t('failedToAddDepartment', 'Failed to add department');
+      const msg = error.response?.data?.error || t('failedToAddDepartment');
       setError(msg);
       toast.error(msg);
     } finally {
@@ -55,7 +55,7 @@ const DepartmentManagement: React.FC = () => {
       setDeptToDelete(null);
     } catch (error: any) {
       console.error("Error deleting department:", error);
-      const msg = error.response?.data?.error || t('failedToDeleteDepartment', 'Failed to delete department');
+      const msg = error.response?.data?.error || t('failedToDeleteDepartment');
       setError(msg);
       toast.error(msg);
     }
@@ -70,7 +70,7 @@ const DepartmentManagement: React.FC = () => {
       refresh();
     } catch (error: any) {
       console.error("Error updating department:", error);
-      const msg = error.response?.data?.error || t('failedToUpdateDepartment', 'Failed to update department');
+      const msg = error.response?.data?.error || t('failedToUpdateDepartment');
       setError(msg);
       toast.error(msg);
     }
@@ -138,11 +138,11 @@ const DepartmentManagement: React.FC = () => {
             )}
             
             <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-              <h3 className="text-lg font-bold text-slate-700 mb-4">{t('addNew', 'Add New')}</h3>
+              <h3 className="text-lg font-bold text-slate-700 mb-4">{t('addNew')}</h3>
               <div className="flex gap-4">
                 <input 
                   className="input-field" 
-                  placeholder={t('newDepartmentName', 'New Department Name')} 
+                  placeholder={t('newDepartmentName')} 
                   value={newDept} 
                   onChange={e => setNewDept(e.target.value)} 
                   onKeyDown={e => e.key === 'Enter' && addDept()}
@@ -153,7 +153,7 @@ const DepartmentManagement: React.FC = () => {
                   className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   <Plus size={20} />
-                  {loading ? "..." : t('add', 'Add')}
+                  {loading ? "..." : t('add')}
                 </button>
               </div>
             </div>
@@ -161,7 +161,7 @@ const DepartmentManagement: React.FC = () => {
             <div className="mb-6">
               <input 
                 className="input-field" 
-                placeholder={t('search', 'Search')} 
+                placeholder={t('search')} 
                 value={searchTerm} 
                 onChange={e => setSearchTerm(e.target.value)} 
               />
@@ -169,7 +169,7 @@ const DepartmentManagement: React.FC = () => {
 
             <div className="space-y-4">
               {filteredDepartments.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">{t('noDepartmentsFound', 'No departments found')}</div>
+                <div className="text-center py-8 text-slate-400">{t('noDepartmentsFound')}</div>
               ) : (
                 (Array.isArray(filteredDepartments) ? filteredDepartments : []).map(dept => (
                   <div key={dept.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
@@ -211,20 +211,20 @@ const DepartmentManagement: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
           >
-            <h3 className="text-xl font-bold text-slate-800 mb-2">{t('deleteConfirm', 'Confirm Deletion')}</h3>
-            <p className="text-slate-500 mb-6">{t('deleteMessage', 'Are you sure you want to delete this department?')}</p>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">{t('deleteConfirm')}</h3>
+            <p className="text-slate-500 mb-6">{t('deleteMessage')}</p>
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setShowDeleteConfirm(false)}
                 className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
               >
-                {t('cancel', 'Cancel')}
+                {t('cancel')}
               </button>
               <button 
                 onClick={confirmDelete}
                 className="px-4 py-2 bg-rose-500 text-white font-medium rounded-lg hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20"
               >
-                {t('delete', 'Delete')}
+                {t('delete')}
               </button>
             </div>
           </motion.div>
