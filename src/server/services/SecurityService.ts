@@ -1,9 +1,8 @@
-import { MagikaNode } from 'magika/node';
 import logger from '../utils/logger.js';
 import fs from 'fs/promises';
 
 export class SecurityService {
-  private static magika: MagikaNode | null = null;
+  private static magika: any = null;
   private static isLoaded = false;
   private static initPromise: Promise<void> | null = null;
 
@@ -18,14 +17,15 @@ export class SecurityService {
     this.initPromise = (async () => {
       try {
         logger.info('Initializing Magika AI for file identification...');
-        // Use the factory method for initialization
+        const { MagikaNode } = await import('magika/node');
         this.magika = await MagikaNode.create();
         this.isLoaded = true;
         logger.info('Magika AI initialized successfully.');
       } catch (error) {
         logger.error('Failed to initialize Magika AI:', error);
         this.initPromise = null;
-        throw new Error('File security identification service is currently unavailable.');
+        // Don't throw - allow server to start without Magika
+        logger.warn('Server will continue without AI file identification.');
       }
     })();
 
