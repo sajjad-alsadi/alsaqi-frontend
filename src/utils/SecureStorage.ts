@@ -19,7 +19,7 @@ export class SecureStorage {
   private async initKeys() {
       // في الإنتاج: يفضل جلب المفتاح الملح من الخادم
       // fetch('/api/security/init').then(r => r.json())...
-      const baseKey = import.meta.env.VITE_STORAGE_SECRET || (typeof navigator !== 'undefined' ? navigator.userAgent : 'fallback-secret');
+      const baseKey = import.meta.env.VITE_STORAGE_SECRET || (typeof navigator !== 'undefined' ? `${navigator.userAgent.slice(0, 32)}-${window.location.origin}` : 'dev-only-storage-key');
       
       this.encryptionKey = await CryptoUtils.importKey(baseKey);
       this.hmacKey = await CryptoUtils.importHMACKey(baseKey);

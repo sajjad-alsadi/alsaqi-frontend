@@ -12,6 +12,7 @@ import { fileURLToPath } from "url";
 import crypto from "crypto";
 import cookieParser from "cookie-parser";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 import { FileUploadRequest } from "./src/server/types";
 import { db, initDb as initializeDatabase } from "./src/server/db/index";
 import { getPersistentDataDir } from "./src/server/db/index";
@@ -60,7 +61,8 @@ const saveFile = createSaveFile(uploadDir);
 const logError = createLogError(db);
 
 if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'alsaqi-dev-secret-key-123')) {
-  logger.warn("WARNING: JWT_SECRET is missing or using default value in production. Using a fallback secret.");
+  logger.error("FATAL: JWT_SECRET must be set to a secure value in production. Exiting.");
+  process.exit(1);
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'alsaqi-dev-secret-key-123';
@@ -154,14 +156,50 @@ async function runDbMigrations() {
 async function startServer() {
   const app = express();
   
+  // Security Headers
+  app.disable('x-powered-by');
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    if (process.env.NODE_ENV === 'production') {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+    next();
+  });
+
   // Enable CORS
+  const corsOrigin = process.env.CORS_ORIGIN;
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: corsOrigin ? corsOrigin.split(',').map(o => o.trim()) : (process.env.NODE_ENV === 'production' ? false : true),
     credentials: true
   }));
 
   const server = http.createServer(app);
   const wss = new WebSocketServer({ server });
+  
+  // WebSocket Authentication
+  wss.on('connection', (ws, req) => {
+    try {
+      const url = new URL(req.url || '', `http://${req.headers.host}`);
+      const token = url.searchParams.get('token');
+      
+      if (!token) {
+        ws.close(4001, 'Authentication required');
+        return;
+      }
+      
+      const decoded = jwt.verify(token, JWT_PUBLIC_KEY!, { algorithms: ['RS256'] }) as any;
+      (ws as any).userId = decoded.id;
+      (ws as any).username = decoded.username;
+    } catch (err) {
+      ws.close(4001, 'Invalid or expired token');
+      return;
+    }
+  });
+  
   wss.on('error', (err) => {
     logger.error('WebSocketServer Error:', err);
   });

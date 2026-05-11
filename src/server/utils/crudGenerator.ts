@@ -48,8 +48,8 @@ export const createCrudRoutes = (
     }
 
     router.get(`/${routeName}`, authenticate, checkPermission(moduleName, 'View'), asyncHandler(async (req, res) => {
-      const page = parseInt(req.query.page as string) || 1;
-      const pageSize = parseInt(req.query.pageSize as string) || 50; // Increased default pageSize for sub-collections
+      const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+      const pageSize = Math.min(Math.max(parseInt(req.query.pageSize as string) || 50, 1), 200); // Bounded: 1-200
 
       // Extract all query params except page and pageSize as filters
       const { page: _, pageSize: __, ...filters } = req.query;

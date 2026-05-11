@@ -101,7 +101,7 @@ if (DATABASE_URL && !DATABASE_URL.startsWith('http')) {
   const isLocal = DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1') || DATABASE_URL.includes('0.0.0.0');
   client = new pg.Pool({
     connectionString: DATABASE_URL,
-    ssl: isLocal ? false : { rejectUnauthorized: false },
+    ssl: isLocal ? false : { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' },
     connectionTimeoutMillis: 2000,
     max: 20,
     idleTimeoutMillis: 30000,

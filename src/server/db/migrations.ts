@@ -834,6 +834,8 @@ export const runMigrations = async () => {
     { table: "user_sessions", column: "refresh_token", type: "TEXT" },
     { table: "refresh_tokens", column: "revoked_at", type: "TIMESTAMP" },
     { table: "outgoing_letters", column: "status", type: "TEXT DEFAULT 'Draft'" },
+    { table: "audit_trail", column: "hash", type: "TEXT" },
+    { table: "audit_trail", column: "previous_hash", type: "TEXT" },
   ];
 
   for (const m of migrations) {
@@ -1177,6 +1179,30 @@ export const runMigrations = async () => {
     }
   } catch (e) {
     console.error("Error seeding default users:", e);
+  }
+
+  // Audit trail immutability trigger
+  try {
+    await db.exec(`
+      CREATE OR REPLACE FUNCTION prevent_audit_modification()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        RAISE EXCEPTION 'Audit trail records cannot be modified or deleted';
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+    await db.exec(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'audit_trail_immutable') THEN
+          CREATE TRIGGER audit_trail_immutable
+          BEFORE UPDATE OR DELETE ON audit_trail
+          FOR EACH ROW EXECUTE FUNCTION prevent_audit_modification();
+        END IF;
+      END $$;
+    `);
+    console.log("[MIGRATION] Audit trail immutability trigger created.");
+  } catch (e) {
+    console.warn("[MIGRATION] Could not create audit trail trigger (may not be supported in PGlite):", (e as any)?.message);
   }
 
   console.log("Migrations completed successfully.");

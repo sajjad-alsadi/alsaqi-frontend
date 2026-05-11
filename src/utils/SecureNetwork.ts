@@ -28,7 +28,9 @@ export class SecureNetwork {
     }
 
     private async initKeys() {
-        const baseKey = import.meta.env.VITE_NETWORK_SECRET || 'default-network-secret';
+        // Derive key from env variable; in production VITE_NETWORK_SECRET must be set
+        const baseKey = import.meta.env.VITE_NETWORK_SECRET || 
+            (typeof window !== 'undefined' ? `${window.location.origin}-${navigator.userAgent.slice(0, 32)}` : 'dev-only-key');
         this.hmacKey = await CryptoUtils.importHMACKey(baseKey);
     }
 

@@ -89,7 +89,23 @@ export class AuthService {
   }
 
   static async logAudit(username: string, action: string, module: string, details: string) {
-    await db.prepare("INSERT INTO audit_trail (user, action, module, details) VALUES (?::text, ?::text, ?::text, ?::text)")
-      .run(username, action, module, details);
+    const timestamp = new Date().toISOString();
+    
+    // Hash chaining for tamper-evident audit trail
+    let previousHash = '0';
+    try {
+      const lastRecord = await db.prepare("SELECT hash FROM audit_trail WHERE hash IS NOT NULL ORDER BY timestamp DESC LIMIT 1").get() as any;
+      if (lastRecord?.hash) {
+        previousHash = lastRecord.hash;
+      }
+    } catch (e) {
+      // If hash column doesn't exist yet, continue without it
+    }
+    
+    const recordData = `${previousHash}|${username}|${action}|${module}|${details}|${timestamp}`;
+    const hash = crypto.createHash('sha256').update(recordData).digest('hex');
+    
+    await db.prepare("INSERT INTO audit_trail (\"user\", action, module, details, hash, previous_hash, timestamp) VALUES (?::text, ?::text, ?::text, ?::text, ?::text, ?::text, ?::timestamp)")
+      .run(username, action, module, details, hash, previousHash, timestamp);
   }
 }

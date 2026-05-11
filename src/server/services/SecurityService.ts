@@ -105,10 +105,13 @@ export class SecurityService {
       return true;
     } catch (error) {
       logger.error('File safety validation error:', error);
-      // In case of error in security service, we might fail open or closed. 
-      // Usually better to fail closed for security, but might cause UX issues if AI is down.
-      // Default to allowed for now if only the AI fails, but log it.
-      return true; 
+      // Fail-closed: if security check fails, reject the file
+      // Only allow if Magika is simply not loaded (graceful degradation)
+      if (!this.isLoaded) {
+        logger.warn('Magika not available - allowing file with extension-only validation');
+        return true;
+      }
+      return false; 
     }
   }
 }

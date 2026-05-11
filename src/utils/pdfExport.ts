@@ -3,6 +3,7 @@ import autoTable from 'jspdf-autotable';
 import api from '../services/api';
 import handlebars from 'handlebars';
 import html2canvas from 'html2canvas';
+import { TAHOMA_FONT_BASE64 } from '../assets/fonts/tahoma-base64';
 
 export const generateDynamicPdf = async (
   templateContent: string,
@@ -89,8 +90,8 @@ export interface PdfSection {
   data?: any[];
 }
 
-// Cache the font so we don't download it every time
-let cachedArabicFont: string | null = null;
+// Use locally embedded font (no internet required)
+let cachedArabicFont: string | null = TAHOMA_FONT_BASE64;
 
 export const generatePdf = async (
   title: string, 
@@ -140,65 +141,10 @@ export const generatePdf = async (
   
   if (isRTL) {
     try {
-      if (!cachedArabicFont) {
-        // Try multiple reliable sources for Arabic TTF fonts
-        const fontUrls = [
-          'https://raw.githubusercontent.com/google/fonts/main/ofl/amiri/Amiri-Regular.ttf',
-          'https://raw.githubusercontent.com/google/fonts/main/ofl/tajawal/Tajawal-Regular.ttf',
-          'https://raw.githubusercontent.com/google/fonts/main/ofl/cairo/static/Cairo-Regular.ttf'
-        ];
-        
-        let buffer: ArrayBuffer | null = null;
-        let fontName = 'Amiri';
-        let fileName = 'Amiri-Regular.ttf';
-        
-        for (const url of fontUrls) {
-          try {
-            const response = await fetch(url);
-            if (response.ok) {
-              const contentType = response.headers.get('content-type');
-              // Ensure we don't accidentally parse an HTML 404 page
-              if (contentType && contentType.includes('text/html')) {
-                continue;
-              }
-              buffer = await response.arrayBuffer();
-              if (url.includes('Tajawal')) {
-                fontName = 'Tajawal';
-                fileName = 'Tajawal-Regular.ttf';
-              } else if (url.includes('Cairo')) {
-                fontName = 'Cairo';
-                fileName = 'Cairo-Regular.ttf';
-              }
-              break;
-            }
-          } catch (err) {
-            console.warn(`Failed to fetch font from ${url}`, err);
-          }
-        }
-        
-        if (!buffer) {
-          throw new Error('Failed to fetch any Arabic font');
-        }
-        
-        // Efficiently convert ArrayBuffer to Base64
-        const bytes = new Uint8Array(buffer);
-        let binary = '';
-        const chunkSize = 8192;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunkSize)));
-        }
-        cachedArabicFont = btoa(binary);
-      }
-      
-      // Use the dynamically determined font name
-      const currentFontName = cachedArabicFont ? (cachedArabicFont.length > 1000 ? 'Amiri' : 'Amiri') : 'Amiri'; // We'll just use the variables we set
-      // Wait, we need to store the font name in the cache or something if we want to reuse it.
-      // For simplicity, let's just assume Amiri if cached, or we can just use a generic name 'ArabicFont'
-      
-      doc.addFileToVFS('ArabicFont.ttf', cachedArabicFont);
-      doc.addFont('ArabicFont.ttf', 'ArabicFont', 'normal');
-      doc.setFont('ArabicFont');
-      settings.arabic_font_name = 'ArabicFont';
+      doc.addFileToVFS('Tahoma.ttf', cachedArabicFont);
+      doc.addFont('Tahoma.ttf', 'Tahoma', 'normal');
+      doc.setFont('Tahoma');
+      settings.arabic_font_name = 'Tahoma';
     } catch (e) {
       console.error('Failed to load Arabic font', e);
       doc.setFont('helvetica');
