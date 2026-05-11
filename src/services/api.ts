@@ -1,6 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import i18n from '../i18n';
+import { translateError } from './errorService';
 
 const api = axios.create({
   baseURL: '/api',
@@ -77,7 +78,7 @@ api.interceptors.response.use(
       } else if (response?.status === 413) {
         toast.error(i18n.t('fileTooLarge'));
       } else if (response?.status === 400) {
-        toast.error(errorMessage || i18n.t('invalidRequest'));
+        toast.error(translateError(errorMessage, i18n.language as 'ar' | 'en') || i18n.t('invalidRequest'));
       } else if (response?.status === 403) {
         toast.error(i18n.t('accessDenied'));
       } else if (response?.status === 404) {

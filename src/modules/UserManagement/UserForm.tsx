@@ -114,7 +114,7 @@ const UserForm: React.FC<UserFormProps> = ({
           <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.role')}</label>
           <div className="relative">
             <select 
-              className="input-field appearance-none !py-2 !text-xs cursor-pointer pr-8"
+              className="input-field appearance-none !py-2 !text-xs cursor-pointer pe-8"
               value={newUser.role || ROLES.VIEWER} 
               onChange={e => onUpdateNewUser({ role: e.target.value })} 
               disabled={isFormDisabled}
@@ -127,7 +127,7 @@ const UserForm: React.FC<UserFormProps> = ({
                 ))
               )}
             </select>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
               <ChevronDown size={14} />
             </div>
           </div>

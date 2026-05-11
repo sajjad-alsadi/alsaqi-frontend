@@ -141,7 +141,7 @@ const SystemLogsManagement: React.FC = () => {
               </div>
 
               <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between group overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+                <div className="absolute top-0 end-0 p-8 opacity-[0.03] pointer-events-none">
                   <ShieldCheck size={120} className="text-emerald-500" />
                 </div>
                 <div className="relative z-10">

@@ -268,9 +268,9 @@ const SystemErrorLogs: React.FC = () => {
           className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black text-slate-700 focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none cursor-pointer"
         >
           <option value="">{t('systemErrorLogs.allSeverities')}</option>
-          <option value="error">Error</option>
-          <option value="warning">Warning</option>
-          <option value="info">Info</option>
+          <option value="error">{t('systemErrorLogs.error')}</option>
+          <option value="warning">{t('systemErrorLogs.warning')}</option>
+          <option value="info">{t('systemErrorLogs.info')}</option>
         </select>
 
         <div className="relative">

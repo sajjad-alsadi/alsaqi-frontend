@@ -233,10 +233,10 @@ export default function ComplianceMatrix() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between gap-4 bg-white/40 p-4 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
         <div className="relative group flex-1 max-w-md">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
+          <Search className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
           <input 
             type="text" placeholder={t('complianceMatrix.searchPlaceholder')} 
-            className="w-full bg-white pr-12 pl-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all shadow-sm"
+            className="w-full bg-white pe-12 ps-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all shadow-sm"
             value={search} onChange={e => setSearch(e.target.value)}
           />
         </div>
@@ -269,7 +269,7 @@ export default function ComplianceMatrix() {
 
       <div className="glass-card">
         <div className="overflow-x-visible lg:overflow-x-auto">
-          <table className="w-full text-right">
+          <table className="w-full text-end">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
                 <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">{t('complianceMatrix.ref')}</th>
@@ -339,20 +339,20 @@ export default function ComplianceMatrix() {
                           <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
                             <MoreHorizontal size={18} />
                           </button>
-                          <div className="absolute left-0 bottom-full mb-1 hidden group-hover/actions:flex flex-col bg-white border border-slate-200 rounded-xl shadow-xl z-[100] min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <div className="absolute start-0 bottom-full mb-1 hidden group-hover/actions:flex flex-col bg-white border border-slate-200 rounded-xl shadow-xl z-[100] min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-200">
                              <div className="px-3 py-2 text-[10px] font-black text-slate-400 bg-slate-50 border-b border-slate-100 uppercase tracking-widest text-center">{t('complianceMatrix.changeStatus')}</div>
                              {Object.entries(statusConfig).map(([k,v]) => (
                                <button 
                                  key={k}
                                  onClick={() => updateStatus(item.id, k as ComplianceStatus)}
-                                 className="px-4 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50 text-right flex items-center gap-2 transition-colors"
+                                 className="px-4 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50 text-end flex items-center gap-2 transition-colors"
                                >
                                  <v.icon size={12} className={`text-${v.color}-500`} />
                                  {v.label}
                                </button>
                              ))}
                              <div className="border-t border-slate-100 mt-1">
-                                <button onClick={() => handleDelete(item.id)} className="w-full px-4 py-2 text-[11px] font-bold text-rose-500 hover:bg-rose-50 text-right flex items-center gap-2 transition-colors">
+                                <button onClick={() => handleDelete(item.id)} className="w-full px-4 py-2 text-[11px] font-bold text-rose-500 hover:bg-rose-50 text-end flex items-center gap-2 transition-colors">
                                   <Trash2 size={12} /> {t('common.delete')}
                                 </button>
                              </div>
@@ -441,7 +441,7 @@ export default function ComplianceMatrix() {
                       onClick={() => { setSelectedItem(item); setFormData(item); setIsViewModalOpen(true); }}
                       className="group p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-[var(--color-primary)]/30 transition-all cursor-pointer relative overflow-hidden"
                     >
-                      <div className={`absolute top-0 right-0 w-1 h-full bg-${config.color}-400/50 group-hover:bg-${config.color}-500 transition-colors`}></div>
+                      <div className={`absolute top-0 end-0 w-1 h-full bg-${config.color}-400/50 group-hover:bg-${config.color}-500 transition-colors`}></div>
                       <div className="text-[9px] font-black font-mono text-slate-400 group-hover:text-[var(--color-primary)] mb-1 leading-none">{item.ref_number}</div>
                       <div className="font-bold text-slate-800 text-xs mb-2 leading-snug truncate-2-lines">{item.title}</div>
                       
@@ -520,7 +520,7 @@ export default function ComplianceMatrix() {
                  </button>
               </div>
 
-              <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-4 max-h-[450px] overflow-y-auto pe-2 custom-scrollbar">
                 {overdueItems.map((item, idx) => (
                   <motion.div 
                     initial={{ opacity: 0, x: 20 }}
@@ -585,7 +585,7 @@ export default function ComplianceMatrix() {
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">{label}</span>
                           <span className={`text-xs font-black text-${color}-600`}>{pct}% {t('complianceMatrix.ofTotal')}</span>
                         </div>
-                        <div className="text-right">
+                        <div className="text-end">
                           <span className="text-xl font-black text-slate-800 leading-none">{count}</span>
                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">{t('complianceMatrix.activeRecord')}</span>
                         </div>
@@ -604,7 +604,7 @@ export default function ComplianceMatrix() {
               </div>
 
               <div className="mt-12 p-6 rounded-3xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 shadow-inner relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
+                 <div className="absolute top-0 end-0 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
                  <div className="relative z-10">
                     <h4 className="text-sm font-black text-[var(--color-primary)] mb-2">{t('complianceMatrix.maturityLevel')}</h4>
                     <div className="flex items-end gap-3 mb-4">
@@ -876,7 +876,7 @@ export default function ComplianceMatrix() {
                 { label: t('complianceMatrix.nextReview'), value: selectedItem.review_date || '-', icon: Calendar, color: 'warning' }
               ].map((info, idx) => (
                 <div key={idx} className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                   <div className={`absolute top-0 right-0 w-1 h-full bg-${info.color === 'primary' ? '[var(--color-primary)]' : 
+                   <div className={`absolute top-0 end-0 w-1 h-full bg-${info.color === 'primary' ? '[var(--color-primary)]' : 
                                                                      info.color === 'warning' ? 'amber-500' :
                                                                      info.color === 'emerald' ? 'emerald-500' : 'slate-500'} group-hover:w-2 transition-all`}></div>
                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5 leading-none">
@@ -914,7 +914,7 @@ export default function ComplianceMatrix() {
 
                <div className="space-y-6">
                   <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm relative overflow-hidden group">
-                    <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none"></div>
+                    <div className="absolute -bottom-8 -end-8 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none"></div>
                     <div className="relative z-10">
                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">{t('complianceMatrix.maturityEvaluation')}</h3>
                        <div className="flex items-center justify-between mb-4">

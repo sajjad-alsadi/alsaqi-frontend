@@ -324,11 +324,11 @@ const OrgStructure: React.FC = () => {
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <div className="glass-card p-4 flex flex-col md:flex-row gap-4 items-center">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
                   type="text"
                   placeholder={t('searchUnits')}
-                  className="input-field pl-10"
+                  className="input-field ps-10"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -356,7 +356,7 @@ const OrgStructure: React.FC = () => {
 
             <div className="glass-card overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
+                <table className="w-full text-sm text-start">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                       <th className="px-6 py-4">{t('code')}</th>
@@ -391,7 +391,7 @@ const OrgStructure: React.FC = () => {
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             item.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
                           }`}>
-                            {item.status}
+                            {t(`common.status.${(item.status || '').toLowerCase()}`)}
                           </span>
                         </td>
                         <td className="px-6 py-4 flex items-center justify-center gap-2">

@@ -117,7 +117,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
               <ChevronRight size={14} className={selectedRoleId === role.id ? 'opacity-100 flex-shrink-0' : 'opacity-0'} />
             </button>
           )) : (
-            <div className="p-4 text-center text-[var(--color-text-muted)] text-[10px]">Loading roles...</div>
+            <div className="p-4 text-center text-[var(--color-text-muted)] text-[10px]">{t('common.loading')}</div>
           )}
         </div>
 
@@ -191,7 +191,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className="fixed bottom-10 right-10 bg-[var(--color-success)] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-50"
+          className="fixed bottom-10 end-10 bg-[var(--color-success)] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-50"
         >
           <CheckCircle size={24} />
           <span className="font-black uppercase tracking-widest text-xs">{t('settingsSavedSuccessfully')}</span>

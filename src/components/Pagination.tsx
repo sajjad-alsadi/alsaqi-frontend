@@ -44,7 +44,7 @@ const Pagination: React.FC<PaginationProps> = ({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="appearance-none bg-white border border-slate-200 text-transparent text-xs font-bold rounded-xl py-1.5 pl-4 pr-8 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:border-primary/50"
+              className="appearance-none bg-white border border-slate-200 text-transparent text-xs font-bold rounded-xl py-1.5 ps-4 pe-8 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:border-primary/50"
             >
               {[10, 20, 50, 100].map((size) => (
                 <option key={size} value={size} className="text-slate-700">

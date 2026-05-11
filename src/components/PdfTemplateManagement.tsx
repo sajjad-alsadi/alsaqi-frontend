@@ -148,13 +148,13 @@ export const PdfTemplateManagement: React.FC = () => {
 
       <div className="glass-card p-6">
         <div className="relative mb-6">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          <Search className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input 
             type="text" 
             placeholder={t('pdfTemplates.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-4 pr-12 py-3 rounded-2xl border-2 border-slate-100 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold"
+            className="w-full ps-4 pe-12 py-3 rounded-2xl border-2 border-slate-100 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold"
           />
         </div>
 
