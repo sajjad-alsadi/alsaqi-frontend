@@ -1477,6 +1477,7 @@
     "message": "Message",
     "noErrorsLogged": "No errors logged",
     "stackTrace": "Stack Trace",
+    "noStackTrace": "No stack trace available for this error",
     "confirmClearLogs": "Confirm clearing logs",
     "importantAlert": "Important Alert!",
     "clearLogsWarning": "Are you sure you want to clear all system error logs? This action cannot be undone once executed.",

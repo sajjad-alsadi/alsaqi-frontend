@@ -349,14 +349,19 @@ const SystemErrorLogs: React.FC = () => {
                     <tr className="bg-slate-50/30">
                       <td colSpan={5} className="px-8 py-6">
                         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
-                          <div className="flex flex-col gap-2">
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
-                            <div className="relative group">
-                              <pre className="text-xs font-mono text-slate-500 bg-slate-900/95 p-6 rounded-2xl overflow-x-auto leading-relaxed border-l-4 border-rose-500">
-                                {log.stack}
-                              </pre>
+                          {log.stack && (
+                            <div className="flex flex-col gap-2">
+                              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
+                              <div className="relative group">
+                                <pre className="text-xs font-mono text-slate-500 bg-slate-900/95 p-6 rounded-2xl overflow-x-auto leading-relaxed border-l-4 border-rose-500">
+                                  {log.stack}
+                                </pre>
+                              </div>
                             </div>
-                          </div>
+                          )}
+                          {!log.stack && (
+                            <p className="text-sm text-slate-400 italic">{t('systemErrorLogs.noStackTrace')}</p>
+                          )}
                         </div>
                       </td>
                     </tr>

@@ -33,6 +33,17 @@ export class AuthService {
         await db.prepare("UPDATE users SET failed_attempts = failed_attempts + 1 WHERE id = ?::uuid").run(user.id);
         if (user.failed_attempts + 1 >= 5) {
           await db.prepare("UPDATE users SET locked_until = ?::timestamp WHERE id = ?::uuid").run(new Date(Date.now() + 15 * 60 * 1000).toISOString(), user.id);
+          
+          // Notify all admins about the locked account
+          try {
+            const admins = await db.prepare("SELECT id FROM users WHERE role = 'Admin' AND status = 'active'").all() as any[];
+            for (const admin of admins) {
+              await db.prepare("INSERT INTO notifications (user_id, event_type, description, related_module, link, status) VALUES (?::uuid, ?::text, ?::text, ?::text, ?::text, 'Unread')")
+                .run(admin.id, 'Security', `Account "${user.username}" locked after 5 failed login attempts (IP: ${ipAddress || 'Unknown'})`, 'Security', '/users');
+            }
+          } catch (notifErr) {
+            console.error("[AuthService] Failed to send lockout notification:", notifErr);
+          }
         }
         throw new AuthError("Invalid credentials");
       }
