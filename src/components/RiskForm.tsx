@@ -81,6 +81,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
     formState: { errors, isSubmitting },
   } = useForm<RiskFormValues>({
     resolver: zodResolver(riskSchema) as any,
+    mode: 'onBlur',
     defaultValues: {
       risk_id: '',
       description: '',

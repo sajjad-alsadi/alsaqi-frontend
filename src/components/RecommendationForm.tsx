@@ -40,6 +40,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCa
     formState: { errors, isSubmitting },
   } = useForm<RecommendationFormValues>({
     resolver: zodResolver(recommendationSchema) as any,
+    mode: 'onBlur',
     defaultValues: {
       finding_id: findings[0]?.id ? String(findings[0].id) : '',
       department: '',

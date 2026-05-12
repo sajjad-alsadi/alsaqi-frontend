@@ -271,7 +271,7 @@ const JobTitles: React.FC = () => {
                     {new Date(title.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <button onClick={() => editTitle(title)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-colors" title={t('common.edit')}>
                         <Edit2 size={16} />
                       </button>

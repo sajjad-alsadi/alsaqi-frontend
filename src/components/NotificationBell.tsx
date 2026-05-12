@@ -83,6 +83,7 @@ const NotificationBell: React.FC = () => {
         tooltip={t('common.notifications')}
         variant="outline"
         className="!p-2.5"
+        ariaExpanded={isOpen}
       />
 
       <AnimatePresence>

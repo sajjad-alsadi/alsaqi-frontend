@@ -97,7 +97,7 @@ const PDFSettingsSection: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.baseFontSize')}</label>
               <input 
@@ -140,7 +140,7 @@ const PDFSettingsSection: React.FC = () => {
         <div className="space-y-6">
           <h3 className="text-lg font-bold text-[var(--color-text-main)] border-b border-[var(--color-border-soft)] pb-2">{t('pdf.pageSettings')}</h3>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.topMargin')}</label>
               <input 

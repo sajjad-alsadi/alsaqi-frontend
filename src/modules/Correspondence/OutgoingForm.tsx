@@ -39,6 +39,7 @@ const OutgoingForm: React.FC<OutgoingFormProps> = ({ language, onSuccess, onCanc
     formState: { errors, isSubmitting },
   } = useForm<OutgoingFormValues>({
     resolver: zodResolver(outgoingSchema),
+    mode: 'onBlur',
     defaultValues: {
       letter_date: new Date().toISOString().split('T')[0],
       classification: CorrespondenceClassification.GENERAL,

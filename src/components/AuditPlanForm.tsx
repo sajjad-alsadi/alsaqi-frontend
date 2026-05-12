@@ -59,6 +59,7 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
     formState: { errors, isSubmitting },
   } = useForm<AuditPlanFormValues>({
     resolver: zodResolver(auditPlanSchema) as any,
+    mode: 'onBlur',
     defaultValues: {
       title: '',
       department: '',

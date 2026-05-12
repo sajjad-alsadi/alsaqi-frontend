@@ -168,7 +168,7 @@ export const PdfTemplateManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
                     <FileText size={24} />
                   </div>
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <button onClick={() => openModal(template)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] bg-[var(--color-bg-soft)] rounded-lg">
                       <Edit2 size={16} />
                     </button>

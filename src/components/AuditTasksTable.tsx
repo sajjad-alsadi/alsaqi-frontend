@@ -71,9 +71,9 @@ const AuditTasksTable: React.FC<AuditTasksTableProps> = ({
               </td>
               <td className="px-6 py-4">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                  task.status === 'completed' || task.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                  task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 
-                  task.status === 'review' ? 'bg-amber-100 text-amber-700' :
+                  task.status === 'completed' || task.status === 'approved' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' :
+                  task.status === 'in_progress' ? 'bg-[var(--color-info)]/10 text-[var(--color-info)]' : 
+                  task.status === 'review' ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' :
                   'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]'
                 }`}>
                   {task.status === 'completed' || task.status === 'approved' ? <CheckCircle2 size={12} /> : 

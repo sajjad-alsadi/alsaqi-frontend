@@ -220,6 +220,53 @@
   scrollbar-width: none;
 }
 
+/* === Mobile Responsive Utilities === */
+
+/* Table scroll indicator — shows a subtle gradient on the right edge when table is scrollable */
+.table-scroll-container {
+  position: relative;
+}
+.table-scroll-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(to var(--scroll-dir, right), transparent, var(--color-card));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.table-scroll-container.is-scrollable::after {
+  opacity: 1;
+}
+
+/* Touch-friendly tap targets on mobile */
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    min-height: 44px;
+  }
+  
+  .input-field {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Stack filter bars on mobile */
+@media (max-width: 640px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-bar > * {
+    width: 100%;
+  }
+}
+
 
 
 /* === Animations & Transitions === */

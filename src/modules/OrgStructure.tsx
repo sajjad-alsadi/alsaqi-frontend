@@ -87,7 +87,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onEdit, onAddChild, on
           </div>
         </div>
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <button 
             onClick={() => onAddChild(node.id)}
             className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] rounded-lg transition-colors"
@@ -243,11 +243,11 @@ const OrgStructure: React.FC = () => {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/20">
             <Network size={32} />
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">
               {t('organizationalStructure')}
             </h1>
             <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('orgStructureDesc')}</p>

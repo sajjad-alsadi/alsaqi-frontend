@@ -49,6 +49,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
     formState: { errors, isSubmitting },
   } = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
+    mode: 'onBlur',
     defaultValues: {
       audit_id: plans[0]?.id ? String(plans[0].id) : '',
       procedure: '',

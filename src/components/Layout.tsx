@@ -96,13 +96,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className={`flex min-h-screen bg-[var(--color-bg-main)] transition-colors duration-300 ${isRTL ? 'font-sans' : ''} ${theme === 'dark' ? 'dark' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Skip to main content link for keyboard users */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[200] focus:px-6 focus:py-3 focus:bg-[var(--color-primary)] focus:text-white focus:rounded-xl focus:shadow-xl focus:font-bold focus:text-sm"
+      >
+        {t('common.skipToContent') || 'Skip to main content'}
+      </a>
+
       {/* Sidebar Overlay for Mobile */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`${isCollapsed ? 'w-24' : 'w-72'} ${isMobileMenuOpen ? 'fixed inset-y-0 start-0 z-50' : 'hidden md:flex'} bg-[var(--color-card)] border-e border-[var(--color-border-soft)] h-screen sticky top-0 flex-col p-6 overflow-y-auto transition-all duration-500 ease-in-out shadow-sm`}>
+      <aside className={`${isCollapsed ? 'w-24' : 'w-72'} ${isMobileMenuOpen ? 'fixed inset-y-0 start-0 z-50' : 'hidden md:flex'} bg-[var(--color-card)] border-e border-[var(--color-border-soft)] h-screen sticky top-0 flex-col p-6 overflow-y-auto transition-all duration-500 ease-in-out shadow-sm`} role="navigation" aria-label="Main navigation">
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} mb-10 px-2`}>
           {!isCollapsed && (
             <motion.div 
@@ -124,6 +132,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`p-2 rounded-full hover:bg-[var(--color-bg-main)] text-[var(--color-text-muted)] transition-colors ${isCollapsed ? 'mt-4' : ''} hidden md:block`}
+            aria-label={isCollapsed ? (t('common.expandSidebar') || 'Expand sidebar') : (t('common.collapseSidebar') || 'Collapse sidebar')}
           >
             {isRTL ? (
               isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />
@@ -133,7 +142,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-2" aria-label="Main menu">
           {menuItems.map((item) => (
             <div key={item.id} className="relative group">
               <motion.button
@@ -143,6 +152,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   navigate(item.path);
                   setIsMobileMenuOpen(false);
                 }}
+                aria-current={activeTab === item.id ? 'page' : undefined}
+                aria-label={isCollapsed ? item.label : undefined}
                 className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-3 rounded-2xl transition-all relative ${
                   activeTab === item.id 
                     ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' 
@@ -212,6 +223,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <button 
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   className="md:hidden p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                  aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={isMobileMenuOpen}
                 >
                   {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -310,7 +323,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         )}
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-[var(--color-bg-main)]">
+        <div id="main-content" role="main" className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-[var(--color-bg-main)]" tabIndex={-1}>
           <div className="max-w-7xl mx-auto w-full animate-fade-in">
             {children}
           </div>

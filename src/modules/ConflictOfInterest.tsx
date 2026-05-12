@@ -89,7 +89,7 @@ const ConflictOfInterest: React.FC = () => {
     <div className="space-y-10">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.conflicts')}</h2>
+          <h2 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.conflicts')}</h2>
           <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('integrity.coiSubtitle')}</p>
         </div>
         <button 

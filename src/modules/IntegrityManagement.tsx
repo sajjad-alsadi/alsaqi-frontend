@@ -54,11 +54,11 @@ const IntegrityManagement: React.FC = () => {
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/20">
             <Scale size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.title')}</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.title')}</h2>
             <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('integrity.subTitle')}</p>
           </div>
         </div>

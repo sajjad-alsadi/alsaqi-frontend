@@ -43,6 +43,7 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
     formState: { errors, isSubmitting },
   } = useForm<FindingFormValues>({
     resolver: zodResolver(findingSchema) as any,
+    mode: 'onBlur',
     defaultValues: {
       audit_id: '',
       condition: '',

@@ -231,7 +231,7 @@ export default function ComplianceMatrix() {
   // --- RENDERS ---
   const renderRegistry = () => (
     <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between gap-4 bg-[var(--color-card)]/40 p-4 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
+      <div className="flex flex-col lg:flex-row justify-between gap-4 bg-[var(--color-bg-soft)]/50 p-4 rounded-2xl border border-[var(--color-border-soft)]">
         <div className="relative group flex-1 max-w-md">
           <Search className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
           <input 
@@ -269,7 +269,7 @@ export default function ComplianceMatrix() {
 
       <div className="glass-card">
         <div className="overflow-x-visible lg:overflow-x-auto">
-          <table className="w-full text-end">
+          <table className="w-full text-start">
             <thead>
               <tr className="border-b border-[var(--color-border-soft)] bg-[var(--color-bg-soft)]/50">
                 <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.ref')}</th>
@@ -390,7 +390,7 @@ export default function ComplianceMatrix() {
     
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center bg-[var(--color-card)]/40 p-4 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
+        <div className="flex justify-between items-center bg-[var(--color-bg-soft)]/50 p-4 rounded-2xl border border-[var(--color-border-soft)]">
            <div>
               <h3 className="font-bold text-[var(--color-text-main)] uppercase tracking-tighter flex items-center gap-2">
                 <Layers size={18} className="text-[var(--color-primary)]" /> {t('complianceMatrix.gapMatrix')}
@@ -437,7 +437,7 @@ export default function ComplianceMatrix() {
                   {stItems.map((item, iIdx) => (
                     <motion.div 
                       key={item.id}
-                      whileHover={{ scale: 1.02, x: -4 }}
+                      whileHover={{ scale: 1.02 }}
                       onClick={() => { setSelectedItem(item); setFormData(item); setIsViewModalOpen(true); }}
                       className="group p-4 bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm hover:shadow-md hover:border-[var(--color-primary)]/30 transition-all cursor-pointer relative overflow-hidden"
                     >
@@ -445,7 +445,7 @@ export default function ComplianceMatrix() {
                       <div className="text-[9px] font-bold font-mono text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] mb-1 leading-none">{item.ref_number}</div>
                       <div className="font-bold text-[var(--color-text-main)] text-xs mb-2 leading-snug truncate-2-lines">{item.title}</div>
                       
-                      <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50">
+                      <div className="flex items-center justify-between mt-auto pt-2 border-t border-[var(--color-border-soft)]/50">
                         {getSourceBadge(item.source_type)}
                         <div className="flex -space-x-1 space-x-reverse">
                            <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]/10 border-2 border-white flex items-center justify-center text-[8px] font-bold text-[var(--color-primary)]" title={item.responsible_person_name || ''}>
@@ -623,19 +623,19 @@ export default function ComplianceMatrix() {
   };
 
   return (
-    <div className="p-4 sm:p-8 max-w-screen-2xl mx-auto" dir="rtl">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/20">
             <ShieldCheck size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.complianceMatrix')}</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.complianceMatrix')}</h2>
             <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('complianceMatrix.subTitle')}</p>
           </div>
         </div>
 
-        <div className="flex items-center bg-[var(--color-card)]/40 p-1.5 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
+        <div className="flex items-center p-1.5 bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)]">
           {[
             { id: 'registry', label: t('complianceMatrix.generalRegistry'), icon: List },
             { id: 'matrix', label: t('complianceMatrix.gapMatrixTab'), icon: Layers },
@@ -644,8 +644,8 @@ export default function ComplianceMatrix() {
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all
-                ${activeTab === tab.id ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest transition-all cursor-pointer
+                ${activeTab === tab.id ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'}`}
             >
               <tab.icon size={14} /> {tab.label}
             </button>
@@ -682,7 +682,7 @@ export default function ComplianceMatrix() {
                       <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.titleLabel')}</label>
                       <input type="text" required className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} placeholder={t('complianceMatrix.titlePlaceholder')} />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div>
                           <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.source')} *</label>
                           <select required className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all appearance-none" value={formData.source_type || ''} onChange={e => setFormData({...formData, source_type: e.target.value as SourceType})}>
@@ -703,7 +703,7 @@ export default function ComplianceMatrix() {
                      <Building size={14} /> {t('complianceMatrix.responsibilities')}
                   </h4>
                   <div className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div>
                           <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.personResp')}</label>
                           <select className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.responsible_person_id || ''} onChange={e => setFormData({...formData, responsible_person_id: e.target.value})}>
@@ -729,7 +729,7 @@ export default function ComplianceMatrix() {
                      <ShieldCheck size={14} /> {t('complianceMatrix.evalMatch')}
                   </h4>
                   <div className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div>
                           <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.statusLabel')}</label>
                           <select className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.compliance_status || 'under_review'} onChange={e => setFormData({...formData, compliance_status: e.target.value as ComplianceStatus})}>
@@ -752,7 +752,7 @@ export default function ComplianceMatrix() {
                   <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <Calendar size={14} /> {t('complianceMatrix.importantDates')}
                   </h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                      <div>
                         <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.effectiveDate')}</label>
                         <input type="date" className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.effective_date || ''} onChange={e => setFormData({...formData, effective_date: e.target.value})} />
@@ -821,13 +821,13 @@ export default function ComplianceMatrix() {
         title={t('deleteConfirm')}
       >
         <div className="space-y-6 pt-2">
-          <div className="flex items-center gap-4 p-4 bg-rose-50 rounded-2xl border border-rose-100">
-            <div className="w-12 h-12 rounded-xl bg-rose-500 flex items-center justify-center text-white shadow-lg shadow-rose-200">
+          <div className="flex items-center gap-4 p-4 bg-[var(--color-danger-light)] rounded-2xl border border-[var(--color-danger)]/20">
+            <div className="w-12 h-12 rounded-xl bg-[var(--color-danger)] flex items-center justify-center text-white shadow-lg shadow-[var(--color-danger)]/20">
               <Trash2 size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-rose-900 text-sm">{t('deleteConfirm')}</h4>
-              <p className="text-rose-700/70 text-[10px] font-bold">{t('deleteMessage')}</p>
+              <h4 className="font-bold text-[var(--color-danger)] text-sm">{t('deleteConfirm')}</h4>
+              <p className="text-[var(--color-text-muted)] text-[10px] font-bold">{t('deleteMessage')}</p>
             </div>
           </div>
           
@@ -837,13 +837,13 @@ export default function ComplianceMatrix() {
                 setIsDeleteModalOpen(false);
                 setItemToDelete(null);
               }}
-              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold text-[10px] uppercase tracking-widest hover:bg-[var(--color-bg-main)] transition-all"
+              className="btn-secondary"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={confirmDelete}
-              className="px-8 py-3 rounded-2xl bg-rose-500 text-white font-bold text-[10px] uppercase tracking-widest hover:bg-rose-600 shadow-xl shadow-rose-200 transition-all"
+              className="btn-danger"
             >
               {t('delete')}
             </button>

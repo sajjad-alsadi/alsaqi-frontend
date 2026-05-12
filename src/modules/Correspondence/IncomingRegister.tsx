@@ -290,7 +290,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <button 
                         onClick={() => onViewDetails(item.id)}
                         className="p-2 bg-[var(--color-card)] text-[var(--color-primary)] border border-[var(--color-border-soft)] hover:border-[var(--color-primary)]/30 rounded-xl shadow-sm transition-all"

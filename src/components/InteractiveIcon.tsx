@@ -15,6 +15,7 @@ interface InteractiveIconProps {
   active?: boolean;
   variant?: 'ghost' | 'solid' | 'outline' | 'danger';
   badge?: string | number;
+  ariaExpanded?: boolean;
 }
 
 const InteractiveIcon: React.FC<InteractiveIconProps> = ({
@@ -28,7 +29,8 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
   disabled = false,
   active = false,
   variant = 'ghost',
-  badge
+  badge,
+  ariaExpanded
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -81,6 +83,9 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
         onMouseLeave={handleMouseLeave}
         onClick={onClick}
         disabled={disabled}
+        aria-label={tooltip}
+        aria-pressed={active}
+        aria-expanded={ariaExpanded}
         className={`
           p-2.5 rounded-xl transition-all duration-200 flex items-center justify-center relative
           ${getVariantClasses()} 

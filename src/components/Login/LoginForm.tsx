@@ -48,6 +48,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           className="p-4 bg-[var(--color-danger-light)] border border-[var(--color-danger)]/20 rounded-xl flex items-center gap-3 text-[var(--color-danger)] text-sm overflow-hidden"
+          role="alert"
+          aria-live="assertive"
         >
           <AlertCircle size={18} className="shrink-0" />
           <span>{error}</span>
@@ -58,6 +60,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           className="p-4 bg-[var(--color-success-light)] border border-[var(--color-success)]/20 rounded-xl flex items-center gap-3 text-[var(--color-success)] text-sm overflow-hidden"
+          role="status"
+          aria-live="polite"
         >
           <ShieldCheck size={18} className="shrink-0" />
           <span>{success}</span>
@@ -65,13 +69,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <div className="space-y-2">
-        <label className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
+        <label htmlFor="login-username" className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
           {t('auth.usernameOrEmail')}
         </label>
         <div className="relative group">
           <UserIcon className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
           <input
+            id="login-username"
             type="text"
+            autoComplete="username"
             className={`w-full ps-12 pe-4 py-3.5 bg-[var(--color-card)] border ${error ? 'border-[var(--color-danger)]' : 'border-[var(--color-border-soft)]'} rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-medium text-[var(--color-text-main)]`}
             placeholder={t('auth.usernameOrEmail')}
             value={username}
@@ -90,14 +96,16 @@ const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <div className="space-y-2">
-        <label className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
+        <label htmlFor="login-password" className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
           {t('common.password')}
         </label>
         <div className="relative group">
           <Lock className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
           <input
+            id="login-password"
             type={showPassword ? "text" : "password"}
             required
+            autoComplete="current-password"
             className="w-full ps-12 pe-12 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-medium text-[var(--color-text-main)]"
             placeholder="••••••••"
             value={password}
@@ -107,6 +115,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
+            aria-label={showPassword ? t('auth.hidePassword') || 'Hide password' : t('auth.showPassword') || 'Show password'}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>

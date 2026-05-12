@@ -56,6 +56,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
     formState: { errors, isSubmitting },
   } = useForm<IncomingFormValues>({
     resolver: zodResolver(incomingSchema) as any,
+    mode: 'onBlur',
     defaultValues: {
       sender_entity_type: EntityType.PRIVATE,
       classification: CorrespondenceClassification.GENERAL,
