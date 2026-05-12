@@ -4,5 +4,6 @@ dist/
 coverage/
 .DS_Store
 *.log
+!debug-eece07.log
 .env*
 !.env.example
