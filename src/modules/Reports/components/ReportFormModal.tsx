@@ -106,14 +106,14 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
             {selectedAuditId && (
               <div>
                 <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('reports.includeFindings')}</label>
-                <div className="border border-[var(--color-border-soft)] rounded-[1.5rem] max-h-60 overflow-y-auto p-2 space-y-2 custom-scrollbar">
+                <div className="border border-[var(--color-border-soft)] rounded-xl max-h-60 overflow-y-auto p-2 space-y-2 custom-scrollbar">
                   {(!Array.isArray(findings) || findings.length === 0) ? (
                     <p className="text-[var(--color-text-muted)] text-sm p-4 text-center">{t('reports.noFindingsForThisAudit')}</p>
                   ) : (
                     findings.map(finding => (
                       <div 
                         key={finding.id} 
-                        className="flex items-start gap-3 p-3 hover:bg-[var(--color-bg-main)] rounded-[1.5rem] cursor-pointer transition-colors"
+                        className="flex items-start gap-3 p-3 hover:bg-[var(--color-bg-main)] rounded-xl cursor-pointer transition-colors"
                         onClick={() => onToggleFinding(finding.id!)}
                       >
                         <div className={`mt-1 ${selectedFindings.includes(finding.id!) ? 'text-[var(--color-primary)]' : 'text-[var(--color-border-soft)]'}`}>
@@ -121,7 +121,7 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                         </div>
                         <div>
                           <p className="text-sm font-bold text-[var(--color-text-main)]">{finding.condition}</p>
-                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mt-1 inline-block ${
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mt-1 inline-block ${
                             finding.risk_level === 'High' ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]' :
                             finding.risk_level === 'Medium' ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' :
                             'bg-[var(--color-success)]/10 text-[var(--color-success)]'
@@ -139,20 +139,20 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
             <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
               <button 
                 onClick={onClose}
-                className="px-6 py-3 rounded-[2rem] bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
+                className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
               >
                 {t('common.cancel')}
               </button>
               <button 
                 onClick={onPreview}
-                className="px-6 py-3 rounded-[2rem] bg-[var(--color-card)] border-2 border-[var(--color-border-soft)] text-[var(--color-text-main)] font-bold hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-2"
+                className="px-6 py-3 rounded-2xl bg-[var(--color-card)] border-2 border-[var(--color-border-soft)] text-[var(--color-text-main)] font-bold hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-2"
               >
                 <Eye size={18} />
                 {t('common.preview')}
               </button>
               <button 
                 onClick={onSave}
-                className="px-6 py-3 rounded-[2rem] bg-[var(--color-primary)] text-white font-bold hover:bg-[var(--color-primary)]/90 transition-colors shadow-lg shadow-[var(--color-primary)]/30 flex items-center gap-2"
+                className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-white font-bold hover:bg-[var(--color-primary)]/90 transition-colors shadow-lg shadow-[var(--color-primary)]/30 flex items-center gap-2"
               >
                 <Download size={18} />
                 {t('common.save')}

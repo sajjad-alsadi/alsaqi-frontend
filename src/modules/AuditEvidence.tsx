@@ -185,12 +185,12 @@ const AuditEvidence: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <FolderOpen size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('evidence.title')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('evidence.secureDocumentRepository')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('evidence.title')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('evidence.secureDocumentRepository')}</p>
           </div>
         </div>
         
@@ -206,7 +206,7 @@ const AuditEvidence: React.FC = () => {
             ))}
           </select>
           <div className="relative flex-1 min-w-[250px]">
-            <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={20} />
             <input 
               type="text"
               placeholder={t('common.search')}
@@ -245,12 +245,12 @@ const AuditEvidence: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="glass-card p-10 border-primary/20"
         >
-          <h3 className="text-xl font-black text-slate-800 mb-8">
+          <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-8">
             {editingId ? (t('evidence.editEvidence')) : (t('evidence.uploadNewEvidence'))}
           </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.auditEngagement')}</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('evidence.auditEngagement')}</label>
               <select 
                 required
                 className="input-field"
@@ -265,7 +265,7 @@ const AuditEvidence: React.FC = () => {
             </div>
             
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.relatedFindingOptional')}</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('evidence.relatedFindingOptional')}</label>
               <select 
                 className="input-field"
                 value={formData.finding_id || ''}
@@ -279,7 +279,7 @@ const AuditEvidence: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.evidenceType')}</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('evidence.evidenceType')}</label>
               <select 
                 required
                 className="input-field"
@@ -295,19 +295,19 @@ const AuditEvidence: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
                 {t('evidence.fileAttachment')} {editingId && (t('evidence.optional'))}
               </label>
               <input 
                 type="file" 
                 required={!editingId}
                 onChange={handleFileChange}
-                className="input-field file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                className="input-field file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
               />
             </div>
 
             <div className="md:col-span-2 space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.description')}</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('evidence.description')}</label>
               <textarea 
                 required
                 className="input-field min-h-[100px]"
@@ -326,7 +326,7 @@ const AuditEvidence: React.FC = () => {
                   setFormData({ type: 'Document' });
                   setFile(null);
                 }} 
-                className="px-8 py-4 rounded-[1.5rem] font-black text-slate-400 hover:bg-slate-100 transition-all uppercase tracking-widest text-xs"
+                className="px-8 py-4 rounded-xl font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] transition-all uppercase tracking-widest text-xs"
               >
                 {t('common.cancel')}
               </button>
@@ -350,7 +350,7 @@ const AuditEvidence: React.FC = () => {
               className="glass-card p-8 group hover:border-primary/30 transition-all flex flex-col"
             >
               <div className="flex items-start justify-between mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shadow-inner overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--color-bg-soft)] flex items-center justify-center text-primary shadow-inner overflow-hidden">
                   {ev.file_data && (ev.file_data.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(ev.file_name)) ? (
                     <img 
                       src={ev.file_data} 
@@ -365,24 +365,24 @@ const AuditEvidence: React.FC = () => {
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setPreviewItem(ev)}
-                    className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-all"
+                    className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-all"
                     title={t('evidence.preview')}
                   >
                     <Eye size={18} />
                   </button>
-                  <button onClick={() => handleDownload(ev)} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/10 flex items-center justify-center transition-all" title={t('evidence.download')}>
+                  <button onClick={() => handleDownload(ev)} className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-primary hover:bg-primary/10 flex items-center justify-center transition-all" title={t('evidence.download')}>
                     <Download size={18} />
                   </button>
                   {canEdit && (
                     <>
                       <button 
                         onClick={() => handleEdit(ev)}
-                        className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-amber-600 hover:bg-amber-50 flex items-center justify-center transition-all"
+                        className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-amber-600 hover:bg-amber-50 flex items-center justify-center transition-all"
                         title={t('common.edit')}
                       >
                         <Edit size={18} />
                       </button>
-                      <button onClick={() => ev.id && handleDelete(ev.id)} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all" title={t('common.delete')}>
+                      <button onClick={() => ev.id && handleDelete(ev.id)} className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all" title={t('common.delete')}>
                         <Trash2 size={18} />
                       </button>
                     </>
@@ -390,29 +390,29 @@ const AuditEvidence: React.FC = () => {
                 </div>
               </div>
 
-              <h3 className="text-lg font-black text-slate-800 mb-2 line-clamp-2" title={ev.file_name}>
+              <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2 line-clamp-2" title={ev.file_name}>
                 {ev.file_name}
               </h3>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6">
                 {ev.type} • {formatDate(ev.upload_date)}
               </p>
 
               <div className="flex-1">
-                <p className="text-sm text-slate-600 font-medium line-clamp-3 mb-6">
+                <p className="text-sm text-[var(--color-text-muted)] font-medium line-clamp-3 mb-6">
                   {ev.description}
                 </p>
               </div>
 
-              <div className="space-y-3 pt-6 border-t border-slate-100">
+              <div className="space-y-3 pt-6 border-t border-[var(--color-border-soft)]">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                  <p className="text-xs font-bold text-slate-600 truncate">
+                  <p className="text-xs font-bold text-[var(--color-text-muted)] truncate">
                     {t('common.auditPlan')}: {audit?.title || (t('evidence.unknown'))}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
-                  <p className="text-xs font-bold text-slate-500 truncate">
+                  <p className="text-xs font-bold text-[var(--color-text-muted)] truncate">
                     {t('evidence.uploadedBy')}{ev.uploaded_by}
                   </p>
                 </div>
@@ -431,11 +431,11 @@ const AuditEvidence: React.FC = () => {
         
         {filteredEvidence.length === 0 && !loading && (
           <div className="col-span-full glass-card p-20 text-center">
-            <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-slate-300 shadow-inner">
+            <div className="w-24 h-24 bg-[var(--color-bg-soft)] rounded-2xl flex items-center justify-center mx-auto mb-8 text-[var(--color-border-strong)] shadow-inner">
               <AlertCircle size={48} />
             </div>
-            <h3 className="text-2xl font-black text-slate-800 mb-3 tracking-tight">{t('evidence.noEvidenceFound')}</h3>
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">{t('evidence.uploadDocumentsToBuildTrail')}</p>
+            <h3 className="text-2xl font-bold text-[var(--color-text-main)] mb-3 tracking-tight">{t('evidence.noEvidenceFound')}</h3>
+            <p className="text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-xs">{t('evidence.uploadDocumentsToBuildTrail')}</p>
           </div>
         )}
       </div>
@@ -449,7 +449,7 @@ const AuditEvidence: React.FC = () => {
         title={t('plan.deleteConfirm')}
       >
         <div className="space-y-6">
-          <p className="text-slate-600 font-medium">
+          <p className="text-[var(--color-text-muted)] font-medium">
             {t('plan.deleteMessage')}
           </p>
           <div className="flex justify-end gap-4">
@@ -458,7 +458,7 @@ const AuditEvidence: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setItemToDelete(null);
               }}
-              className="px-6 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors"
             >
               {t('common.cancel')}
             </button>
@@ -478,7 +478,7 @@ const AuditEvidence: React.FC = () => {
         title={previewItem?.file_name || (t('evidence.preview'))}
         size="full"
       >
-        <div className="w-full h-full bg-slate-50 rounded-xl overflow-hidden">
+        <div className="w-full h-full bg-[var(--color-bg-soft)] rounded-xl overflow-hidden">
           {previewItem?.file_data ? (
             previewItem.file_data.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(previewItem.file_name) ? (
               <img 
@@ -493,8 +493,8 @@ const AuditEvidence: React.FC = () => {
               </div>
             ) : (
               <div className="text-center p-10">
-                <FileText size={48} className="mx-auto text-slate-300 mb-4" />
-                <p className="text-slate-500 font-bold">{t('evidence.previewNotAvailableForThisFile')}</p>
+                <FileText size={48} className="mx-auto text-[var(--color-border-strong)] mb-4" />
+                <p className="text-[var(--color-text-muted)] font-bold">{t('evidence.previewNotAvailableForThisFile')}</p>
                 <button 
                   onClick={() => previewItem && handleDownload(previewItem)}
                   className="mt-4 btn-primary"
@@ -504,7 +504,7 @@ const AuditEvidence: React.FC = () => {
               </div>
             )
           ) : (
-            <p className="text-slate-400">{t('evidence.noFileDataAvailable')}</p>
+            <p className="text-[var(--color-text-muted)]">{t('evidence.noFileDataAvailable')}</p>
           )}
         </div>
       </Modal>

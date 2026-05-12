@@ -58,7 +58,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
       {isReady && dimensions.width > 0 && dimensions.height > 0 ? (
         children(dimensions.width, dimensions.height)
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs italic">
+        <div className="w-full h-full flex items-center justify-center text-[var(--color-text-muted)] text-xs italic">
           Initializing chart...
         </div>
       )}

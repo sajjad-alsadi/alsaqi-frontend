@@ -16,7 +16,7 @@ const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = React.memo((
   return (
     <div className="space-y-8">
       <div className="glass-card p-8">
-        <h3 className="text-xl font-black text-[var(--color-text-main)] mb-8 flex items-center gap-3">
+        <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-8 flex items-center gap-3">
           <Plus className="text-[var(--color-success)]" />
           {t('dashboard.quickActions')}
         </h3>
@@ -37,7 +37,7 @@ const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = React.memo((
       </div>
 
       <div className="glass-card p-8 border-[var(--color-danger)]/20">
-        <h3 className="text-xl font-black text-[var(--color-text-main)] mb-8 flex items-center gap-3">
+        <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-8 flex items-center gap-3">
           <Bell className="text-[var(--color-danger)] animate-pulse" />
           {t('dashboard.alerts')}
         </h3>
@@ -46,14 +46,14 @@ const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = React.memo((
             <AlertTriangle className="text-[var(--color-danger)]" size={28} />
             <div>
               <p className="text-xs font-bold text-[var(--color-danger)] uppercase tracking-widest mb-1">{t('dashboard.overdueRecommendations')}</p>
-              <p className="text-2xl font-black text-[var(--color-text-main)] leading-none">{formatNumber(stats.recommendations.overdue)}</p>
+              <p className="text-2xl font-bold text-[var(--color-text-main)] leading-none">{formatNumber(stats.recommendations.overdue)}</p>
             </div>
           </div>
           <div className="p-4 rounded-2xl bg-[var(--color-warning)]/5 border border-[var(--color-warning)]/10 flex items-center gap-4">
             <Clock className="text-[var(--color-warning)]" size={28} />
             <div>
               <p className="text-xs font-bold text-[var(--color-warning)] uppercase tracking-widest mb-1">{t('dashboard.pendingResponses')}</p>
-              <p className="text-2xl font-black text-[var(--color-text-main)] leading-none">{formatNumber(stats.correspondence.pending_responses)}</p>
+              <p className="text-2xl font-bold text-[var(--color-text-main)] leading-none">{formatNumber(stats.correspondence.pending_responses)}</p>
             </div>
           </div>
         </div>

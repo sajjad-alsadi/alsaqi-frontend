@@ -140,7 +140,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Main Info */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm overflow-hidden">
             <div className="flex border-b border-[var(--color-border-soft)] overflow-x-auto">
               <DetailTab active={activeTab === 'info'} onClick={() => setActiveTab('info')} label={t('correspondence.basicInfo')} icon={<FileText size={18} />} />
               <DetailTab active={activeTab === 'history'} onClick={() => setActiveTab('history')} label={t('correspondence.statusHistory')} icon={<History size={18} />} />
@@ -243,7 +243,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
                       {(Array.isArray(data.attachments) ? data.attachments : []).map((a: any, idx: number) => (
                         <div key={idx} className="p-4 bg-[var(--color-bg-main)] rounded-xl border border-[var(--color-border-soft)] flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white rounded-lg border border-[var(--color-border-soft)]">
+                            <div className="p-2 bg-[var(--color-card)] rounded-lg border border-[var(--color-border-soft)]">
                               <FileText size={20} className="text-[var(--color-primary)]" />
                             </div>
                             <div>
@@ -267,7 +267,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
         {/* Right Column: Tracking & Summary */}
         <div className="space-y-6">
           {type !== 'Outgoing' && (
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm p-6">
               <h3 className="font-bold text-[var(--color-text-main)] mb-4 flex items-center gap-2">
                 <Clock size={18} className="text-[var(--color-primary)]" />
                 {t('correspondence.followUpTracking')}
@@ -304,7 +304,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
           )}
 
           {type !== 'Outgoing' && (
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm p-6">
               <h3 className="font-bold text-[var(--color-text-main)] mb-4 flex items-center gap-2">
                 <User size={18} className="text-[var(--color-primary)]" />
                 {t('correspondence.responsibility')}
@@ -383,8 +383,8 @@ const DetailTab = ({ active, onClick, label, icon }: any) => (
     onClick={onClick}
     className={`flex items-center gap-2 px-6 py-4.5 text-sm transition-all whitespace-nowrap ${
       active 
-        ? 'border-b-2 border-primary text-primary font-black bg-primary/5' 
-        : 'border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-bold'
+        ? 'border-b-2 border-primary text-primary font-bold bg-primary/5' 
+        : 'border-b-2 border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)] font-bold'
     }`}
   >
     {icon}
@@ -425,7 +425,7 @@ const ArchiveModal = ({ language, id, type, onClose, onSuccess }: any) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden w-full max-w-md">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-xl overflow-hidden w-full max-w-md">
         <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-main)]">
           <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('correspondence.confirmArchive')}</h2>
           <button onClick={onClose} className="p-1 hover:bg-[var(--color-border-soft)] rounded-full text-[var(--color-text-main)]"><X size={20} /></button>
@@ -467,7 +467,7 @@ const StatusUpdateModal = ({ language, id, type, currentStatus, onClose, onSucce
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden w-full max-w-md">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-xl overflow-hidden w-full max-w-md">
         <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-main)]">
           <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('correspondence.updateCorrespondenceStatus')}</h2>
           <button onClick={onClose} className="p-1 hover:bg-[var(--color-border-soft)] rounded-full text-[var(--color-text-main)]"><X size={20} /></button>
@@ -536,7 +536,7 @@ const ReferralModal = ({ language, id, onClose, onSuccess }: any) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden w-full max-w-md">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-xl overflow-hidden w-full max-w-md">
         <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-main)]">
           <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('correspondence.referCorrespondence')}</h2>
           <button onClick={onClose} className="p-1 hover:bg-[var(--color-border-soft)] rounded-full text-[var(--color-text-main)]"><X size={20} /></button>

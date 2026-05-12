@@ -24,12 +24,12 @@ const AuditProgramHeader: React.FC<AuditProgramHeaderProps> = ({
   return (
     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
       <div className="flex items-center gap-6">
-        <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+        <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
           <Library size={32} />
         </div>
         <div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('program.library')}</h2>
-          <p className="text-sm text-slate-400 font-bold mt-2">
+          <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('program.library')}</h2>
+          <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">
             {t('program.manageAndStandardizeAuditPrograms')}
           </p>
         </div>
@@ -37,7 +37,7 @@ const AuditProgramHeader: React.FC<AuditProgramHeaderProps> = ({
       
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <div className="relative flex-1 min-w-[250px]">
-          <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={20} />
           <input 
             type="text"
             placeholder={t('program.search')}

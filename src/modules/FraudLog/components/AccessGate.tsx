@@ -80,12 +80,12 @@ export const AccessGate: React.FC<AccessGateProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-rose-500 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl shadow-rose-200">
+            <div className="w-16 h-16 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-2xl shadow-rose-200">
               <ShieldAlert size={32} />
             </div>
             <div>
-              <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('integrity.fraud')}</h2>
-              <p className="text-sm text-rose-600 font-black uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
+              <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.fraud')}</h2>
+              <p className="text-sm text-rose-600 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
                 <Lock size={14} />
                 {t('integrity.confidentialAccess')}
               </p>
@@ -99,11 +99,11 @@ export const AccessGate: React.FC<AccessGateProps> = ({
           </div>
           
           <div className="relative z-10 text-center max-w-2xl mx-auto">
-            <div className="w-24 h-24 bg-rose-100 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 text-rose-600 shadow-xl">
+            <div className="w-24 h-24 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-10 text-rose-600 shadow-xl">
               <AlertCircle size={48} />
             </div>
-            <h3 className="text-3xl font-black text-slate-800 mb-6 tracking-tight">{t('integrity.accessRestricted')}</h3>
-            <p className="text-slate-500 font-medium leading-relaxed mb-10">
+            <h3 className="text-3xl font-bold text-[var(--color-text-main)] mb-6 tracking-tight">{t('integrity.accessRestricted')}</h3>
+            <p className="text-[var(--color-text-muted)] font-medium leading-relaxed mb-10">
               {t('integrity.accessRestrictedDesc')}
             </p>
             
@@ -113,7 +113,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
                   <Clock size={20} />
                   <span>{t('integrity.accessRequestPending')}</span>
                 </div>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-[var(--color-text-muted)]">
                   {t('integrity.requestSentToManager')}
                 </p>
               </div>
@@ -123,7 +123,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
                   <XCircle size={20} />
                   <span>{t('integrity.accessDenied')}</span>
                 </div>
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="text-sm text-[var(--color-text-muted)] mb-4">
                   {t('integrity.reason')}: {myRequest?.rejection_reason}
                 </p>
                 <button 
@@ -137,13 +137,13 @@ export const AccessGate: React.FC<AccessGateProps> = ({
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <button 
                   onClick={() => setIsRequestModalOpen(true)}
-                  className="px-10 py-4 bg-rose-600 text-white font-black rounded-[1.5rem] shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs"
+                  className="px-10 py-4 bg-rose-600 text-white font-bold rounded-xl shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs"
                 >
                   {t('integrity.requestAccess')}
                 </button>
                 <button 
                   onClick={() => setIsPolicyOpen(true)}
-                  className="px-10 py-4 bg-white text-slate-400 font-black rounded-[1.5rem] border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-widest text-xs"
+                  className="px-10 py-4 bg-[var(--color-card)] text-[var(--color-text-muted)] font-bold rounded-xl border border-[var(--color-border-soft)] hover:bg-[var(--color-bg-soft)] transition-all uppercase tracking-widest text-xs"
                 >
                   {t('integrity.viewPolicy')}
                 </button>
@@ -167,7 +167,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
             </div>
             {requestError && <div className="text-rose-500 text-sm font-bold">{requestError}</div>}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('integrity.reasonForAccess')}</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('integrity.reasonForAccess')}</label>
               <textarea 
                 required
                 rows={4}
@@ -177,7 +177,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
                 onChange={e => setRequestReason(e.target.value)}
               />
             </div>
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
+            <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
               <button 
                 type="button"
                 onClick={() => setIsRequestModalOpen(false)}
@@ -214,20 +214,20 @@ export const AccessGate: React.FC<AccessGateProps> = ({
     <>
       {/* Access Requests Section for Managers */}
       {isManager && requests.filter(r => r.status === 'Pending').length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-          <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div className="bg-[var(--color-card)] rounded-2xl shadow-sm border border-[var(--color-border-soft)] p-6 mb-8">
+          <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-4 flex items-center gap-2">
             <ShieldAlert className="text-amber-500" size={20} />
             {t('integrity.pendingAccessRequests')}
           </h3>
           <div className="space-y-4">
             {requests.filter(r => r.status === 'Pending').map(req => (
-              <div key={req.id} className="flex items-start justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div key={req.id} className="flex items-start justify-between p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-slate-800">{req.user_name}</span>
-                    <span className="text-xs text-slate-400">({req.user_id})</span>
+                    <span className="font-bold text-[var(--color-text-main)]">{req.user_name}</span>
+                    <span className="text-xs text-[var(--color-text-muted)]">({req.user_id})</span>
                   </div>
-                  <p className="text-sm text-slate-600 italic">"{req.reason}"</p>
+                  <p className="text-sm text-[var(--color-text-muted)] italic">"{req.reason}"</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -288,7 +288,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
         title={t('integrity.approveAccessRequest')}
       >
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">{t('integrity.grantAccessFor')}:</p>
+          <p className="text-sm text-[var(--color-text-muted)]">{t('integrity.grantAccessFor')}:</p>
           <select 
             className="input-field"
             value={selectedApprovalDuration}
@@ -363,15 +363,15 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
           >
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border-soft)]">
               <div className="flex items-center gap-4">
-                <h3 className="text-xl font-bold text-slate-800">{t('integrity.fraudPolicyGuidelines')}</h3>
+                <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('integrity.fraudPolicyGuidelines')}</h3>
                 {isManager && !isEditing && (
                   <button 
                     onClick={() => setIsEditing(true)}
-                    className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors flex items-center gap-2 text-sm font-bold"
+                    className="p-2 hover:bg-[var(--color-bg-main)] rounded-lg text-[var(--color-text-muted)] transition-colors flex items-center gap-2 text-sm font-bold"
                   >
                     <Plus size={16} />
                     {t('common.edit')}
@@ -380,32 +380,32 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 hover:bg-[var(--color-bg-main)] rounded-full transition-colors"
               >
-                <X size={24} className="text-slate-500" />
+                <X size={24} className="text-[var(--color-text-muted)]" />
               </button>
             </div>
             
             <div className="p-8 overflow-y-auto custom-scrollbar" dir={i18n.dir()}>
               {isEditing ? (
                 <textarea
-                  className="w-full h-[50vh] p-4 border border-slate-200 rounded-xl font-sans text-slate-700 leading-relaxed text-start focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
+                  className="w-full h-[50vh] p-4 border border-[var(--color-border-soft)] rounded-xl font-sans text-[var(--color-text-main)] leading-relaxed text-start focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                 />
               ) : (
-                <pre className="whitespace-pre-wrap font-sans text-slate-700 leading-relaxed text-start">
+                <pre className="whitespace-pre-wrap font-sans text-[var(--color-text-main)] leading-relaxed text-start">
                   {content}
                 </pre>
               )}
             </div>
             
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-4">
+            <div className="p-6 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-soft)] flex justify-end gap-4">
               {isEditing ? (
                 <>
                   <button 
                     onClick={onCancelEdit}
-                    className="px-6 py-2 bg-white text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                    className="px-6 py-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] rounded-lg hover:bg-[var(--color-bg-soft)] transition-colors font-medium"
                   >
                     {t('common.cancel')}
                   </button>

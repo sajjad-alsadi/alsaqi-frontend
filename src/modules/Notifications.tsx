@@ -61,7 +61,7 @@ const Notifications: React.FC = () => {
       case 'Alert': return <AlertTriangle size={20} className="text-amber-500" />;
       case 'User': return <UserPlus size={20} className="text-purple-500" />;
       case 'Security': return <Shield size={20} className="text-rose-500" />;
-      default: return <Bell size={20} className="text-slate-500" />;
+      default: return <Bell size={20} className="text-[var(--color-text-muted)]" />;
     }
   };
 
@@ -69,12 +69,12 @@ const Notifications: React.FC = () => {
     <div className="space-y-8" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <Bell size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">{t('common.notifications')}</h2>
-            <p className="text-sm text-slate-400 font-bold">{t('common.stayUpdated')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight mb-2">{t('common.notifications')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('common.stayUpdated')}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -90,28 +90,28 @@ const Notifications: React.FC = () => {
 
       <div className="glass-card p-6">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex gap-2 p-1 bg-slate-100 rounded-xl w-fit">
+          <div className="flex gap-2 p-1 bg-[var(--color-bg-main)] rounded-xl w-fit">
             <button 
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${filter === 'all' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'all' ? 'bg-[var(--color-card)] shadow-sm text-primary' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
             >
               {t('common.all')}
             </button>
             <button 
               onClick={() => setFilter('unread')}
-              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${filter === 'unread' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'unread' ? 'bg-[var(--color-card)] shadow-sm text-primary' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
             >
               {t('common.unread')}
             </button>
             <button 
               onClick={() => setFilter('read')}
-              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${filter === 'read' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'read' ? 'bg-[var(--color-card)] shadow-sm text-primary' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
             >
               {t('common.read')}
             </button>
           </div>
           <div className="relative flex-1">
-            <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={18} />
             <input 
               type="text" 
               placeholder={t('common.searchNotifications')} 
@@ -130,11 +130,11 @@ const Notifications: React.FC = () => {
                 animate={{ opacity: 1 }}
                 className="text-center py-20"
               >
-                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                <div className="w-20 h-20 bg-[var(--color-bg-soft)] rounded-full flex items-center justify-center mx-auto mb-4 text-[var(--color-border-strong)]">
                   <Bell size={40} />
                 </div>
-                <h3 className="text-xl font-black text-slate-800 mb-2">{t('common.noNotificationsFound')}</h3>
-                <p className="text-slate-400 text-sm font-bold">{t('common.tryAdjustingFilters')}</p>
+                <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('common.noNotificationsFound')}</h3>
+                <p className="text-[var(--color-text-muted)] text-sm font-bold">{t('common.tryAdjustingFilters')}</p>
               </motion.div>
             ) : (
               (Array.isArray(filteredNotifications) ? filteredNotifications : []).map((notification) => (
@@ -144,25 +144,25 @@ const Notifications: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, height: 0 }}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`relative group p-6 rounded-2xl border transition-all cursor-pointer ${notification.status === 'Unread' ? 'bg-white border-primary/20 shadow-lg shadow-primary/5' : 'bg-slate-50/50 border-slate-100'}`}
+                  className={`relative group p-6 rounded-2xl border transition-all cursor-pointer ${notification.status === 'Unread' ? 'bg-[var(--color-card)] border-primary/20 shadow-lg shadow-primary/5' : 'bg-[var(--color-bg-soft)]/50 border-[var(--color-border-soft)]'}`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.status === 'Unread' ? 'bg-primary/10 shadow-inner' : 'bg-white border border-slate-100'}`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.status === 'Unread' ? 'bg-primary/10 shadow-inner' : 'bg-[var(--color-card)] border border-[var(--color-border-soft)]'}`}>
                       {getIcon(notification.event_type)}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1 pe-12">
-                        <span className={`text-xs font-black uppercase tracking-widest ${notification.status === 'Unread' ? 'text-primary' : 'text-slate-400'}`}>
+                        <span className={`text-xs font-bold uppercase tracking-widest ${notification.status === 'Unread' ? 'text-primary' : 'text-[var(--color-text-muted)]'}`}>
                           {getTranslatedNotificationModule(notification.related_module, t)}
                         </span>
-                        <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                        <span className="text-xs font-bold text-[var(--color-text-muted)] flex items-center gap-1">
                           <Calendar size={12} />
                           {new Date(notification.date).toLocaleString(i18n.language)}
                         </span>
                       </div>
                       
-                      <h3 className={`text-lg font-bold mb-2 pe-12 ${notification.status === 'Unread' ? 'text-slate-800' : 'text-slate-600'}`}>
+                      <h3 className={`text-lg font-bold mb-2 pe-12 ${notification.status === 'Unread' ? 'text-[var(--color-text-main)]' : 'text-[var(--color-text-muted)]'}`}>
                         {getTranslatedNotificationMessage(notification.description, t, language)}
                       </h3>
                       
@@ -173,7 +173,7 @@ const Notifications: React.FC = () => {
                               e.stopPropagation();
                               notification.id && markAsRead(notification.id);
                             }}
-                            className="text-xs font-black text-primary hover:text-primary/80 uppercase tracking-wider flex items-center gap-1"
+                            className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-wider flex items-center gap-1"
                           >
                             <Check size={14} /> {t('common.markAsRead')}
                           </button>
@@ -186,7 +186,7 @@ const Notifications: React.FC = () => {
                               setIsDeleteModalOpen(true);
                             }
                           }}
-                          className="text-xs font-black text-slate-400 hover:text-rose-500 uppercase tracking-wider flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-xs font-bold text-[var(--color-text-muted)] hover:text-rose-500 uppercase tracking-wider flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Trash2 size={14} /> {t('common.delete')}
                         </button>
@@ -213,7 +213,7 @@ const Notifications: React.FC = () => {
         title={t('deleteConfirm')}
       >
         <div className="space-y-6">
-          <p className="text-slate-600 font-medium">
+          <p className="text-[var(--color-text-muted)] font-medium">
             {t('deleteMessage')}
           </p>
           <div className="flex justify-end gap-4">
@@ -222,7 +222,7 @@ const Notifications: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setNotificationToDelete(null);
               }}
-              className="px-6 py-3 rounded-[2rem] bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors"
             >
               {t('common.cancel')}
             </button>
@@ -234,7 +234,7 @@ const Notifications: React.FC = () => {
                   setNotificationToDelete(null);
                 }
               }}
-              className="px-6 py-3 rounded-[2rem] bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200"
+              className="px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200"
             >
               {t('delete')}
             </button>

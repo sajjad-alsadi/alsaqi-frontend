@@ -34,8 +34,8 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
           <User size={24} />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-tight">{t('userManagement.title')}</h2>
-          <p className="text-[11px] text-slate-400 font-bold mt-0.5 opacity-80">{t('userManagement.subtitle')}</p>
+          <h2 className="text-2xl font-bold text-[var(--color-text-main)] tracking-tight leading-tight">{t('userManagement.title')}</h2>
+          <p className="text-[11px] text-[var(--color-text-muted)] font-bold mt-0.5 opacity-80">{t('userManagement.subtitle')}</p>
         </div>
       </div>
       
@@ -45,7 +45,7 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
             <button 
               key={tab}
               onClick={() => onTabChange(tab)}
-              className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
                 activeTab === tab 
                   ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm ring-1 ring-[var(--color-border-soft)]' 
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-card)]/30'

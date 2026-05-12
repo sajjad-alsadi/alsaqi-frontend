@@ -185,7 +185,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       sections.push({ type: 'table', columns, data: tableData });
     }
 
-    await generatePdf(reportTitle, sections, token, i18n.language as 'en' | 'ar', typeDesc ? (reportTypes.find(rt => rt.id === selectedReportType)?.label) : 'تقرير التدقيق', {
+    await generatePdf(reportTitle, sections, token, i18n.language as 'en' | 'ar', typeDesc ? (reportTypes.find(rt => rt.id === selectedReportType)?.label) : t('reports.auditReport'), {
       title: reportTitle,
       report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
       summary: reportSummary,
@@ -240,7 +240,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       }))
     });
 
-    await generatePdf(t('reports.executiveSummaryReportTitle'), sections, token, i18n.language as 'en' | 'ar', 'تقرير عام', {
+    await generatePdf(t('reports.executiveSummaryReportTitle'), sections, token, i18n.language as 'en' | 'ar', t('reports.generalReport'), {
       title: t('reports.executiveSummaryReportTitle'),
       report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
       kpi: execData

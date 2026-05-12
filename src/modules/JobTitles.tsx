@@ -120,24 +120,24 @@ const JobTitles: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[var(--color-bg-soft)]/50 p-6 rounded-2xl border border-[var(--color-border-soft)]">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm border border-slate-100">
+          <div className="w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center text-primary shadow-sm border border-[var(--color-border-soft)]">
             <Briefcase size={24} />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">{t('jobTitles')}</h3>
-            <p className="text-xs text-slate-400 font-bold">{t('manageOrgRoles')}</p>
+            <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">{t('jobTitles')}</h3>
+            <p className="text-xs text-[var(--color-text-muted)] font-bold">{t('manageOrgRoles')}</p>
           </div>
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <div className="relative flex-1 min-w-[250px]">
-            <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={18} />
             <input 
               type="text"
               placeholder={t('common.search')}
-              className="w-full p-2.5 ps-11 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-primary transition-colors shadow-sm"
+              className="w-full p-2.5 ps-11 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm font-bold outline-none focus:border-[var(--color-primary)] transition-colors shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -166,7 +166,7 @@ const JobTitles: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="glass-card p-10 border-primary/20"
         >
-          <h3 className="text-xl font-black text-slate-800 mb-8">{editingId ? t('editJobTitle') : t('addNewJobTitle')}</h3>
+          <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-8">{editingId ? t('editJobTitle') : t('addNewJobTitle')}</h3>
           <form onSubmit={handleSubmit}>
             {error && (
               <div className="mb-6 p-4 bg-rose-50 text-rose-600 rounded-xl border border-rose-100 font-bold text-sm">
@@ -175,11 +175,11 @@ const JobTitles: React.FC = () => {
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('jobTitleName')}</label>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">{t('jobTitleName')}</label>
                 <input required className="input-field" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('common.departments')}</label>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">{t('common.departments')}</label>
                 <select className="input-field" value={formData.department || ''} onChange={e => setFormData({...formData, department: e.target.value})}>
                   <option value="">{t('plan.selectDepartment')}</option>
                   {(Array.isArray(departments) ? departments : []).map(dept => (
@@ -188,7 +188,7 @@ const JobTitles: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('jobLevel')}</label>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">{t('jobLevel')}</label>
                 <select className="input-field" value={formData.job_level || 'Staff'} onChange={e => setFormData({...formData, job_level: e.target.value})}>
                   <option value="Executive">{t('jobTitles.executive')}</option>
                   <option value="Manager">{t('jobTitles.manager')}</option>
@@ -197,7 +197,7 @@ const JobTitles: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('reportsTo')}</label>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">{t('reportsTo')}</label>
                 <select className="input-field" value={formData.reporting_to || ''} onChange={e => setFormData({...formData, reporting_to: e.target.value})}>
                   <option value="">{t('common.none')}</option>
                   {(Array.isArray(jobTitles) ? jobTitles : []).filter(j => String(j.id) !== String(editingId)).map(title => (
@@ -206,11 +206,11 @@ const JobTitles: React.FC = () => {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('common.description')}</label>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">{t('common.description')}</label>
                 <textarea className="input-field min-h-[100px]" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('common.statusLabel')}</label>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">{t('common.statusLabel')}</label>
                 <select className="input-field" value={formData.status || 'Active'} onChange={e => setFormData({...formData, status: e.target.value})}>
                   <option value="Active">{t('active')}</option>
                   <option value="Inactive">{t('inactive')}</option>
@@ -229,17 +229,17 @@ const JobTitles: React.FC = () => {
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-start border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('jobTitles')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.departments')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('jobLevel')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('created')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
+              <tr className="bg-[var(--color-bg-soft)]/50 border-b border-[var(--color-border-soft)]">
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('jobTitles')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.departments')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('jobLevel')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('created')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-[var(--color-border-soft)]/50">
               {(Array.isArray(filteredTitles) ? filteredTitles : []).map((title, idx) => (
                 <motion.tr 
                   key={title.id}
@@ -248,43 +248,43 @@ const JobTitles: React.FC = () => {
                   transition={{ delay: idx * 0.02 }}
                   className="hover:bg-primary/5 transition-colors group"
                 >
-                  <td className="px-6 py-4 text-xs font-bold text-slate-400">#{title.id}</td>
+                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)]">#{title.id}</td>
                   <td className="px-6 py-4">
-                    <div className="font-black text-slate-800">{title.name}</div>
-                    {title.description && <div className="text-xs text-slate-500 truncate max-w-[200px] mt-1">{title.description}</div>}
+                    <div className="font-bold text-[var(--color-text-main)]">{title.name}</div>
+                    {title.description && <div className="text-xs text-[var(--color-text-muted)] truncate max-w-[200px] mt-1">{title.description}</div>}
                   </td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-600">{title.department || '-'}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{title.department || '-'}</td>
                   <td className="px-6 py-4">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--color-bg-main)] text-[var(--color-text-muted)]">
                       {t(`jobTitles.${title.job_level?.toLowerCase()}`)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                       title.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                     }`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${title.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                       {t(`jobTitles.${title.status?.toLowerCase()}`)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs font-bold text-slate-400">
+                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)]">
                     {new Date(title.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => editTitle(title)} className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors" title={t('common.edit')}>
+                      <button onClick={() => editTitle(title)} className="p-2 text-[var(--color-text-muted)] hover:text-primary hover:bg-primary/10 rounded-lg transition-colors" title={t('common.edit')}>
                         <Edit2 size={16} />
                       </button>
                       <button onClick={() => {
                         setTitleToChangeStatus(title);
                         setIsStatusModalOpen(true);
-                      }} className={`p-2 rounded-lg transition-colors ${title.status === 'Active' ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'}`} title={title.status === 'Active' ? t('markInactive') : t('markActive')}>
+                      }} className={`p-2 rounded-lg transition-colors ${title.status === 'Active' ? 'text-[var(--color-text-muted)] hover:text-amber-600 hover:bg-amber-50' : 'text-[var(--color-text-muted)] hover:text-emerald-600 hover:bg-emerald-50'}`} title={title.status === 'Active' ? t('markInactive') : t('markActive')}>
                         <Archive size={16} />
                       </button>
                       <button onClick={() => {
                         setTitleToDelete(title.id);
                         setIsDeleteModalOpen(true);
-                      }} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title={t('common.delete')}>
+                      }} className="p-2 text-[var(--color-text-muted)] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title={t('common.delete')}>
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -302,19 +302,19 @@ const JobTitles: React.FC = () => {
         title={t('deleteJobTitle')}
       >
         <div className="space-y-6">
-          <p className="text-sm text-slate-600 font-bold">
+          <p className="text-sm text-[var(--color-text-muted)] font-bold">
             {t('deleteJobTitleConfirm')}
           </p>
-          <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
+          <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
             <button 
               onClick={() => setIsDeleteModalOpen(false)}
-              className="px-6 py-3 rounded-[2rem] bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={deleteTitle}
-              className="px-6 py-3 rounded-[2rem] bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/30"
+              className="px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/30"
             >
               {t('common.delete')}
             </button>
@@ -328,21 +328,21 @@ const JobTitles: React.FC = () => {
         title={t('common.statusLabel')}
       >
         <div className="space-y-6">
-          <p className="text-sm text-slate-600 font-bold">
+          <p className="text-sm text-[var(--color-text-muted)] font-bold">
             {titleToChangeStatus?.status === 'Active' 
               ? t('statusConfirmInactive') 
               : t('statusConfirmActive')}
           </p>
-          <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
+          <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
             <button 
               onClick={() => setIsStatusModalOpen(false)}
-              className="px-6 py-3 rounded-[2rem] bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors"
             >
               {t('common.cancel')}
             </button>
             <button 
               onClick={archiveTitle}
-              className="px-6 py-3 rounded-[2rem] bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
+              className="px-6 py-3 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
             >
               {t('common.save')}
             </button>

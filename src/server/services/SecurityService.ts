@@ -1,9 +1,8 @@
-import { MagikaNode } from 'magika/node';
 import logger from '../utils/logger.js';
 import fs from 'fs/promises';
 
 export class SecurityService {
-  private static magika: MagikaNode | null = null;
+  private static magika: any = null;
   private static isLoaded = false;
   private static initPromise: Promise<void> | null = null;
 
@@ -18,14 +17,15 @@ export class SecurityService {
     this.initPromise = (async () => {
       try {
         logger.info('Initializing Magika AI for file identification...');
-        // Use the factory method for initialization
+        const { MagikaNode } = await import('magika/node');
         this.magika = await MagikaNode.create();
         this.isLoaded = true;
         logger.info('Magika AI initialized successfully.');
       } catch (error) {
         logger.error('Failed to initialize Magika AI:', error);
         this.initPromise = null;
-        throw new Error('File security identification service is currently unavailable.');
+        // Don't throw - allow server to start without Magika
+        logger.warn('Server will continue without AI file identification.');
       }
     })();
 
@@ -105,10 +105,13 @@ export class SecurityService {
       return true;
     } catch (error) {
       logger.error('File safety validation error:', error);
-      // In case of error in security service, we might fail open or closed. 
-      // Usually better to fail closed for security, but might cause UX issues if AI is down.
-      // Default to allowed for now if only the AI fails, but log it.
-      return true; 
+      // Fail-closed: if security check fails, reject the file
+      // Only allow if Magika is simply not loaded (graceful degradation)
+      if (!this.isLoaded) {
+        logger.warn('Magika not available - allowing file with extension-only validation');
+        return true;
+      }
+      return false; 
     }
   }
 }

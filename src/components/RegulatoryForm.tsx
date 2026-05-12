@@ -100,11 +100,11 @@ const RegulatoryForm: React.FC<RegulatoryFormProps> = ({ onSuccess, onClose, ini
           htmlFor="regulatory-file"
           className="input-field flex items-center justify-between cursor-pointer group hover:border-primary/50 transition-all"
         >
-          <span className="text-slate-400 font-bold truncate flex items-center gap-2">
-            <Upload size={16} className="text-slate-300 group-hover:text-primary transition-colors" />
+          <span className="text-[var(--color-text-muted)] font-bold truncate flex items-center gap-2">
+            <Upload size={16} className="text-[var(--color-border-strong)] group-hover:text-primary transition-colors" />
             {formData.attachment ? t('common.fileSelected') : t('common.noFileChosen')}
           </span>
-          <span className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+          <span className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
             {t('common.chooseFile')}
           </span>
         </label>

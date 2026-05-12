@@ -39,12 +39,12 @@ export class LogService {
     const params: any[] = [];
 
     if (module) {
-      conditions.push("module = ?");
-      params.push(module);
+      conditions.push("LOWER(module) LIKE ?");
+      params.push(`%${module.toLowerCase()}%`);
     }
     if (action) {
-      conditions.push("action = ?");
-      params.push(action);
+      conditions.push("LOWER(action) LIKE ?");
+      params.push(`%${action.toLowerCase()}%`);
     }
     if (username) {
       conditions.push('"user" LIKE ?');

@@ -326,11 +326,11 @@ const AuditProgramLibrary: React.FC = () => {
         size="sm"
       >
         <div className="space-y-6">
-          <p className="text-slate-600">{t(showDeleteConfirm.type === 'program' ? 'program.deleteMessage' : 'program.deleteProcedureMessage')}</p>
+          <p className="text-[var(--color-text-muted)]">{t(showDeleteConfirm.type === 'program' ? 'program.deleteMessage' : 'program.deleteProcedureMessage')}</p>
           <div className="flex justify-end gap-3">
             <button 
               onClick={() => setShowDeleteConfirm({ id: null, type: 'program' })}
-              className="px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 transition-colors"
+              className="px-4 py-2 rounded-xl text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors"
             >
               {t('common.cancel')}
             </button>

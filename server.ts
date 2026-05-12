@@ -12,6 +12,7 @@ import { fileURLToPath } from "url";
 import crypto from "crypto";
 import cookieParser from "cookie-parser";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 import { FileUploadRequest } from "./src/server/types";
 import { db, initDb as initializeDatabase } from "./src/server/db/index";
 import { getPersistentDataDir } from "./src/server/db/index";
@@ -86,7 +87,8 @@ const saveFile = createSaveFile(uploadDir);
 const logError = createLogError(db);
 
 if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'alsaqi-dev-secret-key-123')) {
-  logger.warn("WARNING: JWT_SECRET is missing or using default value in production. Using a fallback secret.");
+  logger.error("FATAL: JWT_SECRET must be set to a secure value in production. Exiting.");
+  process.exit(1);
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'alsaqi-dev-secret-key-123';
@@ -96,16 +98,58 @@ let JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY?.replace(/\\n/g, '\n').replace(/
 if (!JWT_PRIVATE_KEY || !JWT_PUBLIC_KEY || !JWT_PRIVATE_KEY.includes('-----BEGIN') || !JWT_PUBLIC_KEY.includes('-----BEGIN')) {
   
   const persistentDir = getPersistentDataDir();
-  const keysPath = path.join(persistentDir, '.rsa_keys.json');
+  const keysPath = path.join(persistentDir, '.rsa_keys.enc');
 
+  // Derive encryption key from JWT_SECRET for at-rest protection
+  const deriveEncKey = () => crypto.createHash('sha256').update(JWT_SECRET + '_rsa_enc').digest();
+
+  const encryptKeys = (data: string): string => {
+    const key = deriveEncKey();
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    let encrypted = cipher.update(data, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    const tag = cipher.getAuthTag();
+    return JSON.stringify({ iv: iv.toString('base64'), tag: tag.toString('base64'), data: encrypted });
+  };
+
+  const decryptKeys = (encStr: string): string => {
+    const key = deriveEncKey();
+    const { iv, tag, data } = JSON.parse(encStr);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64'));
+    decipher.setAuthTag(Buffer.from(tag, 'base64'));
+    let decrypted = decipher.update(data, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  };
+
+  // Try loading encrypted keys
   if (fs.existsSync(keysPath)) {
-    logger.info("Loaded persisted RSA JWT keys from local storage.");
     try {
-      const storedKeys = JSON.parse(fs.readFileSync(keysPath, 'utf8'));
+      const encContent = fs.readFileSync(keysPath, 'utf8');
+      const decrypted = decryptKeys(encContent);
+      const storedKeys = JSON.parse(decrypted);
       JWT_PRIVATE_KEY = storedKeys.privateKey;
       JWT_PUBLIC_KEY = storedKeys.publicKey;
+      logger.info("Loaded persisted RSA JWT keys from encrypted storage.");
     } catch (e) {
-      logger.error("Failed to read persisted RSA keys. Regenerating...");
+      logger.error("Failed to decrypt persisted RSA keys. Regenerating...");
+    }
+  }
+
+  // Migrate from old plaintext format if exists
+  const legacyPath = path.join(persistentDir, '.rsa_keys.json');
+  if ((!JWT_PRIVATE_KEY || !JWT_PUBLIC_KEY || !JWT_PRIVATE_KEY.includes('-----BEGIN')) && fs.existsSync(legacyPath)) {
+    try {
+      const storedKeys = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
+      JWT_PRIVATE_KEY = storedKeys.privateKey;
+      JWT_PUBLIC_KEY = storedKeys.publicKey;
+      // Re-save encrypted and remove legacy
+      fs.writeFileSync(keysPath, encryptKeys(JSON.stringify(storedKeys)));
+      fs.unlinkSync(legacyPath);
+      logger.info("Migrated RSA keys from plaintext to encrypted storage.");
+    } catch (e) {
+      logger.error("Failed to migrate legacy RSA keys.");
     }
   }
 
@@ -132,8 +176,8 @@ if (!JWT_PRIVATE_KEY || !JWT_PUBLIC_KEY || !JWT_PRIVATE_KEY.includes('-----BEGIN
     JWT_PUBLIC_KEY = publicKey;
 
     try {
-      fs.writeFileSync(keysPath, JSON.stringify({ privateKey, publicKey }));
-      logger.info("Persisted newly generated RSA keys safely to disk.");
+      fs.writeFileSync(keysPath, encryptKeys(JSON.stringify({ privateKey, publicKey })));
+      logger.info("Persisted newly generated RSA keys (encrypted) to disk.");
     } catch (e) {
       logger.error("Failed to persist RSA keys to disk. Sessions will reset on reboot.");
     }
@@ -189,14 +233,51 @@ async function startServer() {
   // #endregion
   const app = express();
   
+  // Security Headers
+  app.disable('x-powered-by');
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    if (process.env.NODE_ENV === 'production') {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+    next();
+  });
+
   // Enable CORS
+  const corsOrigin = process.env.CORS_ORIGIN;
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: corsOrigin ? corsOrigin.split(',').map(o => o.trim()) : (process.env.NODE_ENV === 'production' ? false : true),
     credentials: true
   }));
 
   const server = http.createServer(app);
   const wss = new WebSocketServer({ server });
+  
+  // WebSocket Connection Handler
+  // Supports authenticated (message-based) and unauthenticated (notification-only) modes
+  wss.on('connection', (ws, req) => {
+    (ws as any).authenticated = false;
+
+    ws.on('message', (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg.type === 'auth' && msg.token) {
+          const decoded = jwt.verify(msg.token, JWT_PUBLIC_KEY!, { algorithms: ['RS256'] }) as any;
+          (ws as any).userId = decoded.id;
+          (ws as any).username = decoded.username;
+          (ws as any).authenticated = true;
+          ws.send(JSON.stringify({ type: 'auth_ok' }));
+        }
+      } catch (err) {
+        // Auth failed — connection stays in unauthenticated mode (receives broadcasts only)
+      }
+    });
+  });
+  
   wss.on('error', (err) => {
     logger.error('WebSocketServer Error:', err);
   });

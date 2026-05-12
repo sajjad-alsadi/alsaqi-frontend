@@ -28,7 +28,7 @@ const DepartmentManagement: React.FC = () => {
       refresh();
     } catch (error: any) {
       console.error("Error adding department:", error);
-      const msg = error.response?.data?.error || t('failedToAddDepartment', 'Failed to add department');
+      const msg = error.response?.data?.error || t('failedToAddDepartment');
       setError(msg);
       toast.error(msg);
     } finally {
@@ -55,7 +55,7 @@ const DepartmentManagement: React.FC = () => {
       setDeptToDelete(null);
     } catch (error: any) {
       console.error("Error deleting department:", error);
-      const msg = error.response?.data?.error || t('failedToDeleteDepartment', 'Failed to delete department');
+      const msg = error.response?.data?.error || t('failedToDeleteDepartment');
       setError(msg);
       toast.error(msg);
     }
@@ -70,7 +70,7 @@ const DepartmentManagement: React.FC = () => {
       refresh();
     } catch (error: any) {
       console.error("Error updating department:", error);
-      const msg = error.response?.data?.error || t('failedToUpdateDepartment', 'Failed to update department');
+      const msg = error.response?.data?.error || t('failedToUpdateDepartment');
       setError(msg);
       toast.error(msg);
     }
@@ -86,24 +86,24 @@ const DepartmentManagement: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <Building size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('modules.OrgStructure')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('manageSystemDepartments')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('modules.OrgStructure')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('manageSystemDepartments')}</p>
           </div>
         </div>
       </div>
 
       {/* Tabs Header */}
-      <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl w-fit">
+      <div className="flex gap-2 p-1 bg-[var(--color-bg-main)] rounded-2xl w-fit">
         <button 
           onClick={() => setActiveTab('departments')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
             activeTab === 'departments' 
-              ? 'bg-white text-[var(--color-primary)] shadow-sm' 
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' 
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
           }`}
         >
           <Building size={18} />
@@ -111,10 +111,10 @@ const DepartmentManagement: React.FC = () => {
         </button>
         <button 
           onClick={() => setActiveTab('jobTitles')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
             activeTab === 'jobTitles' 
-              ? 'bg-white text-[var(--color-primary)] shadow-sm' 
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' 
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
           }`}
         >
           <Briefcase size={18} />
@@ -137,12 +137,12 @@ const DepartmentManagement: React.FC = () => {
               </div>
             )}
             
-            <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-              <h3 className="text-lg font-bold text-slate-700 mb-4">{t('addNew', 'Add New')}</h3>
+            <div className="mb-8 p-6 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)]">
+              <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-4">{t('addNew')}</h3>
               <div className="flex gap-4">
                 <input 
                   className="input-field" 
-                  placeholder={t('newDepartmentName', 'New Department Name')} 
+                  placeholder={t('newDepartmentName')} 
                   value={newDept} 
                   onChange={e => setNewDept(e.target.value)} 
                   onKeyDown={e => e.key === 'Enter' && addDept()}
@@ -153,7 +153,7 @@ const DepartmentManagement: React.FC = () => {
                   className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   <Plus size={20} />
-                  {loading ? "..." : t('add', 'Add')}
+                  {loading ? "..." : t('add')}
                 </button>
               </div>
             </div>
@@ -161,7 +161,7 @@ const DepartmentManagement: React.FC = () => {
             <div className="mb-6">
               <input 
                 className="input-field" 
-                placeholder={t('search', 'Search')} 
+                placeholder={t('search')} 
                 value={searchTerm} 
                 onChange={e => setSearchTerm(e.target.value)} 
               />
@@ -169,22 +169,22 @@ const DepartmentManagement: React.FC = () => {
 
             <div className="space-y-4">
               {filteredDepartments.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">{t('noDepartmentsFound', 'No departments found')}</div>
+                <div className="text-center py-8 text-[var(--color-text-muted)]">{t('noDepartmentsFound')}</div>
               ) : (
                 (Array.isArray(filteredDepartments) ? filteredDepartments : []).map(dept => (
-                  <div key={dept.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={dept.id} className="flex items-center justify-between p-4 bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm hover:shadow-md transition-shadow">
                     {editingDept?.id === dept.id ? (
                       <input className="input-field" value={editingDept.name || ''} onChange={e => setEditingDept({...editingDept, name: e.target.value})} />
                     ) : (
-                      <span className="font-bold text-slate-700">{dept.name}</span>
+                      <span className="font-bold text-[var(--color-text-main)]">{dept.name}</span>
                     )}
                     <div className="flex gap-2">
                       {editingDept?.id === dept.id ? (
                         <button onClick={() => editDept(dept.id, editingDept.name)} className="btn-primary text-xs">{t('save')}</button>
                       ) : (
-                        <button onClick={() => setEditingDept(dept)} className="p-2 text-slate-400 hover:text-primary"><Edit2 size={18} /></button>
+                        <button onClick={() => setEditingDept(dept)} className="p-2 text-[var(--color-text-muted)] hover:text-primary"><Edit2 size={18} /></button>
                       )}
-                      <button onClick={() => handleDeleteClick(dept.id)} className="p-2 text-slate-400 hover:text-rose-500"><Trash2 size={18} /></button>
+                      <button onClick={() => handleDeleteClick(dept.id)} className="p-2 text-[var(--color-text-muted)] hover:text-rose-500"><Trash2 size={18} /></button>
                     </div>
                   </div>
                 ))
@@ -209,22 +209,22 @@ const DepartmentManagement: React.FC = () => {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className="bg-[var(--color-card)] rounded-2xl p-6 w-full max-w-md shadow-2xl"
           >
-            <h3 className="text-xl font-bold text-slate-800 mb-2">{t('deleteConfirm', 'Confirm Deletion')}</h3>
-            <p className="text-slate-500 mb-6">{t('deleteMessage', 'Are you sure you want to delete this department?')}</p>
+            <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('deleteConfirm')}</h3>
+            <p className="text-[var(--color-text-muted)] mb-6">{t('deleteMessage')}</p>
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-[var(--color-text-muted)] font-medium hover:bg-[var(--color-bg-main)] rounded-lg transition-colors"
               >
-                {t('cancel', 'Cancel')}
+                {t('cancel')}
               </button>
               <button 
                 onClick={confirmDelete}
                 className="px-4 py-2 bg-rose-500 text-white font-medium rounded-lg hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20"
               >
-                {t('delete', 'Delete')}
+                {t('delete')}
               </button>
             </div>
           </motion.div>

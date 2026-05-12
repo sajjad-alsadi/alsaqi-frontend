@@ -139,22 +139,22 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
   const zoomOut = () => setScale(prev => Math.max(prev - 0.2, 0.5));
 
   return (
-    <div className="flex flex-col h-full bg-slate-100 rounded-b-3xl overflow-hidden">
-      <div className="flex items-center justify-between p-4 bg-white border-b border-slate-200 shrink-0">
+    <div className="flex flex-col h-full bg-[var(--color-bg-main)] rounded-b-3xl overflow-hidden">
+      <div className="flex items-center justify-between p-4 bg-[var(--color-card)] border-b border-[var(--color-border-soft)] shrink-0">
         <div className="flex items-center gap-2">
           <button 
             onClick={zoomOut}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] rounded-lg transition-colors"
             title={t('zoomOut')}
           >
             <ZoomOut size={20} />
           </button>
-          <span className="text-sm font-medium text-slate-600 min-w-[3rem] text-center">
+          <span className="text-sm font-medium text-[var(--color-text-muted)] min-w-[3rem] text-center">
             {Math.round(scale * 100)}%
           </span>
           <button 
             onClick={zoomIn}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] rounded-lg transition-colors"
             title={t('zoomIn')}
           >
             <ZoomIn size={20} />
@@ -166,25 +166,25 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
             type="button"
             disabled={pageNumber <= 1}
             onClick={previousPage}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronRight size={20} />
           </button>
-          <p className="text-sm font-medium text-slate-600">
+          <p className="text-sm font-medium text-[var(--color-text-muted)]">
             {t('page')} {pageNumber || (numPages ? 1 : '--')} {t('of')} {numPages || '--'}
           </p>
           <button
             type="button"
             disabled={pageNumber >= (numPages || -1)}
             onClick={nextPage}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={20} />
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 flex justify-center bg-slate-100">
+      <div className="flex-1 overflow-auto p-4 flex justify-center bg-[var(--color-bg-main)]">
         {error ? (
           <div className="flex flex-col items-center justify-center h-full text-red-500 gap-4">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
@@ -219,7 +219,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
             />
           </Document>
         ) : (
-          <div className="flex items-center justify-center h-full text-slate-400">
+          <div className="flex items-center justify-center h-full text-[var(--color-text-muted)]">
             {t('loadingFile')}
           </div>
         )}

@@ -80,7 +80,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
             <Shield size={20} />
           </div>
           <div>
-            <h3 className="text-xl font-black text-[var(--color-text-main)]">{t('userManagement.roles.title')}</h3>
+            <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('userManagement.roles.title')}</h3>
             <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.roles.subtitle')}</p>
           </div>
         </div>
@@ -97,7 +97,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Roles Sidebar */}
         <div className="lg:col-span-1 space-y-1.5">
-          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider px-2 mb-2">{t('userManagement.roles.rolesLabel')}</p>
+          <p className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider px-2 mb-2">{t('userManagement.roles.rolesLabel')}</p>
           {localRoles.length > 0 ? localRoles.map(role => (
             <button
               key={role.id}
@@ -109,7 +109,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
               }`}
             >
               <div className="text-start truncate">
-                <p className="text-xs font-black truncate">{getRoleLabel(role.name)}</p>
+                <p className="text-xs font-bold truncate">{getRoleLabel(role.name)}</p>
                 <p className={`text-[9px] ${selectedRoleId === role.id ? 'text-white/70' : 'text-[var(--color-text-muted)]'}`}>
                   {formatNumber((role.permissions || []).length)} {t('userManagement.roles.permissionsLabel')}
                 </p>
@@ -117,7 +117,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
               <ChevronRight size={14} className={selectedRoleId === role.id ? 'opacity-100 flex-shrink-0' : 'opacity-0'} />
             </button>
           )) : (
-            <div className="p-4 text-center text-[var(--color-text-muted)] text-[10px]">Loading roles...</div>
+            <div className="p-4 text-center text-[var(--color-text-muted)] text-[10px]">{t('common.loading')}</div>
           )}
         </div>
 
@@ -128,9 +128,9 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
               <table className="w-full text-start border-collapse">
                 <thead>
                   <tr className="bg-[var(--color-bg-soft)] border-b border-[var(--color-border-soft)]">
-                    <th className="px-5 py-3 text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider text-start min-w-[140px]">{t('userManagement.roles.module')}</th>
+                    <th className="px-5 py-3 text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider text-start min-w-[140px]">{t('userManagement.roles.module')}</th>
                     {actions.map(action => (
-                      <th key={action} className="px-4 py-3 text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider text-center">
+                      <th key={action} className="px-4 py-3 text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider text-center">
                         {t(`permissions.${action}`)}
                       </th>
                     ))}
@@ -147,7 +147,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
                         className="hover:bg-[var(--color-bg-soft)]/50 transition-colors"
                       >
                         <td className="px-5 py-3">
-                          <span className="text-xs font-black text-[var(--color-text-main)]">{t(`modules.${module}`)}</span>
+                          <span className="text-xs font-bold text-[var(--color-text-main)]">{t(`modules.${module}`)}</span>
                         </td>
                         {actions.map(action => {
                           const perm = allPermissions.find(p => p.module === module && p.action === action);
@@ -167,7 +167,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
                                   disabled={disabled}
                                   onChange={(e) => perm && handleToggle(selectedRoleId!, perm.id, e.target.checked)}
                                 />
-                                <div className="w-9 h-5 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)] group-hover:shadow-sm transition-all"></div>
+                                <div className="w-9 h-5 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-card)] after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)] group-hover:shadow-sm transition-all"></div>
                               </label>
                             </td>
                           );
@@ -191,10 +191,10 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className="fixed bottom-10 right-10 bg-[var(--color-success)] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-50"
+          className="fixed bottom-10 end-10 bg-[var(--color-success)] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-50"
         >
           <CheckCircle size={24} />
-          <span className="font-black uppercase tracking-widest text-xs">{t('settingsSavedSuccessfully')}</span>
+          <span className="font-bold uppercase tracking-widest text-xs">{t('settingsSavedSuccessfully')}</span>
         </motion.div>
       )}
     </div>

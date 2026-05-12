@@ -4,7 +4,7 @@ import i18next from 'i18next';
  * Translates error messages from the backend to the current language
  */
 export const translateError = (error: any, language: 'en' | 'ar'): string => {
-  const t = (key: string) => i18next.t(key, { lng: language });
+  const t = (key: string, options?: any) => i18next.t(key, { lng: language, ...options });
   
   if (!error) return t('errorOccurred');
   
@@ -19,13 +19,38 @@ export const translateError = (error: any, language: 'en' | 'ar'): string => {
     'Network Error': t('networkError'),
     'Invalid credentials': t('failedLogin'),
     'Account locked': t('accountLocked'),
+    'Account suspended': t('auth.accountSuspended'),
+    'Account suspended, disabled or archived': t('auth.accountSuspended'),
     'Session expired': t('sessionExpired'),
+    'Session invalidated': t('sessionExpired'),
     'Invalid data': t('invalidData'),
+    'Invalid option': t('validationErrors.invalidOption'),
+    'expected string': t('validationErrors.expectedString'),
+    'Required': t('validationErrors.required'),
+    'too_small': t('validationErrors.tooShort'),
+    'too_big': t('validationErrors.tooLong'),
+    'TOO_MANY_ATTEMPTS': t('auth.tooManyAttempts'),
+    'Too many requests': t('auth.tooManyAttempts'),
+    'Invalid token': t('sessionExpired'),
+    'User not found': t('failedLogin'),
+    'Password change required': t('passwordChangeRequired'),
+    'Forbidden: Insufficient permissions': t('forbidden'),
+    'An unexpected error occurred': t('errorOccurred'),
+    'Missing required fields': t('validationErrors.required'),
+    'Not implemented': t('featureUnderDevelopment'),
   };
 
   // Check if the message matches any known error
   for (const [key, value] of Object.entries(errorMap)) {
     if (message.includes(key)) return value;
+  }
+
+  // Handle Zod validation patterns
+  if (message.includes('Invalid option: expected one of')) {
+    return t('validationErrors.invalidOption');
+  }
+  if (message.includes('Invalid input: expected')) {
+    return t('validationErrors.invalidInput');
   }
 
   // Fallback to the original message if it's already translated or just return generic error

@@ -85,10 +85,10 @@ const PDFSettingsSection: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2">{t('pdf.fontSettings')}</h3>
+          <h3 className="text-lg font-bold text-[var(--color-text-main)] border-b border-[var(--color-border-soft)] pb-2">{t('pdf.fontSettings')}</h3>
           
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.arabicFontName')}</label>
+            <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.arabicFontName')}</label>
             <input 
               type="text" 
               className="input-field" 
@@ -99,7 +99,7 @@ const PDFSettingsSection: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.baseFontSize')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.baseFontSize')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -108,7 +108,7 @@ const PDFSettingsSection: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.headingFontSize')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.headingFontSize')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -117,7 +117,7 @@ const PDFSettingsSection: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.subheadingFontSize')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.subheadingFontSize')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -126,7 +126,7 @@ const PDFSettingsSection: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.tableFontSize')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.tableFontSize')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -138,11 +138,11 @@ const PDFSettingsSection: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2">{t('pdf.pageSettings')}</h3>
+          <h3 className="text-lg font-bold text-[var(--color-text-main)] border-b border-[var(--color-border-soft)] pb-2">{t('pdf.pageSettings')}</h3>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.topMargin')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.topMargin')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -151,7 +151,7 @@ const PDFSettingsSection: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.bottomMargin')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.bottomMargin')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -160,7 +160,7 @@ const PDFSettingsSection: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.rightMargin')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.rightMargin')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -169,7 +169,7 @@ const PDFSettingsSection: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.leftMargin')}</label>
+              <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.leftMargin')}</label>
               <input 
                 type="number" 
                 className="input-field" 
@@ -183,11 +183,11 @@ const PDFSettingsSection: React.FC = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="checkbox" 
-                className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary bg-transparent"
+                className="w-5 h-5 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
                 checked={settings.rtl_enabled === 1}
                 onChange={e => setSettings({...settings, rtl_enabled: e.target.checked ? 1 : 0})}
               />
-              <span className="font-bold text-slate-700">{t('pdf.enableRtl')}</span>
+              <span className="font-bold text-[var(--color-text-main)]">{t('pdf.enableRtl')}</span>
             </label>
           </div>
           
@@ -195,22 +195,22 @@ const PDFSettingsSection: React.FC = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="checkbox" 
-                className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary bg-transparent"
+                className="w-5 h-5 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
                 checked={settings.show_page_number === 1}
                 onChange={e => setSettings({...settings, show_page_number: e.target.checked ? 1 : 0})}
               />
-              <span className="font-bold text-slate-700">{t('pdf.showPageNumber')}</span>
+              <span className="font-bold text-[var(--color-text-main)]">{t('pdf.showPageNumber')}</span>
             </label>
           </div>
         </div>
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2">{t('pdf.headerAndFooter')}</h3>
+        <h3 className="text-lg font-bold text-[var(--color-text-main)] border-b border-[var(--color-border-soft)] pb-2">{t('pdf.headerAndFooter')}</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.headerText')}</label>
+            <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.headerText')}</label>
             <textarea 
               className="input-field min-h-[100px]" 
               value={settings.header_template || ''}
@@ -219,7 +219,7 @@ const PDFSettingsSection: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.footerText')}</label>
+            <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.footerText')}</label>
             <textarea 
               className="input-field min-h-[100px]" 
               value={settings.footer_template || ''}
@@ -230,7 +230,7 @@ const PDFSettingsSection: React.FC = () => {
         </div>
         
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">{t('pdf.logoPosition')}</label>
+          <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('pdf.logoPosition')}</label>
           <select 
             className="input-field"
             value={settings.logo_position}
@@ -244,7 +244,7 @@ const PDFSettingsSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex justify-end pt-6 border-t border-slate-100">
+      <div className="flex justify-end pt-6 border-t border-[var(--color-border-soft)]">
         <button type="submit" className="btn-primary flex items-center gap-2">
           <Save size={20} />
           <span>{t('pdf.saveSettings')}</span>

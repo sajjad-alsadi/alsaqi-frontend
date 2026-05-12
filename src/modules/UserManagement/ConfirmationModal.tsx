@@ -43,9 +43,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-[var(--color-card)] p-8 rounded-[2rem] shadow-2xl max-w-md w-full mx-4 border border-[var(--color-border-soft)]"
+        className="bg-[var(--color-card)] p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-[var(--color-border-soft)]"
       >
-        <h3 className="text-xl font-black text-[var(--color-text-main)] mb-4">{title}</h3>
+        <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-4">{title}</h3>
         <p className="text-[var(--color-text-muted)] mb-6 font-bold">{message}</p>
         
         {children}
@@ -65,13 +65,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <div className="flex justify-end gap-4 mt-8">
           <button 
             onClick={onClose}
-            className="px-6 py-3 rounded-xl text-[var(--color-text-muted)] font-black uppercase tracking-widest text-[10px] hover:bg-[var(--color-bg-soft)] transition-all"
+            className="px-6 py-3 rounded-xl text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--color-bg-soft)] transition-all"
           >
             {t('common.cancel')}
           </button>
           <button 
             onClick={onConfirm}
-            className={`px-8 py-3 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-all shadow-lg ${variantClasses[confirmVariant]}`}
+            className={`px-8 py-3 rounded-xl text-white font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg ${variantClasses[confirmVariant]}`}
           >
             {confirmLabel}
           </button>

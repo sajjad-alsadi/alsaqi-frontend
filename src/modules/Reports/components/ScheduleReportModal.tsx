@@ -50,13 +50,13 @@ const ScheduleReportModal: React.FC<ScheduleReportModalProps> = ({ isOpen, onClo
         <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
           <button 
             onClick={onClose}
-            className="px-6 py-3 rounded-[2rem] bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
+            className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold hover:bg-[var(--color-border-soft)] transition-colors border border-[var(--color-border-soft)]"
           >
             {t('common.cancel')}
           </button>
           <button 
             onClick={onSchedule}
-            className="px-6 py-3 rounded-[2rem] bg-[var(--color-primary)] text-white font-bold hover:bg-[var(--color-primary)]/90 transition-colors shadow-lg shadow-[var(--color-primary)]/30"
+            className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-white font-bold hover:bg-[var(--color-primary)]/90 transition-colors shadow-lg shadow-[var(--color-primary)]/30"
           >
             {t('common.save')}
           </button>

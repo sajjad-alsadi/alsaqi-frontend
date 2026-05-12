@@ -47,7 +47,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-3 text-rose-600 text-sm overflow-hidden"
+          className="p-4 bg-[var(--color-danger-light)] border border-[var(--color-danger)]/20 rounded-xl flex items-center gap-3 text-[var(--color-danger)] text-sm overflow-hidden"
         >
           <AlertCircle size={18} className="shrink-0" />
           <span>{error}</span>
@@ -57,7 +57,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3 text-emerald-600 text-sm overflow-hidden"
+          className="p-4 bg-[var(--color-success-light)] border border-[var(--color-success)]/20 rounded-xl flex items-center gap-3 text-[var(--color-success)] text-sm overflow-hidden"
         >
           <ShieldCheck size={18} className="shrink-0" />
           <span>{success}</span>
@@ -65,15 +65,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <div className="space-y-2">
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">
+        <label className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
           {t('auth.usernameOrEmail')}
         </label>
         <div className="relative group">
-          <UserIcon className="absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+          <UserIcon className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
           <input
             type="text"
-            className={`w-full ps-12 pe-4 py-3.5 bg-white border ${error ? 'border-rose-500' : 'border-slate-200'} rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium text-slate-900`}
-            placeholder="Enter your credentials"
+            className={`w-full ps-12 pe-4 py-3.5 bg-[var(--color-card)] border ${error ? 'border-[var(--color-danger)]' : 'border-[var(--color-border-soft)]'} rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-medium text-[var(--color-text-main)]`}
+            placeholder={t('auth.usernameOrEmail')}
             value={username}
             onChange={(e) => {
               setUsername(e.target.value);
@@ -90,15 +90,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <div className="space-y-2">
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">
+        <label className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
           {t('common.password')}
         </label>
         <div className="relative group">
-          <Lock className="absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+          <Lock className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
           <input
             type={showPassword ? "text" : "password"}
             required
-            className="w-full ps-12 pe-12 py-3.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium text-slate-900"
+            className="w-full ps-12 pe-12 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-medium text-[var(--color-text-main)]"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -106,7 +106,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <button 
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -117,17 +117,17 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <label className="flex items-center gap-2 cursor-pointer group">
           <input 
             type="checkbox" 
-            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+            className="w-4 h-4 rounded border-[var(--color-border-soft)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
           />
-          <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">{t('auth.rememberMe')}</span>
+          <span className="text-sm font-medium text-[var(--color-text-muted)] group-hover:text-[var(--color-text-main)] transition-colors">{t('auth.rememberMe')}</span>
         </label>
 
         <button 
           type="button"
           onClick={onContactClick}
-          className="text-sm font-bold text-primary hover:text-primary/80 transition-colors"
+          className="text-sm font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
         >
           {t('auth.needHelp')}
         </button>
@@ -136,7 +136,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3.5 mt-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-all disabled:opacity-50 active:scale-[0.98] uppercase tracking-widest text-sm"
+        className="w-full py-3.5 mt-2 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 active:scale-[0.98] uppercase tracking-widest text-sm"
       >
         {loading ? '...' : t('auth.login')}
       </button>

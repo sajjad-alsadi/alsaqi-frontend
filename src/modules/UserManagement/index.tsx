@@ -142,9 +142,8 @@ const UserManagement: React.FC = () => {
       refreshAll();
     } catch (err: any) {
       console.error('Error updating permissions:', err);
-      const errorMessage = err.response?.data?.error || 'Failed to update permissions';
       refreshAll();
-      alert(errorMessage);
+      toast.error(t('userManagement.permissionUpdateFailed'));
     }
   };
 

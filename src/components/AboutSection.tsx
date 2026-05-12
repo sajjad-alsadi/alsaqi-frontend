@@ -59,9 +59,9 @@ const AboutSection: React.FC = () => {
   ];
 
   return (
-    <div className="glass-card p-10 space-y-8 bg-white border border-slate-200">
+    <div className="glass-card p-10 space-y-8 bg-[var(--color-card)] border border-[var(--color-border-soft)]">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-black text-slate-800 uppercase tracking-widest">
+        <h3 className="text-xl font-bold text-[var(--color-text-main)] uppercase tracking-widest">
           {t('settings.aboutApplication')}
         </h3>
         {user?.role === 'Admin' && (
@@ -78,7 +78,7 @@ const AboutSection: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {fields.map((field) => (
           <div key={field.key} className="space-y-2">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{field.label}</label>
             {isEditing ? (
               <input 
                 className="input-field"
@@ -86,7 +86,7 @@ const AboutSection: React.FC = () => {
                 onChange={e => setEditForm({...editForm, [field.key]: e.target.value})}
               />
             ) : (
-              <p className="text-sm font-bold text-slate-700">{settings[field.key]}</p>
+              <p className="text-sm font-bold text-[var(--color-text-main)]">{settings[field.key]}</p>
             )}
           </div>
         ))}

@@ -52,19 +52,19 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
     switch (variant) {
       case 'solid':
         return active 
-          ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+          ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20' 
+          : 'bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)]';
       case 'outline':
         return active
-          ? 'border-2 border-primary text-primary bg-primary/5'
-          : 'border border-slate-200 text-slate-500 hover:border-primary hover:text-primary';
+          ? 'border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-primary)]/5'
+          : 'border border-[var(--color-border-soft)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]';
       case 'danger':
-        return 'text-rose-500 hover:bg-rose-50 hover:text-rose-600';
+        return 'text-[var(--color-danger)] hover:bg-[var(--color-danger-light)] hover:text-[var(--color-danger)]';
       case 'ghost':
       default:
         return active
-          ? 'bg-primary/10 text-primary'
-          : 'text-slate-500 hover:bg-slate-100 hover:text-primary';
+          ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-primary)]';
     }
   };
 
@@ -91,7 +91,7 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
         {Icon && <Icon size={size} className={iconClassName} />}
         {children}
         {badge !== undefined && (
-          <span className="absolute -top-1 -end-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg">
+          <span className="absolute -top-1 -end-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-lg">
             {badge}
           </span>
         )}
@@ -104,10 +104,10 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute bottom-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-3 px-3 py-2 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest rounded-[1.5rem] shadow-2xl z-[100] whitespace-nowrap pointer-events-none border border-white/10"
+            className="absolute bottom-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-3 px-3 py-2 bg-[var(--color-text-main)] text-[var(--color-bg-main)] text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-2xl z-[100] whitespace-nowrap pointer-events-none border border-[var(--color-border-soft)]"
           >
             {tooltip}
-            <div className="absolute top-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 border-[6px] border-transparent border-t-slate-900" />
+            <div className="absolute top-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 border-[6px] border-transparent border-t-[var(--color-text-main)]" />
           </motion.div>
         )}
       </AnimatePresence>

@@ -108,7 +108,7 @@ const Dashboard: React.FC = () => {
       <div className="flex items-center justify-center h-screen bg-[var(--color-bg-main)]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-500 font-black uppercase tracking-widest text-xs">{t('common.loading')}</p>
+          <p className="text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-xs">{t('common.loading')}</p>
         </div>
       </div>
     );

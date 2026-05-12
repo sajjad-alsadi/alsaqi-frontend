@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../services/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -71,6 +72,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       }
     } catch (error) {
       console.error("Failed to fetch outgoing correspondence", error);
+      toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -90,6 +92,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       setItemToDelete(null);
     } catch (error) {
       console.error('Error deleting letter:', error);
+      toast.error(t('errorOccurred'));
     }
   };
 
@@ -170,13 +173,13 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       )}
 
       {/* Filters Bar */}
-      <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex flex-wrap items-center gap-4">
+      <div className="bg-[var(--color-bg-soft)]/50 p-4 rounded-2xl border border-[var(--color-border-soft)] flex flex-wrap items-center gap-4">
         <div className="relative flex-1 min-w-[250px]">
-          <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={18} />
           <input 
             type="text"
             placeholder={t('correspondence.searchOutgoingPlaceholder')}
-            className="w-full p-2.5 ps-11 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-primary transition-colors shadow-sm"
+            className="w-full p-2.5 ps-11 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm font-bold outline-none focus:border-[var(--color-primary)] transition-colors shadow-sm"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -194,54 +197,54 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+      <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-start border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">
+              <tr className="bg-[var(--color-bg-soft)]/50 border-b border-[var(--color-border-soft)]">
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">
                   {t('correspondence.seqNumber')}
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.recipient')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.classification')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.sendingMethod')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">{t('correspondence.attachment')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">{t('common.actions')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.recipient')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.classification')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.sendingMethod')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-center">{t('correspondence.attachment')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-center">{t('common.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-[var(--color-border-soft)]/50">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-slate-400 font-bold text-sm">
+                  <td colSpan={8} className="px-6 py-10 text-center text-[var(--color-text-muted)] font-bold text-sm">
                     {t('common.loading')}
                   </td>
                 </tr>
               ) : filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-slate-400 font-bold text-sm">
+                  <td colSpan={8} className="px-6 py-10 text-center text-[var(--color-text-muted)] font-bold text-sm">
                     {t('correspondence.noMatchingResults')}
                   </td>
                 </tr>
               ) : (Array.isArray(filteredItems) ? filteredItems : []).map((item) => (
                 <tr key={item.id} className="hover:bg-primary/5 transition-colors group cursor-pointer" onClick={() => onViewDetails('Outgoing', item.id)}>
-                  <td className="px-6 py-4 text-xs font-black text-slate-300 tracking-widest">{formatNumber(item.sequence_number)}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-700">{formatDate(item.letter_date)}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-700">
+                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{formatNumber(item.sequence_number)}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">{formatDate(item.letter_date)}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">
                     <div className="flex items-center gap-2">
-                      <Building size={14} className="text-slate-400" />
+                      <Building size={14} className="text-[var(--color-text-muted)]" />
                       {item.recipient_entity}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-700 max-w-xs truncate">{item.subject}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)] max-w-xs truncate">{item.subject}</td>
                   <td className="px-6 py-4">
-                    <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-[10px] font-black uppercase tracking-wider text-slate-500 border border-slate-200">
-                      {t(`correspondence.${item.classification.toLowerCase().replace(/\s+/g, '_')}`) || item.classification}
+                    <span className="px-2.5 py-1 bg-[var(--color-bg-main)] rounded-lg text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] border border-[var(--color-border-soft)]">
+                      {t(`correspondence.${(item.classification || '').toLowerCase().replace(/\s+/g, '_')}`) || item.classification}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-700">
-                    {t(`correspondence.${item.sending_method.toLowerCase().replace(/\s+/g, '_')}`) || item.sending_method}
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">
+                    {t(`correspondence.${(item.sending_method || '').toLowerCase().replace(/\s+/g, '_')}`) || item.sending_method}
                   </td>
                   <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                     {item.attachment_file && (
@@ -256,16 +259,16 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                   </td>
                   <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 bg-white text-slate-400 border border-slate-100 hover:text-primary rounded-xl shadow-sm transition-all" title={t('common.download')}>
+                      <button className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-primary rounded-xl shadow-sm transition-all" title={t('common.download')}>
                         <Download size={16} />
                       </button>
                       {userRole === 'Admin' && (
                         <>
-                          <button className="p-2 bg-white text-slate-400 border border-slate-100 hover:text-amber-500 rounded-xl shadow-sm transition-all" title={t('common.edit')}>
+                          <button className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-amber-500 rounded-xl shadow-sm transition-all" title={t('common.edit')}>
                             <Edit2 size={16} />
                           </button>
                           <button 
-                            className="p-2 bg-white text-slate-400 border border-slate-100 hover:text-red-500 rounded-xl shadow-sm transition-all" 
+                            className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-red-500 rounded-xl shadow-sm transition-all" 
                             onClick={() => handleDelete(item.id)}
                             title={t('common.delete')}
                           >
@@ -299,7 +302,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+              className="bg-[var(--color-card)] rounded-3xl border border-[var(--color-border-soft)] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
             >
               <div className="p-6 border-b border-[var(--color-border-soft)] flex items-center justify-between bg-[var(--color-bg-main)]">
                 <h2 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">

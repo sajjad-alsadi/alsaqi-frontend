@@ -834,6 +834,8 @@ export const runMigrations = async () => {
     { table: "user_sessions", column: "refresh_token", type: "TEXT" },
     { table: "refresh_tokens", column: "revoked_at", type: "TIMESTAMP" },
     { table: "outgoing_letters", column: "status", type: "TEXT DEFAULT 'Draft'" },
+    { table: "audit_trail", column: "hash", type: "TEXT" },
+    { table: "audit_trail", column: "previous_hash", type: "TEXT" },
   ];
 
   for (const m of migrations) {
@@ -951,7 +953,31 @@ export const runMigrations = async () => {
     "CREATE INDEX IF NOT EXISTS idx_audit_tasks_plan_id ON audit_tasks(plan_id)",
     "CREATE INDEX IF NOT EXISTS idx_audit_plans_type ON audit_plans(type)",
     "CREATE INDEX IF NOT EXISTS idx_audit_plans_department ON audit_plans(department)",
-    "CREATE INDEX IF NOT EXISTS idx_risk_register_type ON risk_register(type)"
+    "CREATE INDEX IF NOT EXISTS idx_risk_register_type ON risk_register(type)",
+    // Additional performance indexes
+    "CREATE INDEX IF NOT EXISTS idx_audit_tasks_assigned_to ON audit_tasks(assigned_to)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_tasks_status ON audit_tasks(status)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_tasks_deleted_at ON audit_tasks(deleted_at)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_findings_status ON audit_findings(status)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_findings_deleted_at ON audit_findings(deleted_at)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_evidence_audit_id ON audit_evidence(audit_id)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_evidence_finding_id ON audit_evidence(finding_id)",
+    "CREATE INDEX IF NOT EXISTS idx_recommendations_status ON recommendations(status)",
+    "CREATE INDEX IF NOT EXISTS idx_recommendations_responsible ON recommendations(responsible_person_id)",
+    "CREATE INDEX IF NOT EXISTS idx_login_history_user_id ON login_history(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_login_history_login_time ON login_history(login_time)",
+    "CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_user_sessions_status ON user_sessions(status)",
+    "CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON refresh_tokens(expires_at)",
+    "CREATE INDEX IF NOT EXISTS idx_system_error_log_timestamp ON system_error_log(timestamp)",
+    "CREATE INDEX IF NOT EXISTS idx_system_error_log_severity ON system_error_log(severity)",
+    "CREATE INDEX IF NOT EXISTS idx_correspondence_attachments_corr_id ON correspondence_attachments(correspondence_id)",
+    "CREATE INDEX IF NOT EXISTS idx_correspondence_referrals_incoming_id ON correspondence_referrals(incoming_id)",
+    "CREATE INDEX IF NOT EXISTS idx_password_history_user_id ON password_history(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_compliance_items_status ON compliance_items(compliance_status)",
+    "CREATE INDEX IF NOT EXISTS idx_compliance_items_source_type ON compliance_items(source_type)",
+    "CREATE INDEX IF NOT EXISTS idx_compliance_items_deleted_at ON compliance_items(deleted_at)"
   ];
 
   for (const indexSql of indexes) {
@@ -962,44 +988,28 @@ export const runMigrations = async () => {
     }
   }
 
-  // Set revoked_at for legacy revoked tokens
+  // --- COMPLIANCE MATRIX MIGRATION (idempotent) ---
   try {
-    // Drop existing versions of these tables to redefine them (development approach)
-    await db.prepare("DROP TABLE IF EXISTS finding_compliance CASCADE").run();
-    await db.prepare("DROP TABLE IF EXISTS compliance_items CASCADE").run();
-
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS compliance_items (
         id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-        -- Identity
         ref_number            TEXT NOT NULL,
         title                 TEXT NOT NULL,
         source_type           TEXT NOT NULL,
         issuing_authority     TEXT,
         category              TEXT,
-
-        -- Dates
         issue_date            TEXT,
         effective_date        TEXT,
         review_date           TEXT,
-
-        -- Compliance tracking
         compliance_status     TEXT NOT NULL DEFAULT 'under_review',
         maturity_score        INTEGER CHECK(maturity_score BETWEEN 0 AND 100),
         gap_notes             TEXT,
-
-        -- Ownership
         responsible_person_id UUID REFERENCES users(id),
         department_id         UUID REFERENCES org_entities(id),
-
-        -- Content
         description           TEXT,
         keywords              TEXT,
         version               TEXT,
         attachment_path       TEXT,
-
-        -- Meta
         created_by            UUID REFERENCES users(id),
         created_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         updated_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -1015,58 +1025,65 @@ export const runMigrations = async () => {
       )
     `).run();
 
-    // Migrate data
-    await db.prepare(`
-      INSERT INTO compliance_items
-        (ref_number, title, source_type, issuing_authority, category,
-         issue_date, description, compliance_status, created_at)
-      SELECT
-        COALESCE(reference_number, 'REF-' || id::text),
-        title,
-        'cbi_instruction',
-        'البنك المركزي العراقي',
-        category,
-        issue_date,
-        description,
-        CASE WHEN status = 'Active' THEN 'compliant' ELSE 'under_review' END,
-        CURRENT_TIMESTAMP
-      FROM central_bank_instructions
-      WHERE title IS NOT NULL
-    `).run();
+    // Only seed data if compliance_items is empty (first-time migration)
+    const complianceCount = await db.prepare("SELECT count(*) as count FROM compliance_items").get() as any;
+    if (complianceCount && complianceCount.count === 0) {
+      console.log("[MIGRATION] Seeding compliance_items from existing data...");
 
-    await db.prepare(`
-      INSERT INTO compliance_items
-        (ref_number, title, source_type, issuing_authority,
-         issue_date, keywords, compliance_status, created_at)
-      SELECT
-        'LAW-' || id::text,
-        title,
-        'law',
-        authority,
-        issue_date,
-        keywords,
-        'under_review',
-        CURRENT_TIMESTAMP
-      FROM law_bank
-      WHERE title IS NOT NULL
-    `).run();
+      await db.prepare(`
+        INSERT INTO compliance_items
+          (ref_number, title, source_type, issuing_authority, category,
+           issue_date, description, compliance_status, created_at)
+        SELECT
+          COALESCE(reference_number, 'REF-' || id::text),
+          title,
+          'cbi_instruction',
+          'البنك المركزي العراقي',
+          category,
+          issue_date,
+          description,
+          CASE WHEN status = 'Active' THEN 'compliant' ELSE 'under_review' END,
+          CURRENT_TIMESTAMP
+        FROM central_bank_instructions
+        WHERE title IS NOT NULL
+      `).run();
 
-    await db.prepare(`
-      INSERT INTO compliance_items
-        (ref_number, title, source_type, version,
-         issue_date, attachment_path, compliance_status, created_at)
-      SELECT
-        'POL-' || id::text,
-        title,
-        'internal_policy',
-        version,
-        upload_date,
-        file_url,
-        CASE WHEN status = 'Active' THEN 'compliant' ELSE 'under_review' END,
-        CURRENT_TIMESTAMP
-      FROM internal_policies
-      WHERE title IS NOT NULL
-    `).run();
+      await db.prepare(`
+        INSERT INTO compliance_items
+          (ref_number, title, source_type, issuing_authority,
+           issue_date, keywords, compliance_status, created_at)
+        SELECT
+          'LAW-' || id::text,
+          title,
+          'law',
+          authority,
+          issue_date,
+          keywords,
+          'under_review',
+          CURRENT_TIMESTAMP
+        FROM law_bank
+        WHERE title IS NOT NULL
+      `).run();
+
+      await db.prepare(`
+        INSERT INTO compliance_items
+          (ref_number, title, source_type, version,
+           issue_date, attachment_path, compliance_status, created_at)
+        SELECT
+          'POL-' || id::text,
+          title,
+          'internal_policy',
+          version,
+          upload_date,
+          file_url,
+          CASE WHEN status = 'Active' THEN 'compliant' ELSE 'under_review' END,
+          CURRENT_TIMESTAMP
+        FROM internal_policies
+        WHERE title IS NOT NULL
+      `).run();
+
+      console.log("[MIGRATION] Compliance items seeded successfully.");
+    }
   } catch (e) {
     console.error("Error creating compliance matrix tables:", e);
   }
@@ -1177,6 +1194,30 @@ export const runMigrations = async () => {
     }
   } catch (e) {
     console.error("Error seeding default users:", e);
+  }
+
+  // Audit trail immutability trigger
+  try {
+    await db.exec(`
+      CREATE OR REPLACE FUNCTION prevent_audit_modification()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        RAISE EXCEPTION 'Audit trail records cannot be modified or deleted';
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+    await db.exec(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'audit_trail_immutable') THEN
+          CREATE TRIGGER audit_trail_immutable
+          BEFORE UPDATE OR DELETE ON audit_trail
+          FOR EACH ROW EXECUTE FUNCTION prevent_audit_modification();
+        END IF;
+      END $$;
+    `);
+    console.log("[MIGRATION] Audit trail immutability trigger created.");
+  } catch (e) {
+    console.warn("[MIGRATION] Could not create audit trail trigger (may not be supported in PGlite):", (e as any)?.message);
   }
 
   console.log("Migrations completed successfully.");

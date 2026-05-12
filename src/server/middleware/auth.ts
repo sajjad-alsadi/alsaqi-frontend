@@ -6,6 +6,24 @@ import { rateLimit } from 'express-rate-limit';
 const cache = new Map<string, { data: any, expires: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Invalidate all cache entries for a specific user (call after role/permission/status changes)
+export const invalidateUserCache = (userId: string) => {
+  for (const key of cache.keys()) {
+    if (key.includes(userId)) {
+      cache.delete(key);
+    }
+  }
+};
+
+// Clear all permission cache entries (call after role permission changes)
+export const clearPermissionCache = () => {
+  for (const key of cache.keys()) {
+    if (key.startsWith('perm_')) {
+      cache.delete(key);
+    }
+  }
+};
+
 export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KEY: string) => {
   const getCachedOrDb = async (key: string, fetcher: () => Promise<any>) => {
     const cached = cache.get(key);
@@ -114,10 +132,16 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
 
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // Limit each IP to 10 login requests per windowMs
-    message: { error: "Too many login attempts, please try again later." },
+    max: 10, // Limit each IP+username combination to 10 login requests per windowMs
+    message: { error: "TOO_MANY_ATTEMPTS" },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { keyGeneratorIpFallback: false },
+    // Key by IP + username so that blocking one user doesn't affect others
+    keyGenerator: (req: any) => {
+      const username = (req.body && req.body.usernameOrEmail) ? String(req.body.usernameOrEmail).toLowerCase() : 'unknown';
+      return `${req.ip || 'no-ip'}_${username}`;
+    },
   });
 
   return { authenticate, checkPermission, authorize, authLimiter, cache };

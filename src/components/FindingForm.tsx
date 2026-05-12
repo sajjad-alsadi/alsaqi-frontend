@@ -159,11 +159,11 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
         <CommentSection relatedType="finding" relatedId={initialData.id} />
       )}
 
-      <div className="flex justify-end gap-6 pt-8 border-t border-slate-100 dark:border-slate-800">
+      <div className="flex justify-end gap-6 pt-8 border-t border-[var(--color-border-soft)] dark:border-slate-800">
         <button
           type="button"
           onClick={onCancel}
-          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-[1.5rem] transition-all"
+          className="px-8 py-3 text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)] font-bold uppercase tracking-widest hover:bg-[var(--color-bg-main)] dark:hover:bg-slate-800 rounded-xl transition-all"
         >
           {t('common.cancel')}
         </button>

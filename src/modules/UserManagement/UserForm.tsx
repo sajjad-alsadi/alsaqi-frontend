@@ -47,32 +47,32 @@ const UserForm: React.FC<UserFormProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className="glass-card p-6 border-[var(--color-primary)]/20"
     >
-      <h3 className="text-lg font-black text-[var(--color-text-main)] mb-6">{editingUser ? t('userManagement.editUser') : t('userManagement.addUser')}</h3>
+      <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-6">{editingUser ? t('userManagement.editUser') : t('userManagement.addUser')}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.username')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.username')}</label>
           <input className="input-field !py-2 !text-xs" placeholder={t('userManagement.form.username')} value={newUser.username || ''} onChange={e => onUpdateNewUser({ username: e.target.value })} disabled={!!editingUser || isFormDisabled} />
         </div>
         {!editingUser && (
           <div className="space-y-1">
-            <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.password')}</label>
+            <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.password')}</label>
             <input className="input-field !py-2 !text-xs" type="password" placeholder={t('userManagement.form.password')} value={newUser.password || ''} onChange={e => onUpdateNewUser({ password: e.target.value })} disabled={isFormDisabled} />
           </div>
         )}
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.fullName')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.fullName')}</label>
           <input className="input-field !py-2 !text-xs" placeholder={t('userManagement.form.fullName')} value={newUser.name || ''} onChange={e => onUpdateNewUser({ name: e.target.value })} disabled={isFormDisabled} />
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.email')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.email')}</label>
           <input className="input-field !py-2 !text-xs" placeholder={t('userManagement.form.email')} value={newUser.email || ''} onChange={e => onUpdateNewUser({ email: e.target.value })} disabled={isFormDisabled} />
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.phoneNumber')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.phoneNumber')}</label>
           <input className="input-field !py-2 !text-xs" placeholder={t('userManagement.form.phoneNumber')} value={newUser.phone_number || ''} onChange={e => onUpdateNewUser({ phone_number: e.target.value })} disabled={isFormDisabled} />
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.jobTitle')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.jobTitle')}</label>
           <select className="input-field !py-2 !text-xs" value={newUser.job_title_id || ''} onChange={e => onUpdateNewUser({ job_title_id: e.target.value })} disabled={isFormDisabled}>
             <option value="">{t('userManagement.form.selectJobTitle')}</option>
             {jobTitles.map(title => (
@@ -81,7 +81,7 @@ const UserForm: React.FC<UserFormProps> = ({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.department')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.department')}</label>
           <select className="input-field !py-2 !text-xs" value={newUser.department || ''} onChange={e => onUpdateNewUser({ department: e.target.value })} disabled={isFormDisabled}>
             <option value="">{t('userManagement.form.selectDepartment')}</option>
             {departments.map(dept => (
@@ -90,11 +90,11 @@ const UserForm: React.FC<UserFormProps> = ({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.unit')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.unit')}</label>
           <input className="input-field !py-2 !text-xs" placeholder={t('userManagement.form.unit')} value={newUser.unit || ''} onChange={e => onUpdateNewUser({ unit: e.target.value })} disabled={isFormDisabled} />
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.reportingManager')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.reportingManager')}</label>
           <select className="input-field !py-2 !text-xs" value={newUser.reporting_manager_id || ''} onChange={e => onUpdateNewUser({ reporting_manager_id: e.target.value })} disabled={isFormDisabled}>
             <option value="">{t('userManagement.form.selectManager')}</option>
             {users.filter(u => u.id !== editingUser?.id).map(u => (
@@ -103,7 +103,7 @@ const UserForm: React.FC<UserFormProps> = ({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.accessScope')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.accessScope')}</label>
           <select className="input-field !py-2 !text-xs" value={newUser.access_scope || AccessScope.GLOBAL} onChange={e => onUpdateNewUser({ access_scope: e.target.value })} disabled={isFormDisabled}>
             <option value={AccessScope.GLOBAL}>{t('userManagement.form.global')}</option>
             <option value={AccessScope.DEPARTMENT}>{t('userManagement.form.department')}</option>
@@ -111,10 +111,10 @@ const UserForm: React.FC<UserFormProps> = ({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.role')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.role')}</label>
           <div className="relative">
             <select 
-              className="input-field appearance-none !py-2 !text-xs cursor-pointer pr-8"
+              className="input-field appearance-none !py-2 !text-xs cursor-pointer pe-8"
               value={newUser.role || ROLES.VIEWER} 
               onChange={e => onUpdateNewUser({ role: e.target.value })} 
               disabled={isFormDisabled}
@@ -127,13 +127,13 @@ const UserForm: React.FC<UserFormProps> = ({
                 ))
               )}
             </select>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
               <ChevronDown size={14} />
             </div>
           </div>
         </div>
         <div className="lg:col-span-1 space-y-1">
-          <label className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.notes')}</label>
+          <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.notes')}</label>
           <textarea 
             className="input-field !py-2 !text-xs min-h-[42px]" 
             placeholder={t('userManagement.form.additionalNotes')} 

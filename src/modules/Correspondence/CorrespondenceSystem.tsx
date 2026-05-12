@@ -136,16 +136,16 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
 
   return (
     <div className="space-y-6" dir={language === Language.AR ? 'rtl' : 'ltr'}>
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[var(--color-bg-soft)]/50 p-6 rounded-2xl border border-[var(--color-border-soft)]">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm border border-slate-100">
+          <div className="w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center text-primary shadow-sm border border-[var(--color-border-soft)]">
             <Mail size={24} />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">
+            <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">
               {t('correspondence.systemTitle')}
             </h3>
-            <p className="text-xs text-slate-400 font-bold">
+            <p className="text-xs text-[var(--color-text-muted)] font-bold">
               {t('correspondence.systemDesc')}
             </p>
           </div>
@@ -160,7 +160,7 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
           </button>
           <button 
             onClick={() => setActiveSubTab('outgoing')}
-            className="btn-secondary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm bg-white"
+            className="btn-secondary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm bg-[var(--color-card)]"
           >
             <Plus size={18} />
             {t('correspondence.registerOutgoing')}
@@ -168,7 +168,7 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
         </div>
       </div>
 
-      <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl w-fit overflow-x-auto">
+      <div className="flex gap-2 p-1 bg-[var(--color-bg-main)] rounded-2xl w-fit overflow-x-auto">
         <TabButton 
           active={activeSubTab === 'dashboard'} 
           onClick={() => setActiveSubTab('dashboard')}
@@ -230,7 +230,7 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, onClick }) => (
   <div 
     onClick={onClick}
-    className={`${color} p-6 rounded-[2rem] border border-[var(--color-border-soft)] shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
+    className={`${color} p-6 rounded-2xl border border-[var(--color-border-soft)] shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
   >
     <div className="flex items-center justify-between mb-2">
       <span className="text-[var(--color-text-muted)] font-medium">{title}</span>
@@ -250,10 +250,10 @@ interface TabButtonProps {
 const TabButton: React.FC<TabButtonProps> = ({ active, onClick, label, icon }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all whitespace-nowrap ${
+    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
       active 
-        ? 'bg-white text-[var(--color-primary)] shadow-sm' 
-        : 'text-slate-500 hover:text-slate-700'
+        ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' 
+        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
     }`}
   >
     {icon}

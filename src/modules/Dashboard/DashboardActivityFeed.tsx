@@ -2,6 +2,7 @@ import React from 'react';
 import { History, Briefcase, FileSearch, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useFormat } from '../../services/formatService';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 interface DashboardActivityFeedProps {
   t: any;
@@ -11,11 +12,12 @@ interface DashboardActivityFeedProps {
 const DashboardActivityFeed: React.FC<DashboardActivityFeedProps> = React.memo(({ t, activity }) => {
   const navigate = useNavigate();
   const { formatDateTime, translateName, translateAction, translateModule } = useFormat();
+  const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
 
   return (
-    <div className="lg:col-span-2 glass-card p-8">
+    <div ref={ref} className={`lg:col-span-2 glass-card p-8 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xl font-black text-[var(--color-text-main)] flex items-center gap-3">
+        <h3 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-3">
           <History className="text-[var(--color-primary)]" />
           {t('dashboard.recentActivity')}
         </h3>

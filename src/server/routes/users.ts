@@ -6,6 +6,7 @@ import { AuthService } from '../services/AuthService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError, NotFoundError } from '../utils/errors';
 import { validateSchema } from '../middleware/validate';
+import { invalidateUserCache } from '../middleware/auth';
 
 const userSchema = z.object({
   username: z.string().min(3).max(50).optional(),
@@ -82,6 +83,7 @@ export const createUserRoutes = (
       await UserService.logPermissionChange(id, (req as any).user.id, oldUser.role, role || oldUser.role, "Profile update");
     }
 
+    invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, "Updated User", "User Management", `Updated user ID ${id}`);
       
     res.json({ success: true });
@@ -93,6 +95,7 @@ export const createUserRoutes = (
     const newStatus = currentStatus === 'Suspended' ? 'Active' : 'Suspended';
     const username = await UserService.setStatus(id, newStatus);
     
+    invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, `${newStatus === 'Suspended' ? 'Suspended' : 'Activated'} User`, "User Management", `Changed status for user ${username} to ${newStatus}`);
       
     res.json({ success: true, status: newStatus });
@@ -101,6 +104,7 @@ export const createUserRoutes = (
   router.post(`/:id/archive`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.setStatus(id, 'Archived');
+    invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, "Archive", "User Management", `Archived user: ${username}`);
     res.json({ success: true });
   }));
@@ -108,6 +112,7 @@ export const createUserRoutes = (
   router.post(`/:id/activate`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.activateUser(id);
+    invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, "Activate", "User Management", `Activated user: ${username}`);
     res.json({ success: true });
   }));
@@ -115,6 +120,7 @@ export const createUserRoutes = (
   router.delete(`/:id`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.deleteUser(id);
+    invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, "Deleted User", "User Management", `Deleted user ${username}`);
     res.json({ success: true });
   }));
@@ -122,6 +128,7 @@ export const createUserRoutes = (
   router.post(`/:id/unlock`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.unlockUser(id);
+    invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, "Unlocked User", "User Management", `Unlocked user ${username} and reset failed attempts`);
     res.json({ success: true });
   }));

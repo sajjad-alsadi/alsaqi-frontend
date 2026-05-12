@@ -33,6 +33,17 @@ export class AuthService {
         await db.prepare("UPDATE users SET failed_attempts = failed_attempts + 1 WHERE id = ?::uuid").run(user.id);
         if (user.failed_attempts + 1 >= 5) {
           await db.prepare("UPDATE users SET locked_until = ?::timestamp WHERE id = ?::uuid").run(new Date(Date.now() + 15 * 60 * 1000).toISOString(), user.id);
+          
+          // Notify all admins about the locked account
+          try {
+            const admins = await db.prepare("SELECT id FROM users WHERE role = 'Admin' AND status = 'active'").all() as any[];
+            for (const admin of admins) {
+              await db.prepare("INSERT INTO notifications (user_id, event_type, description, related_module, link, status) VALUES (?::uuid, ?::text, ?::text, ?::text, ?::text, 'Unread')")
+                .run(admin.id, 'Security', `Account "${user.username}" locked after 5 failed login attempts (IP: ${ipAddress || 'Unknown'})`, 'Security', '/users');
+            }
+          } catch (notifErr) {
+            console.error("[AuthService] Failed to send lockout notification:", notifErr);
+          }
         }
         throw new AuthError("Invalid credentials");
       }
@@ -89,7 +100,23 @@ export class AuthService {
   }
 
   static async logAudit(username: string, action: string, module: string, details: string) {
-    await db.prepare("INSERT INTO audit_trail (user, action, module, details) VALUES (?::text, ?::text, ?::text, ?::text)")
-      .run(username, action, module, details);
+    const timestamp = new Date().toISOString();
+    
+    // Hash chaining for tamper-evident audit trail
+    let previousHash = '0';
+    try {
+      const lastRecord = await db.prepare("SELECT hash FROM audit_trail WHERE hash IS NOT NULL ORDER BY timestamp DESC LIMIT 1").get() as any;
+      if (lastRecord?.hash) {
+        previousHash = lastRecord.hash;
+      }
+    } catch (e) {
+      // If hash column doesn't exist yet, continue without it
+    }
+    
+    const recordData = `${previousHash}|${username}|${action}|${module}|${details}|${timestamp}`;
+    const hash = crypto.createHash('sha256').update(recordData).digest('hex');
+    
+    await db.prepare("INSERT INTO audit_trail (\"user\", action, module, details, hash, previous_hash, timestamp) VALUES (?::text, ?::text, ?::text, ?::text, ?::text, ?::text, ?::timestamp)")
+      .run(username, action, module, details, hash, previousHash, timestamp);
   }
 }

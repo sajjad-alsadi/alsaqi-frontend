@@ -105,19 +105,19 @@ const AuditCharter: React.FC = () => {
     <div className="space-y-10">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
+          <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
             <BookOpen size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('common.auditCharter')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{charterData.company}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.auditCharter')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{charterData.company}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="bg-slate-100 px-4 py-2 rounded-[1.5rem] text-sm font-bold text-slate-600">
+          <div className="bg-[var(--color-bg-main)] px-4 py-2 rounded-xl text-sm font-bold text-[var(--color-text-muted)]">
             {t('common.version')}: {charterData.version}
           </div>
-          <div className="bg-slate-100 px-4 py-2 rounded-[1.5rem] text-sm font-bold text-slate-600">
+          <div className="bg-[var(--color-bg-main)] px-4 py-2 rounded-xl text-sm font-bold text-[var(--color-text-muted)]">
             {t('common.date')}: {charterData.date}
           </div>
         </div>
@@ -138,20 +138,20 @@ const AuditCharter: React.FC = () => {
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                   <Icon size={24} />
                 </div>
-                <h3 className="text-2xl font-black text-slate-800">{section.title}</h3>
+                <h3 className="text-2xl font-bold text-[var(--color-text-main)]">{section.title}</h3>
               </div>
               
-              <div className="space-y-4 text-slate-600 leading-relaxed">
+              <div className="space-y-4 text-[var(--color-text-muted)] leading-relaxed">
                 {section.id === 'org_chart' && (
                   <div className="py-8 overflow-x-auto">
                     <div className="min-w-[800px] flex flex-col items-center">
                       <div className="relative flex flex-col items-center w-full">
                         <div className="bg-primary text-white font-bold py-4 px-8 rounded-xl shadow-lg relative z-10 w-64 text-center">
-                          {t('auditCharter.deptManager', 'Department Manager')}
+                          {t('auditCharter.deptManager')}
                         </div>
                         <div className="w-0.5 h-8 bg-slate-300"></div>
                         <div className="bg-slate-700 text-white font-bold py-3 px-6 rounded-lg relative z-10 w-56 text-center">
-                          {t('auditCharter.deputyManager', 'Deputy Manager')}
+                          {t('auditCharter.deputyManager')}
                         </div>
                         <div className="w-0.5 h-8 bg-slate-300"></div>
                         <div className="w-[75%] h-0.5 bg-slate-300"></div>
@@ -160,25 +160,25 @@ const AuditCharter: React.FC = () => {
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-sky-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.financialAuditDept', 'Financial Audit Department')}
+                              {t('auditCharter.financialAuditDept')}
                             </div>
                           </div>
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-emerald-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.auditDivision', 'Audit Division')}
+                              {t('auditCharter.auditDivision')}
                             </div>
                           </div>
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-amber-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.auditReconciliationDiv', 'Division of Auditing and Reconciliation of Settlements and Banks')}
+                              {t('auditCharter.auditReconciliationDiv')}
                             </div>
                           </div>
                           <div className="flex flex-col items-center flex-1 px-2">
                             <div className="w-0.5 h-8 bg-slate-300"></div>
                             <div className="bg-rose-500 w-full text-white font-bold py-3 px-2 rounded-lg shadow-md text-center text-sm h-full flex items-center justify-center leading-snug">
-                              {t('auditCharter.itAuditDiv', 'IT Audit and Electronic Payment Systems Division')}
+                              {t('auditCharter.itAuditDiv')}
                             </div>
                           </div>
                         </div>
@@ -195,9 +195,9 @@ const AuditCharter: React.FC = () => {
                 {section.items && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     {section.items.map((item, i) => (
-                      <div key={i} className="bg-slate-50 p-4 rounded-[1.5rem] border border-slate-100">
-                        <h4 className="font-bold text-slate-800 mb-2">{item.term}</h4>
-                        <p className="text-sm text-slate-600">{item.def}</p>
+                      <div key={i} className="bg-[var(--color-bg-soft)] p-4 rounded-xl border border-[var(--color-border-soft)]">
+                        <h4 className="font-bold text-[var(--color-text-main)] mb-2">{item.term}</h4>
+                        <p className="text-sm text-[var(--color-text-muted)]">{item.def}</p>
                       </div>
                     ))}
                   </div>
@@ -207,20 +207,20 @@ const AuditCharter: React.FC = () => {
                   <div className="overflow-x-auto mt-6">
                     <table className="w-full text-start border-collapse">
                       <thead>
-                        <tr className="bg-slate-50 border-b border-slate-100">
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.reportName')}</th>
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.frequency')}</th>
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.recipients')}</th>
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.notes')}</th>
+                        <tr className="bg-[var(--color-bg-soft)] border-b border-[var(--color-border-soft)]">
+                          <th className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)] uppercase">{t('common.reportName')}</th>
+                          <th className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)] uppercase">{t('common.frequency')}</th>
+                          <th className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)] uppercase">{t('common.recipients')}</th>
+                          <th className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)] uppercase">{t('common.notes')}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-[var(--color-border-soft)]/50">
                         {section.table.map((row, i) => (
-                          <tr key={i} className="hover:bg-slate-50/50">
-                            <td className="px-6 py-4 text-sm font-bold text-slate-700">{row.name}</td>
-                            <td className="px-6 py-4 text-sm text-slate-600">{row.freq}</td>
-                            <td className="px-6 py-4 text-sm text-slate-600">{row.recipient}</td>
-                            <td className="px-6 py-4 text-sm text-slate-500">{row.notes}</td>
+                          <tr key={i} className="hover:bg-[var(--color-bg-soft)]/50">
+                            <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">{row.name}</td>
+                            <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">{row.freq}</td>
+                            <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">{row.recipient}</td>
+                            <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">{row.notes}</td>
                           </tr>
                         ))}
                       </tbody>

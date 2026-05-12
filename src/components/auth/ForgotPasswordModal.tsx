@@ -50,14 +50,14 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
         )}
 
         <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
+          <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
             {t('username')}
           </label>
           <div className="relative">
             <input
               type="text"
               required
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium placeholder:text-slate-400"
+              className="w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-main)] rounded-xl px-4 py-3.5 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all font-medium placeholder:text-[var(--color-text-muted)]"
               placeholder={t('enterUsername')}
               value={username}
               onChange={(e) => {
@@ -90,11 +90,11 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border-soft)]">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all"
+            className="px-6 py-2.5 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)] rounded-xl transition-all"
           >
             {t('common.cancel')}
           </button>

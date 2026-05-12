@@ -167,7 +167,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
         </FormField>
 
         <div className="col-span-full pt-4 border-t border-[var(--color-border-soft)]">
-          <h4 className="text-sm font-black text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.initialRiskAssessment')}</h4>
+          <h4 className="text-sm font-bold text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.initialRiskAssessment')}</h4>
         </div>
 
         <FormField label={t('likelihood')} error={errors.likelihood?.message}>
@@ -191,7 +191,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
         </FormField>
 
         <div className="col-span-full pt-4 border-t border-[var(--color-border-soft)]">
-          <h4 className="text-sm font-black text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.controlsAndMitigation')}</h4>
+          <h4 className="text-sm font-bold text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.controlsAndMitigation')}</h4>
         </div>
 
         <FormField label={t('existingControls')} error={errors.controls?.message} className="md:col-span-2">
@@ -211,7 +211,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
         </FormField>
 
         <div className="col-span-full pt-4 border-t border-[var(--color-border-soft)]">
-          <h4 className="text-sm font-black text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.residualRiskAssessment')}</h4>
+          <h4 className="text-sm font-bold text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.residualRiskAssessment')}</h4>
         </div>
 
         <FormField label={t('residualLikelihood')} error={errors.residual_likelihood?.message}>
@@ -235,7 +235,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
         </FormField>
 
         <div className="col-span-full pt-4 border-t border-[var(--color-border-soft)]">
-          <h4 className="text-sm font-black text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.tracking')}</h4>
+          <h4 className="text-sm font-bold text-[var(--color-text-main)] uppercase tracking-widest mb-4 opacity-80">{t('common.tracking')}</h4>
         </div>
 
         <FormField label={t('status')} error={errors.status?.message}>
@@ -264,7 +264,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
       </div>
 
       <div className="flex justify-end gap-6 pt-8 border-t border-[var(--color-border-soft)] sticky bottom-0 bg-[var(--color-card)]/80 backdrop-blur-md p-4 rounded-xl">
-        <button type="button" onClick={onCancel} className="px-8 py-3 text-[var(--color-text-muted)] font-black uppercase tracking-widest hover:bg-[var(--color-bg-soft)] rounded-[1.5rem] transition-all">
+        <button type="button" onClick={onCancel} className="px-8 py-3 text-[var(--color-text-muted)] font-bold uppercase tracking-widest hover:bg-[var(--color-bg-soft)] rounded-xl transition-all">
           {t('common.cancel')}
         </button>
         <button type="submit" disabled={isSubmitting} className="btn-primary disabled:opacity-50">

@@ -34,7 +34,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('integrity.detectionDate')}</label>
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('integrity.detectionDate')}</label>
             <input 
               type="date" 
               required
@@ -44,7 +44,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('integrity.detectionSource')}</label>
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('integrity.detectionSource')}</label>
             <input 
               type="text" 
               required
@@ -55,7 +55,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('integrity.riskCategory')}</label>
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('integrity.riskCategory')}</label>
             <select 
               className="input-field"
               value={newCase.riskCategory}
@@ -68,7 +68,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('integrity.financialImpact')}</label>
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('integrity.financialImpact')}</label>
             <input 
               type="text" 
               placeholder={t('integrity.financialImpact')}
@@ -80,7 +80,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('common.description')}</label>
+          <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.description')}</label>
           <textarea 
             required
             rows={3}
@@ -91,7 +91,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('integrity.suspects')} ({t('integrity.fraudLabel')})</label>
+          <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('integrity.suspects')} ({t('integrity.fraudLabel')})</label>
           <input 
             type="text" 
             className="input-field border-rose-200 focus:border-rose-500 focus:ring-rose-200"
@@ -102,7 +102,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('integrity.correctiveActions')}</label>
+          <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('integrity.correctiveActions')}</label>
           <textarea 
             rows={3}
             className="input-field"
@@ -112,7 +112,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('common.statusLabel')}</label>
+          <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.statusLabel')}</label>
           <select 
             className="input-field"
             value={newCase.status}
@@ -125,7 +125,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
           </select>
         </div>
 
-        <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
+        <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
           <button 
             type="button"
             onClick={onClose}

@@ -109,11 +109,11 @@ const Login: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen bg-[#F8F9FA] flex transition-colors duration-300"
+      className="min-h-screen bg-[var(--color-bg-main)] flex transition-colors duration-300"
       dir={language === Language.AR ? 'rtl' : 'ltr'}
     >
       {/* Left Side - Login Form (in LTR) / Right Side (in RTL) */}
-      <div className="w-full lg:w-[45%] flex items-center justify-center p-6 sm:p-12 bg-white border-e border-slate-100 shadow-[20px_0_50px_-15px_rgba(0,0,0,0.05)] rtl:shadow-[-20px_0_50px_-15px_rgba(0,0,0,0.05)]">
+      <div className="w-full lg:w-[45%] flex items-center justify-center p-6 sm:p-12 bg-[var(--color-card)] border-e border-[var(--color-border-soft)] shadow-[20px_0_50px_-15px_rgba(0,0,0,0.05)] rtl:shadow-[-20px_0_50px_-15px_rgba(0,0,0,0.05)]">
         <motion.div 
           initial={{ opacity: 0, x: language === Language.AR ? 20 : -20 }}
           animate={{ opacity: 1, x: 0 }}
