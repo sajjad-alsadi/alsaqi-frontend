@@ -86,12 +86,36 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
+        <ol className="flex items-center gap-1.5 list-none p-0 m-0">
+          <li className="flex items-center gap-1.5">
+            <button onClick={onBack} className="font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer">
+              {t('common.cms')}
+            </button>
+          </li>
+          <li className="flex items-center gap-1.5">
+            <ChevronRight size={12} className="text-[var(--color-border-strong)] rtl:rotate-180" />
+            <button onClick={onBack} className="font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer">
+              {t(`correspondence.${type.toLowerCase()}`)}
+            </button>
+          </li>
+          <li className="flex items-center gap-1.5">
+            <ChevronRight size={12} className="text-[var(--color-border-strong)] rtl:rotate-180" />
+            <span className="font-semibold text-[var(--color-text-main)]" aria-current="page">
+              #{formatNumber(mainData.sequence_number)}
+            </span>
+          </li>
+        </ol>
+      </nav>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack}
             className="p-2 hover:bg-[var(--color-bg-main)] rounded-full transition-colors text-[var(--color-text-main)]"
+            aria-label={t('common.goBack') || 'Go back'}
           >
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>

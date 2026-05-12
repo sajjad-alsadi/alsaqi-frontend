@@ -9,6 +9,8 @@ import InteractiveIcon from './InteractiveIcon';
 import Logo from './Logo';
 import LanguageSwitcher from './LanguageSwitcher';
 import Chatbot from './Chatbot';
+import CommandPalette from './CommandPalette';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useFormat } from '../services/formatService';
 import { 
   LayoutDashboard, 
@@ -45,7 +47,8 @@ import {
   ShieldCheck,
   Terminal,
   PanelTopClose,
-  PanelTop
+  PanelTop,
+  Search
 } from 'lucide-react';
 import { Language } from '../constants';
 
@@ -63,6 +66,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isHeaderHidden, setIsHeaderHidden] = useState(() => {
     try { return localStorage.getItem('audit_header_hidden') === 'true'; } catch { return false; }
   });
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    { key: 'ctrl+k', handler: () => setIsCommandPaletteOpen(true) },
+  ]);
   const navigate = useNavigate();
   const location = useLocation();
   const isRTL = i18n.language === 'ar';
@@ -235,6 +244,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
               {/* Right side (End) */}
               <div className="flex items-center gap-2 sm:gap-4">
+                {/* Quick Search (Ctrl+K) */}
+                <button
+                  onClick={() => setIsCommandPaletteOpen(true)}
+                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] rounded-xl text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-primary)]/30 transition-all cursor-pointer"
+                  aria-label={t('common.quickSearch') || 'Quick search'}
+                >
+                  <Search size={14} />
+                  <span className="font-medium">{t('common.search') || 'Search'}</span>
+                  <kbd className="px-1.5 py-0.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded text-[9px] font-semibold ms-2">⌘K</kbd>
+                </button>
+
                 <NotificationBell />
                 
                 <div className="h-8 w-px bg-[var(--color-border-soft)] mx-1 hidden sm:block"></div>
@@ -330,6 +350,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
         <Chatbot />
       </main>
+
+      {/* Command Palette (Ctrl+K) */}
+      <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} />
     </div>
   );
 
