@@ -92,7 +92,7 @@ const NotificationBell: React.FC = () => {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className={`absolute top-12 start-0 w-80 md:w-96 bg-[var(--color-card)] rounded-2xl shadow-[0_8px_30px_rgb(10,125,133,0.12)] border border-[var(--color-border-soft)] overflow-hidden z-50`}
+            className={`absolute top-12 start-0 w-80 md:w-96 bg-[var(--color-card)] rounded-2xl shadow-[0_8px_30px_rgb(10,125,133,0.12)] border border-[var(--color-border-soft)] overflow-hidden z-[9999]`}
           >
             <div className="p-4 border-b border-[var(--color-border-soft)] flex items-center justify-between bg-[var(--color-bg-soft)]/50">
               <h3 className="font-bold text-[var(--color-text-main)] text-sm">{t('common.notifications')}</h3>

@@ -4,3 +4,14 @@
 {"sessionId":"eece07","timestamp":1778588108697,"hypothesisId":"H2","location":"server.ts:startServer","message":"before_listen","data":{"port":3000}}
 {"sessionId":"eece07","timestamp":1778588108705,"hypothesisId":"H2","location":"server.ts:listen","message":"listening","data":{"port":3000}}
 {"sessionId":"eece07","timestamp":1778588111819,"hypothesisId":"H4","location":"server.ts:runDbMigrations","message":"db_ready","data":{"attempts":1,"isDbReady":true}}
+{"sessionId":"eece07","timestamp":1778595124062,"hypothesisId":"H0","location":"server.ts:bootstrap","message":"invoking_startServer","data":{"cwd":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi","dirname":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi"}}
+{"sessionId":"eece07","timestamp":1778595124068,"hypothesisId":"H3","location":"server.ts:startServer","message":"startServer_enter","data":{"nodeEnv":null,"hasGemini":false}}
+{"sessionId":"eece07","timestamp":1778595125290,"hypothesisId":"H1","location":"server.ts:startServer","message":"vite_ready","data":{"ok":true}}
+{"sessionId":"eece07","timestamp":1778595125292,"hypothesisId":"H2","location":"server.ts:startServer","message":"before_listen","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778595125300,"hypothesisId":"H2","location":"server.ts:server.on(error)","message":"listen_error","data":{"code":"EADDRINUSE","message":"listen EADDRINUSE: address already in use 0.0.0.0:3000"}}
+{"sessionId":"eece07","timestamp":1778595192385,"hypothesisId":"H0","location":"server.ts:bootstrap","message":"invoking_startServer","data":{"cwd":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi","dirname":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi"}}
+{"sessionId":"eece07","timestamp":1778595192390,"hypothesisId":"H3","location":"server.ts:startServer","message":"startServer_enter","data":{"nodeEnv":null,"hasGemini":false}}
+{"sessionId":"eece07","timestamp":1778595193434,"hypothesisId":"H1","location":"server.ts:startServer","message":"vite_ready","data":{"ok":true}}
+{"sessionId":"eece07","timestamp":1778595193436,"hypothesisId":"H2","location":"server.ts:startServer","message":"before_listen","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778595193442,"hypothesisId":"H2","location":"server.ts:listen","message":"listening","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778595195154,"hypothesisId":"H4","location":"server.ts:runDbMigrations","message":"db_ready","data":{"attempts":1,"isDbReady":true}}

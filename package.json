@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.4.1",
@@ -66,6 +68,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -75,10 +79,13 @@
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.27",
     "esbuild": "^0.28.0",
+    "fast-check": "^4.8.0",
+    "jsdom": "^29.1.1",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.1",
     "ts-morph": "^27.0.2",
     "tsx": "^4.21.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.6"
   }
 }

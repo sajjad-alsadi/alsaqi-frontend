@@ -11,7 +11,7 @@ import SystemErrorLogs from './SystemErrorLogs';
 const SystemLogsManagement: React.FC = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab ] = useState<'overview' | 'audit' | 'errors'>('overview');
-  const [stats, setStats] = useState({ auditToday: 0, errorsCount: 0 });
+  const [stats, setStats] = useState({ auditToday: 0, errorsCount: 0, healthPercent: 100, healthColor: 'text-emerald-500', healthStatus: 'stable' });
   const [loading, setLoading] = useState(false);
 
   const fetchStats = async () => {
@@ -32,9 +32,35 @@ const SystemLogsManagement: React.FC = () => {
         item.timestamp?.startsWith(today)
       ).length;
 
+      // Use pagination.total for accurate counts across all pages
+      const totalErrors = errorsRes.data?.pagination?.total ?? errorsData.length;
+      const totalAudit = auditRes.data?.pagination?.total ?? auditData.length;
+
+      // Compute dynamic health percentage
+      const health = (totalAudit > 0 || totalErrors > 0)
+        ? (totalAudit / (totalAudit + totalErrors)) * 100
+        : 100;
+
+      // Determine color and status based on thresholds
+      let healthColor: string;
+      let healthStatus: string;
+      if (health >= 90) {
+        healthColor = 'text-emerald-500';
+        healthStatus = 'stable';
+      } else if (health >= 70) {
+        healthColor = 'text-amber-500';
+        healthStatus = 'degraded';
+      } else {
+        healthColor = 'text-rose-500';
+        healthStatus = 'critical';
+      }
+
       setStats({
         auditToday: todayAudit,
-        errorsCount: errorsData.length
+        errorsCount: totalErrors,
+        healthPercent: health,
+        healthColor,
+        healthStatus
       });
     } catch (error) {
       console.error('Error fetching logs stats:', error);
@@ -151,8 +177,8 @@ const SystemLogsManagement: React.FC = () => {
                   <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('systemLogsManagement.systemHealth')}</h3>
                   <p className="text-sm font-bold text-[var(--color-text-muted)]">{t('systemLogsManagement.serverStatus')}</p>
                   <div className="mt-6 flex items-end gap-2">
-                    <span className="text-5xl font-bold tracking-tighter text-emerald-500">99.9%</span>
-                    <span className="text-[var(--color-text-muted)] font-bold mb-1 text-xs uppercase tracking-widest">{t('systemLogsManagement.stable')}</span>
+                    <span className={`text-5xl font-bold tracking-tighter ${stats.healthColor}`}>{stats.healthPercent.toFixed(1)}%</span>
+                    <span className="text-[var(--color-text-muted)] font-bold mb-1 text-xs uppercase tracking-widest">{t(`systemLogsManagement.${stats.healthStatus}`)}</span>
                   </div>
                 </div>
                 <div className="relative z-10 space-y-3 mt-8 pt-6 border-t border-[var(--color-border-soft)]">

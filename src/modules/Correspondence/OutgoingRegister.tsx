@@ -143,7 +143,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       </Modal>
 
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[var(--color-bg-main)] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[var(--color-border-soft)]">
             <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-4">
               {t('correspondence.confirmDelete')}
@@ -297,7 +297,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       {/* Add Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}

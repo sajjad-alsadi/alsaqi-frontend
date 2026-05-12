@@ -109,7 +109,7 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" dir={dir}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6" dir={dir}>
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}

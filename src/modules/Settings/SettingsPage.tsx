@@ -556,7 +556,7 @@ const Settings: React.FC = () => {
         </div>
       </div>
       {showLogoutAllModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-soft)]">
               <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('settings.logoutFromAllDevices')}</h2>
