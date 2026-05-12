@@ -63,7 +63,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
   return (
     <div className="mt-6 border-t border-[var(--color-border-soft)] pt-6">
       <h4 className="font-bold text-[var(--color-text-main)] mb-4 flex items-center gap-2">
-        <MessageSquare size={18} className="text-primary" />
+        <MessageSquare size={18} className="text-[var(--color-primary)]" />
         {t('comments')}
       </h4>
       

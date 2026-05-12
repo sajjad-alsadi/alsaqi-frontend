@@ -245,7 +245,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                       <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.progress')}</h4>
                       <div className="flex items-center gap-4">
                         <div className="flex-1 h-2 bg-[var(--color-bg-main)] rounded-full overflow-hidden">
-                           <div className={`h-full rounded-full ${activeTask?.status === 'completed' ? 'bg-emerald-500 w-full' : 'bg-blue-500 w-1/2'}`} />
+                           <div className={`h-full rounded-full ${activeTask?.status === 'completed' ? 'bg-emerald-500 w-full' : 'bg-[var(--color-primary-light)]0 w-1/2'}`} />
                         </div>
                         <span className="text-xs font-bold text-[var(--color-text-main)]">{activeTask?.status === 'completed' ? '100%' : '50%'}</span>
                       </div>

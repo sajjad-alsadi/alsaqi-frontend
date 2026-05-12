@@ -138,13 +138,13 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Received': return 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]';
-      case 'Registered': return 'bg-[var(--color-secondary)]/10 text-[var(--color-secondary)]';
+      case 'Registered': return 'bg-[var(--color-info)]/10 text-[var(--color-info)]';
       case 'Under Review': return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]';
       case 'Referred': return 'bg-purple-500/10 text-purple-500';
       case 'Action Taken': return 'bg-teal-500/10 text-teal-500';
       case 'Closed': return 'bg-[var(--color-success)]/10 text-[var(--color-success)]';
       case 'Archived': return 'bg-[var(--color-text-muted)]/10 text-[var(--color-text-muted)]';
-      case 'Cancelled': return 'bg-[var(--color-error)]/10 text-[var(--color-error)]';
+      case 'Cancelled': return 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]';
       default: return 'bg-[var(--color-text-muted)]/10 text-[var(--color-text-muted)]';
     }
   };
@@ -158,7 +158,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
     switch (priority) {
       case 'Normal': return 'text-[var(--color-text-muted)]';
       case 'Urgent': return 'text-[var(--color-warning)] font-semibold';
-      case 'Very Urgent': return 'text-[var(--color-error)] font-bold';
+      case 'Very Urgent': return 'text-[var(--color-danger)] font-semibold';
       case 'Confidential': return 'text-purple-500 font-semibold';
       case 'Restricted': return 'text-[var(--color-primary)] font-semibold';
       default: return 'text-[var(--color-text-muted)]';
@@ -262,7 +262,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
                   </td>
                 </tr>
               ) : (Array.isArray(items) ? items : []).map((item) => (
-                <tr key={item.id} className="hover:bg-primary/5 transition-colors group">
+                <tr key={item.id} className="hover:bg-[var(--color-primary)]/5 transition-colors group">
                   <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{formatNumber(item.sequence_number)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">{formatNumber(item.letter_number) || '-'}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">
@@ -293,7 +293,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
                         onClick={() => onViewDetails(item.id)}
-                        className="p-2 bg-[var(--color-card)] text-primary border border-[var(--color-border-soft)] hover:border-primary/30 rounded-xl shadow-sm transition-all"
+                        className="p-2 bg-[var(--color-card)] text-[var(--color-primary)] border border-[var(--color-border-soft)] hover:border-[var(--color-primary)]/30 rounded-xl shadow-sm transition-all"
                         title={t('correspondence.viewDetails')}
                       >
                         <Eye size={16} />

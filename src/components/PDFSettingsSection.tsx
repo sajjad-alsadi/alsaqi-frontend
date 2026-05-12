@@ -183,7 +183,7 @@ const PDFSettingsSection: React.FC = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="checkbox" 
-                className="w-5 h-5 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
+                className="w-5 h-5 rounded border-[var(--color-border-strong)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-transparent"
                 checked={settings.rtl_enabled === 1}
                 onChange={e => setSettings({...settings, rtl_enabled: e.target.checked ? 1 : 0})}
               />
@@ -195,7 +195,7 @@ const PDFSettingsSection: React.FC = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="checkbox" 
-                className="w-5 h-5 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
+                className="w-5 h-5 rounded border-[var(--color-border-strong)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-transparent"
                 checked={settings.show_page_number === 1}
                 onChange={e => setSettings({...settings, show_page_number: e.target.checked ? 1 : 0})}
               />

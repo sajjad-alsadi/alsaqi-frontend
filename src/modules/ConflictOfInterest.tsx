@@ -121,7 +121,7 @@ const ConflictOfInterest: React.FC = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="hover:bg-primary/5 transition-colors group"
+                  className="hover:bg-[var(--color-primary)]/5 transition-colors group"
                 >
                   <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)]">#{coi.id}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{coi.user_name}</td>
@@ -145,7 +145,7 @@ const ConflictOfInterest: React.FC = () => {
                           setReviewData({ status: coi.status, reviewer_notes: coi.reviewer_notes || '' });
                           setIsReviewModalOpen(true);
                         }}
-                        className="p-2 text-[var(--color-text-muted)] hover:text-primary hover:bg-primary/10 rounded-xl transition-colors"
+                        className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-xl transition-colors"
                       >
                         <Edit size={18} />
                       </button>

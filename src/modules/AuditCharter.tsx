@@ -135,7 +135,7 @@ const AuditCharter: React.FC = () => {
               className="glass-card p-8"
             >
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
                   <Icon size={24} />
                 </div>
                 <h3 className="text-2xl font-bold text-[var(--color-text-main)]">{section.title}</h3>
@@ -146,7 +146,7 @@ const AuditCharter: React.FC = () => {
                   <div className="py-8 overflow-x-auto">
                     <div className="min-w-[800px] flex flex-col items-center">
                       <div className="relative flex flex-col items-center w-full">
-                        <div className="bg-primary text-white font-bold py-4 px-8 rounded-xl shadow-lg relative z-10 w-64 text-center">
+                        <div className="bg-[var(--color-primary)] text-white font-bold py-4 px-8 rounded-xl shadow-lg relative z-10 w-64 text-center">
                           {t('auditCharter.deptManager')}
                         </div>
                         <div className="w-0.5 h-8 bg-slate-300"></div>

@@ -127,7 +127,7 @@ const UserForm: React.FC<UserFormProps> = ({
                 ))
               )}
             </select>
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-muted)]">
               <ChevronDown size={14} />
             </div>
           </div>

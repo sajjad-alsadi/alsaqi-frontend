@@ -163,7 +163,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
               </button>
               <button 
                 onClick={confirmDelete}
-                className="px-6 py-2.5 bg-[var(--color-error)] text-white rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-900/20"
+                className="px-6 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-900/20"
               >
                 {t('common.delete')}
               </button>
@@ -228,7 +228,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                   </td>
                 </tr>
               ) : (Array.isArray(filteredItems) ? filteredItems : []).map((item) => (
-                <tr key={item.id} className="hover:bg-primary/5 transition-colors group cursor-pointer" onClick={() => onViewDetails('Outgoing', item.id)}>
+                <tr key={item.id} className="hover:bg-[var(--color-primary)]/5 transition-colors group cursor-pointer" onClick={() => onViewDetails('Outgoing', item.id)}>
                   <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{formatNumber(item.sequence_number)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">{formatDate(item.letter_date)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">
@@ -250,7 +250,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                     {item.attachment_file && (
                       <button 
                         onClick={() => handlePreview(item.attachment_file!)} 
-                        className="p-2 text-primary hover:bg-primary/10 rounded-xl transition-colors inline-flex"
+                        className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-xl transition-colors inline-flex"
                         title={t('correspondence.previewAttachment')}
                       >
                         <FileText size={18} />
@@ -259,7 +259,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                   </td>
                   <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-primary rounded-xl shadow-sm transition-all" title={t('common.download')}>
+                      <button className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-[var(--color-primary)] rounded-xl shadow-sm transition-all" title={t('common.download')}>
                         <Download size={16} />
                       </button>
                       {userRole === 'Admin' && (

@@ -36,7 +36,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       size="md"
     >
       <form onSubmit={onSubmit} className="space-y-6">
-        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+        <div className="p-4 bg-[var(--color-primary-light)]/50 border border-blue-100 rounded-xl">
           <p className="text-sm text-blue-700 leading-relaxed font-medium">
             {t('forgotPasswordInstructions')}
           </p>
@@ -101,7 +101,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           <button
             type="submit"
             disabled={loading || resetStatus === 'Pending'}
-            className="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-2.5 bg-[var(--color-primary)] text-white text-sm font-bold rounded-xl hover:bg-[var(--color-primary)]/90 transition-all shadow-lg shadow-[var(--color-primary)]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

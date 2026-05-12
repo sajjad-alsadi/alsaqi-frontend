@@ -73,13 +73,13 @@ const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
         />
         <label 
           htmlFor="legal-file"
-          className="input-field flex items-center justify-between cursor-pointer group hover:border-primary/50 transition-all"
+          className="input-field flex items-center justify-between cursor-pointer group hover:border-[var(--color-primary)]/50 transition-all"
         >
           <span className="text-[var(--color-text-muted)] font-bold truncate flex items-center gap-2">
-            <Upload size={16} className="text-[var(--color-border-strong)] group-hover:text-primary transition-colors" />
+            <Upload size={16} className="text-[var(--color-border-strong)] group-hover:text-[var(--color-primary)] transition-colors" />
             {formData.attachment ? t('common.fileSelected') : t('common.noFileChosen')}
           </span>
-          <span className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
+          <span className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
             {t('common.chooseFile')}
           </span>
         </label>

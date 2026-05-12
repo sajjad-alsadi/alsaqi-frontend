@@ -69,7 +69,7 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
         <div className="lg:col-span-2 space-y-8">
           <div className="glass-card p-8 space-y-6">
             <h3 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
-              <FileText size={20} className="text-primary" />
+              <FileText size={20} className="text-[var(--color-primary)]" />
               {t('program.basicProgramInformation')}
             </h3>
             
@@ -139,7 +139,7 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
             <div className="glass-card p-8 space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
-                  <List size={20} className="text-primary" />
+                  <List size={20} className="text-[var(--color-primary)]" />
                   {t('program.auditProcedures')}
                 </h3>
                 <button onClick={onAddProcedure} className="btn-primary py-2 px-4 text-xs flex items-center gap-2">
@@ -152,7 +152,7 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
                 {Array.isArray(procedures) && procedures.map((proc, idx) => (
                   <div key={proc.id} className="p-6 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)] space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                      <span className="text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1 rounded-full">
                         {t('program.procedure')} #{formatNumber(proc.procedure_number)}
                       </span>
                       <button 
@@ -230,7 +230,7 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
         <div className="space-y-8">
           <div className="glass-card p-8 space-y-6">
             <h3 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
-              <Shield size={20} className="text-primary" />
+              <Shield size={20} className="text-[var(--color-primary)]" />
               {t('program.risksAndControls')}
             </h3>
             
@@ -255,14 +255,14 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
                 <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.referenceStandard')}</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {(program.reference_standard ? program.reference_standard.split(',').filter(Boolean) : []).map((standard, index) => (
-                    <span key={index} className="bg-primary/10 text-primary px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                    <span key={index} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                       {standard}
                       <button 
                         onClick={() => {
                           const standards = (program.reference_standard ? program.reference_standard.split(',').filter(Boolean) : []);
                           onUpdateProgram({ reference_standard: standards.filter((_, i) => i !== index).join(',') });
                         }}
-                        className="hover:text-primary/70"
+                        className="hover:text-[var(--color-primary)]/70"
                       >
                         <X size={12} />
                       </button>
@@ -295,7 +295,7 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
 
           <div className="glass-card p-8 space-y-6">
             <h3 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
-              <Target size={20} className="text-primary" />
+              <Target size={20} className="text-[var(--color-primary)]" />
               {t('program.programStatus')}
             </h3>
             
@@ -304,7 +304,7 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
                 <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.status')}</span>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                   program.status === AuditStatus.APPROVED ? 'bg-emerald-100 text-emerald-600' :
-                  program.status === AuditStatus.DRAFT ? 'bg-slate-200 text-[var(--color-text-muted)]' : 'bg-primary/10 text-primary'
+                  program.status === AuditStatus.DRAFT ? 'bg-slate-200 text-[var(--color-text-muted)]' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
                 }`}>
                   {t(`plan.${program.status?.toLowerCase() || 'draft'}`)}
                 </span>

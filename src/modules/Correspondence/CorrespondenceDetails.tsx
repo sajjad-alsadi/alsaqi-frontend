@@ -97,7 +97,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${type === 'Incoming' ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'bg-[var(--color-secondary)]/10 text-[var(--color-secondary)]'}`}>
+              <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${type === 'Incoming' ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'bg-[var(--color-info)]/10 text-[var(--color-info)]'}`}>
                 {t('correspondence.' + type.toLowerCase())}
               </span>
               <h1 className="text-2xl font-bold text-[var(--color-text-main)]">{formatNumber(mainData.sequence_number)}</h1>
@@ -295,7 +295,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
                   {mainData.response_required && (
                     <div className="mt-2 flex justify-between items-center">
                        <span className="text-sm text-[var(--color-text-muted)]">{t('correspondence.dueDate')}</span>
-                       <span className="text-sm font-medium text-[var(--color-error)]">{formatDate(mainData.response_due_date)}</span>
+                       <span className="text-sm font-medium text-[var(--color-danger)]">{formatDate(mainData.response_due_date)}</span>
                     </div>
                   )}
                 </div>
@@ -383,7 +383,7 @@ const DetailTab = ({ active, onClick, label, icon }: any) => (
     onClick={onClick}
     className={`flex items-center gap-2 px-6 py-4.5 text-sm transition-all whitespace-nowrap ${
       active 
-        ? 'border-b-2 border-primary text-primary font-bold bg-primary/5' 
+        ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold bg-[var(--color-primary)]/5' 
         : 'border-b-2 border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)] font-bold'
     }`}
   >

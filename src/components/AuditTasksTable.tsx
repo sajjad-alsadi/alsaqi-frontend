@@ -57,11 +57,11 @@ const AuditTasksTable: React.FC<AuditTasksTableProps> = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="hover:bg-primary/5 transition-colors group cursor-pointer"
+              className="hover:bg-[var(--color-primary)]/5 transition-colors group cursor-pointer"
             >
               <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{task.task_number || `#${formatNumber(task.id)}`}</td>
               <td className="px-6 py-4 max-w-xs">
-                <p className="text-sm font-bold text-[var(--color-text-main)] group-hover:text-primary transition-colors line-clamp-2">{task.title || task.procedure}</p>
+                <p className="text-sm font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">{task.title || task.procedure}</p>
               </td>
               <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{getPlanTitle(task.plan_id || task.audit_id as any)}</td>
               <td className="px-6 py-4">
@@ -84,7 +84,7 @@ const AuditTasksTable: React.FC<AuditTasksTableProps> = ({
               <td className="px-6 py-4 text-end">
                 <div className="flex items-center justify-end gap-2">
                   {task.status === 'draft' && canTransitionToInProgress && (
-                    <button onClick={(e) => { e.stopPropagation(); updateStatus(task.id!, 'in_progress'); }} className="text-[10px] uppercase font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100">
+                    <button onClick={(e) => { e.stopPropagation(); updateStatus(task.id!, 'in_progress'); }} className="text-[10px] uppercase font-bold text-blue-600 bg-[var(--color-primary-light)] px-2 py-1 rounded hover:bg-blue-100">
                       {t('tasks.startTask')}
                     </button>
                   )}

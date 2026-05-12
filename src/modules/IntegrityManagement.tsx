@@ -73,7 +73,7 @@ const IntegrityManagement: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 isActive 
                   ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm shadow-[var(--color-border-soft)]' 
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-card)]/50'
@@ -138,10 +138,10 @@ const IntegrityManagement: React.FC = () => {
 
               <div className="p-8 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl shadow-sm flex flex-col justify-between group overflow-hidden relative">
                 <div className="absolute top-0 end-0 p-8 opacity-[0.03] pointer-events-none">
-                  <Scale size={120} className="text-primary" />
+                  <Scale size={120} className="text-[var(--color-primary)]" />
                 </div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] mb-6 group-hover:scale-110 transition-transform">
                     <Scale size={24} />
                   </div>
                   <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('integrity.totalReports')}</h3>

@@ -159,8 +159,8 @@ export const AccessGate: React.FC<AccessGateProps> = ({
           title={t('integrity.requestAccessTitle')}
         >
           <form onSubmit={(e) => { e.preventDefault(); submitAccessRequest(e); }} className="space-y-6">
-            <div className="bg-blue-50 p-4 rounded-lg flex items-start gap-3">
-              <AlertCircle className="text-blue-500 shrink-0 mt-0.5" size={20} />
+            <div className="bg-[var(--color-primary-light)] p-4 rounded-lg flex items-start gap-3">
+              <AlertCircle className="text-[var(--color-primary)] shrink-0 mt-0.5" size={20} />
               <p className="text-sm text-blue-700">
                 {t('integrity.accessMonitoredDesc')}
               </p>

@@ -38,21 +38,21 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ delay: idx * 0.05 }}
-            className="glass-card group hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 overflow-hidden flex flex-col"
+            className="glass-card group hover:shadow-2xl hover:shadow-[var(--color-primary)]/10 transition-all duration-500 overflow-hidden flex flex-col"
           >
             <div className="p-8 space-y-6 flex-1">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1 rounded-full uppercase tracking-widest">
                     {program.program_code}
                   </span>
-                  <h3 className="text-xl font-bold text-[var(--color-text-main)] leading-tight group-hover:text-primary transition-colors">
+                  <h3 className="text-xl font-bold text-[var(--color-text-main)] leading-tight group-hover:text-[var(--color-primary)] transition-colors">
                     {program.program_title}
                   </h3>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                   program.status === AuditStatus.APPROVED ? 'bg-emerald-100 text-emerald-600' :
-                  program.status === AuditStatus.DRAFT ? 'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]' : 'bg-primary/10 text-primary'
+                  program.status === AuditStatus.DRAFT ? 'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
                 }`}>
                   {t(`plan.${program.status?.toLowerCase() || 'draft'}`)}
                 </span>
@@ -89,7 +89,7 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => onEdit(program)}
-                  className="p-2 text-[var(--color-text-muted)] hover:text-primary hover:bg-[var(--color-card)] rounded-xl transition-all"
+                  className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-card)] rounded-xl transition-all"
                   title={t('program.edit')}
                 >
                   <Edit size={18} />
@@ -111,7 +111,7 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
               </div>
               <button 
                 onClick={() => onViewProcedures(program)}
-                className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
+                className="text-xs font-bold text-[var(--color-primary)] flex items-center gap-1 hover:gap-2 transition-all"
               >
                 {t('program.viewProcedures')}
                 <ChevronRight size={14} className={isRTL ? 'rotate-180' : ''} />

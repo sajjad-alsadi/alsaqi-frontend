@@ -122,7 +122,7 @@ const JobTitles: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[var(--color-bg-soft)]/50 p-6 rounded-2xl border border-[var(--color-border-soft)]">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center text-primary shadow-sm border border-[var(--color-border-soft)]">
+          <div className="w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center text-[var(--color-primary)] shadow-sm border border-[var(--color-border-soft)]">
             <Briefcase size={24} />
           </div>
           <div>
@@ -164,7 +164,7 @@ const JobTitles: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-10 border-primary/20"
+          className="glass-card p-10 border-[var(--color-primary)]/20"
         >
           <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-8">{editingId ? t('editJobTitle') : t('addNewJobTitle')}</h3>
           <form onSubmit={handleSubmit}>
@@ -246,7 +246,7 @@ const JobTitles: React.FC = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.02 }}
-                  className="hover:bg-primary/5 transition-colors group"
+                  className="hover:bg-[var(--color-primary)]/5 transition-colors group"
                 >
                   <td className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)]">#{title.id}</td>
                   <td className="px-6 py-4">
@@ -272,7 +272,7 @@ const JobTitles: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => editTitle(title)} className="p-2 text-[var(--color-text-muted)] hover:text-primary hover:bg-primary/10 rounded-lg transition-colors" title={t('common.edit')}>
+                      <button onClick={() => editTitle(title)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-colors" title={t('common.edit')}>
                         <Edit2 size={16} />
                       </button>
                       <button onClick={() => {
@@ -342,7 +342,7 @@ const JobTitles: React.FC = () => {
             </button>
             <button 
               onClick={archiveTitle}
-              className="px-6 py-3 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-white font-bold hover:bg-[var(--color-primary)]/90 transition-colors shadow-lg shadow-[var(--color-primary)]/30"
             >
               {t('common.save')}
             </button>

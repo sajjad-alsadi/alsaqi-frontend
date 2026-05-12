@@ -183,8 +183,8 @@ const Settings: React.FC = () => {
               }}
               className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-bold transition-all duration-300 ${
                 activeTab === tab.id 
-                ? 'bg-primary text-white shadow-xl shadow-primary/20' 
-                : 'text-[var(--color-text-muted)] hover:bg-[var(--color-card)] hover:text-primary'
+                ? 'bg-[var(--color-primary)] text-white shadow-xl shadow-[var(--color-primary)]/20' 
+                : 'text-[var(--color-text-muted)] hover:bg-[var(--color-card)] hover:text-[var(--color-primary)]'
               }`}
             >
               <tab.icon size={20} />
@@ -232,7 +232,7 @@ const Settings: React.FC = () => {
                       <button 
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-2 -end-2 w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                        className="absolute -bottom-2 -end-2 w-10 h-10 bg-[var(--color-primary)] text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                       >
                         <Camera size={18} />
                       </button>
@@ -247,7 +247,7 @@ const Settings: React.FC = () => {
                     <div>
                       <h3 className="text-2xl font-bold text-[var(--color-text-main)]">{profile?.name}</h3>
                       <p className="text-sm text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1">{profile?.job_title || profile?.role} • {profile?.department}</p>
-                      <p className="text-xs text-primary font-bold mt-2">{t('settings.userId')}{profile?.employee_id || profile?.username || profile?.id}</p>
+                      <p className="text-xs text-[var(--color-primary)] font-bold mt-2">{t('settings.userId')}{profile?.employee_id || profile?.username || profile?.id}</p>
                     </div>
                   </div>
 
@@ -351,7 +351,7 @@ const Settings: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-6">
                       <div className="flex items-center gap-4 mb-2">
-                        <Globe size={20} className="text-primary" />
+                        <Globe size={20} className="text-[var(--color-primary)]" />
                         <h4 className="font-bold text-[var(--color-text-main)] uppercase tracking-widest text-xs">{t('common.language')}</h4>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -359,7 +359,7 @@ const Settings: React.FC = () => {
                           type="button"
                           onClick={() => setLanguage(Language.EN)}
                           className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
-                            language === Language.EN ? 'border-primary bg-primary/5 text-primary' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
+                            language === Language.EN ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
                           }`}
                         >
                           {t('common.english')}
@@ -368,7 +368,7 @@ const Settings: React.FC = () => {
                           type="button"
                           onClick={() => setLanguage(Language.AR)}
                           className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
-                            language === Language.AR ? 'border-primary bg-primary/5 text-primary' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
+                            language === Language.AR ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
                           }`}
                         >
                           {t('common.arabic')}
@@ -378,7 +378,7 @@ const Settings: React.FC = () => {
 
                     <div className="space-y-6">
                       <div className="flex items-center gap-4 mb-2">
-                        <Sun size={20} className="text-primary" />
+                        <Sun size={20} className="text-[var(--color-primary)]" />
                         <h4 className="font-bold text-[var(--color-text-main)] uppercase tracking-widest text-xs">{t('settings.theme')}</h4>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -386,7 +386,7 @@ const Settings: React.FC = () => {
                           type="button"
                           onClick={() => setTheme('light')}
                           className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
-                            theme === 'light' ? 'border-primary bg-primary/5 text-primary' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
+                            theme === 'light' ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
                           }`}
                         >
                           {t('settings.light')}
@@ -395,7 +395,7 @@ const Settings: React.FC = () => {
                           type="button"
                           onClick={() => setTheme('dark')}
                           className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
-                            theme === 'dark' ? 'border-primary bg-primary/5 text-primary' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
+                            theme === 'dark' ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
                           }`}
                         >
                           {t('settings.dark')}
@@ -405,14 +405,14 @@ const Settings: React.FC = () => {
 
                     <div className="space-y-6">
                       <div className="flex items-center gap-4 mb-2">
-                        <Bell size={20} className="text-primary" />
+                        <Bell size={20} className="text-[var(--color-primary)]" />
                         <h4 className="font-bold text-[var(--color-text-main)] uppercase tracking-widest text-xs">{t('common.notifications')}</h4>
                       </div>
                       <label className="flex items-center justify-between p-4 bg-[var(--color-bg-soft)] rounded-2xl cursor-pointer hover:bg-[var(--color-bg-main)] transition-colors">
                         <span className="text-sm font-bold text-[var(--color-text-muted)]">{t('settings.notificationsEnabled')}</span>
                         <input 
                           type="checkbox" 
-                          className="w-6 h-6 rounded-lg border-2 border-[var(--color-border-soft)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
+                          className="w-6 h-6 rounded-lg border-2 border-[var(--color-border-soft)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-transparent"
                           checked={preferences.notifications}
                           onChange={(e) => setPreferences({ ...preferences, notifications: e.target.checked })}
                         />
@@ -423,7 +423,7 @@ const Settings: React.FC = () => {
                           <label className="flex items-center gap-3 cursor-pointer">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
+                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-transparent"
                               checked={preferences.notifyOn.newAudit}
                               onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, newAudit: e.target.checked } })}
                             />
@@ -432,7 +432,7 @@ const Settings: React.FC = () => {
                           <label className="flex items-center gap-3 cursor-pointer">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
+                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-transparent"
                               checked={preferences.notifyOn.updates}
                               onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, updates: e.target.checked } })}
                             />
@@ -441,7 +441,7 @@ const Settings: React.FC = () => {
                           <label className="flex items-center gap-3 cursor-pointer">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
+                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-transparent"
                               checked={preferences.notifyOn.alerts}
                               onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, alerts: e.target.checked } })}
                             />
@@ -450,7 +450,7 @@ const Settings: React.FC = () => {
                           <label className="flex items-center gap-3 cursor-pointer">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)] bg-transparent"
+                              className="w-4 h-4 rounded border-[var(--color-border-strong)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-transparent"
                               checked={preferences.notifyOn.users}
                               onChange={(e) => setPreferences({ ...preferences, notifyOn: { ...preferences.notifyOn, users: e.target.checked } })}
                             />
@@ -462,7 +462,7 @@ const Settings: React.FC = () => {
 
                     <div className="md:col-span-2 space-y-6">
                       <div className="flex items-center gap-4 mb-2">
-                        <LayoutIcon size={20} className="text-primary" />
+                        <LayoutIcon size={20} className="text-[var(--color-primary)]" />
                         <h4 className="font-bold text-[var(--color-text-main)] uppercase tracking-widest text-xs">{t('settings.dashboardLayout')}</h4>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -472,7 +472,7 @@ const Settings: React.FC = () => {
                             type="button"
                             onClick={() => setDashboardLayout(l as "compact" | "standard" | "detailed")}
                             className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
-                              dashboardLayout === l ? 'border-primary bg-primary/5 text-primary' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
+                              dashboardLayout === l ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]' : 'border-[var(--color-border-soft)] text-[var(--color-text-muted)]'
                             }`}
                           >
                             {t(`settings.${l}`)}
@@ -558,16 +558,16 @@ const Settings: React.FC = () => {
       {showLogoutAllModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-              <h2 className="text-lg font-bold text-gray-900">{t('settings.logoutFromAllDevices')}</h2>
-              <button onClick={() => setShowLogoutAllModal(false)} className="p-1 hover:bg-gray-200 rounded-full"><X size={20} /></button>
+            <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-soft)]">
+              <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('settings.logoutFromAllDevices')}</h2>
+              <button onClick={() => setShowLogoutAllModal(false)} className="p-1 hover:bg-[var(--color-bg-main)] rounded-full"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-[var(--color-text-muted)]">
                 {t('settings.logoutFromAllDevicesConfirm')}
               </p>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowLogoutAllModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{t('common.cancel')}</button>
+                <button type="button" onClick={() => setShowLogoutAllModal(false)} className="flex-1 px-4 py-2 border border-[var(--color-border-strong)] rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)]">{t('common.cancel')}</button>
                 <button 
                   onClick={handleLogoutAll} 
                   className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700"

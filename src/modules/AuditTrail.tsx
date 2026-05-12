@@ -151,14 +151,14 @@ const AuditTrailModule: React.FC = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.02 }}
-                  className="hover:bg-primary/5 transition-colors group"
+                  className="hover:bg-[var(--color-primary)]/5 transition-colors group"
                 >
                   <td className="px-10 py-6 text-xs font-bold text-[var(--color-text-muted)] whitespace-nowrap">
                     {formatDateTime(log.timestamp)}
                   </td>
                   <td className="px-10 py-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-[var(--color-card)] border border-[var(--color-border-soft)] flex items-center justify-center text-[10px] font-bold text-primary shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-[var(--color-card)] border border-[var(--color-border-soft)] flex items-center justify-center text-[10px] font-bold text-[var(--color-primary)] shadow-sm">
                         {log.user.charAt(0).toUpperCase()}
                       </div>
                       <span className="text-sm font-bold text-[var(--color-text-main)]">{translateName(log.user)}</span>
@@ -168,7 +168,7 @@ const AuditTrailModule: React.FC = () => {
                     <span className={`inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                       (log.action || '').toLowerCase().includes('delete') ? 'bg-rose-100 text-rose-600' :
                       (log.action || '').toLowerCase().includes('created') ? 'bg-emerald-100 text-emerald-600' :
-                      (log.action || '').toLowerCase().includes('failed') ? 'bg-rose-100 text-rose-600' : 'bg-primary/10 text-primary'
+                      (log.action || '').toLowerCase().includes('failed') ? 'bg-rose-100 text-rose-600' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
                     }`}>
                       {translateAction(log.action)}
                     </span>

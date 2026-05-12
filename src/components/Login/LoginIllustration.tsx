@@ -14,7 +14,7 @@ const LoginIllustration: React.FC = () => {
       ></div>
       
       {/* Primary Color Overlay */}
-      <div className="absolute inset-0 bg-primary/85 mix-blend-multiply"></div>
+      <div className="absolute inset-0 bg-[var(--color-primary)]/85 mix-blend-multiply"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-primary/50 to-slate-900/80"></div>
 
       {/* Content Container */}

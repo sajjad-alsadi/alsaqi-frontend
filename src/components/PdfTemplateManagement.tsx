@@ -163,13 +163,13 @@ export const PdfTemplateManagement: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTemplates.map(template => (
-              <div key={template.id} className="border-2 border-[var(--color-border-soft)] rounded-xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all bg-[var(--color-card)] relative group flex flex-col">
+              <div key={template.id} className="border-2 border-[var(--color-border-soft)] rounded-xl p-6 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 transition-all bg-[var(--color-card)] relative group flex flex-col">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
                     <FileText size={24} />
                   </div>
                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => openModal(template)} className="p-2 text-[var(--color-text-muted)] hover:text-primary bg-[var(--color-bg-soft)] rounded-lg">
+                    <button onClick={() => openModal(template)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] bg-[var(--color-bg-soft)] rounded-lg">
                       <Edit2 size={16} />
                     </button>
                     <button onClick={() => handleDelete(template.id)} className="p-2 text-[var(--color-text-muted)] hover:text-rose-600 bg-[var(--color-bg-soft)] rounded-lg">
@@ -194,7 +194,7 @@ export const PdfTemplateManagement: React.FC = () => {
                       {template.status === 'Approved' ? t('status.approved') : template.status === 'Draft' ? t('status.draft') : template.status}
                     </span>
                     {template.is_default === 1 && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1 rounded-full">
                         <CheckCircle size={12} /> {t('pdfTemplates.default')}
                       </span>
                     )}
@@ -271,7 +271,7 @@ export const PdfTemplateManagement: React.FC = () => {
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input 
                           type="checkbox" 
-                          className="w-5 h-5 rounded border-[var(--color-border-strong)] text-primary focus:ring-[var(--color-primary)]"
+                          className="w-5 h-5 rounded border-[var(--color-border-strong)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                           checked={formData.is_default}
                           onChange={(e) => setFormData({...formData, is_default: e.target.checked})}
                         />
@@ -283,7 +283,7 @@ export const PdfTemplateManagement: React.FC = () => {
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('pdfTemplates.templateContent')}</label>
-                      <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded">{t('pdfTemplates.supportsHandlebars')}</span>
+                      <span className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-1 rounded">{t('pdfTemplates.supportsHandlebars')}</span>
                     </div>
                     <p className="text-xs text-[var(--color-text-muted)] mb-3 font-medium">استخدم المتغيرات مثل <code className="bg-[var(--color-bg-main)] px-1 py-0.5 rounded text-rose-500">{"{{report_number}}"}</code> و الحلقات مثل <code className="bg-[var(--color-bg-main)] px-1 py-0.5 rounded text-rose-500">{"{{#findings}} ... {{/findings}}"}</code></p>
                     <textarea 

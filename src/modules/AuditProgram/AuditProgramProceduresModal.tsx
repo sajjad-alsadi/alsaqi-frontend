@@ -83,7 +83,7 @@ const AuditProgramProceduresModal: React.FC<AuditProgramProceduresModalProps> = 
                 <tbody className="divide-y divide-[var(--color-border-soft)]/50">
                   {Array.isArray(procedures) && procedures.map(proc => (
                     <tr key={proc.id} className="hover:bg-[var(--color-bg-soft)]/50 transition-colors">
-                      <td className="px-6 py-4 text-xs font-bold text-primary text-center">{formatNumber(proc.procedure_number)}</td>
+                      <td className="px-6 py-4 text-xs font-bold text-[var(--color-primary)] text-center">{formatNumber(proc.procedure_number)}</td>
                       <td className="px-6 py-4">
                         <p className="text-sm font-bold text-[var(--color-text-main)]">{proc.audit_step}</p>
                         <p className="text-[10px] text-[var(--color-text-muted)] mt-1">{proc.audit_test_description}</p>

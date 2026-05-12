@@ -84,7 +84,7 @@ export const FraudTable: React.FC<FraudTableProps> = ({ cases }) => {
                     </span>
                     <button 
                       onClick={() => toggleSuspectVisibility(item.id)}
-                      className="p-1.5 rounded-lg hover:bg-[var(--color-bg-main)] text-[var(--color-text-muted)] hover:text-primary transition-all shadow-sm border border-[var(--color-border-soft)] bg-[var(--color-card)]"
+                      className="p-1.5 rounded-lg hover:bg-[var(--color-bg-main)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-all shadow-sm border border-[var(--color-border-soft)] bg-[var(--color-card)]"
                     >
                       {showSuspects[item.id] ? <EyeHide size={14} /> : <Eye size={14} />}
                     </button>

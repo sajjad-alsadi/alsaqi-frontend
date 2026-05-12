@@ -87,7 +87,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
               setTypeFilter('All');
               setPagination(prev => ({ ...prev, page: 1 }));
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'All' ? 'bg-[var(--color-card)] text-primary shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'All' ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >
             {t('correspondence.all')}
           </button>
@@ -96,7 +96,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
               setTypeFilter('Incoming');
               setPagination(prev => ({ ...prev, page: 1 }));
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'Incoming' ? 'bg-[var(--color-card)] text-primary shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'Incoming' ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >
             {t('correspondence.incoming')}
           </button>
@@ -105,7 +105,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
               setTypeFilter('Outgoing');
               setPagination(prev => ({ ...prev, page: 1 }));
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'Outgoing' ? 'bg-[var(--color-card)] text-primary shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'Outgoing' ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >
             {t('correspondence.outgoing')}
           </button>
@@ -139,11 +139,11 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
                   </td>
                 </tr>
               ) : (Array.isArray(items) ? items : []).map((item, idx) => (
-                <tr key={idx} className="hover:bg-primary/5 transition-colors group">
+                <tr key={idx} className="hover:bg-[var(--color-primary)]/5 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       {item.type === 'Incoming' ? (
-                        <Mail size={16} className="text-primary" />
+                        <Mail size={16} className="text-[var(--color-primary)]" />
                       ) : (
                         <Send size={16} className="text-teal-500" />
                       )}
@@ -163,7 +163,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
                         onClick={() => onViewDetails(item.type, item.id)}
-                        className="p-2 bg-[var(--color-card)] text-primary border border-[var(--color-border-soft)] hover:border-primary/30 rounded-xl shadow-sm transition-all"
+                        className="p-2 bg-[var(--color-card)] text-[var(--color-primary)] border border-[var(--color-border-soft)] hover:border-[var(--color-primary)]/30 rounded-xl shadow-sm transition-all"
                         title={t('correspondence.viewDetails')}
                       >
                         <Eye size={16} />

@@ -90,7 +90,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onEdit, onAddChild, on
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button 
             onClick={() => onAddChild(node.id)}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] rounded-lg transition-colors"
             title={t('addChildUnit')}
           >
             <Plus size={16} />
@@ -275,9 +275,9 @@ const OrgStructure: React.FC = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer duration-200 ${
               activeTab === tab.id 
-                ? 'bg-[var(--color-card)] text-blue-600 shadow-sm' 
+                ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' 
                 : 'text-[var(--color-text-muted)] hover:bg-[var(--color-card)]/50'
             }`}
           >
@@ -395,7 +395,7 @@ const OrgStructure: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 flex items-center justify-center gap-2">
-                          <button onClick={() => handleEdit(item)} className="p-2 text-[var(--color-text-muted)] hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                          <button onClick={() => handleEdit(item)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] rounded-lg transition-colors">
                             <Edit2 size={16} />
                           </button>
                           <button onClick={() => handleArchive(item)} className="p-2 text-[var(--color-text-muted)] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
@@ -457,7 +457,7 @@ const OrgStructure: React.FC = () => {
                     </div>
                     <div className="h-1.5 bg-[var(--color-bg-main)] rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-blue-500 transition-all duration-500" 
+                        className="h-full bg-[var(--color-primary-light)]0 transition-all duration-500" 
                         style={{ width: `${(count / stats.activeUnits) * 100}%` }}
                       />
                     </div>

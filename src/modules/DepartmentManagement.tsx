@@ -100,7 +100,7 @@ const DepartmentManagement: React.FC = () => {
       <div className="flex gap-2 p-1 bg-[var(--color-bg-main)] rounded-2xl w-fit">
         <button 
           onClick={() => setActiveTab('departments')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
             activeTab === 'departments' 
               ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' 
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
@@ -111,7 +111,7 @@ const DepartmentManagement: React.FC = () => {
         </button>
         <button 
           onClick={() => setActiveTab('jobTitles')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
             activeTab === 'jobTitles' 
               ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' 
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
@@ -182,7 +182,7 @@ const DepartmentManagement: React.FC = () => {
                       {editingDept?.id === dept.id ? (
                         <button onClick={() => editDept(dept.id, editingDept.name)} className="btn-primary text-xs">{t('save')}</button>
                       ) : (
-                        <button onClick={() => setEditingDept(dept)} className="p-2 text-[var(--color-text-muted)] hover:text-primary"><Edit2 size={18} /></button>
+                        <button onClick={() => setEditingDept(dept)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"><Edit2 size={18} /></button>
                       )}
                       <button onClick={() => handleDeleteClick(dept.id)} className="p-2 text-[var(--color-text-muted)] hover:text-rose-500"><Trash2 size={18} /></button>
                     </div>

@@ -243,7 +243,7 @@ const AuditEvidence: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-10 border-primary/20"
+          className="glass-card p-10 border-[var(--color-primary)]/20"
         >
           <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-8">
             {editingId ? (t('evidence.editEvidence')) : (t('evidence.uploadNewEvidence'))}
@@ -302,7 +302,7 @@ const AuditEvidence: React.FC = () => {
                 type="file" 
                 required={!editingId}
                 onChange={handleFileChange}
-                className="input-field file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                className="input-field file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[var(--color-primary)]/10 file:text-[var(--color-primary)] hover:file:bg-[var(--color-primary)]/20"
               />
             </div>
 
@@ -347,10 +347,10 @@ const AuditEvidence: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="glass-card p-8 group hover:border-primary/30 transition-all flex flex-col"
+              className="glass-card p-8 group hover:border-[var(--color-primary)]/30 transition-all flex flex-col"
             >
               <div className="flex items-start justify-between mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-[var(--color-bg-soft)] flex items-center justify-center text-primary shadow-inner overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--color-bg-soft)] flex items-center justify-center text-[var(--color-primary)] shadow-inner overflow-hidden">
                   {ev.file_data && (ev.file_data.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(ev.file_name)) ? (
                     <img 
                       src={ev.file_data} 
@@ -365,12 +365,12 @@ const AuditEvidence: React.FC = () => {
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setPreviewItem(ev)}
-                    className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-all"
+                    className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-blue-600 hover:bg-[var(--color-primary-light)] flex items-center justify-center transition-all"
                     title={t('evidence.preview')}
                   >
                     <Eye size={18} />
                   </button>
-                  <button onClick={() => handleDownload(ev)} className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-primary hover:bg-primary/10 flex items-center justify-center transition-all" title={t('evidence.download')}>
+                  <button onClick={() => handleDownload(ev)} className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 flex items-center justify-center transition-all" title={t('evidence.download')}>
                     <Download size={18} />
                   </button>
                   {canEdit && (
@@ -405,7 +405,7 @@ const AuditEvidence: React.FC = () => {
 
               <div className="space-y-3 pt-6 border-t border-[var(--color-border-soft)]">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] shrink-0" />
                   <p className="text-xs font-bold text-[var(--color-text-muted)] truncate">
                     {t('common.auditPlan')}: {audit?.title || (t('evidence.unknown'))}
                   </p>

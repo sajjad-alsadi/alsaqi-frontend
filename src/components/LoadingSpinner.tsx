@@ -18,7 +18,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', className 
     <motion.div
       animate={{ rotate: 360 }}
       transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-      className={`${sizes[size]} rounded-full border-primary border-t-transparent ${className}`}
+      className={`${sizes[size]} rounded-full border-[var(--color-primary)] border-t-transparent ${className}`}
     />
   );
 

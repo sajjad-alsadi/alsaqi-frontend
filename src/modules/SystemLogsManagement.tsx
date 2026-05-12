@@ -77,7 +77,7 @@ const SystemLogsManagement: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 isActive 
                   ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm shadow-[var(--color-border-soft)] border border-[var(--color-border-soft)]' 
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-card)]/50'
@@ -104,7 +104,7 @@ const SystemLogsManagement: React.FC = () => {
               {/* Bento Grid Analytics */}
               <div className="p-8 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl shadow-sm flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary-light)] flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
                     <History size={24} />
                   </div>
                   <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('SystemLogsAudit')}</h3>

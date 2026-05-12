@@ -18,6 +18,7 @@ import {
   Building
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'motion/react';
 import { useCorrespondence } from '../../hooks/useCorrespondence';
 import { correspondenceService } from '../../services/correspondenceService';
 import toast from 'react-hot-toast';
@@ -51,34 +52,32 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
 
   const renderDashboard = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard 
-          title={t('correspondence.totalIncoming')} 
-          value={formatNumber(stats?.total_incoming || 0)} 
-          icon={<Mail className="text-[var(--color-primary)]" />} 
-          color="bg-[var(--color-primary)]/10"
-          onClick={() => setActiveSubTab('incoming')}
-        />
-        <StatCard 
-          title={t('correspondence.totalOutgoing')} 
-          value={formatNumber(stats?.total_outgoing || 0)} 
-          icon={<Send className="text-[var(--color-secondary)]" />} 
-          color="bg-[var(--color-secondary)]/10"
-          onClick={() => setActiveSubTab('outgoing')}
-        />
-        <StatCard 
-          title={t('correspondence.pendingResponses')} 
-          value={formatNumber(stats?.pending_response || 0)} 
-          icon={<Clock className="text-[var(--color-warning)]" />} 
-          color="bg-[var(--color-warning)]/10"
-        />
-        <StatCard 
-          title={t('correspondence.archive')} 
-          value={formatNumber(stats?.archived || 0)} 
-          icon={<Archive className="text-[var(--color-text-muted)]" />} 
-          color="bg-[var(--color-bg-main)]"
-          onClick={() => setActiveSubTab('archive')}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {[
+          { title: t('correspondence.totalIncoming'), value: formatNumber(stats?.total_incoming || 0), icon: <Mail size={22} />, color: 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]', onClick: () => setActiveSubTab('incoming') },
+          { title: t('correspondence.totalOutgoing'), value: formatNumber(stats?.total_outgoing || 0), icon: <Send size={22} />, color: 'bg-[var(--color-info)]/10 text-[var(--color-info)]', onClick: () => setActiveSubTab('outgoing') },
+          { title: t('correspondence.pendingResponses'), value: formatNumber(stats?.pending_response || 0), icon: <Clock size={22} />, color: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]', onClick: undefined },
+          { title: t('correspondence.archive'), value: formatNumber(stats?.archived || 0), icon: <Archive size={22} />, color: 'bg-[var(--color-bg-soft)] text-[var(--color-text-muted)]', onClick: () => setActiveSubTab('archive') },
+        ].map((card, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05, duration: 0.3, ease: 'easeOut' }}
+            onClick={card.onClick}
+            className="interactive-card p-5 group hover:border-[var(--color-primary)]/20"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className={`w-11 h-11 rounded-xl ${card.color} flex items-center justify-center group-hover:scale-105 transition-transform duration-200`}>
+                {card.icon}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{card.title}</p>
+              <p className="text-2xl font-bold text-[var(--color-text-main)]">{card.value}</p>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6">
@@ -136,31 +135,31 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
 
   return (
     <div className="space-y-6" dir={language === Language.AR ? 'rtl' : 'ltr'}>
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[var(--color-bg-soft)]/50 p-6 rounded-2xl border border-[var(--color-border-soft)]">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center text-primary shadow-sm border border-[var(--color-border-soft)]">
-            <Mail size={24} />
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/20">
+            <Mail size={28} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">
+            <h1 className="text-2xl font-bold text-[var(--color-text-main)] tracking-tight">
               {t('correspondence.systemTitle')}
-            </h3>
-            <p className="text-xs text-[var(--color-text-muted)] font-bold">
+            </h1>
+            <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
               {t('correspondence.systemDesc')}
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           <button 
             onClick={() => setActiveSubTab('incoming')}
-            className="btn-primary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm"
+            className="btn-primary flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <Plus size={18} />
             {t('correspondence.registerIncoming')}
           </button>
           <button 
             onClick={() => setActiveSubTab('outgoing')}
-            className="btn-secondary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm bg-[var(--color-card)]"
+            className="btn-secondary flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <Plus size={18} />
             {t('correspondence.registerOutgoing')}
@@ -168,7 +167,7 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
         </div>
       </div>
 
-      <div className="flex gap-2 p-1 bg-[var(--color-bg-main)] rounded-2xl w-fit overflow-x-auto">
+      <div className="flex gap-2 p-1.5 bg-[var(--color-card)] rounded-2xl w-fit overflow-x-auto border border-[var(--color-border-soft)]">
         <TabButton 
           active={activeSubTab === 'dashboard'} 
           onClick={() => setActiveSubTab('dashboard')}
@@ -219,27 +218,6 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
   );
 };
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  onClick?: () => void;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, onClick }) => (
-  <div 
-    onClick={onClick}
-    className={`${color} p-6 rounded-2xl border border-[var(--color-border-soft)] shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
-  >
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-[var(--color-text-muted)] font-medium">{title}</span>
-      {icon}
-    </div>
-    <div className="text-3xl font-bold text-[var(--color-text-main)]">{value}</div>
-  </div>
-);
-
 interface TabButtonProps {
   active: boolean;
   onClick: () => void;
@@ -250,10 +228,10 @@ interface TabButtonProps {
 const TabButton: React.FC<TabButtonProps> = ({ active, onClick, label, icon }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+    className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
       active 
-        ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' 
-        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
+        ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' 
+        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'
     }`}
   >
     {icon}

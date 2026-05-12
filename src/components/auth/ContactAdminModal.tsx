@@ -182,7 +182,7 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
                       {t('auth.contactAdminModal.fullName')}
                     </label>
                     <div className="relative group">
-                      <User className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
+                      <User className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors`} size={18} />
                       <input
                         type="text"
                         name="fullName"
@@ -201,7 +201,7 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
                       {t('auth.contactAdminModal.contactInfo')}
                     </label>
                     <div className="relative group">
-                      <Mail className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
+                      <Mail className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors`} size={18} />
                       <input
                         type="text"
                         name="contactInfo"
@@ -220,7 +220,7 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
                       {t('auth.contactAdminModal.requestType')}
                     </label>
                     <div className="relative group">
-                      <FileText className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
+                      <FileText className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors`} size={18} />
                       <select
                         name="requestType"
                         value={formData.requestType}
@@ -245,7 +245,7 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
                       {t('auth.contactAdminModal.requestDetails')}
                     </label>
                     <div className="relative group">
-                      <MessageSquare className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-3 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
+                      <MessageSquare className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-3 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors`} size={18} />
                       <textarea
                         name="requestDetails"
                         value={formData.requestDetails}
@@ -276,7 +276,7 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
                   type="submit"
                   form="contact-admin-form"
                   disabled={status === 'loading'}
-                  className="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-all disabled:opacity-70 flex items-center gap-2 shadow-lg shadow-primary/20"
+                  className="px-6 py-2.5 bg-[var(--color-primary)] text-white text-sm font-bold rounded-xl hover:bg-[var(--color-primary)]/90 transition-all disabled:opacity-70 flex items-center gap-2 shadow-lg shadow-[var(--color-primary)]/20"
                 >
                   {status === 'loading' ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
