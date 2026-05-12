@@ -89,8 +89,20 @@ const SystemErrorLogs: React.FC = () => {
     }
   };
 
-  const exportLogs = () => {
-    window.location.href = '/api/system-errors/export';
+  const exportLogs = async () => {
+    try {
+      const response = await api.get('/system-errors/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `system-errors-${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting logs:', error);
+    }
   };
 
   const fetchLogsRef = React.useRef(fetchLogs);

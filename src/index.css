@@ -8,34 +8,62 @@
   --font-arabic: "Tajawal", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  /* Light Mode Palette — Professional Enterprise */
+  /* Primary Color Scale */
+  --color-primary-50: #e6f7f8;
+  --color-primary-100: #b3e8eb;
+  --color-primary-200: #80d9de;
+  --color-primary-300: #4dcad1;
+  --color-primary-400: #1abbc4;
   --color-primary: #0a7d85;
   --color-primary-hover: #065f66;
+  --color-primary-700: #044a50;
+  --color-primary-800: #03363a;
+  --color-primary-900: #012224;
   --color-primary-light: #e6f5f6;
+
+  /* Neutral Palette — Light Mode */
   --color-bg-main: #f4f7f9;
   --color-bg-soft: #eef2f5;
   --color-card: #ffffff;
+  --color-surface-raised: #fafbfc;
   --color-text-main: #111827;
   --color-text-muted: #5b6b7a;
   --color-border-soft: #dce4ea;
   --color-border-strong: #b8c5cf;
   
-  /* Status Colors — Refined */
+  /* Status Colors */
   --color-success: #059669;
+  --color-success-light: #ecfdf5;
   --color-warning: #d97706;
+  --color-warning-light: #fffbeb;
   --color-danger: #dc2626;
+  --color-danger-light: #fef2f2;
   --color-info: #0284c7;
+  --color-info-light: #f0f9ff;
+
+  /* Shadow Scale */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+  --shadow-primary: 0 4px 14px rgba(10, 125, 133, 0.25);
 }
 
 .dark {
   --color-bg-main: #0c1220;
   --color-bg-soft: #131d2e;
   --color-card: #1a2538;
+  --color-surface-raised: #1f2d42;
   --color-text-main: #f1f5f9;
   --color-text-muted: #8b9db3;
   --color-border-soft: #263347;
   --color-border-strong: #374a63;
   --color-primary-light: #0a7d8520;
+  --color-success-light: #05966915;
+  --color-warning-light: #d9770615;
+  --color-danger-light: #dc262615;
+  --color-info-light: #0284c715;
 }
 
 @layer base {
@@ -65,10 +93,10 @@
 /* === Cards & Containers === */
 .glass-card {
   @apply bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl transition-all duration-200;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--shadow-sm);
 }
 .glass-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: var(--shadow-md);
 }
 
 /* === Sidebar === */
@@ -84,10 +112,10 @@
 /* === Buttons === */
 .btn-primary {
   @apply bg-[var(--color-primary)] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[var(--color-primary-hover)] transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer;
-  box-shadow: 0 2px 8px rgba(10, 125, 133, 0.2);
+  box-shadow: var(--shadow-primary);
 }
 .btn-primary:hover {
-  box-shadow: 0 4px 14px rgba(10, 125, 133, 0.3);
+  box-shadow: 0 6px 20px rgba(10, 125, 133, 0.35);
 }
 
 .btn-secondary {
@@ -96,7 +124,7 @@
 
 .btn-danger {
   @apply bg-[var(--color-danger)] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-red-700 transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-danger) 25%, transparent);
 }
 
 /* === Form Elements === */
@@ -110,19 +138,31 @@
 
 /* === Badges === */
 .badge-success {
-  @apply bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg text-xs font-semibold border border-emerald-200;
+  @apply px-3 py-1 rounded-lg text-xs font-semibold border;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  border-color: color-mix(in srgb, var(--color-success) 20%, transparent);
 }
 
 .badge-warning {
-  @apply bg-amber-50 text-amber-700 px-3 py-1 rounded-lg text-xs font-semibold border border-amber-200;
+  @apply px-3 py-1 rounded-lg text-xs font-semibold border;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+  border-color: color-mix(in srgb, var(--color-warning) 20%, transparent);
 }
 
 .badge-danger {
-  @apply bg-red-50 text-red-700 px-3 py-1 rounded-lg text-xs font-semibold border border-red-200;
+  @apply px-3 py-1 rounded-lg text-xs font-semibold border;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
 }
 
 .badge-info {
-  @apply bg-sky-50 text-sky-700 px-3 py-1 rounded-lg text-xs font-semibold border border-sky-200;
+  @apply px-3 py-1 rounded-lg text-xs font-semibold border;
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+  border-color: color-mix(in srgb, var(--color-info) 20%, transparent);
 }
 
 .badge-risk-critical {
@@ -144,7 +184,7 @@
 /* === Tables === */
 .table-container {
   @apply w-full overflow-x-auto rounded-2xl border border-[var(--color-border-soft)] bg-[var(--color-card)];
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .table-header {
@@ -257,12 +297,12 @@
 /* === Enhanced Interactive States === */
 .interactive-card {
   @apply bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl cursor-pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .interactive-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
 }
 .interactive-card:active {
   transform: translateY(0);

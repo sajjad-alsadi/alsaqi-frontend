@@ -5,6 +5,7 @@ import { AuditTrail } from '../types';
 import { History, Search, Filter, Clock, User, Activity, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import api from '../services/api';
+import toast from 'react-hot-toast';
 import { useFormat } from '../services/formatService';
 import Pagination from '../components/Pagination';
 
@@ -56,6 +57,7 @@ const AuditTrailModule: React.FC = () => {
       }));
     } catch (err) {
       console.error(err);
+      toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);
     }

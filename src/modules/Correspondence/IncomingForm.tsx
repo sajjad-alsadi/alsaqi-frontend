@@ -10,6 +10,7 @@ import {
   EntityType 
 } from '../../constants';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
@@ -76,6 +77,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
       onSuccess();
     } catch (error) {
       console.error("Failed to save incoming correspondence", error);
+      toast.error(t('errorOccurred'));
     }
   };
 

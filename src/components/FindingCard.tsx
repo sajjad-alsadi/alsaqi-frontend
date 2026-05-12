@@ -43,10 +43,10 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
           </div>
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h4 className="font-black text-xl text-[var(--color-text-main)]">{t('findings.findingNumber')}{formatNumber(finding.id)}</h4>
+              <h4 className="font-bold text-xl text-[var(--color-text-main)]">{t('findings.findingNumber')}{formatNumber(finding.id)}</h4>
               <Badge type="risk" value={finding.risk_level} />
             </div>
-            <p className="text-xs text-[var(--color-text-muted)] font-bold uppercase tracking-wider">
+            <p className="text-xs text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
               {t('common.auditPlan')}: {formatNumber(finding.audit_id)} • {t('common.statusLabel')}: <Badge type="status" value={finding.status} className="ms-2" />
             </p>
           </div>
@@ -63,7 +63,7 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setActiveTab('recommendations')}
-            className="px-4 py-3 bg-[var(--color-card)] text-[var(--color-primary)] font-black rounded-xl shadow-sm hover:bg-[var(--color-primary)] hover:text-white transition-all text-[10px] uppercase tracking-widest border border-[var(--color-border-soft)]"
+            className="px-4 py-3 bg-[var(--color-card)] text-[var(--color-primary)] font-bold rounded-xl shadow-sm hover:bg-[var(--color-primary)] hover:text-white transition-all text-[10px] uppercase tracking-widest border border-[var(--color-border-soft)]"
           >
             {t('findings.viewRecommendations')}
           </motion.button>
@@ -72,24 +72,24 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
 
       <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
         <div className="space-y-3">
-          <p className="text-[10px] text-[var(--color-primary)] uppercase font-black tracking-[0.2em]">{t('findings.condition')}</p>
+          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.condition')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.condition}</p>
         </div>
         <div className="space-y-3">
-          <p className="text-[10px] text-[var(--color-primary)] uppercase font-black tracking-[0.2em]">{t('findings.criteria')}</p>
+          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.criteria')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.criteria}</p>
         </div>
         <div className="space-y-3">
-          <p className="text-[10px] text-[var(--color-primary)] uppercase font-black tracking-[0.2em]">{t('findings.cause')}</p>
+          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.cause')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.cause}</p>
         </div>
         <div className="space-y-3">
-          <p className="text-[10px] text-[var(--color-primary)] uppercase font-black tracking-[0.2em]">{t('findings.consequence')}</p>
+          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.consequence')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.consequence}</p>
         </div>
         <div className="space-y-3 bg-[var(--color-success)]/5 p-6 rounded-xl border border-[var(--color-success)]/20">
-          <p className="text-[10px] text-[var(--color-success)] uppercase font-black tracking-[0.2em]">{t('findings.recommendation')}</p>
-          <p className="text-sm text-[var(--color-success)] leading-relaxed font-black">{finding.recommendation}</p>
+          <p className="text-[10px] text-[var(--color-success)] uppercase font-bold tracking-[0.2em]">{t('findings.recommendation')}</p>
+          <p className="text-sm text-[var(--color-success)] leading-relaxed font-bold">{finding.recommendation}</p>
         </div>
       </div>
     </motion.div>

@@ -107,8 +107,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             >
               <Logo size={40} className="text-[var(--color-primary)]" />
               <div className="flex flex-col gap-1">
-                <h1 className="font-black text-xl text-[var(--color-text-main)] tracking-tight leading-tight uppercase">{t('common.brandName')}</h1>
-                <span className="text-[10px] font-bold text-[var(--color-primary)] tracking-[0.15em] uppercase">{t('common.auditSystem')}</span>
+                <h1 className="font-bold text-xl text-[var(--color-text-main)] tracking-tight leading-tight uppercase">{t('common.brandName')}</h1>
+                <span className="text-[10px] font-semibold text-[var(--color-primary)] tracking-[0.15em] uppercase">{t('common.auditSystem')}</span>
               </div>
             </motion.div>
           )}

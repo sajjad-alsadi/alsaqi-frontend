@@ -118,6 +118,7 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
     message: { error: "TOO_MANY_ATTEMPTS" },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { ipKeyGenerator: false },
     // Key by IP + username so that blocking one user doesn't affect others
     keyGenerator: (req: any) => {
       const username = (req.body && req.body.usernameOrEmail) ? String(req.body.usernameOrEmail).toLowerCase() : 'unknown';

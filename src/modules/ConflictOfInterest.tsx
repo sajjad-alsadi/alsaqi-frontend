@@ -5,6 +5,7 @@ import { ShieldAlert, Plus, Edit, CheckCircle2, AlertCircle } from 'lucide-react
 import { motion } from 'motion/react';
 import Modal from '../components/Modal';
 import api from '../services/api';
+import toast from 'react-hot-toast';
 import { useFormat } from '../services/formatService';
 
 interface COI {
@@ -64,6 +65,7 @@ const ConflictOfInterest: React.FC = () => {
       fetchDeclarations();
     } catch (err) {
       console.error(err);
+      toast.error(t('errorOccurred'));
     }
   };
 
@@ -77,6 +79,7 @@ const ConflictOfInterest: React.FC = () => {
       fetchDeclarations();
     } catch (err) {
       console.error(err);
+      toast.error(t('errorOccurred'));
     }
   };
 

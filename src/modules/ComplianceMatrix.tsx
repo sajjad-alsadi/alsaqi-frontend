@@ -946,7 +946,7 @@ export default function ComplianceMatrix() {
                             <div className="text-xs font-black truncate">{t('complianceMatrix.originalDoc')}</div>
                             <div className="text-[9px] font-bold opacity-60">{t('complianceMatrix.viewAttachedFile')}</div>
                          </div>
-                         <Download size={14} className="mr-auto" />
+                         <Download size={14} className="ms-auto" />
                       </a>
                     ) : (
                       <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 text-[10px] font-black text-center italic">

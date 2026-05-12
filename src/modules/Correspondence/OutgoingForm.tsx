@@ -8,6 +8,7 @@ import {
   SendingMethod 
 } from '../../constants';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { FormField } from '../../components/ui/FormField';
@@ -62,6 +63,7 @@ const OutgoingForm: React.FC<OutgoingFormProps> = ({ language, onSuccess, onCanc
       onSuccess();
     } catch (error) {
       console.error("Failed to save outgoing correspondence", error);
+      toast.error(t('errorOccurred'));
     }
   };
 

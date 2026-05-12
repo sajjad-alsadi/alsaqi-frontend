@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../services/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -71,6 +72,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       }
     } catch (error) {
       console.error("Failed to fetch outgoing correspondence", error);
+      toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -90,6 +92,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       setItemToDelete(null);
     } catch (error) {
       console.error('Error deleting letter:', error);
+      toast.error(t('errorOccurred'));
     }
   };
 

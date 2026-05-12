@@ -14,7 +14,7 @@ const LoginHeader: React.FC<LoginHeaderProps> = ({ language, setLanguage, t }) =
       <div className="flex justify-end mb-8">
         <button 
           onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-          className="p-2.5 bg-slate-50 text-slate-500 rounded-xl hover:bg-slate-100 transition-all border border-slate-100"
+          className="p-2.5 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] rounded-xl hover:bg-[var(--color-bg-main)] transition-all border border-[var(--color-border-soft)]"
           title={t('common.language')}
         >
           <Languages size={20} />
@@ -23,14 +23,14 @@ const LoginHeader: React.FC<LoginHeaderProps> = ({ language, setLanguage, t }) =
 
       <div className="mb-10 text-start">
         <div className="flex justify-start mb-6">
-          <div className="rounded-full overflow-hidden bg-white">
+          <div className="rounded-full overflow-hidden bg-[var(--color-card)]">
             <Logo size={72} className="block" />
           </div>
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+        <h1 className="text-3xl font-bold text-[var(--color-text-main)] tracking-tight leading-tight">
           {t('auth.portalTitle')}
         </h1>
-        <p className="text-slate-500 mt-2 text-base">
+        <p className="text-[var(--color-text-muted)] mt-2 text-base">
           {t('auth.welcome')}
         </p>
       </div>

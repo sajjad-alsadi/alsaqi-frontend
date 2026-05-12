@@ -30,7 +30,7 @@ const Badge: React.FC<BadgeProps> = ({ type, value, className = '' }) => {
     return 'bg-[var(--color-bg-soft)] text-[var(--color-text-muted)]';
   };
 
-  const baseClass = "inline-flex items-center px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all";
+  const baseClass = "inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all";
   const typeClass = type === 'risk' ? getRiskClass(value) : type === 'status' ? getStatusClass(value) : 'bg-slate-100 text-slate-500';
 
   const displayValue = type === 'risk' ? (
