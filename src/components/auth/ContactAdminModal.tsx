@@ -125,22 +125,22 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-lg bg-[var(--color-card)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border-soft)]">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-xl font-bold text-[var(--color-text-main)]">
                   {t('auth.contactAdminModal.title')}
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">
                   {t('auth.contactAdminModal.description')}
                 </p>
               </div>
               <button
                 onClick={onClose}
                 disabled={status === 'loading'}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors disabled:opacity-50"
+                className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] rounded-full transition-colors disabled:opacity-50"
               >
                 <X size={20} />
               </button>
@@ -157,12 +157,12 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
                   <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
                     <CheckCircle size={32} />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">
+                  <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2">
                     {t('auth.contactAdminModal.successMessage')}
                   </h3>
                   <button
                     onClick={onClose}
-                    className="mt-6 px-6 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                    className="mt-6 px-6 py-2.5 bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-bold rounded-xl hover:bg-[var(--color-bg-main)] transition-colors"
                   >
                     {t('auth.contactAdminModal.close')}
                   </button>
@@ -178,18 +178,18 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
 
                   {/* Full Name */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">
+                    <label className="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-widest">
                       {t('auth.contactAdminModal.fullName')}
                     </label>
                     <div className="relative group">
-                      <User className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors`} size={18} />
+                      <User className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
                       <input
                         type="text"
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
                         disabled={status === 'loading'}
-                        className={`w-full bg-slate-50 border ${errors.fullName ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-slate-900 transition-all outline-none focus:ring-4 disabled:opacity-60`}
+                        className={`w-full bg-[var(--color-bg-soft)] border ${errors.fullName ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-[var(--color-border-soft)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-[var(--color-text-main)] transition-all outline-none focus:ring-4 disabled:opacity-60`}
                       />
                     </div>
                     {errors.fullName && <p className="text-xs text-red-500 font-medium mt-1">{errors.fullName}</p>}
@@ -197,18 +197,18 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
 
                   {/* Contact Info */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">
+                    <label className="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-widest">
                       {t('auth.contactAdminModal.contactInfo')}
                     </label>
                     <div className="relative group">
-                      <Mail className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors`} size={18} />
+                      <Mail className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
                       <input
                         type="text"
                         name="contactInfo"
                         value={formData.contactInfo}
                         onChange={handleChange}
                         disabled={status === 'loading'}
-                        className={`w-full bg-slate-50 border ${errors.contactInfo ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-slate-900 transition-all outline-none focus:ring-4 disabled:opacity-60`}
+                        className={`w-full bg-[var(--color-bg-soft)] border ${errors.contactInfo ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-[var(--color-border-soft)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-[var(--color-text-main)] transition-all outline-none focus:ring-4 disabled:opacity-60`}
                       />
                     </div>
                     {errors.contactInfo && <p className="text-xs text-red-500 font-medium mt-1">{errors.contactInfo}</p>}
@@ -216,17 +216,17 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
 
                   {/* Request Type */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">
+                    <label className="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-widest">
                       {t('auth.contactAdminModal.requestType')}
                     </label>
                     <div className="relative group">
-                      <FileText className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors`} size={18} />
+                      <FileText className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
                       <select
                         name="requestType"
                         value={formData.requestType}
                         onChange={handleChange}
                         disabled={status === 'loading'}
-                        className={`w-full bg-slate-50 border ${errors.requestType ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-slate-900 transition-all outline-none focus:ring-4 disabled:opacity-60 appearance-none`}
+                        className={`w-full bg-[var(--color-bg-soft)] border ${errors.requestType ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-[var(--color-border-soft)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-[var(--color-text-main)] transition-all outline-none focus:ring-4 disabled:opacity-60 appearance-none`}
                       >
                         <option value="" disabled>--</option>
                         <option value="newAccount">{t('auth.contactAdminModal.requestTypes.newAccount')}</option>
@@ -241,18 +241,18 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
 
                   {/* Request Details */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">
+                    <label className="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-widest">
                       {t('auth.contactAdminModal.requestDetails')}
                     </label>
                     <div className="relative group">
-                      <MessageSquare className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-3 text-slate-400 group-focus-within:text-primary transition-colors`} size={18} />
+                      <MessageSquare className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-3 text-[var(--color-text-muted)] group-focus-within:text-primary transition-colors`} size={18} />
                       <textarea
                         name="requestDetails"
                         value={formData.requestDetails}
                         onChange={handleChange}
                         disabled={status === 'loading'}
                         rows={4}
-                        className={`w-full bg-slate-50 border ${errors.requestDetails ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-slate-900 transition-all outline-none focus:ring-4 disabled:opacity-60 resize-none`}
+                        className={`w-full bg-[var(--color-bg-soft)] border ${errors.requestDetails ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-[var(--color-border-soft)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20'} rounded-xl py-2.5 ${dir === 'rtl' ? 'pr-10 pl-4' : 'pl-10 pr-4'} text-sm text-[var(--color-text-main)] transition-all outline-none focus:ring-4 disabled:opacity-60 resize-none`}
                       />
                     </div>
                     {errors.requestDetails && <p className="text-xs text-red-500 font-medium mt-1">{errors.requestDetails}</p>}
@@ -263,12 +263,12 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
 
             {/* Footer */}
             {status !== 'success' && (
-              <div className="p-6 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3">
+              <div className="p-6 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-soft)] flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={status === 'loading'}
-                  className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50"
+                  className="px-5 py-2.5 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-main)] rounded-xl transition-colors disabled:opacity-50"
                 >
                   {t('common.cancel')}
                 </button>

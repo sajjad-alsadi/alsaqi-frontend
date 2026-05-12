@@ -34,7 +34,7 @@ const DashboardAuditProgress: React.FC<DashboardAuditProgressProps> = React.memo
         </h3>
         <div className="flex items-center gap-4">
           <span className="text-sm font-bold text-[var(--color-success)] uppercase tracking-widest">{t('dashboard.completionRate')}: {formatNumber(completionRate)}%</span>
-          <div className="w-40 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700 shadow-inner">
+          <div className="w-40 h-3 bg-[var(--color-bg-main)] dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-[var(--color-border-soft)] dark:border-slate-700 shadow-inner">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${completionRate}%` }}

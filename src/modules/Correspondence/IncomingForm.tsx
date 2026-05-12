@@ -164,16 +164,16 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
         </FormField>
 
         {/* Tracking Section */}
-        <div className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 lg:col-span-3 space-y-6">
+        <div className="p-6 bg-[var(--color-bg-soft)] dark:bg-slate-900/50 rounded-2xl border border-[var(--color-border-soft)] dark:border-slate-800 lg:col-span-3 space-y-6">
           <div className="flex flex-wrap items-center gap-8">
             <div className="flex items-center gap-3">
               <input 
                 type="checkbox"
                 id="follow_up_required"
-                className="w-5 h-5 text-[var(--color-primary)] rounded border-slate-300 dark:border-slate-700 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-800"
+                className="w-5 h-5 text-[var(--color-primary)] rounded border-[var(--color-border-strong)] dark:border-slate-700 focus:ring-[var(--color-primary)] bg-[var(--color-card)] dark:bg-slate-800"
                 {...register('follow_up_required')}
               />
-              <label htmlFor="follow_up_required" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+              <label htmlFor="follow_up_required" className="text-sm font-bold text-[var(--color-text-main)] dark:text-[var(--color-border-strong)]">
                 {t('correspondence.followUpRequired')}
               </label>
             </div>
@@ -190,10 +190,10 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
               <input 
                 type="checkbox"
                 id="response_required"
-                className="w-5 h-5 text-[var(--color-primary)] rounded border-slate-300 dark:border-slate-700 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-800"
+                className="w-5 h-5 text-[var(--color-primary)] rounded border-[var(--color-border-strong)] dark:border-slate-700 focus:ring-[var(--color-primary)] bg-[var(--color-card)] dark:bg-slate-800"
                 {...register('response_required')}
               />
-              <label htmlFor="response_required" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+              <label htmlFor="response_required" className="text-sm font-bold text-[var(--color-text-main)] dark:text-[var(--color-border-strong)]">
                 {t('correspondence.responseRequired')}
               </label>
             </div>
@@ -211,11 +211,11 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
         </FormField>
       </div>
 
-      <div className="flex justify-end gap-6 pt-8 border-t border-slate-100 dark:border-slate-800">
+      <div className="flex justify-end gap-6 pt-8 border-t border-[var(--color-border-soft)] dark:border-slate-800">
         <button 
           type="button"
           onClick={onCancel}
-          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
+          className="px-8 py-3 text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)] font-bold uppercase tracking-widest hover:bg-[var(--color-bg-main)] dark:hover:bg-slate-800 rounded-xl transition-all"
         >
           {t('common.cancel')}
         </button>

@@ -207,7 +207,7 @@ export default function ComplianceMatrix() {
         ${status === 'compliant' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 
           status === 'non_compliant' ? 'bg-rose-50 text-rose-700 border-rose-100' : 
           status === 'partial' ? 'bg-amber-50 text-amber-700 border-amber-100' : 
-          'bg-slate-50 text-slate-700 border-slate-100'}`}>
+          'bg-[var(--color-bg-soft)] text-[var(--color-text-main)] border-[var(--color-border-soft)]'}`}>
         <Icon size={12} strokeWidth={3} />
         {config.label}
       </span>
@@ -231,26 +231,26 @@ export default function ComplianceMatrix() {
   // --- RENDERS ---
   const renderRegistry = () => (
     <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between gap-4 bg-white/40 p-4 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
+      <div className="flex flex-col lg:flex-row justify-between gap-4 bg-[var(--color-card)]/40 p-4 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
         <div className="relative group flex-1 max-w-md">
-          <Search className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
+          <Search className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors" size={18} />
           <input 
             type="text" placeholder={t('complianceMatrix.searchPlaceholder')} 
-            className="w-full bg-white pe-12 ps-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all shadow-sm"
+            className="w-full bg-[var(--color-card)] pe-12 ps-4 py-2.5 rounded-xl border border-[var(--color-border-soft)] text-sm focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all shadow-sm"
             value={search} onChange={e => setSearch(e.target.value)}
           />
         </div>
         
         <div className="flex flex-wrap items-center gap-3 lg:pb-0">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm cursor-pointer">
-            <Filter size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-sm cursor-pointer">
+            <Filter size={14} className="text-[var(--color-text-muted)]" />
             <select className="bg-transparent text-xs font-medium outline-none border-none p-0 cursor-pointer min-w-[120px]" value={filterSource} onChange={e => setFilterSource(e.target.value)}>
               <option value="">{t('complianceMatrix.allSources')}</option>
               {Object.entries(sourceLabels).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm">
-            <ShieldCheck size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-sm">
+            <ShieldCheck size={14} className="text-[var(--color-text-muted)]" />
             <select className="bg-transparent text-xs font-medium outline-none border-none p-0 cursor-pointer min-w-[120px]" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
               <option value="">{t('complianceMatrix.allStatuses')}</option>
               {Object.entries(statusConfig).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
@@ -271,17 +271,17 @@ export default function ComplianceMatrix() {
         <div className="overflow-x-visible lg:overflow-x-auto">
           <table className="w-full text-end">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('complianceMatrix.ref')}</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('complianceMatrix.titleData')}</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('complianceMatrix.source')}</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('complianceMatrix.complianceStatus')}</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('complianceMatrix.responsible', t('complianceMatrix.personResp'))}</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('complianceMatrix.review')}</th>
-                <th className="px-6 py-4 text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('complianceMatrix.actions')}</th>
+              <tr className="border-b border-[var(--color-border-soft)] bg-[var(--color-bg-soft)]/50">
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.ref')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.titleData')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.source')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.complianceStatus')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.responsible', t('complianceMatrix.personResp'))}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.review')}</th>
+                <th className="px-6 py-4 text-center text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[var(--color-border-soft)]">
               <AnimatePresence mode="popLayout">
                 {items.map((item, idx) => (
                   <motion.tr 
@@ -293,14 +293,14 @@ export default function ComplianceMatrix() {
                     className="hover:bg-[var(--color-primary)]/5 transition-colors group"
                   >
                     <td className="px-6 py-5 whitespace-nowrap">
-                      <span className="text-[10px] font-bold font-mono text-slate-400 group-hover:text-[var(--color-primary)] transition-colors bg-slate-100 px-2 py-1 rounded border border-slate-200 uppercase">
+                      <span className="text-[10px] font-bold font-mono text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors bg-[var(--color-bg-main)] px-2 py-1 rounded border border-[var(--color-border-soft)] uppercase">
                         {item.ref_number}
                       </span>
                     </td>
                     <td className="px-6 py-5 min-w-[200px]">
-                      <div className="font-bold text-slate-800 leading-tight mb-1 truncate max-w-sm" title={item.title}>{item.title}</div>
+                      <div className="font-bold text-[var(--color-text-main)] leading-tight mb-1 truncate max-w-sm" title={item.title}>{item.title}</div>
                       <div className="flex items-center gap-3">
-                        <span className="text-[9px] text-slate-400 flex items-center gap-1 font-medium">
+                        <span className="text-[9px] text-[var(--color-text-muted)] flex items-center gap-1 font-medium">
                           <Tag size={10} /> {item.category || t('complianceMatrix.noCategory')}
                         </span>
                         {item.open_findings_count ? (
@@ -314,15 +314,15 @@ export default function ComplianceMatrix() {
                     <td className="px-6 py-5 whitespace-nowrap">{getStatusBadge(item.compliance_status)}</td>
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                         <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-                            <User size={12} className="text-slate-400" />
+                         <div className="w-7 h-7 rounded-full bg-[var(--color-bg-main)] flex items-center justify-center border border-[var(--color-border-soft)]">
+                            <User size={12} className="text-[var(--color-text-muted)]" />
                          </div>
-                         <div className="text-xs font-bold text-slate-700">{item.responsible_person_name || t('complianceMatrix.notSpecified')}</div>
+                         <div className="text-xs font-bold text-[var(--color-text-main)]">{item.responsible_person_name || t('complianceMatrix.notSpecified')}</div>
                       </div>
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex flex-col gap-0.5">
-                        <span className={`text-[10px] font-bold flex items-center gap-1 ${item.review_date && new Date(item.review_date) < new Date() ? 'text-rose-500' : 'text-slate-500'}`}>
+                        <span className={`text-[10px] font-bold flex items-center gap-1 ${item.review_date && new Date(item.review_date) < new Date() ? 'text-rose-500' : 'text-[var(--color-text-muted)]'}`}>
                           <Calendar size={10} /> {item.review_date || '-- / -- / --'}
                         </span>
                         {item.review_date && new Date(item.review_date) < new Date() && (
@@ -332,26 +332,26 @@ export default function ComplianceMatrix() {
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => { setSelectedItem(item); setFormData(item); setIsViewModalOpen(true); }} className="p-2 text-slate-400 hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-all" title={t('common.view')}><Eye size={18} /></button>
-                        <button onClick={() => { setSelectedItem(item); setFormData(item); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all" title={t('common.edit')}><Edit2 size={18} /></button>
+                        <button onClick={() => { setSelectedItem(item); setFormData(item); setIsViewModalOpen(true); }} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-all" title={t('common.view')}><Eye size={18} /></button>
+                        <button onClick={() => { setSelectedItem(item); setFormData(item); setIsModalOpen(true); }} className="p-2 text-[var(--color-text-muted)] hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all" title={t('common.edit')}><Edit2 size={18} /></button>
                         
                         <div className="relative group/actions">
-                          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
+                          <button className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] rounded-lg transition-all">
                             <MoreHorizontal size={18} />
                           </button>
-                          <div className="absolute start-0 bottom-full mb-1 hidden group-hover/actions:flex flex-col bg-white border border-slate-200 rounded-xl shadow-xl z-[100] min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-200">
-                             <div className="px-3 py-2 text-[10px] font-bold text-slate-400 bg-slate-50 border-b border-slate-100 uppercase tracking-widest text-center">{t('complianceMatrix.changeStatus')}</div>
+                          <div className="absolute start-0 bottom-full mb-1 hidden group-hover/actions:flex flex-col bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-xl z-[100] min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                             <div className="px-3 py-2 text-[10px] font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-soft)] border-b border-[var(--color-border-soft)] uppercase tracking-widest text-center">{t('complianceMatrix.changeStatus')}</div>
                              {Object.entries(statusConfig).map(([k,v]) => (
                                <button 
                                  key={k}
                                  onClick={() => updateStatus(item.id, k as ComplianceStatus)}
-                                 className="px-4 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50 text-end flex items-center gap-2 transition-colors"
+                                 className="px-4 py-2 text-[11px] font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] text-end flex items-center gap-2 transition-colors"
                                >
                                  <v.icon size={12} className={`text-${v.color}-500`} />
                                  {v.label}
                                </button>
                              ))}
-                             <div className="border-t border-slate-100 mt-1">
+                             <div className="border-t border-[var(--color-border-soft)] mt-1">
                                 <button onClick={() => handleDelete(item.id)} className="w-full px-4 py-2 text-[11px] font-bold text-rose-500 hover:bg-rose-50 text-end flex items-center gap-2 transition-colors">
                                   <Trash2 size={12} /> {t('common.delete')}
                                 </button>
@@ -366,16 +366,16 @@ export default function ComplianceMatrix() {
             </tbody>
           </table>
           {(loading || items.length === 0) && (
-            <div className="flex flex-col items-center justify-center py-20 bg-white/20">
+            <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-card)]/20">
                {loading ? (
                  <div className="animate-spin rounded-full h-10 w-10 border-4 border-[var(--color-primary)] border-t-transparent shadow-lg shadow-[var(--color-primary)]/20"></div>
                ) : (
                  <>
-                  <div className="bg-slate-100 p-6 rounded-full border-2 border-dashed border-slate-300 mb-4 animate-pulse">
-                    <ShieldCheck size={48} className="text-slate-300" />
+                  <div className="bg-[var(--color-bg-main)] p-6 rounded-full border-2 border-dashed border-[var(--color-border-strong)] mb-4 animate-pulse">
+                    <ShieldCheck size={48} className="text-[var(--color-border-strong)]" />
                   </div>
-                  <p className="text-slate-500 font-bold">{t('complianceMatrix.noRecords')}</p>
-                  <p className="text-slate-400 text-sm mt-1">{t('complianceMatrix.tryAdjustFilters')}</p>
+                  <p className="text-[var(--color-text-muted)] font-bold">{t('complianceMatrix.noRecords')}</p>
+                  <p className="text-[var(--color-text-muted)] text-sm mt-1">{t('complianceMatrix.tryAdjustFilters')}</p>
                  </>
                )}
             </div>
@@ -390,18 +390,18 @@ export default function ComplianceMatrix() {
     
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center bg-white/40 p-4 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
+        <div className="flex justify-between items-center bg-[var(--color-card)]/40 p-4 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
            <div>
-              <h3 className="font-bold text-slate-800 uppercase tracking-tighter flex items-center gap-2">
+              <h3 className="font-bold text-[var(--color-text-main)] uppercase tracking-tighter flex items-center gap-2">
                 <Layers size={18} className="text-[var(--color-primary)]" /> {t('complianceMatrix.gapMatrix')}
               </h3>
-              <p className="text-[10px] text-slate-500 font-bold">{t('complianceMatrix.gapMatrixDesc')}</p>
+              <p className="text-[10px] text-[var(--color-text-muted)] font-bold">{t('complianceMatrix.gapMatrixDesc')}</p>
            </div>
            <div className="flex gap-2">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 rounded-xl text-xs font-bold transition-all shadow-sm group">
+              <button className="flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border-soft)] hover:border-[var(--color-border-strong)] text-[var(--color-text-muted)] rounded-xl text-xs font-bold transition-all shadow-sm group">
                 <FileDown size={14} className="group-hover:translate-y-0.5 transition-transform" /> {t('complianceMatrix.exportPdf')}
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 rounded-xl text-xs font-bold transition-all shadow-sm group">
+              <button className="flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border-soft)] hover:border-[var(--color-border-strong)] text-[var(--color-text-muted)] rounded-xl text-xs font-bold transition-all shadow-sm group">
                 <BarChart3 size={14} className="group-hover:scale-110 transition-transform" /> {t('complianceMatrix.detailedStats')}
               </button>
            </div>
@@ -419,14 +419,14 @@ export default function ComplianceMatrix() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: sIdx * 0.1 }}
                 key={status} 
-                className="flex flex-col h-[600px] bg-slate-50/50 rounded-3xl border border-slate-200/50 overflow-hidden shadow-inner"
+                className="flex flex-col h-[600px] bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)]/50 overflow-hidden shadow-inner"
               >
-                <div className={`p-4 border-b-2 flex justify-between items-center bg-white border-${config.color}-500/30`}>
+                <div className={`p-4 border-b-2 flex justify-between items-center bg-[var(--color-card)] border-${config.color}-500/30`}>
                   <div className="flex items-center gap-2.5">
                     <div className={`p-2 bg-${config.color}-50 rounded-lg text-${config.color}-600 border border-${config.color}-100`}>
                       <Icon size={16} strokeWidth={3} />
                     </div>
-                    <span className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">{config.label}</span>
+                    <span className="font-bold text-[var(--color-text-main)] text-[11px] uppercase tracking-wider">{config.label}</span>
                   </div>
                   <span className={`bg-${config.color}-100 text-${config.color}-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono border border-${config.color}-200`}>
                     {stItems.length}
@@ -439,11 +439,11 @@ export default function ComplianceMatrix() {
                       key={item.id}
                       whileHover={{ scale: 1.02, x: -4 }}
                       onClick={() => { setSelectedItem(item); setFormData(item); setIsViewModalOpen(true); }}
-                      className="group p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-[var(--color-primary)]/30 transition-all cursor-pointer relative overflow-hidden"
+                      className="group p-4 bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm hover:shadow-md hover:border-[var(--color-primary)]/30 transition-all cursor-pointer relative overflow-hidden"
                     >
                       <div className={`absolute top-0 end-0 w-1 h-full bg-${config.color}-400/50 group-hover:bg-${config.color}-500 transition-colors`}></div>
-                      <div className="text-[9px] font-bold font-mono text-slate-400 group-hover:text-[var(--color-primary)] mb-1 leading-none">{item.ref_number}</div>
-                      <div className="font-bold text-slate-800 text-xs mb-2 leading-snug truncate-2-lines">{item.title}</div>
+                      <div className="text-[9px] font-bold font-mono text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] mb-1 leading-none">{item.ref_number}</div>
+                      <div className="font-bold text-[var(--color-text-main)] text-xs mb-2 leading-snug truncate-2-lines">{item.title}</div>
                       
                       <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50">
                         {getSourceBadge(item.source_type)}
@@ -456,7 +456,7 @@ export default function ComplianceMatrix() {
                     </motion.div>
                   ))}
                   {stItems.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-40 text-slate-300 opacity-50 space-y-2">
+                    <div className="flex flex-col items-center justify-center h-40 text-[var(--color-border-strong)] opacity-50 space-y-2">
                        <ShieldCheck size={32} />
                        <span className="text-[10px] font-bold uppercase tracking-widest italic">{t('complianceMatrix.noData')}</span>
                     </div>
@@ -499,9 +499,9 @@ export default function ComplianceMatrix() {
                    <div className={`p-2 rounded-xl bg-${stat.color}-50 text-${stat.color}-600 group-hover:scale-110 transition-transform`}>
                       <stat.icon size={20} />
                    </div>
-                   <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 uppercase tracking-widest">{stat.label}</span>
+                   <span className="text-[10px] font-bold text-[var(--color-text-muted)] group-hover:text-[var(--color-text-muted)] uppercase tracking-widest">{stat.label}</span>
                 </div>
-                <div className={`text-3xl font-bold text-slate-800 group-hover:text-${stat.color}-600 transition-colors`}>{stat.value}</div>
+                <div className={`text-3xl font-bold text-[var(--color-text-main)] group-hover:text-${stat.color}-600 transition-colors`}>{stat.value}</div>
              </motion.div>
            ))}
         </div>
@@ -513,7 +513,7 @@ export default function ComplianceMatrix() {
                     <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight flex items-center gap-3">
                        <AlertTriangle className="text-amber-500" /> {t('complianceMatrix.overdueReviews')}
                     </h3>
-                    <p className="text-xs text-slate-400 font-bold mt-1">{t('complianceMatrix.overdueReviewsDesc')}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] font-bold mt-1">{t('complianceMatrix.overdueReviewsDesc')}</p>
                  </div>
                  <button className="text-[10px] font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] flex items-center gap-1 uppercase tracking-widest p-2 bg-[var(--color-primary)]/10 rounded-lg transition-colors">
                     {t('complianceMatrix.viewAll')} <ChevronRight size={12} className="rotate-180" />
@@ -527,7 +527,7 @@ export default function ComplianceMatrix() {
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
                     key={item.id} 
-                    className="group flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-white border border-slate-100 rounded-2xl hover:border-amber-200 hover:bg-amber-50/20 transition-all shadow-sm"
+                    className="group flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:border-amber-200 hover:bg-amber-50/20 transition-all shadow-sm"
                   >
                     <div className="flex items-start gap-4">
                        <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 font-bold text-sm shadow-inner group-hover:scale-110 transition-transform">
@@ -535,10 +535,10 @@ export default function ComplianceMatrix() {
                        </div>
                        <div className="min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-bold font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase tracking-tighter">{item.ref_number}</span>
-                            <div className="text-sm font-bold text-slate-800 truncate max-w-[200px] lg:max-w-md">{item.title}</div>
+                            <span className="text-[10px] font-bold font-mono text-[var(--color-text-muted)] bg-[var(--color-bg-main)] px-2 py-0.5 rounded uppercase tracking-tighter">{item.ref_number}</span>
+                            <div className="text-sm font-bold text-[var(--color-text-main)] truncate max-w-[200px] lg:max-w-md">{item.title}</div>
                           </div>
-                          <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold">
+                          <div className="flex items-center gap-3 text-[10px] text-[var(--color-text-muted)] font-bold">
                             <span className="flex items-center gap-1"><Building size={10} /> {item.department_name || t('complianceMatrix.unspecifiedDept')}</span>
                             <span className="flex items-center gap-1"><User size={10} /> {item.responsible_person_name || t('complianceMatrix.notSpecified')}</span>
                           </div>
@@ -548,14 +548,14 @@ export default function ComplianceMatrix() {
                        <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-100 text-rose-700 rounded-xl text-[10px] font-bold border border-rose-200 shadow-sm animate-pulse">
                            {t('complianceMatrix.overdue')} {Math.ceil((new Date().getTime() - new Date(item.review_date!).getTime()) / (1000 * 3600 * 24))} {t('complianceMatrix.overdueDays')}
                        </div>
-                       <div className="text-[10px] font-bold px-2 py-1 bg-white border border-slate-100 rounded-lg shadow-sm text-slate-400 font-mono tracking-tighter">
+                       <div className="text-[10px] font-bold px-2 py-1 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-lg shadow-sm text-[var(--color-text-muted)] font-mono tracking-tighter">
                           {item.review_date}
                        </div>
                     </div>
                   </motion.div>
                 ))}
                 {overdueItems.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-20 text-slate-300 italic">
+                  <div className="flex flex-col items-center justify-center py-20 text-[var(--color-border-strong)] italic">
                     <CheckCircle size={48} className="mb-4 opacity-20" />
                     <p className="font-bold uppercase tracking-widest text-xs">{t('complianceMatrix.noOverdue')}</p>
                   </div>
@@ -582,15 +582,15 @@ export default function ComplianceMatrix() {
                     >
                       <div className="flex justify-between items-end mb-2">
                         <div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">{label}</span>
+                          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">{label}</span>
                           <span className={`text-xs font-bold text-${color}-600`}>{pct}% {t('complianceMatrix.ofTotal')}</span>
                         </div>
                         <div className="text-end">
-                          <span className="text-xl font-bold text-slate-800 leading-none">{count}</span>
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">{t('complianceMatrix.activeRecord')}</span>
+                          <span className="text-xl font-bold text-[var(--color-text-main)] leading-none">{count}</span>
+                          <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest block">{t('complianceMatrix.activeRecord')}</span>
                         </div>
                       </div>
-                      <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner p-0.5 border border-slate-200">
+                      <div className="h-3 w-full bg-[var(--color-bg-main)] rounded-full overflow-hidden shadow-inner p-0.5 border border-[var(--color-border-soft)]">
                         <motion.div 
                           initial={{ width: 0 }}
                           whileInView={{ width: `${pct}%` }}
@@ -635,7 +635,7 @@ export default function ComplianceMatrix() {
           </div>
         </div>
 
-        <div className="flex items-center bg-white/40 p-1.5 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
+        <div className="flex items-center bg-[var(--color-card)]/40 p-1.5 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm">
           {[
             { id: 'registry', label: t('complianceMatrix.generalRegistry'), icon: List },
             { id: 'matrix', label: t('complianceMatrix.gapMatrixTab'), icon: Layers },
@@ -645,7 +645,7 @@ export default function ComplianceMatrix() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all
-                ${activeTab === tab.id ? 'bg-white text-[var(--color-primary)] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                ${activeTab === tab.id ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
             >
               <tab.icon size={14} /> {tab.label}
             </button>
@@ -669,51 +669,51 @@ export default function ComplianceMatrix() {
         <form onSubmit={handleSave} className="space-y-8 p-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
-               <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 shadow-inner">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-slate-200 pb-2">
+               <div className="p-6 bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)] shadow-inner">
+                  <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <Info size={14} /> {t('complianceMatrix.basicData')}
                   </h4>
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.refSymbolic')} *</label>
-                      <input type="text" required className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.ref_number || ''} onChange={e => setFormData({...formData, ref_number: e.target.value})} placeholder={t('complianceMatrix.refPlaceholder')} />
+                      <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.refSymbolic')} *</label>
+                      <input type="text" required className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.ref_number || ''} onChange={e => setFormData({...formData, ref_number: e.target.value})} placeholder={t('complianceMatrix.refPlaceholder')} />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.titleLabel')}</label>
-                      <input type="text" required className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} placeholder={t('complianceMatrix.titlePlaceholder')} />
+                      <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.titleLabel')}</label>
+                      <input type="text" required className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} placeholder={t('complianceMatrix.titlePlaceholder')} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                        <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.source')} *</label>
-                          <select required className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all appearance-none" value={formData.source_type || ''} onChange={e => setFormData({...formData, source_type: e.target.value as SourceType})}>
+                          <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.source')} *</label>
+                          <select required className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all appearance-none" value={formData.source_type || ''} onChange={e => setFormData({...formData, source_type: e.target.value as SourceType})}>
                             <option value="">{t('complianceMatrix.selectSource')}</option>
                             {Object.entries(sourceLabels).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
                           </select>
                        </div>
                        <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.issuingAuthority')}</label>
-                          <input type="text" className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.issuing_authority || ''} onChange={e => setFormData({...formData, issuing_authority: e.target.value})} />
+                          <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.issuingAuthority')}</label>
+                          <input type="text" className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.issuing_authority || ''} onChange={e => setFormData({...formData, issuing_authority: e.target.value})} />
                        </div>
                     </div>
                   </div>
                </div>
 
-               <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 shadow-inner">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-slate-200 pb-2">
+               <div className="p-6 bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)] shadow-inner">
+                  <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <Building size={14} /> {t('complianceMatrix.responsibilities')}
                   </h4>
                   <div className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
                        <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.personResp')}</label>
-                          <select className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.responsible_person_id || ''} onChange={e => setFormData({...formData, responsible_person_id: e.target.value})}>
+                          <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.personResp')}</label>
+                          <select className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.responsible_person_id || ''} onChange={e => setFormData({...formData, responsible_person_id: e.target.value})}>
                             <option value="">{t('complianceMatrix.selectPerson')}</option>
                             {users.map(u => <option key={u.id} value={u.id}>{u.name || u.full_name || u.username}</option>)}
                           </select>
                        </div>
                        <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.deptResp')}</label>
-                          <select className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.department_id || ''} onChange={e => setFormData({...formData, department_id: e.target.value})}>
+                          <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.deptResp')}</label>
+                          <select className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.department_id || ''} onChange={e => setFormData({...formData, department_id: e.target.value})}>
                             <option value="">{t('complianceMatrix.selectDept')}</option>
                             {departments.map(d => <option key={d.id} value={d.id}>{d.name_ar || d.name_en || d.name}</option>)}
                           </select>
@@ -724,52 +724,52 @@ export default function ComplianceMatrix() {
             </div>
 
             <div className="space-y-6">
-               <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 shadow-inner">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-slate-200 pb-2">
+               <div className="p-6 bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)] shadow-inner">
+                  <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <ShieldCheck size={14} /> {t('complianceMatrix.evalMatch')}
                   </h4>
                   <div className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
                        <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.statusLabel')}</label>
-                          <select className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.compliance_status || 'under_review'} onChange={e => setFormData({...formData, compliance_status: e.target.value as ComplianceStatus})}>
+                          <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.statusLabel')}</label>
+                          <select className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.compliance_status || 'under_review'} onChange={e => setFormData({...formData, compliance_status: e.target.value as ComplianceStatus})}>
                             {Object.entries(statusConfig).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
                           </select>
                        </div>
                        <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.maturityScoreLabel')}</label>
-                          <input type="number" min="0" max="100" className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.maturity_score || ''} onChange={e => setFormData({...formData, maturity_score: parseInt(e.target.value)})} />
+                          <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.maturityScoreLabel')}</label>
+                          <input type="number" min="0" max="100" className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.maturity_score || ''} onChange={e => setFormData({...formData, maturity_score: parseInt(e.target.value)})} />
                        </div>
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.requiredActions')}</label>
-                      <textarea className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" rows={3} value={formData.gap_notes || ''} onChange={e => setFormData({...formData, gap_notes: e.target.value})} placeholder={t('complianceMatrix.gapNotesPlaceholder')}></textarea>
+                      <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.requiredActions')}</label>
+                      <textarea className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" rows={3} value={formData.gap_notes || ''} onChange={e => setFormData({...formData, gap_notes: e.target.value})} placeholder={t('complianceMatrix.gapNotesPlaceholder')}></textarea>
                     </div>
                   </div>
                </div>
 
-               <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 shadow-inner">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-slate-200 pb-2">
+               <div className="p-6 bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)] shadow-inner">
+                  <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <Calendar size={14} /> {t('complianceMatrix.importantDates')}
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.effectiveDate')}</label>
-                        <input type="date" className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.effective_date || ''} onChange={e => setFormData({...formData, effective_date: e.target.value})} />
+                        <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.effectiveDate')}</label>
+                        <input type="date" className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.effective_date || ''} onChange={e => setFormData({...formData, effective_date: e.target.value})} />
                      </div>
                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.nextReviewDate')}</label>
-                        <input type="date" className="w-full bg-white px-4 py-3 rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.review_date || ''} onChange={e => setFormData({...formData, review_date: e.target.value})} />
+                        <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.nextReviewDate')}</label>
+                        <input type="date" className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.review_date || ''} onChange={e => setFormData({...formData, review_date: e.target.value})} />
                      </div>
                   </div>
                </div>
 
-               <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 shadow-inner">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-slate-200 pb-2">
+               <div className="p-6 bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)] shadow-inner">
+                  <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <FileText size={14} /> {t('complianceMatrix.docsAttachments')}
                   </h4>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.uploadPdf')}</label>
+                    <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.uploadPdf')}</label>
                     <div className="relative group/file">
                       <input 
                         type="file" 
@@ -782,14 +782,14 @@ export default function ComplianceMatrix() {
                         }}
                       />
                       <div className={`w-full px-4 py-3 rounded-2xl border-2 border-dashed transition-all flex items-center justify-between
-                        ${file ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'border-slate-200 bg-white group-hover/file:border-[var(--color-primary)]/50'}`}>
+                        ${file ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'border-[var(--color-border-soft)] bg-[var(--color-card)] group-hover/file:border-[var(--color-primary)]/50'}`}>
                         <div className="flex items-center gap-3">
-                          <FileText size={18} className={file ? 'text-[var(--color-primary)]' : 'text-slate-400'} />
-                          <span className={`text-xs font-bold truncate max-w-[200px] ${file ? 'text-[var(--color-primary)]' : 'text-slate-400'}`}>
+                          <FileText size={18} className={file ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'} />
+                          <span className={`text-xs font-bold truncate max-w-[200px] ${file ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}`}>
                             {file ? file.name : (formData.attachment_path ? t('complianceMatrix.fileUploaded') : t('complianceMatrix.dragFile'))}
                           </span>
                         </div>
-                        <Upload size={16} className={file ? 'text-[var(--color-primary)]' : 'text-slate-400'} />
+                        <Upload size={16} className={file ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'} />
                       </div>
                     </div>
                   </div>
@@ -797,8 +797,8 @@ export default function ComplianceMatrix() {
             </div>
           </div>
           
-          <div className="flex justify-end items-center gap-4 mt-12 bg-white/50 backdrop-blur-md p-6 -mx-6 -mb-6 border-t border-slate-100">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 py-3 text-slate-500 font-bold text-xs uppercase tracking-widest hover:text-slate-700 transition-colors">{t('complianceMatrix.cancel')}</button>
+          <div className="flex justify-end items-center gap-4 mt-12 bg-[var(--color-card)]/50 backdrop-blur-md p-6 -mx-6 -mb-6 border-t border-[var(--color-border-soft)]">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 py-3 text-[var(--color-text-muted)] font-bold text-xs uppercase tracking-widest hover:text-[var(--color-text-main)] transition-colors">{t('complianceMatrix.cancel')}</button>
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -837,7 +837,7 @@ export default function ComplianceMatrix() {
                 setIsDeleteModalOpen(false);
                 setItemToDelete(null);
               }}
-              className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-500 font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all"
+              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold text-[10px] uppercase tracking-widest hover:bg-[var(--color-bg-main)] transition-all"
             >
               {t('common.cancel')}
             </button>
@@ -875,14 +875,14 @@ export default function ComplianceMatrix() {
                 { label: t('complianceMatrix.issueDate'), value: selectedItem.issue_date || '-', icon: Calendar, color: 'slate' },
                 { label: t('complianceMatrix.nextReview'), value: selectedItem.review_date || '-', icon: Calendar, color: 'warning' }
               ].map((info, idx) => (
-                <div key={idx} className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                <div key={idx} className="bg-[var(--color-bg-soft)]/50 p-4 rounded-2xl border border-[var(--color-border-soft)] shadow-sm relative overflow-hidden group">
                    <div className={`absolute top-0 end-0 w-1 h-full bg-${info.color === 'primary' ? '[var(--color-primary)]' : 
                                                                      info.color === 'warning' ? 'amber-500' :
                                                                      info.color === 'emerald' ? 'emerald-500' : 'slate-500'} group-hover:w-2 transition-all`}></div>
-                   <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5 leading-none">
+                   <div className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1 flex items-center gap-1.5 leading-none">
                       <info.icon size={10} /> {info.label}
                    </div>
-                   <div className="text-xs font-bold text-slate-700 truncate">{info.value}</div>
+                   <div className="text-xs font-bold text-[var(--color-text-main)] truncate">{info.value}</div>
                 </div>
               ))}
             </div>
@@ -891,10 +891,10 @@ export default function ComplianceMatrix() {
                <div className="md:col-span-2 space-y-8">
                   {selectedItem.description && (
                     <section>
-                      <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <h3 className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-3 flex items-center gap-2">
                          <Info size={14} className="text-[var(--color-primary)]" /> {t('complianceMatrix.reqDesc')}
                       </h3>
-                      <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm text-sm text-slate-600 font-bold leading-relaxed">
+                      <div className="p-6 bg-[var(--color-card)] rounded-3xl border border-[var(--color-border-soft)] shadow-sm text-sm text-[var(--color-text-muted)] font-bold leading-relaxed">
                          {selectedItem.description}
                       </div>
                     </section>
@@ -902,7 +902,7 @@ export default function ComplianceMatrix() {
 
                   {selectedItem.gap_notes && (
                     <section>
-                      <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <h3 className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-3 flex items-center gap-2">
                          <AlertTriangle size={14} className="text-amber-500" /> الفجوات وال{t('complianceMatrix.actions')} التصحيحية
                       </h3>
                       <div className="p-6 bg-amber-50/50 rounded-3xl border border-amber-100 text-sm text-amber-900 font-bold leading-relaxed shadow-inner">
@@ -913,15 +913,15 @@ export default function ComplianceMatrix() {
                </div>
 
                <div className="space-y-6">
-                  <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm relative overflow-hidden group">
+                  <div className="p-6 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl shadow-sm relative overflow-hidden group">
                     <div className="absolute -bottom-8 -end-8 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none"></div>
                     <div className="relative z-10">
-                       <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">{t('complianceMatrix.maturityEvaluation')}</h3>
+                       <h3 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 border-b border-[var(--color-border-soft)] pb-2">{t('complianceMatrix.maturityEvaluation')}</h3>
                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-xs font-bold text-slate-400">{t('complianceMatrix.percentage')}</span>
-                          <span className="text-3xl font-bold text-slate-800">{selectedItem.maturity_score || 0}%</span>
+                          <span className="text-xs font-bold text-[var(--color-text-muted)]">{t('complianceMatrix.percentage')}</span>
+                          <span className="text-3xl font-bold text-[var(--color-text-main)]">{selectedItem.maturity_score || 0}%</span>
                        </div>
-                       <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner flex p-0.5">
+                       <div className="h-2 w-full bg-[var(--color-bg-main)] rounded-full overflow-hidden shadow-inner flex p-0.5">
                           <motion.div 
                             initial={{ width: 0 }}
                             animate={{ width: `${selectedItem.maturity_score || 0}%` }}
@@ -929,17 +929,17 @@ export default function ComplianceMatrix() {
                             className="h-full rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] shadow-sm shadow-[var(--color-primary)]/50"
                           ></motion.div>
                        </div>
-                       <div className="mt-8 pt-6 border-t border-slate-100">
-                          <button className="w-full py-3 bg-slate-50 hover:bg-slate-100 border border-slate-100 hover:border-slate-200 text-slate-500 hover:text-slate-700 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all">{t('complianceMatrix.updateEvaluation')}</button>
+                       <div className="mt-8 pt-6 border-t border-[var(--color-border-soft)]">
+                          <button className="w-full py-3 bg-[var(--color-bg-soft)] hover:bg-[var(--color-bg-main)] border border-[var(--color-border-soft)] hover:border-[var(--color-border-soft)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all">{t('complianceMatrix.updateEvaluation')}</button>
                        </div>
                     </div>
                   </div>
 
-                  <div className="glass-card p-6 border-slate-200">
-                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('complianceMatrix.attachmentsDocs')}</h3>
+                  <div className="glass-card p-6 border-[var(--color-border-soft)]">
+                    <h3 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-4">{t('complianceMatrix.attachmentsDocs')}</h3>
                     {selectedItem.attachment_path ? (
                       <a href={selectedItem.attachment_path} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 bg-[var(--color-primary)]/10 rounded-2xl border border-[var(--color-primary)]/20 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-colors group">
-                         <div className="p-2 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
+                         <div className="p-2 bg-[var(--color-card)] rounded-lg shadow-sm group-hover:scale-110 transition-transform">
                             <FileText size={18} />
                          </div>
                          <div className="min-w-0">
@@ -949,7 +949,7 @@ export default function ComplianceMatrix() {
                          <Download size={14} className="ms-auto" />
                       </a>
                     ) : (
-                      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 text-[10px] font-bold text-center italic">
+                      <div className="p-4 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)] text-[var(--color-text-muted)] text-[10px] font-bold text-center italic">
                         {t('complianceMatrix.noFilesAttached')}
                       </div>
                     )}
@@ -957,8 +957,8 @@ export default function ComplianceMatrix() {
                </div>
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 pt-6">
-              <button onClick={() => setIsViewModalOpen(false)} className="px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl text-xs font-bold shadow-inner shadow-slate-200 uppercase tracking-widest hover:bg-slate-200 transition-all">{t('complianceMatrix.closeWindow')}</button>
+            <div className="flex justify-end border-t border-[var(--color-border-soft)] pt-6">
+              <button onClick={() => setIsViewModalOpen(false)} className="px-8 py-3 bg-[var(--color-bg-main)] text-[var(--color-text-muted)] rounded-2xl text-xs font-bold shadow-inner shadow-[var(--color-border-soft)] uppercase tracking-widest hover:bg-[var(--color-bg-main)] transition-all">{t('complianceMatrix.closeWindow')}</button>
             </div>
           </div>
         )}

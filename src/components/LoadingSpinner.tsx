@@ -24,7 +24,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', className 
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-[var(--color-card)]/50 backdrop-blur-sm flex items-center justify-center z-50">
         {spinner}
       </div>
     );

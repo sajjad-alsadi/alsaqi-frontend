@@ -6,6 +6,7 @@ import { translateError } from './errorService';
 const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
+  timeout: 30000, // 30 second timeout for all requests
 });
 
 api.interceptors.request.use((config) => {

@@ -26,7 +26,7 @@ const LoginIllustration: React.FC = () => {
           className="max-w-xl"
         >
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)]/10 backdrop-blur-md rounded-full border border-white/20 mb-8">
             <ShieldCheck size={16} className="text-teal-300" />
             <span className="text-xs font-bold text-white uppercase tracking-widest">{t('auth.secureAccess')}</span>
           </div>
@@ -47,13 +47,13 @@ const LoginIllustration: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="absolute bottom-16 start-16 xl:start-24 flex gap-6"
         >
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 min-w-[200px] shadow-2xl border border-white/20">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{t('auth.systemUptime')}</div>
-            <div className="text-3xl font-bold text-slate-800">99.98%</div>
+          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-6 min-w-[200px] shadow-2xl border border-white/20">
+            <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('auth.systemUptime')}</div>
+            <div className="text-3xl font-bold text-[var(--color-text-main)]">99.98%</div>
           </div>
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 min-w-[200px] shadow-2xl border border-white/20">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{t('auth.auditsToday')}</div>
-            <div className="text-3xl font-bold text-slate-800">1,240+</div>
+          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-6 min-w-[200px] shadow-2xl border border-white/20">
+            <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('auth.auditsToday')}</div>
+            <div className="text-3xl font-bold text-[var(--color-text-main)]">1,240+</div>
           </div>
         </motion.div>
       </div>

@@ -61,20 +61,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
   };
 
   return (
-    <div className="mt-6 border-t border-slate-100 pt-6">
-      <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+    <div className="mt-6 border-t border-[var(--color-border-soft)] pt-6">
+      <h4 className="font-bold text-[var(--color-text-main)] mb-4 flex items-center gap-2">
         <MessageSquare size={18} className="text-primary" />
         {t('comments')}
       </h4>
       
       <div className="space-y-4 mb-4">
         {(Array.isArray(comments) ? comments : []).map(comment => (
-          <div key={comment.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <div key={comment.id} className="bg-[var(--color-bg-soft)] p-4 rounded-2xl border border-[var(--color-border-soft)]">
             <div className="flex justify-between items-start mb-2">
-              <span className="font-bold text-xs text-slate-700">{comment.user_name}</span>
-              <span className="text-[10px] font-bold text-slate-400">{new Date(comment.created_at).toLocaleString()}</span>
+              <span className="font-bold text-xs text-[var(--color-text-main)]">{comment.user_name}</span>
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)]">{new Date(comment.created_at).toLocaleString()}</span>
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed">{comment.content}</p>
+            <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{comment.content}</p>
             {(user?.id === comment.user_id || user?.role === 'Admin') && (
               <button 
                 onClick={() => deleteComment(comment.id)} 
@@ -87,7 +87,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
           </div>
         ))}
         {comments.length === 0 && (
-          <p className="text-center py-6 text-xs font-bold text-slate-400 italic">
+          <p className="text-center py-6 text-xs font-bold text-[var(--color-text-muted)] italic">
             {t('noCommentsYet')}
           </p>
         )}

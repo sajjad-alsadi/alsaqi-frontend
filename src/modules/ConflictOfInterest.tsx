@@ -105,16 +105,16 @@ const ConflictOfInterest: React.FC = () => {
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-start border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.user')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('integrity.declarationDate')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('integrity.relatedParty')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start"></th>
+              <tr className="bg-[var(--color-bg-soft)]/50 border-b border-[var(--color-border-soft)]">
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.user')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('integrity.declarationDate')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('integrity.relatedParty')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-[var(--color-border-soft)]/50">
               {(Array.isArray(declarations) ? declarations : []).map((coi, idx) => (
                 <motion.tr 
                   key={coi.id}
@@ -123,10 +123,10 @@ const ConflictOfInterest: React.FC = () => {
                   transition={{ delay: idx * 0.05 }}
                   className="hover:bg-primary/5 transition-colors group"
                 >
-                  <td className="px-6 py-4 text-xs font-bold text-slate-300">#{coi.id}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-600">{coi.user_name}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-500">{formatDate(coi.declaration_date)}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-500">{coi.related_party}</td>
+                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)]">#{coi.id}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{coi.user_name}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{formatDate(coi.declaration_date)}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{coi.related_party}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest ${
                       coi.status === 'Resolved' ? 'bg-emerald-100 text-emerald-600' :
@@ -145,7 +145,7 @@ const ConflictOfInterest: React.FC = () => {
                           setReviewData({ status: coi.status, reviewer_notes: coi.reviewer_notes || '' });
                           setIsReviewModalOpen(true);
                         }}
-                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-xl transition-colors"
+                        className="p-2 text-[var(--color-text-muted)] hover:text-primary hover:bg-primary/10 rounded-xl transition-colors"
                       >
                         <Edit size={18} />
                       </button>
@@ -162,7 +162,7 @@ const ConflictOfInterest: React.FC = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={t('integrity.declareConflict')}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('common.description')}</label>
+            <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-3">{t('common.description')}</label>
             <textarea
               required
               rows={4}
@@ -172,7 +172,7 @@ const ConflictOfInterest: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('integrity.relatedParty')}</label>
+            <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-3">{t('integrity.relatedParty')}</label>
             <input
               type="text"
               required
@@ -181,8 +181,8 @@ const ConflictOfInterest: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, related_party: e.target.value })}
             />
           </div>
-          <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors">
+          <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors">
               {t('common.cancel')}
             </button>
             <button type="submit" className="btn-primary">
@@ -196,7 +196,7 @@ const ConflictOfInterest: React.FC = () => {
       <Modal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} title={t('common.edit')}>
         <form onSubmit={handleReviewSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('common.statusLabel')}</label>
+            <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-3">{t('common.statusLabel')}</label>
             <select
               className="input-field"
               value={reviewData.status}
@@ -208,7 +208,7 @@ const ConflictOfInterest: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('integrity.reviewerNotes')}</label>
+            <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-3">{t('integrity.reviewerNotes')}</label>
             <textarea
               rows={4}
               className="input-field py-4"
@@ -216,8 +216,8 @@ const ConflictOfInterest: React.FC = () => {
               onChange={(e) => setReviewData({ ...reviewData, reviewer_notes: e.target.value })}
             />
           </div>
-          <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
-            <button type="button" onClick={() => setIsReviewModalOpen(false)} className="px-6 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors">
+          <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
+            <button type="button" onClick={() => setIsReviewModalOpen(false)} className="px-6 py-3 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors">
               {t('common.cancel')}
             </button>
             <button type="submit" className="btn-primary">

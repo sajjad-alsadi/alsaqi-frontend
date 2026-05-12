@@ -35,7 +35,7 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
         </div>
         <div>
           <h2 className="text-2xl font-bold text-[var(--color-text-main)] tracking-tight leading-tight">{t('userManagement.title')}</h2>
-          <p className="text-[11px] text-slate-400 font-bold mt-0.5 opacity-80">{t('userManagement.subtitle')}</p>
+          <p className="text-[11px] text-[var(--color-text-muted)] font-bold mt-0.5 opacity-80">{t('userManagement.subtitle')}</p>
         </div>
       </div>
       

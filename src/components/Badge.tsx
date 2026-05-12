@@ -11,13 +11,13 @@ const Badge: React.FC<BadgeProps> = ({ type, value, className = '' }) => {
   const { t } = useTranslation();
   
   const getRiskClass = (val: string) => {
-    if (!val) return 'bg-slate-100 text-slate-500';
+    if (!val) return 'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]';
     const v = val.toLowerCase();
     if (v === 'critical') return 'badge-risk-critical';
     if (v === 'high') return 'badge-risk-high';
     if (v === 'medium' || v === 'med') return 'badge-risk-med';
     if (v === 'low') return 'badge-risk-low';
-    return 'bg-slate-100 text-slate-500';
+    return 'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]';
   };
 
   const getStatusClass = (val: string) => {
@@ -31,7 +31,7 @@ const Badge: React.FC<BadgeProps> = ({ type, value, className = '' }) => {
   };
 
   const baseClass = "inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all";
-  const typeClass = type === 'risk' ? getRiskClass(value) : type === 'status' ? getStatusClass(value) : 'bg-slate-100 text-slate-500';
+  const typeClass = type === 'risk' ? getRiskClass(value) : type === 'status' ? getStatusClass(value) : 'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]';
 
   const displayValue = type === 'risk' ? (
     value && value.toLowerCase() === 'critical' ? t('critical') :

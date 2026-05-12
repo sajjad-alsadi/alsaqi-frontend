@@ -190,7 +190,7 @@ const SystemErrorLogs: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 space-y-10" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-[var(--color-bg-soft)]/50 p-6 space-y-10" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-6">
           <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-[var(--color-primary)]/20">
@@ -202,13 +202,13 @@ const SystemErrorLogs: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={fetchLogs} title={t('common.refresh')} className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors shadow-sm">
-            <RefreshCw size={20} className="text-slate-600" />
+          <button onClick={fetchLogs} title={t('common.refresh')} className="p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:bg-[var(--color-bg-main)] transition-colors shadow-sm">
+            <RefreshCw size={20} className="text-[var(--color-text-muted)]" />
           </button>
-          <button onClick={exportLogs} title={t('common.export')} className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors shadow-sm">
-            <Download size={20} className="text-slate-600" />
+          <button onClick={exportLogs} title={t('common.export')} className="p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:bg-[var(--color-bg-main)] transition-colors shadow-sm">
+            <Download size={20} className="text-[var(--color-text-muted)]" />
           </button>
-          <button onClick={() => setIsClearModalOpen(true)} title={t('common.clear')} className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors text-rose-500 shadow-sm">
+          <button onClick={() => setIsClearModalOpen(true)} title={t('common.clear')} className="p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:bg-[var(--color-bg-main)] transition-colors text-rose-500 shadow-sm">
             <Trash2 size={20} />
           </button>
         </div>
@@ -224,15 +224,15 @@ const SystemErrorLogs: React.FC = () => {
           <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldAlert size={32} />
           </div>
-          <h3 className="text-xl font-bold text-slate-800 mb-2">{t('systemErrorLogs.importantAlert')}</h3>
-          <p className="text-slate-500 font-bold mb-8 leading-relaxed">
+          <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('systemErrorLogs.importantAlert')}</h3>
+          <p className="text-[var(--color-text-muted)] font-bold mb-8 leading-relaxed">
             {t('systemErrorLogs.clearLogsWarning')}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setIsClearModalOpen(false)}
               disabled={isClearing}
-              className="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors border border-slate-100"
+              className="px-6 py-3 rounded-xl font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] transition-colors border border-[var(--color-border-soft)]"
             >
               {t('common.cancel')}
             </button>
@@ -255,14 +255,14 @@ const SystemErrorLogs: React.FC = () => {
       </Modal>
 
       {/* Search & Filters Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-inner">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 bg-[var(--color-bg-main)]/50 rounded-2xl border border-[var(--color-border-soft)]/50 shadow-inner">
         <div className="relative group">
           <input 
             type="text" 
             placeholder={t('systemErrorLogs.filterByModule')} 
             value={moduleFilter} 
             onChange={(e) => setModuleFilter(e.target.value)} 
-            className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none" 
+            className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none" 
           />
         </div>
         
@@ -271,13 +271,13 @@ const SystemErrorLogs: React.FC = () => {
           placeholder={t('systemErrorLogs.filterByUserId')} 
           value={userIdFilter} 
           onChange={(e) => setUserIdFilter(e.target.value)} 
-          className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none" 
+          className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none" 
         />
         
         <select 
           value={severityFilter} 
           onChange={(e) => setSeverityFilter(e.target.value)} 
-          className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none cursor-pointer"
+          className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none cursor-pointer"
         >
           <option value="">{t('systemErrorLogs.allSeverities')}</option>
           <option value="error">{t('systemErrorLogs.error')}</option>
@@ -290,7 +290,7 @@ const SystemErrorLogs: React.FC = () => {
             type="date" 
             value={startDate} 
             onChange={(e) => setStartDate(e.target.value)} 
-            className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none" 
+            className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] outline-none" 
           />
         </div>
 
@@ -299,26 +299,26 @@ const SystemErrorLogs: React.FC = () => {
             type="date" 
             value={endDate} 
             onChange={(e) => setEndDate(e.target.value)} 
-            className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none" 
+            className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] outline-none" 
           />
         </div>
       </div>
       
       <SystemErrorAnalytics data={analytics} />
       
-      <div className="bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+      <div className="bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-slate-50">
-                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('common.time')}</th>
-                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('common.module')}</th>
-                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.severity')}</th>
-                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('common.message')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('common.time')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('common.module')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('systemErrorLogs.severity')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('common.message')}</th>
                 <th className="px-8 py-6 text-start"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-[var(--color-border-soft)]/50">
               {loading ? (
                 <tr>
                   <td colSpan={5} className="px-8 py-20 text-center">
@@ -336,12 +336,12 @@ const SystemErrorLogs: React.FC = () => {
               ) : (Array.isArray(logs) ? logs : []).map(log => (
                 <React.Fragment key={log.id}>
                   <tr 
-                    className="hover:bg-slate-50/50 cursor-pointer transition-all duration-200 group" 
+                    className="hover:bg-[var(--color-bg-soft)]/50 cursor-pointer transition-all duration-200 group" 
                     onClick={() => toggleRow(log.id)}
                   >
-                    <td className="px-8 py-5 text-sm font-bold text-slate-500 font-mono">{formatDate(log.timestamp)}</td>
+                    <td className="px-8 py-5 text-sm font-bold text-[var(--color-text-muted)] font-mono">{formatDate(log.timestamp)}</td>
                     <td className="px-8 py-5">
-                      <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                      <span className="px-3 py-1 bg-[var(--color-bg-main)] text-[var(--color-text-muted)] rounded-lg text-[10px] font-bold uppercase tracking-wider">
                         {log.module}
                       </span>
                     </td>
@@ -351,28 +351,28 @@ const SystemErrorLogs: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-8 py-5">
-                      <span className="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-rose-600 transition-colors">{log.message}</span>
+                      <span className="text-sm font-bold text-[var(--color-text-main)] line-clamp-1 group-hover:text-rose-600 transition-colors">{log.message}</span>
                     </td>
-                    <td className="px-8 py-5 text-slate-400 group-hover:text-slate-600">
+                    <td className="px-8 py-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-text-muted)]">
                       {expandedRows.includes(log.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                     </td>
                   </tr>
                   {expandedRows.includes(log.id) && (
-                    <tr className="bg-slate-50/30">
+                    <tr className="bg-[var(--color-bg-soft)]/30">
                       <td colSpan={5} className="px-8 py-6">
-                        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
+                        <div className="bg-[var(--color-card)] p-6 rounded-2xl border border-[var(--color-border-soft)] shadow-sm space-y-6">
                           {log.stack && (
                             <div className="flex flex-col gap-2">
-                              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
+                              <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
                               <div className="relative group">
-                                <pre className="text-xs font-mono text-slate-500 bg-slate-900/95 p-6 rounded-2xl overflow-x-auto leading-relaxed border-l-4 border-rose-500">
+                                <pre className="text-xs font-mono text-[var(--color-text-muted)] bg-slate-900/95 p-6 rounded-2xl overflow-x-auto leading-relaxed border-l-4 border-rose-500">
                                   {log.stack}
                                 </pre>
                               </div>
                             </div>
                           )}
                           {!log.stack && (
-                            <p className="text-sm text-slate-400 italic">{t('systemErrorLogs.noStackTrace')}</p>
+                            <p className="text-sm text-[var(--color-text-muted)] italic">{t('systemErrorLogs.noStackTrace')}</p>
                           )}
                         </div>
                       </td>
@@ -384,7 +384,7 @@ const SystemErrorLogs: React.FC = () => {
           </table>
         </div>
 
-        <div className="p-8 border-t border-slate-50 bg-slate-50/20">
+        <div className="p-8 border-t border-slate-50 bg-[var(--color-bg-soft)]/20">
           <Pagination 
             currentPage={pagination.page}
             totalPages={pagination.totalPages}

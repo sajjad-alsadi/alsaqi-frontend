@@ -107,17 +107,17 @@ const Reports: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-2 p-1.5 bg-slate-100/50 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-2 p-1.5 bg-[var(--color-bg-main)]/50 rounded-2xl border border-[var(--color-border-soft)] shadow-sm">
           <button 
             onClick={() => setActiveSubTab('executive')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'executive' ? 'bg-white shadow-sm text-[var(--color-primary)]' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'executive' ? 'bg-[var(--color-card)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >
             <LayoutDashboard size={16} />
             {t('reports.executiveReports')}
           </button>
           <button 
             onClick={() => setActiveSubTab('audit')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'audit' ? 'bg-white shadow-sm text-[var(--color-primary)]' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'audit' ? 'bg-[var(--color-card)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >
             <FileBarChart size={16} />
             {t('reports.auditReports')}

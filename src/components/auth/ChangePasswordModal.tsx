@@ -51,7 +51,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         )}
 
         <div className="space-y-2">
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
             {t('newPassword')}
           </label>
           <div className="relative">
@@ -59,7 +59,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               type={showNewPassword ? 'text' : 'password'}
               required
               minLength={8}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium placeholder:text-slate-400"
+              className="w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-main)] rounded-xl px-4 py-3.5 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all font-medium placeholder:text-[var(--color-text-muted)]"
               placeholder="••••••••"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -68,18 +68,18 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
+              className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-primary transition-colors"
             >
               {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-          <p className="text-[10px] text-slate-500 font-medium mt-1">
+          <p className="text-[10px] text-[var(--color-text-muted)] font-medium mt-1">
             {t('passwordRequirements')}
           </p>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
             {t('confirmPassword')}
           </label>
           <div className="relative">
@@ -87,7 +87,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               type={showConfirmPassword ? 'text' : 'password'}
               required
               minLength={8}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium placeholder:text-slate-400"
+              className="w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-main)] rounded-xl px-4 py-3.5 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all font-medium placeholder:text-[var(--color-text-muted)]"
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -96,18 +96,18 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
+              className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-primary transition-colors"
             >
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border-soft)]">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all"
+            className="px-6 py-2.5 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)] rounded-xl transition-all"
           >
             {t('common.cancel')}
           </button>

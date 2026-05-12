@@ -28,9 +28,9 @@ const SystemErrorAnalytics: React.FC<Props> = ({ data }) => {
   }, []);
 
   return (
-    <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col group transition-all hover:shadow-xl hover:shadow-slate-200/50">
+    <div className="bg-[var(--color-card)] p-8 rounded-2xl border border-[var(--color-border-soft)] shadow-sm flex flex-col group transition-all hover:shadow-xl hover:shadow-[var(--color-border-soft)]/50">
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-[var(--color-primary)] transition-colors">
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] flex items-center justify-center text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors">
           <BarChartIcon size={20} />
         </div>
         <h2 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">{t('systemErrorLogs.errorTrends')}</h2>
@@ -65,7 +65,7 @@ const SystemErrorAnalytics: React.FC<Props> = ({ data }) => {
           </ChartContainer>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-300 font-bold border-2 border-dashed border-slate-50 rounded-3xl">
+        <div className="flex flex-col items-center justify-center py-20 text-[var(--color-border-strong)] font-bold border-2 border-dashed border-slate-50 rounded-3xl">
           <Activity size={48} className="mb-4 opacity-20" />
           {t('systemErrorLogs.noAnalyticsData')}
         </div>

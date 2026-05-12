@@ -46,34 +46,34 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
                   <span className="text-[10px] font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">
                     {program.program_code}
                   </span>
-                  <h3 className="text-xl font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors">
+                  <h3 className="text-xl font-bold text-[var(--color-text-main)] leading-tight group-hover:text-primary transition-colors">
                     {program.program_title}
                   </h3>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                   program.status === AuditStatus.APPROVED ? 'bg-emerald-100 text-emerald-600' :
-                  program.status === AuditStatus.DRAFT ? 'bg-slate-100 text-slate-400' : 'bg-primary/10 text-primary'
+                  program.status === AuditStatus.DRAFT ? 'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]' : 'bg-primary/10 text-primary'
                 }`}>
                   {t(`plan.${program.status?.toLowerCase() || 'draft'}`)}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('program.department')}</span>
-                  <p className="text-xs font-bold text-slate-700 truncate">
+                <div className="p-4 bg-[var(--color-bg-soft)] rounded-2xl space-y-1">
+                  <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.department')}</span>
+                  <p className="text-xs font-bold text-[var(--color-text-main)] truncate">
                     {program.department}
                   </p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('program.auditType')}</span>
-                  <p className="text-xs font-bold text-slate-700">
+                <div className="p-4 bg-[var(--color-bg-soft)] rounded-2xl space-y-1">
+                  <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.auditType')}</span>
+                  <p className="text-xs font-bold text-[var(--color-text-main)]">
                     {t(`plan.${program.audit_type?.toLowerCase() || ''}`)}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
+              <div className="flex items-center gap-4 text-xs font-bold text-[var(--color-text-muted)]">
                 <div className="flex items-center gap-1">
                   <Clock size={14} />
                   {formatDate(program.created_at!)}
@@ -85,25 +85,25 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
               </div>
             </div>
 
-            <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+            <div className="p-6 bg-[var(--color-bg-soft)]/50 border-t border-[var(--color-border-soft)] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => onEdit(program)}
-                  className="p-2 text-slate-400 hover:text-primary hover:bg-white rounded-xl transition-all"
+                  className="p-2 text-[var(--color-text-muted)] hover:text-primary hover:bg-[var(--color-card)] rounded-xl transition-all"
                   title={t('program.edit')}
                 >
                   <Edit size={18} />
                 </button>
                 <button 
                   onClick={() => onDuplicate(program.id!)}
-                  className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-white rounded-xl transition-all"
+                  className="p-2 text-[var(--color-text-muted)] hover:text-emerald-600 hover:bg-[var(--color-card)] rounded-xl transition-all"
                   title={t('program.duplicate')}
                 >
                   <Copy size={18} />
                 </button>
                 <button 
                   onClick={() => onDelete(program.id!)}
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-xl transition-all"
+                  className="p-2 text-[var(--color-text-muted)] hover:text-rose-600 hover:bg-[var(--color-card)] rounded-xl transition-all"
                   title={t('program.delete')}
                 >
                   <Trash2 size={18} />

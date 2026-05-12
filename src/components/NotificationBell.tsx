@@ -68,7 +68,7 @@ const NotificationBell: React.FC = () => {
       case 'Alert': return <AlertTriangle size={16} className="text-amber-500" />;
       case 'User': return <UserPlus size={16} className="text-purple-500" />;
       case 'Security': return <Shield size={16} className="text-rose-500" />;
-      default: return <Bell size={16} className="text-slate-500" />;
+      default: return <Bell size={16} className="text-[var(--color-text-muted)]" />;
     }
   };
 

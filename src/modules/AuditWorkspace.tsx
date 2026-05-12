@@ -109,7 +109,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
 
   if (loading && !plan) {
     return (
-      <div className="fixed inset-0 bg-white z-[60] flex items-center justify-center">
+      <div className="fixed inset-0 bg-[var(--color-card)] z-[60] flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -118,17 +118,17 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
   return (
     <div className="fixed inset-0 bg-[var(--color-bg-main)] z-[60] flex flex-col">
       {/* Header */}
-      <div className="h-20 bg-white border-b border-[var(--color-border-soft)] px-8 flex items-center justify-between">
+      <div className="h-20 bg-[var(--color-card)] border-b border-[var(--color-border-soft)] px-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-full hover:bg-[var(--color-bg-main)] flex items-center justify-center transition-colors"
           >
             <ArrowRight size={20} className={isRTL ? '' : 'rotate-180'} />
           </button>
           <div>
-            <h2 className="text-xl font-bold text-slate-800">{plan?.title}</h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{plan?.plan_code} • {plan?.department}</p>
+            <h2 className="text-xl font-bold text-[var(--color-text-main)]">{plan?.title}</h2>
+            <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{plan?.plan_code} • {plan?.department}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -142,15 +142,15 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Tasks */}
-        <div className="w-80 bg-white border-e border-[var(--color-border-soft)] flex flex-col">
+        <div className="w-80 bg-[var(--color-card)] border-e border-[var(--color-border-soft)] flex flex-col">
           <div className="p-6 border-b border-[var(--color-border-soft)]">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">{t('planTasks')}</h3>
+            <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-4">{t('planTasks')}</h3>
             <div className="relative">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={14} />
               <input 
                 type="text" 
                 placeholder={t('common.search')}
-                className="w-full bg-slate-50 border-none rounded-xl py-2 ps-10 text-xs font-bold focus:ring-1 focus:ring-[var(--color-primary)]"
+                className="w-full bg-[var(--color-bg-soft)] border-none rounded-xl py-2 ps-10 text-xs font-bold focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
           </div>
@@ -162,11 +162,11 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                 className={`w-full text-start p-4 rounded-2xl transition-all group ${
                   activeTask?.id === task.id 
                     ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20' 
-                    : 'hover:bg-slate-50 text-slate-600'
+                    : 'hover:bg-[var(--color-bg-soft)] text-[var(--color-text-muted)]'
                 }`}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <span className={`text-[9px] font-bold uppercase tracking-widest ${activeTask?.id === task.id ? 'text-white/70' : 'text-slate-400'}`}>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest ${activeTask?.id === task.id ? 'text-white/70' : 'text-[var(--color-text-muted)]'}`}>
                     {task.task_number}
                   </span>
                   <div className={`w-2 h-2 rounded-full ${
@@ -177,7 +177,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                 <p className="text-xs font-bold leading-tight line-clamp-2">{task.title}</p>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <User size={10} className={activeTask?.id === task.id ? 'text-white/70' : 'text-slate-400'} />
+                    <User size={10} className={activeTask?.id === task.id ? 'text-white/70' : 'text-[var(--color-text-muted)]'} />
                     <span className="text-[9px] font-bold opacity-70">{task.assigned_name || t('common.unassigned')}</span>
                   </div>
                   <ChevronRight size={14} className={`transition-transform ${isRTL ? 'rotate-180' : ''} ${activeTask?.id === task.id ? (isRTL ? '-translate-x-1' : 'translate-x-1') : 'opacity-0 group-hover:opacity-100'}`} />
@@ -188,19 +188,19 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
         </div>
 
         {/* Main Content: Middle (Execution) & Right (Findings/Evidence) */}
-        <div className="flex-1 flex bg-slate-50 overflow-hidden">
+        <div className="flex-1 flex bg-[var(--color-bg-soft)] overflow-hidden">
           {/* Execution Area */}
           <div className="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-8">
             {activeTask ? (
               <>
-                <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+                <div className="bg-[var(--color-card)] rounded-2xl p-8 shadow-sm border border-[var(--color-border-soft)]">
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-800 mb-2">{activeTask.title}</h3>
+                      <h3 className="text-2xl font-bold text-[var(--color-text-main)] mb-2">{activeTask.title}</h3>
                       <div className="flex items-center gap-4">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{activeTask.audit_type}</span>
+                        <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{activeTask.audit_type}</span>
                         <div className="w-1 h-1 rounded-full bg-slate-300" />
-                        <span className="text-xs font-bold text-slate-400">{t('common.assignedTo')}: {activeTask.assigned_name}</span>
+                        <span className="text-xs font-bold text-[var(--color-text-muted)]">{t('common.assignedTo')}: {activeTask.assigned_name}</span>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -229,25 +229,25 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
 
                   <div className="grid grid-cols-2 gap-8 text-sm">
                     <div className="space-y-4">
-                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.details')}</h4>
+                      <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.details')}</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('common.startDate')}</p>
-                          <p className="font-bold text-slate-700">{activeTask?.period_from || '—'}</p>
+                          <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('common.startDate')}</p>
+                          <p className="font-bold text-[var(--color-text-main)]">{activeTask?.period_from || '—'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('common.endDate')}</p>
-                          <p className="font-bold text-slate-700">{activeTask?.period_to || '—'}</p>
+                          <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('common.endDate')}</p>
+                          <p className="font-bold text-[var(--color-text-main)]">{activeTask?.period_to || '—'}</p>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.progress')}</h4>
+                      <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.progress')}</h4>
                       <div className="flex items-center gap-4">
-                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-[var(--color-bg-main)] rounded-full overflow-hidden">
                            <div className={`h-full rounded-full ${activeTask?.status === 'completed' ? 'bg-emerald-500 w-full' : 'bg-blue-500 w-1/2'}`} />
                         </div>
-                        <span className="text-xs font-bold text-slate-800">{activeTask?.status === 'completed' ? '100%' : '50%'}</span>
+                        <span className="text-xs font-bold text-[var(--color-text-main)]">{activeTask?.status === 'completed' ? '100%' : '50%'}</span>
                       </div>
                     </div>
                   </div>
@@ -255,13 +255,13 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
 
                 {/* Observations & Work Done */}
                 <div className="grid grid-cols-1 gap-8">
-                  <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+                  <div className="bg-[var(--color-card)] rounded-2xl p-8 shadow-sm border border-[var(--color-border-soft)]">
                     <div className="flex justify-between items-center mb-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500">
                           <AlertTriangle size={20} />
                         </div>
-                        <h4 className="text-lg font-bold text-slate-800">{t('common.findingsAndObservations')}</h4>
+                        <h4 className="text-lg font-bold text-[var(--color-text-main)]">{t('common.findingsAndObservations')}</h4>
                       </div>
                       <button 
                          onClick={() => {
@@ -276,12 +276,12 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
 
                     <div className="relative mt-4">
                       {findings.length === 0 ? (
-                        <div className="py-12 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-50 rounded-3xl">
+                        <div className="py-12 flex flex-col items-center justify-center text-[var(--color-border-strong)] border-2 border-dashed border-slate-50 rounded-3xl">
                           <MessageSquare size={48} className="mb-4 opacity-20" />
                           <p className="text-sm font-bold">{t('common.noFindingsYet')}</p>
                         </div>
                       ) : (
-                        <div className="relative overflow-hidden w-full bg-slate-50 border border-slate-100 rounded-2xl p-6 h-[200px]">
+                        <div className="relative overflow-hidden w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] rounded-2xl p-6 h-[200px]">
                           <AnimatePresence mode="wait">
                             {findings.length > 0 && (
                               <motion.div
@@ -293,12 +293,12 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                                 className="absolute inset-0 p-6 flex flex-col h-full"
                               >
                                 <div className="flex justify-between items-start mb-4">
-                                  <h5 className="font-bold text-slate-800 text-lg line-clamp-1">{findings[currentFindingIndex].title}</h5>
+                                  <h5 className="font-bold text-[var(--color-text-main)] text-lg line-clamp-1">{findings[currentFindingIndex].title}</h5>
                                   <Badge type="risk" value={findings[currentFindingIndex].risk_level} />
                                 </div>
-                                <p className="text-sm text-slate-500 line-clamp-3 mb-auto leading-relaxed">{findings[currentFindingIndex].description}</p>
-                                <div className="flex flex-row items-center justify-between mt-4 border-t border-slate-200/50 pt-4">
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm">
+                                <p className="text-sm text-[var(--color-text-muted)] line-clamp-3 mb-auto leading-relaxed">{findings[currentFindingIndex].description}</p>
+                                <div className="flex flex-row items-center justify-between mt-4 border-t border-[var(--color-border-soft)]/50 pt-4">
+                                  <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest bg-[var(--color-card)] px-3 py-1 rounded-full shadow-sm">
                                     {findings[currentFindingIndex].status}
                                   </span>
                                   <button 
@@ -320,13 +320,13 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                             <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-2 w-full pointer-events-none">
                               <button 
                                 onClick={isRTL ? nextFinding : prevFinding}
-                                className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors pointer-events-auto"
+                                className="w-8 h-8 rounded-full bg-[var(--color-card)] shadow-md flex items-center justify-center text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] transition-colors pointer-events-auto"
                               >
                                 <ChevronRight size={18} className="rotate-180" />
                               </button>
                               <button 
                                 onClick={isRTL ? prevFinding : nextFinding}
-                                className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors pointer-events-auto"
+                                className="w-8 h-8 rounded-full bg-[var(--color-card)] shadow-md flex items-center justify-center text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] transition-colors pointer-events-auto"
                               >
                                 <ChevronRight size={18} />
                               </button>
@@ -352,7 +352,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                 </div>
               </>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-4">
+              <div className="h-full flex flex-col items-center justify-center text-[var(--color-text-muted)] space-y-4">
                 <ClipboardList size={64} className="opacity-20" />
                 <p className="text-lg font-bold uppercase tracking-widest">{t('common.selectTaskToExecute')}</p>
               </div>
@@ -360,41 +360,41 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
           </div>
 
           {/* Right Sidebar: Evidence & Links */}
-          <div className="w-96 bg-white border-s border-[var(--color-border-soft)] flex flex-col p-6">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">{t('common.evidenceAndAttachments')}</h3>
+          <div className="w-96 bg-[var(--color-card)] border-s border-[var(--color-border-soft)] flex flex-col p-6">
+            <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6">{t('common.evidenceAndAttachments')}</h3>
             
             <div className="mb-8">
-              <div className="p-8 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-center group hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer">
-                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 mb-4 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
+              <div className="p-8 border-2 border-dashed border-[var(--color-border-soft)] rounded-2xl flex flex-col items-center justify-center text-center group hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer">
+                <div className="w-12 h-12 bg-[var(--color-bg-soft)] rounded-2xl flex items-center justify-center text-[var(--color-text-muted)] mb-4 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
                   <Upload size={24} />
                 </div>
-                <p className="text-xs font-bold text-slate-800 mb-1">{t('common.uploadEvidence')}</p>
-                <p className="text-[10px] font-medium text-slate-400">{t('common.dragAndDropFile')}</p>
+                <p className="text-xs font-bold text-[var(--color-text-main)] mb-1">{t('common.uploadEvidence')}</p>
+                <p className="text-[10px] font-medium text-[var(--color-text-muted)]">{t('common.dragAndDropFile')}</p>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4">
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.recentEvidence')}</h4>
+              <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.recentEvidence')}</h4>
               {evidence.length === 0 ? (
-                <p className="text-[10px] font-bold text-slate-300 text-center py-8 italic">{t('common.noEvidenceUploaded')}</p>
+                <p className="text-[10px] font-bold text-[var(--color-border-strong)] text-center py-8 italic">{t('common.noEvidenceUploaded')}</p>
               ) : (
                 evidence.map((item) => (
-                  <div key={item.id} className="p-3 rounded-2xl bg-slate-50 flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-500 shadow-sm">
+                  <div key={item.id} className="p-3 rounded-2xl bg-[var(--color-bg-soft)] flex items-center gap-3 group">
+                    <div className="w-10 h-10 bg-[var(--color-card)] rounded-xl flex items-center justify-center text-blue-500 shadow-sm">
                       <FileText size={20} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-800 truncate">{item.file_name}</p>
-                      <p className="text-[9px] font-medium text-slate-400 underline">{item.type || 'General'}</p>
+                      <p className="text-xs font-bold text-[var(--color-text-main)] truncate">{item.file_name}</p>
+                      <p className="text-[9px] font-medium text-[var(--color-text-muted)] underline">{item.type || 'General'}</p>
                     </div>
-                    <button className="w-8 h-8 rounded-lg hover:bg-slate-200 flex items-center justify-center text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="w-8 h-8 rounded-lg hover:bg-[var(--color-bg-main)] flex items-center justify-center text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity">
                       <Plus size={14} />
                     </button>
                   </div>
                 ))
               )}
 
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2 mt-8">{t('common.linkedRecommendations')}</h4>
+              <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest border-b border-slate-50 pb-2 mt-8">{t('common.linkedRecommendations')}</h4>
               {findings.map(f => (
                 <div key={`rec-${f.id}`} className="space-y-2">
                   <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100/50">

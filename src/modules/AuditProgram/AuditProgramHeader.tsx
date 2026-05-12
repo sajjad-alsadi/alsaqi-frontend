@@ -37,7 +37,7 @@ const AuditProgramHeader: React.FC<AuditProgramHeaderProps> = ({
       
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <div className="relative flex-1 min-w-[250px]">
-          <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={20} />
           <input 
             type="text"
             placeholder={t('program.search')}

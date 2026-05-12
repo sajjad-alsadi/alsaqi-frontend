@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { RoleService } from '../services/RoleService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
+import { invalidateUserCache, clearPermissionCache } from '../middleware/auth';
 
 const updatePermissionsSchema = z.object({
   permissionIds: z.array(z.string().min(1))
@@ -34,6 +35,7 @@ export const createRoleRoutes = (
     }
     const { permissionIds } = validation.data;
     await RoleService.updateRolePermissions(req.params.id as string, permissionIds);
+    clearPermissionCache();
     res.json({ success: true });
   }));
 

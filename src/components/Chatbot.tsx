@@ -172,12 +172,12 @@ const Chatbot: React.FC = () => {
             initial={{ opacity: 0, y: 30, scale: 0.95, filter: 'blur(10px)' }}
             animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 30, scale: 0.95, filter: 'blur(10px)' }}
-            className="fixed bottom-24 end-6 w-80 sm:w-[400px] h-[600px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-[var(--color-border-soft)] flex flex-col z-50 overflow-hidden backdrop-blur-xl"
+            className="fixed bottom-24 end-6 w-80 sm:w-[400px] h-[600px] max-h-[85vh] bg-[var(--color-card)] dark:bg-slate-900 rounded-2xl shadow-2xl border border-[var(--color-border-soft)] flex flex-col z-50 overflow-hidden backdrop-blur-xl"
           >
             {/* Header */}
             <div className="p-6 bg-[var(--color-primary)] text-white flex items-center justify-between shadow-lg shadow-[var(--color-primary)]/20">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30">
+                <div className="w-12 h-12 bg-[var(--color-card)]/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30">
                   <Search size={24} className="text-white" />
                 </div>
                 <div>
@@ -187,7 +187,7 @@ const Chatbot: React.FC = () => {
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-full transition-all active:scale-90"
+                className="w-10 h-10 flex items-center justify-center hover:bg-[var(--color-card)]/20 rounded-full transition-all active:scale-90"
               >
                 <X size={20} />
               </button>
@@ -202,17 +202,17 @@ const Chatbot: React.FC = () => {
                 >
                   <div className={`flex gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
                     <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
-                      msg.sender === 'user' ? 'bg-white text-[var(--color-primary)]' : 'bg-[var(--color-primary)] text-white'
+                      msg.sender === 'user' ? 'bg-[var(--color-card)] text-[var(--color-primary)]' : 'bg-[var(--color-primary)] text-white'
                     }`}>
                       {msg.sender === 'user' ? <User size={18} /> : <Bot size={18} />}
                     </div>
                     <div className={`max-w-[85%] p-4 rounded-xl text-sm font-medium shadow-sm ${
                       msg.sender === 'user' 
                         ? 'bg-[var(--color-primary)] text-white rounded-tr-none' 
-                        : 'bg-white dark:bg-slate-800 border border-[var(--color-border-soft)] text-slate-700 dark:text-white rounded-tl-none'
+                        : 'bg-[var(--color-card)] dark:bg-slate-800 border border-[var(--color-border-soft)] text-[var(--color-text-main)] dark:text-white rounded-tl-none'
                     }`}>
                       <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
-                      <span className={`text-[10px] mt-2 block font-bold uppercase tracking-widest ${msg.sender === 'user' ? 'text-white/60' : 'text-slate-400 dark:text-slate-500'}`}>
+                      <span className={`text-[10px] mt-2 block font-bold uppercase tracking-widest ${msg.sender === 'user' ? 'text-white/60' : 'text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]'}`}>
                         {formatDateTime(msg.timestamp)}
                       </span>
                     </div>
@@ -231,20 +231,20 @@ const Chatbot: React.FC = () => {
                             navigate(result.path, { state: { searchTerm: input } });
                             setIsOpen(false);
                           }}
-                          className="w-full flex items-center gap-4 p-4 bg-white dark:bg-slate-800 border border-[var(--color-border-soft)] rounded-2xl hover:border-[var(--color-primary)]/50 hover:shadow-lg hover:shadow-[var(--color-primary)]/5 transition-all text-start group"
+                          className="w-full flex items-center gap-4 p-4 bg-[var(--color-card)] dark:bg-slate-800 border border-[var(--color-border-soft)] rounded-2xl hover:border-[var(--color-primary)]/50 hover:shadow-lg hover:shadow-[var(--color-primary)]/5 transition-all text-start group"
                         >
-                          <div className="w-10 h-10 bg-[var(--color-bg-main)] dark:bg-slate-700 rounded-xl flex items-center justify-center text-slate-500 group-hover:text-[var(--color-primary)] transition-colors">
+                          <div className="w-10 h-10 bg-[var(--color-bg-main)] dark:bg-slate-700 rounded-xl flex items-center justify-center text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors">
                             {getResultIcon(result.type)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-1">
+                            <p className="text-[10px] font-bold text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)] uppercase tracking-[0.15em] mb-1">
                               {getResultLabel(result.type)}
                             </p>
-                            <p className="text-sm font-bold text-slate-700 dark:text-white truncate">
+                            <p className="text-sm font-bold text-[var(--color-text-main)] dark:text-white truncate">
                               {result.title}
                             </p>
                           </div>
-                          <ExternalLink size={16} className="text-slate-300 group-hover:text-[var(--color-primary)] transition-colors" />
+                          <ExternalLink size={16} className="text-[var(--color-border-strong)] group-hover:text-[var(--color-primary)] transition-colors" />
                         </motion.button>
                       ))}
                     </div>
@@ -256,7 +256,7 @@ const Chatbot: React.FC = () => {
                   <div className="w-10 h-10 rounded-2xl bg-[var(--color-primary)] text-white flex items-center justify-center shrink-0 shadow-sm">
                     <Bot size={18} />
                   </div>
-                  <div className="p-4 bg-white dark:bg-slate-800 border border-[var(--color-border-soft)] rounded-xl rounded-tl-none shadow-sm">
+                  <div className="p-4 bg-[var(--color-card)] dark:bg-slate-800 border border-[var(--color-border-soft)] rounded-xl rounded-tl-none shadow-sm">
                     <Loader2 size={20} className="animate-spin text-[var(--color-primary)]" />
                   </div>
                 </div>
@@ -265,7 +265,7 @@ const Chatbot: React.FC = () => {
             </div>
 
             {/* Input */}
-            <div className="p-6 bg-white dark:bg-slate-900 border-t border-[var(--color-border-soft)]">
+            <div className="p-6 bg-[var(--color-card)] dark:bg-slate-900 border-t border-[var(--color-border-soft)]">
               <div className="flex items-center gap-3">
                 <div className="flex-1 relative">
                   <input
@@ -274,7 +274,7 @@ const Chatbot: React.FC = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                     placeholder={t('askAboutPolicies')}
-                    className="w-full bg-[var(--color-bg-main)] dark:bg-slate-800 border-none rounded-full px-6 py-4 text-sm font-medium text-slate-700 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-[var(--color-primary)]/30 outline-none transition-all"
+                    className="w-full bg-[var(--color-bg-main)] dark:bg-slate-800 border-none rounded-full px-6 py-4 text-sm font-medium text-[var(--color-text-main)] dark:text-white placeholder:text-[var(--color-text-muted)] dark:placeholder:text-[var(--color-text-muted)] focus:ring-2 focus:ring-[var(--color-primary)]/30 outline-none transition-all"
                   />
                 </div>
                 <button
