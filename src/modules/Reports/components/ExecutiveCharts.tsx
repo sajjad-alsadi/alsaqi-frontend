@@ -14,6 +14,7 @@ import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChartContainer from '../../../components/ChartContainer';
 import { useFormat } from '../../../services/formatService';
+import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import { ExecData } from '../types';
 
 interface ExecutiveChartsProps {
@@ -26,9 +27,10 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 const ExecutiveCharts: React.FC<ExecutiveChartsProps> = ({ execData, language }) => {
   const { t } = useTranslation();
   const { formatNumber } = useFormat();
+  const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div ref={ref} className={`grid grid-cols-1 lg:grid-cols-2 gap-8 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
       {/* Findings Trend Chart */}
       <div className="glass-card p-8">
         <div className="flex items-center justify-between mb-8">

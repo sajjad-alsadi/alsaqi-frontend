@@ -48,6 +48,15 @@
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
   --shadow-primary: 0 4px 14px rgba(10, 125, 133, 0.25);
+
+  /* Z-Index Scale (documented for consistency)
+   * z-0:    Base content
+   * z-10:   Sticky elements within content
+   * z-20:   Floating action buttons
+   * z-40:   Sticky header, sidebar overlay backdrop
+   * z-50:   Modals, mobile sidebar, dropdowns, tooltips
+   * z-[100]: Tooltip arrows (above everything)
+   */
 }
 
 .dark {
@@ -70,23 +79,6 @@
   body {
     @apply bg-[var(--color-bg-main)] text-[var(--color-text-main)] font-sans transition-colors duration-200 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  }
-  
-  /* Dark mode overrides for hardcoded Tailwind classes */
-  .dark .bg-white {
-    background-color: var(--color-card) !important;
-  }
-  .dark .text-gray-900, .dark .text-gray-800, .dark .text-slate-900, .dark .text-slate-800 {
-    color: var(--color-text-main) !important;
-  }
-  .dark .text-gray-700, .dark .text-gray-600, .dark .text-gray-500, .dark .text-slate-700, .dark .text-slate-600, .dark .text-slate-500 {
-    color: var(--color-text-muted) !important;
-  }
-  .dark .border-gray-200, .dark .border-gray-100, .dark .border-slate-200, .dark .border-slate-100 {
-    border-color: var(--color-border-soft) !important;
-  }
-  .dark .bg-gray-50, .dark .bg-slate-50, .dark .bg-gray-100, .dark .bg-slate-100 {
-    background-color: var(--color-bg-main) !important;
   }
 }
 
@@ -213,10 +205,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300/70 rounded-full;
+  background-color: var(--color-border-soft);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400;
+  background-color: var(--color-border-strong);
 }
 
 .scrollbar-hide::-webkit-scrollbar {
