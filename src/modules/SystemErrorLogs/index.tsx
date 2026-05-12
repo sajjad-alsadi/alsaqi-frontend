@@ -197,8 +197,8 @@ const SystemErrorLogs: React.FC = () => {
             <AlertCircle size={32} />
           </div>
           <div>
-            <h1 className="text-4xl font-black text-slate-800 tracking-tight">{t('systemErrorLogs.title')}</h1>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('common.stayUpdated')}</p>
+            <h1 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('systemErrorLogs.title')}</h1>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('common.stayUpdated')}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -224,7 +224,7 @@ const SystemErrorLogs: React.FC = () => {
           <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldAlert size={32} />
           </div>
-          <h3 className="text-xl font-black text-slate-800 mb-2">{t('systemErrorLogs.importantAlert')}</h3>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">{t('systemErrorLogs.importantAlert')}</h3>
           <p className="text-slate-500 font-bold mb-8 leading-relaxed">
             {t('systemErrorLogs.clearLogsWarning')}
           </p>
@@ -232,14 +232,14 @@ const SystemErrorLogs: React.FC = () => {
             <button
               onClick={() => setIsClearModalOpen(false)}
               disabled={isClearing}
-              className="px-6 py-3 rounded-xl font-black text-slate-500 hover:bg-slate-50 transition-colors border border-slate-100"
+              className="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors border border-slate-100"
             >
               {t('common.cancel')}
             </button>
             <button
               onClick={handleClearLogs}
               disabled={isClearing}
-              className="px-6 py-3 rounded-xl font-black bg-rose-500 text-white hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-6 py-3 rounded-xl font-bold bg-rose-500 text-white hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isClearing ? (
                 <>
@@ -277,7 +277,7 @@ const SystemErrorLogs: React.FC = () => {
         <select 
           value={severityFilter} 
           onChange={(e) => setSeverityFilter(e.target.value)} 
-          className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black text-slate-700 focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none cursor-pointer"
+          className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none cursor-pointer"
         >
           <option value="">{t('systemErrorLogs.allSeverities')}</option>
           <option value="error">{t('systemErrorLogs.error')}</option>
@@ -311,10 +311,10 @@ const SystemErrorLogs: React.FC = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-slate-50">
-                <th className="px-8 py-6 text-start text-xs font-black text-slate-400 uppercase tracking-widest">{t('common.time')}</th>
-                <th className="px-8 py-6 text-start text-xs font-black text-slate-400 uppercase tracking-widest">{t('common.module')}</th>
-                <th className="px-8 py-6 text-start text-xs font-black text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.severity')}</th>
-                <th className="px-8 py-6 text-start text-xs font-black text-slate-400 uppercase tracking-widest">{t('common.message')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('common.time')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('common.module')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.severity')}</th>
+                <th className="px-8 py-6 text-start text-xs font-bold text-slate-400 uppercase tracking-widest">{t('common.message')}</th>
                 <th className="px-8 py-6 text-start"></th>
               </tr>
             </thead>
@@ -323,14 +323,14 @@ const SystemErrorLogs: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="px-8 py-20 text-center">
                     <RefreshCw className="animate-spin text-[var(--color-primary)] mx-auto mb-4" size={32} />
-                    <p className="text-slate-400 font-bold">{t('common.loading')}</p>
+                    <p className="text-[var(--color-text-muted)] font-bold">{t('common.loading')}</p>
                   </td>
                 </tr>
               ) : (Array.isArray(logs) ? logs : []).length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-8 py-20 text-center">
                     <AlertCircle className="text-slate-200 mx-auto mb-4" size={48} />
-                    <p className="text-slate-400 font-bold">{t('systemErrorLogs.noErrorsLogged')}</p>
+                    <p className="text-[var(--color-text-muted)] font-bold">{t('systemErrorLogs.noErrorsLogged')}</p>
                   </td>
                 </tr>
               ) : (Array.isArray(logs) ? logs : []).map(log => (
@@ -341,12 +341,12 @@ const SystemErrorLogs: React.FC = () => {
                   >
                     <td className="px-8 py-5 text-sm font-bold text-slate-500 font-mono">{formatDate(log.timestamp)}</td>
                     <td className="px-8 py-5">
-                      <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                      <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-wider">
                         {log.module}
                       </span>
                     </td>
                     <td className="px-8 py-5">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${getSeverityColor(log.severity)}`}>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getSeverityColor(log.severity)}`}>
                         {t(`systemErrorLogs.${log.severity || 'error'}`)}
                       </span>
                     </td>
@@ -363,7 +363,7 @@ const SystemErrorLogs: React.FC = () => {
                         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
                           {log.stack && (
                             <div className="flex flex-col gap-2">
-                              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
+                              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
                               <div className="relative group">
                                 <pre className="text-xs font-mono text-slate-500 bg-slate-900/95 p-6 rounded-2xl overflow-x-auto leading-relaxed border-l-4 border-rose-500">
                                   {log.stack}

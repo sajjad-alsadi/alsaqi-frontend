@@ -50,7 +50,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
         )}
 
         <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">
             {t('username')}
           </label>
           <div className="relative">

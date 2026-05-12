@@ -165,8 +165,8 @@ const Settings: React.FC = () => {
             <SettingsIcon size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('common.settings')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('settings.manageAccountAndPreferences')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.settings')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('settings.manageAccountAndPreferences')}</p>
           </div>
         </div>
       </div>
@@ -181,7 +181,7 @@ const Settings: React.FC = () => {
                 setActiveTab(tab.id as any);
                 setMessage(null);
               }}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-black transition-all duration-300 ${
+              className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-bold transition-all duration-300 ${
                 activeTab === tab.id 
                 ? 'bg-primary text-white shadow-xl shadow-primary/20' 
                 : 'text-slate-400 hover:bg-white hover:text-primary'
@@ -245,15 +245,15 @@ const Settings: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-slate-800">{profile?.name}</h3>
+                      <h3 className="text-2xl font-bold text-slate-800">{profile?.name}</h3>
                       <p className="text-sm text-slate-400 font-bold uppercase tracking-widest mt-1">{profile?.job_title || profile?.role} • {profile?.department}</p>
-                      <p className="text-xs text-primary font-black mt-2">{t('settings.userId')}{profile?.employee_id || profile?.username || profile?.id}</p>
+                      <p className="text-xs text-primary font-bold mt-2">{t('settings.userId')}{profile?.employee_id || profile?.username || profile?.id}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.name')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.name')}</label>
                       <input 
                         type="text" 
                         className="input-field"
@@ -262,7 +262,7 @@ const Settings: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.email')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.email')}</label>
                       <input 
                         type="email" 
                         className="input-field"
@@ -271,7 +271,7 @@ const Settings: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.department')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.department')}</label>
                       <select 
                         className="input-field"
                         value={profileForm.department}
@@ -284,7 +284,7 @@ const Settings: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.role')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.role')}</label>
                       <input 
                         type="text" 
                         disabled
@@ -306,7 +306,7 @@ const Settings: React.FC = () => {
                 <form onSubmit={handlePasswordChange} className="space-y-8">
                   <div className="max-w-md space-y-8">
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.currentPassword')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.currentPassword')}</label>
                       <input 
                         type="password" 
                         required
@@ -316,7 +316,7 @@ const Settings: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.newPassword')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.newPassword')}</label>
                       <input 
                         type="password" 
                         required
@@ -324,10 +324,10 @@ const Settings: React.FC = () => {
                         value={passwordForm.newPassword}
                         onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                       />
-                      <p className="text-[10px] text-slate-400 font-bold mt-2">{t('settings.passwordRequirements')}</p>
+                      <p className="text-[10px] text-[var(--color-text-muted)] font-bold mt-2">{t('settings.passwordRequirements')}</p>
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.confirmPassword')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('settings.confirmPassword')}</label>
                       <input 
                         type="password" 
                         required
@@ -352,13 +352,13 @@ const Settings: React.FC = () => {
                     <div className="space-y-6">
                       <div className="flex items-center gap-4 mb-2">
                         <Globe size={20} className="text-primary" />
-                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('common.language')}</h4>
+                        <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs">{t('common.language')}</h4>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <button 
                           type="button"
                           onClick={() => setLanguage(Language.EN)}
-                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                          className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
                             language === Language.EN ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
                           }`}
                         >
@@ -367,7 +367,7 @@ const Settings: React.FC = () => {
                         <button 
                           type="button"
                           onClick={() => setLanguage(Language.AR)}
-                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                          className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
                             language === Language.AR ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
                           }`}
                         >
@@ -379,13 +379,13 @@ const Settings: React.FC = () => {
                     <div className="space-y-6">
                       <div className="flex items-center gap-4 mb-2">
                         <Sun size={20} className="text-primary" />
-                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('settings.theme')}</h4>
+                        <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs">{t('settings.theme')}</h4>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <button 
                           type="button"
                           onClick={() => setTheme('light')}
-                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                          className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
                             theme === 'light' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
                           }`}
                         >
@@ -394,7 +394,7 @@ const Settings: React.FC = () => {
                         <button 
                           type="button"
                           onClick={() => setTheme('dark')}
-                          className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                          className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
                             theme === 'dark' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
                           }`}
                         >
@@ -406,7 +406,7 @@ const Settings: React.FC = () => {
                     <div className="space-y-6">
                       <div className="flex items-center gap-4 mb-2">
                         <Bell size={20} className="text-primary" />
-                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('common.notifications')}</h4>
+                        <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs">{t('common.notifications')}</h4>
                       </div>
                       <label className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-slate-100 transition-colors">
                         <span className="text-sm font-bold text-slate-600">{t('settings.notificationsEnabled')}</span>
@@ -463,7 +463,7 @@ const Settings: React.FC = () => {
                     <div className="md:col-span-2 space-y-6">
                       <div className="flex items-center gap-4 mb-2">
                         <LayoutIcon size={20} className="text-primary" />
-                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">{t('settings.dashboardLayout')}</h4>
+                        <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs">{t('settings.dashboardLayout')}</h4>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         {['standard', 'compact', 'detailed'].map((l) => (
@@ -471,7 +471,7 @@ const Settings: React.FC = () => {
                             key={l}
                             type="button"
                             onClick={() => setDashboardLayout(l as "compact" | "standard" | "detailed")}
-                            className={`px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${
+                            className={`px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest border-2 transition-all ${
                               dashboardLayout === l ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 text-slate-400'
                             }`}
                           >
@@ -494,15 +494,15 @@ const Settings: React.FC = () => {
                 <div className="space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-6">
-                      <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.loginActivity')}</h4>
+                      <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.loginActivity')}</h4>
                       <div className="p-6 bg-slate-50 rounded-xl border border-slate-100">
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">{t('settings.lastLogin')}</p>
-                        <p className="text-sm font-black text-slate-700">{profile?.last_login ? new Date(profile.last_login).toLocaleString() : t('settings.never')}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2">{t('settings.lastLogin')}</p>
+                        <p className="text-sm font-bold text-slate-700">{profile?.last_login ? new Date(profile.last_login).toLocaleString() : t('settings.never')}</p>
                       </div>
                     </div>
 
                     <div className="space-y-6">
-                      <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.activeSessions')}</h4>
+                      <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs mb-4">{t('settings.activeSessions')}</h4>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-6 bg-emerald-50 rounded-xl border border-emerald-100">
                           <div className="flex items-center gap-4">
@@ -510,11 +510,11 @@ const Settings: React.FC = () => {
                               <LayoutIcon size={20} />
                             </div>
                             <div>
-                              <p className="text-xs font-black text-emerald-800">{t('settings.currentSession')}</p>
+                              <p className="text-xs font-bold text-emerald-800">{t('settings.currentSession')}</p>
                               <p className="text-[10px] text-emerald-600 font-bold">{t('settings.activeNow')}</p>
                             </div>
                           </div>
-                          <span className="px-3 py-1 bg-white text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">{t('settings.online')}</span>
+                          <span className="px-3 py-1 bg-white text-emerald-600 rounded-full text-[10px] font-bold uppercase tracking-widest">{t('settings.online')}</span>
                         </div>
                       </div>
                     </div>
@@ -523,12 +523,12 @@ const Settings: React.FC = () => {
                   <div className="pt-10 border-t border-slate-100">
                     <div className="bg-rose-50 p-10 rounded-2xl border border-rose-100 flex flex-col md:flex-row items-center justify-between gap-8">
                       <div>
-                        <h4 className="text-xl font-black text-rose-900 mb-2">{t('settings.logoutEverywhere')}</h4>
+                        <h4 className="text-xl font-bold text-rose-900 mb-2">{t('settings.logoutEverywhere')}</h4>
                         <p className="text-sm text-rose-600 font-medium leading-relaxed">{t('settings.invalidateAllSessions')}</p>
                       </div>
                       <button 
                         onClick={() => setShowLogoutAllModal(true)}
-                        className="px-10 py-4 bg-rose-600 text-white font-black rounded-xl shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs flex items-center gap-3"
+                        className="px-10 py-4 bg-rose-600 text-white font-bold rounded-xl shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs flex items-center gap-3"
                       >
                         <LogOut size={18} />
                         {t('settings.logoutAll')}
@@ -541,7 +541,7 @@ const Settings: React.FC = () => {
               {activeTab === 'pdf' && (
                 <div className="space-y-10">
                   <div>
-                    <h3 className="text-2xl font-black text-slate-800 mb-2">{t('settings.pdfSettings')}</h3>
+                    <h3 className="text-2xl font-bold text-slate-800 mb-2">{t('settings.pdfSettings')}</h3>
                     <p className="text-sm text-slate-500 font-bold">{t('settings.pdfSettingsDesc')}</p>
                   </div>
                   <PDFSettingsSection />

@@ -109,8 +109,8 @@ const AuditCharter: React.FC = () => {
             <BookOpen size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('common.auditCharter')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{charterData.company}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.auditCharter')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{charterData.company}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -138,7 +138,7 @@ const AuditCharter: React.FC = () => {
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                   <Icon size={24} />
                 </div>
-                <h3 className="text-2xl font-black text-slate-800">{section.title}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{section.title}</h3>
               </div>
               
               <div className="space-y-4 text-slate-600 leading-relaxed">
@@ -208,10 +208,10 @@ const AuditCharter: React.FC = () => {
                     <table className="w-full text-start border-collapse">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-100">
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.reportName')}</th>
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.frequency')}</th>
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.recipients')}</th>
-                          <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase">{t('common.notes')}</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase">{t('common.reportName')}</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase">{t('common.frequency')}</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase">{t('common.recipients')}</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase">{t('common.notes')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50">

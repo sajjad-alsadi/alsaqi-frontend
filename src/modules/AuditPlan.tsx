@@ -113,8 +113,8 @@ const AuditPlanModule: React.FC = () => {
             <Calendar size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('common.auditPlan')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('plan.strategicInternalAuditRoadmap')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.auditPlan')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('plan.strategicInternalAuditRoadmap')}</p>
           </div>
         </div>
         
@@ -215,14 +215,14 @@ const AuditPlanModule: React.FC = () => {
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-[var(--color-bg-main)] border-b border-[var(--color-border-soft)]">
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.code')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.title')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.department')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.type')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.riskRating')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.startDate')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.status')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]"></th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.code')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.title')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.department')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.type')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.riskRating')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.startDate')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('plan.status')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]">
@@ -234,14 +234,14 @@ const AuditPlanModule: React.FC = () => {
                   transition={{ delay: idx * 0.05 }}
                   className="hover:bg-[var(--color-primary)]/5 transition-colors group cursor-pointer"
                 >
-                  <td className="px-10 py-6 text-xs font-black text-[var(--color-text-muted)] tracking-widest">{plan.plan_code || `#${formatNumber(plan.id)}`}</td>
+                  <td className="px-10 py-6 text-xs font-bold text-[var(--color-text-muted)] tracking-widest">{plan.plan_code || `#${formatNumber(plan.id)}`}</td>
                   <td className="px-10 py-6">
-                    <p className="text-sm font-black text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors">{plan.title}</p>
+                    <p className="text-sm font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors">{plan.title}</p>
                     <p className="text-[10px] text-[var(--color-text-muted)] font-bold mt-1 uppercase tracking-wider">{plan.lead_auditor}</p>
                   </td>
                   <td className="px-10 py-6 text-sm font-bold text-[var(--color-text-main)]">{plan.department}</td>
                   <td className="px-10 py-6">
-                    <span className="inline-flex items-center px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[var(--color-bg-main)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)]">
+                    <span className="inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--color-bg-main)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)]">
                       {t(`plan.${plan.type?.toLowerCase() || ''}`)}
                     </span>
                   </td>

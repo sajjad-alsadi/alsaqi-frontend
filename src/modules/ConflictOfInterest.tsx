@@ -89,8 +89,8 @@ const ConflictOfInterest: React.FC = () => {
     <div className="space-y-10">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('integrity.conflicts')}</h2>
-          <p className="text-sm text-slate-400 font-bold mt-2">{t('integrity.coiSubtitle')}</p>
+          <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.conflicts')}</h2>
+          <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('integrity.coiSubtitle')}</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
@@ -106,12 +106,12 @@ const ConflictOfInterest: React.FC = () => {
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.user')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('integrity.declarationDate')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('integrity.relatedParty')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start"></th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.user')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('integrity.declarationDate')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('integrity.relatedParty')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -123,12 +123,12 @@ const ConflictOfInterest: React.FC = () => {
                   transition={{ delay: idx * 0.05 }}
                   className="hover:bg-primary/5 transition-colors group"
                 >
-                  <td className="px-6 py-4 text-xs font-black text-slate-300">#{coi.id}</td>
+                  <td className="px-6 py-4 text-xs font-bold text-slate-300">#{coi.id}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-600">{coi.user_name}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-500">{formatDate(coi.declaration_date)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-500">{coi.related_party}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest ${
                       coi.status === 'Resolved' ? 'bg-emerald-100 text-emerald-600' :
                       coi.status === 'Reviewed' ? 'bg-blue-100 text-blue-600' :
                       'bg-amber-100 text-amber-600'
@@ -162,7 +162,7 @@ const ConflictOfInterest: React.FC = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={t('integrity.declareConflict')}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('common.description')}</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('common.description')}</label>
             <textarea
               required
               rows={4}
@@ -172,7 +172,7 @@ const ConflictOfInterest: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('integrity.relatedParty')}</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('integrity.relatedParty')}</label>
             <input
               type="text"
               required
@@ -196,7 +196,7 @@ const ConflictOfInterest: React.FC = () => {
       <Modal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} title={t('common.edit')}>
         <form onSubmit={handleReviewSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('common.statusLabel')}</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('common.statusLabel')}</label>
             <select
               className="input-field"
               value={reviewData.status}
@@ -208,7 +208,7 @@ const ConflictOfInterest: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{t('integrity.reviewerNotes')}</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{t('integrity.reviewerNotes')}</label>
             <textarea
               rows={4}
               className="input-field py-4"

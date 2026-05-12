@@ -61,7 +61,7 @@ const AboutSection: React.FC = () => {
   return (
     <div className="glass-card p-10 space-y-8 bg-white border border-slate-200">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-black text-slate-800 uppercase tracking-widest">
+        <h3 className="text-xl font-bold text-slate-800 uppercase tracking-widest">
           {t('settings.aboutApplication')}
         </h3>
         {user?.role === 'Admin' && (
@@ -78,7 +78,7 @@ const AboutSection: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {fields.map((field) => (
           <div key={field.key} className="space-y-2">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{field.label}</label>
             {isEditing ? (
               <input 
                 className="input-field"

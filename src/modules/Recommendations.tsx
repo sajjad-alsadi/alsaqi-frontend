@@ -132,8 +132,8 @@ const RecommendationsModule: React.FC = () => {
             <TrendingUp size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('recommendations.title')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('recommendations.trackingManagementActionPlans')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('recommendations.title')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('recommendations.trackingManagementActionPlans')}</p>
           </div>
         </div>
         
@@ -218,14 +218,14 @@ const RecommendationsModule: React.FC = () => {
             <table className="w-full text-start border-collapse">
               <thead>
                 <tr className="bg-[var(--color-bg-main)] border-b border-[var(--color-border-soft)]">
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.id')}</th>
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.recommendation')}</th>
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.department')}</th>
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.responsible')}</th>
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.dueDate')}</th>
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.riskLevel')}</th>
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.status')}</th>
-                  <th className="px-10 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]"></th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.id')}</th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.recommendation')}</th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.department')}</th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.responsible')}</th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.dueDate')}</th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.riskLevel')}</th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.status')}</th>
+                  <th className="px-10 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border-soft)]">
@@ -237,9 +237,9 @@ const RecommendationsModule: React.FC = () => {
                     transition={{ delay: idx * 0.05 }}
                     className="hover:bg-[var(--color-primary)]/5 transition-colors group cursor-pointer"
                   >
-                    <td className="px-10 py-6 text-xs font-black text-[var(--color-text-muted)] tracking-widest">#{formatNumber(rec.id)}</td>
+                    <td className="px-10 py-6 text-xs font-bold text-[var(--color-text-muted)] tracking-widest">#{formatNumber(rec.id)}</td>
                     <td className="px-10 py-6 max-w-xs">
-                      <p className="text-sm font-black text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">{getFindingRecommendation(rec.finding_id)}</p>
+                      <p className="text-sm font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">{getFindingRecommendation(rec.finding_id)}</p>
                     </td>
                     <td className="px-10 py-6 text-sm font-bold text-[var(--color-text-main)]">{t(rec.department?.toLowerCase() || '')}</td>
                     <td className="px-10 py-6 text-sm font-bold text-[var(--color-text-muted)]">{rec.responsible}</td>
@@ -256,7 +256,7 @@ const RecommendationsModule: React.FC = () => {
                           onClick={() => handleEdit(rec)}
                           className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 rounded-xl transition-all"
                         >
-                          <span className="text-[10px] font-black uppercase tracking-widest">{t('recommendations.edit')}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest">{t('recommendations.edit')}</span>
                         </button>
                       </div>
                     </td>

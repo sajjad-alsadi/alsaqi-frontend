@@ -21,7 +21,7 @@ const UserSessions: React.FC<UserSessionsProps> = ({
           <Globe size={24} />
         </div>
         <div>
-          <h3 className="text-2xl font-black text-[var(--color-text-main)]">{t('userManagement.sessions.title')}</h3>
+          <h3 className="text-2xl font-bold text-[var(--color-text-main)]">{t('userManagement.sessions.title')}</h3>
           <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('userManagement.sessions.subtitle')}</p>
         </div>
       </div>
@@ -41,8 +41,8 @@ const UserSessions: React.FC<UserSessionsProps> = ({
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-lg font-black text-[var(--color-text-main)]">{session.username}</h4>
-                  <span className="px-2 py-0.5 bg-[var(--color-success)]/10 text-[var(--color-success)] text-[10px] font-black uppercase rounded-full">{t('userManagement.sessions.active')}</span>
+                  <h4 className="text-lg font-bold text-[var(--color-text-main)]">{session.username}</h4>
+                  <span className="px-2 py-0.5 bg-[var(--color-success)]/10 text-[var(--color-success)] text-[10px] font-bold uppercase rounded-full">{t('userManagement.sessions.active')}</span>
                 </div>
                 <div className="flex flex-wrap gap-4 text-xs font-bold text-[var(--color-text-muted)]">
                   <div className="flex items-center gap-1">

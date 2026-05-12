@@ -121,7 +121,7 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                         </div>
                         <div>
                           <p className="text-sm font-bold text-[var(--color-text-main)]">{finding.condition}</p>
-                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mt-1 inline-block ${
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mt-1 inline-block ${
                             finding.risk_level === 'High' ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]' :
                             finding.risk_level === 'Medium' ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' :
                             'bg-[var(--color-success)]/10 text-[var(--color-success)]'

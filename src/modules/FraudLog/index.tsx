@@ -71,8 +71,8 @@ const FraudLog: React.FC = () => {
             <ShieldAlert size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('integrity.fraud')}</h2>
-            <p className="text-sm text-rose-600 font-black uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.fraud')}</h2>
+            <p className="text-sm text-rose-600 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
               <Lock size={14} />
               {t('integrity.confidentialAccess')}
             </p>

@@ -33,7 +33,7 @@ const SystemErrorAnalytics: React.FC<Props> = ({ data }) => {
         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-[var(--color-primary)] transition-colors">
           <BarChartIcon size={20} />
         </div>
-        <h2 className="text-xl font-black text-slate-800 tracking-tight">{t('systemErrorLogs.errorTrends')}</h2>
+        <h2 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">{t('systemErrorLogs.errorTrends')}</h2>
       </div>
       
       {data.length > 0 ? (

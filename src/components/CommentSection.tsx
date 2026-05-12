@@ -62,7 +62,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
 
   return (
     <div className="mt-6 border-t border-slate-100 pt-6">
-      <h4 className="font-black text-slate-800 mb-4 flex items-center gap-2">
+      <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
         <MessageSquare size={18} className="text-primary" />
         {t('comments')}
       </h4>
@@ -71,14 +71,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
         {(Array.isArray(comments) ? comments : []).map(comment => (
           <div key={comment.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
             <div className="flex justify-between items-start mb-2">
-              <span className="font-black text-xs text-slate-700">{comment.user_name}</span>
+              <span className="font-bold text-xs text-slate-700">{comment.user_name}</span>
               <span className="text-[10px] font-bold text-slate-400">{new Date(comment.created_at).toLocaleString()}</span>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">{comment.content}</p>
             {(user?.id === comment.user_id || user?.role === 'Admin') && (
               <button 
                 onClick={() => deleteComment(comment.id)} 
-                className="text-rose-500 hover:text-rose-700 mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest transition-colors"
+                className="text-rose-500 hover:text-rose-700 mt-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest transition-colors"
               >
                 <Trash2 size={12} />
                 {t('delete')}

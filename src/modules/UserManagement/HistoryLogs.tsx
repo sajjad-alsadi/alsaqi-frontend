@@ -40,20 +40,20 @@ const HistoryLogs: React.FC<HistoryLogsProps> = ({
             <History size={24} />
           </div>
           <div>
-            <h3 className="text-2xl font-black text-[var(--color-text-main)]">{t('userManagement.history.title')}</h3>
+            <h3 className="text-2xl font-bold text-[var(--color-text-main)]">{t('userManagement.history.title')}</h3>
             <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('userManagement.history.subtitle')}</p>
           </div>
         </div>
         <div className="flex bg-[var(--color-bg-soft)] p-1 rounded-xl self-start border border-[var(--color-border-soft)]">
           <button 
             onClick={() => setLogTab('login')}
-            className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${logTab === 'login' ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+            className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${logTab === 'login' ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >
             {t('userManagement.history.loginHistory')}
           </button>
           <button 
             onClick={() => setLogTab('activity')}
-            className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${logTab === 'activity' ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+            className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${logTab === 'activity' ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >
             {t('userManagement.history.activityLogs')}
           </button>
@@ -65,10 +65,10 @@ const HistoryLogs: React.FC<HistoryLogsProps> = ({
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-[var(--color-bg-soft)] border-b border-[var(--color-border-soft)]">
-                <th className="px-8 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-start">{t('userManagement.history.user')}</th>
-                <th className="px-8 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-start">{logTab === 'login' ? t('userManagement.history.ipAddress') : t('userManagement.history.action')}</th>
-                <th className="px-8 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-start">{t('common.date')}</th>
-                <th className="px-8 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-start">{t('common.statusLabel')}</th>
+                <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest text-start">{t('userManagement.history.user')}</th>
+                <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest text-start">{logTab === 'login' ? t('userManagement.history.ipAddress') : t('userManagement.history.action')}</th>
+                <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest text-start">{t('common.date')}</th>
+                <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest text-start">{t('common.statusLabel')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]">
@@ -79,7 +79,7 @@ const HistoryLogs: React.FC<HistoryLogsProps> = ({
                       <div className="w-8 h-8 bg-[var(--color-bg-soft)] rounded-lg flex items-center justify-center text-[var(--color-text-muted)]">
                         <User size={14} />
                       </div>
-                      <span className="text-sm font-black text-[var(--color-text-main)]">
+                      <span className="text-sm font-bold text-[var(--color-text-main)]">
                         {logTab === 'login' ? log.username : translateName(log.user)}
                       </span>
                     </div>
@@ -87,7 +87,7 @@ const HistoryLogs: React.FC<HistoryLogsProps> = ({
                   <td className="px-8 py-6">
                     <span className="text-sm font-bold text-[var(--color-text-muted)]">{logTab === 'login' ? log.ip_address : log.action}</span>
                     {logTab === 'activity' && log.module && (
-                      <span className="ms-2 px-2 py-0.5 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] text-[10px] font-black uppercase rounded-md border border-[var(--color-border-soft)]">{log.module}</span>
+                      <span className="ms-2 px-2 py-0.5 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] text-[10px] font-bold uppercase rounded-md border border-[var(--color-border-soft)]">{log.module}</span>
                     )}
                   </td>
                   <td className="px-8 py-6">
@@ -97,7 +97,7 @@ const HistoryLogs: React.FC<HistoryLogsProps> = ({
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                       (log.status === 'Success' || log.status === 'Completed' || logTab === 'activity') ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]'
                     }`}>
                       {translateStatus(log.status || (logTab === 'activity' ? 'Completed' : 'Success'))}

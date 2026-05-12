@@ -142,10 +142,10 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
             <Mail size={24} />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">
+            <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">
               {t('correspondence.systemTitle')}
             </h3>
-            <p className="text-xs text-slate-400 font-bold">
+            <p className="text-xs text-[var(--color-text-muted)] font-bold">
               {t('correspondence.systemDesc')}
             </p>
           </div>
@@ -250,7 +250,7 @@ interface TabButtonProps {
 const TabButton: React.FC<TabButtonProps> = ({ active, onClick, label, icon }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all whitespace-nowrap ${
+    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
       active 
         ? 'bg-white text-[var(--color-primary)] shadow-sm' 
         : 'text-slate-500 hover:text-slate-700'

@@ -48,24 +48,24 @@ export const FraudTable: React.FC<FraudTableProps> = ({ cases }) => {
         <table className="w-full">
           <thead className="bg-[var(--color-bg-soft)] border-b border-[var(--color-border-soft)]">
             <tr>
-              <th className="p-6 text-start text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.refNumber')}</th>
-              <th className="p-6 text-start text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.date')}</th>
-              <th className="p-6 text-start text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.riskCategory')}</th>
-              <th className="p-6 text-start text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('common.description')}</th>
-              <th className="p-6 text-start text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.suspects')}</th>
-              <th className="p-6 text-start text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.impact')}</th>
-              <th className="p-6 text-start text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('common.statusLabel')}</th>
+              <th className="p-6 text-start text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.refNumber')}</th>
+              <th className="p-6 text-start text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.date')}</th>
+              <th className="p-6 text-start text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.riskCategory')}</th>
+              <th className="p-6 text-start text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('common.description')}</th>
+              <th className="p-6 text-start text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.suspects')}</th>
+              <th className="p-6 text-start text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('integrity.impact')}</th>
+              <th className="p-6 text-start text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('common.statusLabel')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border-soft)]">
             {cases.map((item) => (
               <tr key={item.id} className="hover:bg-[var(--color-primary)]/5 transition-colors group">
-                <td className="p-6 font-mono text-[10px] font-black text-slate-800 tracking-normal min-w-[140px]">
+                <td className="p-6 font-mono text-[10px] font-bold text-slate-800 tracking-normal min-w-[140px]">
                   <span className="block truncate" title={item.id}>{item.id}</span>
                 </td>
-                <td className="p-6 text-xs font-black text-slate-900 whitespace-nowrap">{formatDate(item.detectionDate)}</td>
+                <td className="p-6 text-xs font-bold text-slate-900 whitespace-nowrap">{formatDate(item.detectionDate)}</td>
                 <td className="p-6">
-                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest leading-none ${
+                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest leading-none ${
                     item.riskCategory === 'Financial' ? 'bg-rose-100 text-rose-800' :
                     item.riskCategory === 'Operational' ? 'bg-amber-100 text-amber-800' :
                     item.riskCategory === 'Compliance' ? 'bg-blue-100 text-blue-800' :
@@ -79,7 +79,7 @@ export const FraudTable: React.FC<FraudTableProps> = ({ cases }) => {
                 </td>
                 <td className="p-6">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-black text-slate-900 tracking-[0.2em]">
+                    <span className="font-mono text-xs font-bold text-slate-900 tracking-[0.2em]">
                       {showSuspects[item.id] ? item.suspects : '••••••••'}
                     </span>
                     <button 
@@ -90,9 +90,9 @@ export const FraudTable: React.FC<FraudTableProps> = ({ cases }) => {
                     </button>
                   </div>
                 </td>
-                <td className="p-6 text-sm font-black text-rose-700 whitespace-nowrap">{item.financialImpact}</td>
+                <td className="p-6 text-sm font-bold text-rose-700 whitespace-nowrap">{item.financialImpact}</td>
                 <td className="p-6">
-                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${
                     item.status === 'Open' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
                     item.status === 'Under Investigation' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
                     item.status.includes('Convicted') ? 'bg-rose-100 text-rose-800 border border-rose-300' :

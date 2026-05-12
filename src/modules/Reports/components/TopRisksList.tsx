@@ -17,10 +17,10 @@ const TopRisksList: React.FC<TopRisksListProps> = ({ risks }) => {
           <div className="w-10 h-10 rounded-xl bg-[var(--color-danger)]/10 text-[var(--color-danger)] flex items-center justify-center">
             <AlertTriangle size={20} />
           </div>
-          <h3 className="text-xl font-black text-[var(--color-text-main)]">{t('reports.topRisks')}</h3>
+          <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('reports.topRisks')}</h3>
         </div>
         <button 
-          className="text-xs font-black text-[var(--color-primary)] uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all"
+          className="text-xs font-bold text-[var(--color-primary)] uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all"
         >
           {t('reports.viewAll')} <ArrowRight size={14} />
         </button>
@@ -32,7 +32,7 @@ const TopRisksList: React.FC<TopRisksListProps> = ({ risks }) => {
               <p className="text-sm font-bold text-[var(--color-text-main)]">{risk.description}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">{risk.owner}</p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
               risk.rating === 'High' ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]' :
               risk.rating === 'Medium' ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' :
               'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'

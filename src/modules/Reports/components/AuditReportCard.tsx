@@ -28,7 +28,7 @@ const AuditReportCard: React.FC<AuditReportCardProps> = ({
             <FileText size={24} />
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="px-3 py-1 bg-[var(--color-bg-main)] rounded-full text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] border border-[var(--color-border-soft)]">
+            <span className="px-3 py-1 bg-[var(--color-bg-main)] rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] border border-[var(--color-border-soft)]">
               {report.status}
             </span>
             {report.report_type && report.report_type !== 'auditReport' && (

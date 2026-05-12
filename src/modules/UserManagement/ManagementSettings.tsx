@@ -39,7 +39,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
   if (!settings) return (
     <div className="flex flex-col items-center justify-center p-20 space-y-4">
       <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-[var(--color-text-muted)] font-black uppercase tracking-widest text-xs">{t('common.loading')}</p>
+      <p className="text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-xs">{t('common.loading')}</p>
     </div>
   );
 
@@ -56,7 +56,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
           <Settings size={24} />
          </div>
          <div>
-           <h3 className="text-2xl font-black text-[var(--color-text-main)]">{t('userManagement.settings.title')}</h3>
+           <h3 className="text-2xl font-bold text-[var(--color-text-main)]">{t('userManagement.settings.title')}</h3>
            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('userManagement.settings.subtitle')}</p>
          </div>
        </div>
@@ -65,13 +65,13 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
          <div className="glass-card p-8 space-y-8">
            <div className="flex items-center gap-3 text-[var(--color-text-main)]">
              <Lock size={20} className="text-[var(--color-primary)]" />
-             <h4 className="text-lg font-black">{t('userManagement.settings.passwordPolicy')}</h4>
+             <h4 className="text-lg font-bold">{t('userManagement.settings.passwordPolicy')}</h4>
            </div>
            
            <div className="space-y-6">
              <div className="flex items-center justify-between p-4 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)]">
                <div>
-                 <p className="text-sm font-black text-[var(--color-text-main)]">{t('userManagement.settings.minPasswordLength')}</p>
+                 <p className="text-sm font-bold text-[var(--color-text-main)]">{t('userManagement.settings.minPasswordLength')}</p>
                  <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{t('userManagement.settings.characters')}</p>
                </div>
                <input 
@@ -87,7 +87,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
  
              <div className="flex items-center justify-between p-4 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)]">
                <div>
-                 <p className="text-sm font-black text-[var(--color-text-main)]">{t('userManagement.settings.requireSpecialChars')}</p>
+                 <p className="text-sm font-bold text-[var(--color-text-main)]">{t('userManagement.settings.requireSpecialChars')}</p>
                  <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{t('userManagement.settings.complexity')}</p>
                </div>
                <label className="relative inline-flex items-center cursor-pointer">
@@ -103,7 +103,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
  
              <div className="flex items-center justify-between p-4 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)]">
                <div>
-                 <p className="text-sm font-black text-[var(--color-text-main)]">{t('userManagement.settings.passwordExpiryDays')}</p>
+                 <p className="text-sm font-bold text-[var(--color-text-main)]">{t('userManagement.settings.passwordExpiryDays')}</p>
                  <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{t('userManagement.settings.days')}</p>
                </div>
                <input 
@@ -122,13 +122,13 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
          <div className="glass-card p-8 space-y-8">
            <div className="flex items-center gap-3 text-[var(--color-text-main)]">
              <Shield size={20} className="text-[var(--color-primary)]" />
-             <h4 className="text-lg font-black">{t('userManagement.settings.accountSecurity')}</h4>
+             <h4 className="text-lg font-bold">{t('userManagement.settings.accountSecurity')}</h4>
            </div>
  
            <div className="space-y-6">
              <div className="flex items-center justify-between p-4 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)]">
                <div>
-                 <p className="text-sm font-black text-[var(--color-text-main)]">{t('userManagement.settings.maxLoginAttempts')}</p>
+                 <p className="text-sm font-bold text-[var(--color-text-main)]">{t('userManagement.settings.maxLoginAttempts')}</p>
                  <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{t('userManagement.settings.beforeLockout')}</p>
                </div>
                <input 
@@ -144,7 +144,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
  
              <div className="flex items-center justify-between p-4 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)]">
                <div>
-                 <p className="text-sm font-black text-[var(--color-text-main)]">{t('userManagement.settings.sessionTimeoutMinutes')}</p>
+                 <p className="text-sm font-bold text-[var(--color-text-main)]">{t('userManagement.settings.sessionTimeoutMinutes')}</p>
                  <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{t('userManagement.settings.minutes')}</p>
                </div>
                <input 
@@ -160,7 +160,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
  
              <div className="flex items-center justify-between p-4 bg-[var(--color-bg-soft)] rounded-2xl border border-[var(--color-border-soft)]">
                <div>
-                 <p className="text-sm font-black text-[var(--color-text-main)]">{t('userManagement.settings.twoFactorAuth')}</p>
+                 <p className="text-sm font-bold text-[var(--color-text-main)]">{t('userManagement.settings.twoFactorAuth')}</p>
                  <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{t('userManagement.settings.recommended')}</p>
                </div>
                <label className="relative inline-flex items-center cursor-pointer">
@@ -179,7 +179,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
          <div className="lg:col-span-2 p-6 bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 rounded-3xl flex items-start gap-4">
            <AlertCircle className="text-[var(--color-warning)] mt-1" size={20} />
            <div>
-             <p className="text-sm font-black text-[var(--color-warning)]">{t('userManagement.settings.securityAdvisory')}</p>
+             <p className="text-sm font-bold text-[var(--color-warning)]">{t('userManagement.settings.securityAdvisory')}</p>
              <p className="text-xs font-bold text-[var(--color-warning)] opacity-80 mt-1">
                {t('userManagement.settings.securityAdvisoryNote')}
              </p>

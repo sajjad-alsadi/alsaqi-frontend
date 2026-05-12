@@ -208,7 +208,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
         <button
           type="button"
           onClick={onCancel}
-          className="px-8 py-3 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
+          className="px-8 py-3 text-[var(--color-text-muted)] font-bold uppercase tracking-widest hover:bg-[var(--color-bg-soft)] rounded-xl transition-all"
         >
           {t('common.cancel')}
         </button>

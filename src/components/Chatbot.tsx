@@ -181,7 +181,7 @@ const Chatbot: React.FC = () => {
                   <Search size={24} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-black text-lg tracking-tight">{t('searchAssistant')}</h3>
+                  <h3 className="font-bold text-lg tracking-tight">{t('searchAssistant')}</h3>
                   <p className="text-xs text-white/70 font-bold">{t('localPolicySearch')}</p>
                 </div>
               </div>
@@ -237,7 +237,7 @@ const Chatbot: React.FC = () => {
                             {getResultIcon(result.type)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-1">
+                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-1">
                               {getResultLabel(result.type)}
                             </p>
                             <p className="text-sm font-bold text-slate-700 dark:text-white truncate">

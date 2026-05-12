@@ -90,8 +90,8 @@ const DepartmentManagement: React.FC = () => {
             <Building size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('modules.OrgStructure')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('manageSystemDepartments')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('modules.OrgStructure')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('manageSystemDepartments')}</p>
           </div>
         </div>
       </div>
@@ -100,7 +100,7 @@ const DepartmentManagement: React.FC = () => {
       <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl w-fit">
         <button 
           onClick={() => setActiveTab('departments')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
             activeTab === 'departments' 
               ? 'bg-white text-[var(--color-primary)] shadow-sm' 
               : 'text-slate-500 hover:text-slate-700'
@@ -111,7 +111,7 @@ const DepartmentManagement: React.FC = () => {
         </button>
         <button 
           onClick={() => setActiveTab('jobTitles')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
             activeTab === 'jobTitles' 
               ? 'bg-white text-[var(--color-primary)] shadow-sm' 
               : 'text-slate-500 hover:text-slate-700'

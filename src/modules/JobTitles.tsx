@@ -126,8 +126,8 @@ const JobTitles: React.FC = () => {
             <Briefcase size={24} />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">{t('jobTitles')}</h3>
-            <p className="text-xs text-slate-400 font-bold">{t('manageOrgRoles')}</p>
+            <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">{t('jobTitles')}</h3>
+            <p className="text-xs text-[var(--color-text-muted)] font-bold">{t('manageOrgRoles')}</p>
           </div>
         </div>
         
@@ -166,7 +166,7 @@ const JobTitles: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="glass-card p-10 border-primary/20"
         >
-          <h3 className="text-xl font-black text-slate-800 mb-8">{editingId ? t('editJobTitle') : t('addNewJobTitle')}</h3>
+          <h3 className="text-xl font-bold text-slate-800 mb-8">{editingId ? t('editJobTitle') : t('addNewJobTitle')}</h3>
           <form onSubmit={handleSubmit}>
             {error && (
               <div className="mb-6 p-4 bg-rose-50 text-rose-600 rounded-xl border border-rose-100 font-bold text-sm">
@@ -175,11 +175,11 @@ const JobTitles: React.FC = () => {
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('jobTitleName')}</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('jobTitleName')}</label>
                 <input required className="input-field" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('common.departments')}</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('common.departments')}</label>
                 <select className="input-field" value={formData.department || ''} onChange={e => setFormData({...formData, department: e.target.value})}>
                   <option value="">{t('plan.selectDepartment')}</option>
                   {(Array.isArray(departments) ? departments : []).map(dept => (
@@ -188,7 +188,7 @@ const JobTitles: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('jobLevel')}</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('jobLevel')}</label>
                 <select className="input-field" value={formData.job_level || 'Staff'} onChange={e => setFormData({...formData, job_level: e.target.value})}>
                   <option value="Executive">{t('jobTitles.executive')}</option>
                   <option value="Manager">{t('jobTitles.manager')}</option>
@@ -197,7 +197,7 @@ const JobTitles: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('reportsTo')}</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('reportsTo')}</label>
                 <select className="input-field" value={formData.reporting_to || ''} onChange={e => setFormData({...formData, reporting_to: e.target.value})}>
                   <option value="">{t('common.none')}</option>
                   {(Array.isArray(jobTitles) ? jobTitles : []).filter(j => String(j.id) !== String(editingId)).map(title => (
@@ -206,11 +206,11 @@ const JobTitles: React.FC = () => {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('common.description')}</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('common.description')}</label>
                 <textarea className="input-field min-h-[100px]" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('common.statusLabel')}</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('common.statusLabel')}</label>
                 <select className="input-field" value={formData.status || 'Active'} onChange={e => setFormData({...formData, status: e.target.value})}>
                   <option value="Active">{t('active')}</option>
                   <option value="Inactive">{t('inactive')}</option>
@@ -230,13 +230,13 @@ const JobTitles: React.FC = () => {
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('jobTitles')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.departments')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('jobLevel')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('created')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('jobTitles')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.departments')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('jobLevel')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('created')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -250,17 +250,17 @@ const JobTitles: React.FC = () => {
                 >
                   <td className="px-6 py-4 text-xs font-bold text-slate-400">#{title.id}</td>
                   <td className="px-6 py-4">
-                    <div className="font-black text-slate-800">{title.name}</div>
+                    <div className="font-bold text-slate-800">{title.name}</div>
                     {title.description && <div className="text-xs text-slate-500 truncate max-w-[200px] mt-1">{title.description}</div>}
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-600">{title.department || '-'}</td>
                   <td className="px-6 py-4">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-600">
                       {t(`jobTitles.${title.job_level?.toLowerCase()}`)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                       title.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                     }`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${title.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`} />

@@ -202,16 +202,16 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">
                   {t('correspondence.seqNumber')}
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.recipient')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.classification')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.sendingMethod')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">{t('correspondence.attachment')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">{t('common.actions')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.recipient')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.classification')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.sendingMethod')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-center">{t('correspondence.attachment')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-center">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -229,7 +229,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                 </tr>
               ) : (Array.isArray(filteredItems) ? filteredItems : []).map((item) => (
                 <tr key={item.id} className="hover:bg-primary/5 transition-colors group cursor-pointer" onClick={() => onViewDetails('Outgoing', item.id)}>
-                  <td className="px-6 py-4 text-xs font-black text-slate-300 tracking-widest">{formatNumber(item.sequence_number)}</td>
+                  <td className="px-6 py-4 text-xs font-bold text-slate-300 tracking-widest">{formatNumber(item.sequence_number)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700">{formatDate(item.letter_date)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700">
                     <div className="flex items-center gap-2">
@@ -239,7 +239,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700 max-w-xs truncate">{item.subject}</td>
                   <td className="px-6 py-4">
-                    <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-[10px] font-black uppercase tracking-wider text-slate-500 border border-slate-200">
+                    <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 border border-slate-200">
                       {t(`correspondence.${(item.classification || '').toLowerCase().replace(/\s+/g, '_')}`) || item.classification}
                     </span>
                   </td>

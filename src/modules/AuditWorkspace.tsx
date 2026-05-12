@@ -127,7 +127,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
             <ArrowRight size={20} className={isRTL ? '' : 'rotate-180'} />
           </button>
           <div>
-            <h2 className="text-xl font-black text-slate-800">{plan?.title}</h2>
+            <h2 className="text-xl font-bold text-slate-800">{plan?.title}</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{plan?.plan_code} • {plan?.department}</p>
           </div>
         </div>
@@ -144,7 +144,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
         {/* Left Sidebar: Tasks */}
         <div className="w-80 bg-white border-e border-[var(--color-border-soft)] flex flex-col">
           <div className="p-6 border-b border-[var(--color-border-soft)]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('planTasks')}</h3>
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">{t('planTasks')}</h3>
             <div className="relative">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
               <input 
@@ -166,7 +166,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                 }`}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <span className={`text-[9px] font-black uppercase tracking-widest ${activeTask?.id === task.id ? 'text-white/70' : 'text-slate-400'}`}>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest ${activeTask?.id === task.id ? 'text-white/70' : 'text-slate-400'}`}>
                     {task.task_number}
                   </span>
                   <div className={`w-2 h-2 rounded-full ${
@@ -196,7 +196,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <h3 className="text-2xl font-black text-slate-800 mb-2">{activeTask.title}</h3>
+                      <h3 className="text-2xl font-bold text-slate-800 mb-2">{activeTask.title}</h3>
                       <div className="flex items-center gap-4">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{activeTask.audit_type}</span>
                         <div className="w-1 h-1 rounded-full bg-slate-300" />
@@ -229,25 +229,25 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
 
                   <div className="grid grid-cols-2 gap-8 text-sm">
                     <div className="space-y-4">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.details')}</h4>
+                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.details')}</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('common.startDate')}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('common.startDate')}</p>
                           <p className="font-bold text-slate-700">{activeTask?.period_from || '—'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('common.endDate')}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('common.endDate')}</p>
                           <p className="font-bold text-slate-700">{activeTask?.period_to || '—'}</p>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.progress')}</h4>
+                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.progress')}</h4>
                       <div className="flex items-center gap-4">
                         <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
                            <div className={`h-full rounded-full ${activeTask?.status === 'completed' ? 'bg-emerald-500 w-full' : 'bg-blue-500 w-1/2'}`} />
                         </div>
-                        <span className="text-xs font-black text-slate-800">{activeTask?.status === 'completed' ? '100%' : '50%'}</span>
+                        <span className="text-xs font-bold text-slate-800">{activeTask?.status === 'completed' ? '100%' : '50%'}</span>
                       </div>
                     </div>
                   </div>
@@ -261,14 +261,14 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                         <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500">
                           <AlertTriangle size={20} />
                         </div>
-                        <h4 className="text-lg font-black text-slate-800">{t('common.findingsAndObservations')}</h4>
+                        <h4 className="text-lg font-bold text-slate-800">{t('common.findingsAndObservations')}</h4>
                       </div>
                       <button 
                          onClick={() => {
                            setSelectedFinding(null);
                            setIsFindingModalOpen(true);
                          }}
-                         className="flex items-center gap-2 text-[var(--color-primary)] font-black text-xs hover:bg-[var(--color-primary)]/5 px-4 py-2 rounded-xl transition-colors"
+                         className="flex items-center gap-2 text-[var(--color-primary)] font-bold text-xs hover:bg-[var(--color-primary)]/5 px-4 py-2 rounded-xl transition-colors"
                       >
                         <Plus size={16} /> {t('common.addObservation')}
                       </button>
@@ -298,7 +298,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                                 </div>
                                 <p className="text-sm text-slate-500 line-clamp-3 mb-auto leading-relaxed">{findings[currentFindingIndex].description}</p>
                                 <div className="flex flex-row items-center justify-between mt-4 border-t border-slate-200/50 pt-4">
-                                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm">
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm">
                                     {findings[currentFindingIndex].status}
                                   </span>
                                   <button 
@@ -306,7 +306,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                                       setSelectedFinding(findings[currentFindingIndex]);
                                       setIsFindingModalOpen(true);
                                     }}
-                                    className="text-[var(--color-primary)] text-xs font-black uppercase tracking-widest hover:underline"
+                                    className="text-[var(--color-primary)] text-xs font-bold uppercase tracking-widest hover:underline"
                                   >
                                     {t('common.edit')}
                                   </button>
@@ -354,27 +354,27 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-4">
                 <ClipboardList size={64} className="opacity-20" />
-                <p className="text-lg font-black uppercase tracking-widest">{t('common.selectTaskToExecute')}</p>
+                <p className="text-lg font-bold uppercase tracking-widest">{t('common.selectTaskToExecute')}</p>
               </div>
             )}
           </div>
 
           {/* Right Sidebar: Evidence & Links */}
           <div className="w-96 bg-white border-s border-[var(--color-border-soft)] flex flex-col p-6">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">{t('common.evidenceAndAttachments')}</h3>
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">{t('common.evidenceAndAttachments')}</h3>
             
             <div className="mb-8">
               <div className="p-8 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-center group hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer">
                 <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 mb-4 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
                   <Upload size={24} />
                 </div>
-                <p className="text-xs font-black text-slate-800 mb-1">{t('common.uploadEvidence')}</p>
+                <p className="text-xs font-bold text-slate-800 mb-1">{t('common.uploadEvidence')}</p>
                 <p className="text-[10px] font-medium text-slate-400">{t('common.dragAndDropFile')}</p>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.recentEvidence')}</h4>
+              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">{t('common.recentEvidence')}</h4>
               {evidence.length === 0 ? (
                 <p className="text-[10px] font-bold text-slate-300 text-center py-8 italic">{t('common.noEvidenceUploaded')}</p>
               ) : (
@@ -394,7 +394,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                 ))
               )}
 
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2 mt-8">{t('common.linkedRecommendations')}</h4>
+              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2 mt-8">{t('common.linkedRecommendations')}</h4>
               {findings.map(f => (
                 <div key={`rec-${f.id}`} className="space-y-2">
                   <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100/50">

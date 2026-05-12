@@ -137,7 +137,7 @@ export const PdfTemplateManagement: React.FC = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-black text-slate-800">{t('pdfTemplates.title')}</h2>
+          <h2 className="text-2xl font-bold text-slate-800">{t('pdfTemplates.title')}</h2>
           <p className="text-slate-500 text-sm font-bold mt-1">{t('pdfTemplates.subtitle')}</p>
         </div>
         <button onClick={() => openModal()} className="btn-primary flex items-center gap-2">
@@ -178,7 +178,7 @@ export const PdfTemplateManagement: React.FC = () => {
                   </div>
                 </div>
                 
-                <h3 className="font-black text-lg text-slate-800 mb-1">{template.template_name}</h3>
+                <h3 className="font-bold text-lg text-slate-800 mb-1">{template.template_name}</h3>
                 <p className="text-sm font-bold text-slate-500 mb-4">{template.template_type}</p>
                 
                 <div className="mt-auto space-y-3 pt-4 border-t border-slate-100">
@@ -187,14 +187,14 @@ export const PdfTemplateManagement: React.FC = () => {
                     <span dir="ltr">v{template.version}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                       template.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' : 
                       template.status === 'Draft' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
                     }`}>
                       {template.status === 'Approved' ? t('status.approved') : template.status === 'Draft' ? t('status.draft') : template.status}
                     </span>
                     {template.is_default === 1 && (
-                      <span className="flex items-center gap-1 text-[10px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full">
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
                         <CheckCircle size={12} /> {t('pdfTemplates.default')}
                       </span>
                     )}
@@ -203,7 +203,7 @@ export const PdfTemplateManagement: React.FC = () => {
               </div>
             ))}
             {filteredTemplates.length === 0 && (
-              <div className="col-span-full p-10 text-center text-slate-400 font-bold">
+              <div className="col-span-full p-10 text-center text-[var(--color-text-muted)] font-bold">
                 {t('pdfTemplates.noMatch')}
               </div>
             )}
@@ -221,7 +221,7 @@ export const PdfTemplateManagement: React.FC = () => {
               className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
             >
               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 className="text-xl font-black text-slate-800">
+                <h3 className="text-xl font-bold text-slate-800">
                   {editingTemplate ? t('pdfTemplates.editTemplate') : t('pdfTemplates.createNew')}
                 </h3>
                 <button onClick={() => setShowModal(false)} className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-rose-500 shadow-sm transition-colors">
@@ -233,7 +233,7 @@ export const PdfTemplateManagement: React.FC = () => {
                 <form id="templateForm" onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('pdfTemplates.templateName')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('pdfTemplates.templateName')}</label>
                       <input 
                         type="text" 
                         required
@@ -243,7 +243,7 @@ export const PdfTemplateManagement: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('pdfTemplates.reportType')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('pdfTemplates.reportType')}</label>
                       <select 
                         required
                         className="input-field"
@@ -256,7 +256,7 @@ export const PdfTemplateManagement: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{t('pdfTemplates.templateStatus')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('pdfTemplates.templateStatus')}</label>
                       <select 
                         className="input-field"
                         value={formData.status}
@@ -282,7 +282,7 @@ export const PdfTemplateManagement: React.FC = () => {
 
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{t('pdfTemplates.templateContent')}</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">{t('pdfTemplates.templateContent')}</label>
                       <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded">{t('pdfTemplates.supportsHandlebars')}</span>
                     </div>
                     <p className="text-xs text-slate-500 mb-3 font-medium">استخدم المتغيرات مثل <code className="bg-slate-100 px-1 py-0.5 rounded text-rose-500">{"{{report_number}}"}</code> و الحلقات مثل <code className="bg-slate-100 px-1 py-0.5 rounded text-rose-500">{"{{#findings}} ... {{/findings}}"}</code></p>

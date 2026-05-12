@@ -26,7 +26,7 @@ const KPICards: React.FC<KPICardsProps> = ({ execData, onCardClick }) => {
         </div>
         <div>
           <p className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('reports.totalAudits')}</p>
-          <p className="text-4xl font-black text-[var(--color-text-main)] mt-1">{formatNumber(execData.totalAudits)}</p>
+          <p className="text-4xl font-bold text-[var(--color-text-main)] mt-1">{formatNumber(execData.totalAudits)}</p>
         </div>
       </motion.div>
 
@@ -40,7 +40,7 @@ const KPICards: React.FC<KPICardsProps> = ({ execData, onCardClick }) => {
         </div>
         <div>
           <p className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('reports.completedAudits')}</p>
-          <p className="text-4xl font-black text-[var(--color-text-main)] mt-1">{formatNumber(execData.completedAudits)}</p>
+          <p className="text-4xl font-bold text-[var(--color-text-main)] mt-1">{formatNumber(execData.completedAudits)}</p>
         </div>
       </motion.div>
 
@@ -54,7 +54,7 @@ const KPICards: React.FC<KPICardsProps> = ({ execData, onCardClick }) => {
         </div>
         <div>
           <p className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('reports.highRiskFindings')}</p>
-          <p className="text-4xl font-black text-[var(--color-text-main)] mt-1">{formatNumber(execData.highRiskFindings)}</p>
+          <p className="text-4xl font-bold text-[var(--color-text-main)] mt-1">{formatNumber(execData.highRiskFindings)}</p>
         </div>
       </motion.div>
     </div>

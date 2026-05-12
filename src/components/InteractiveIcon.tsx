@@ -91,7 +91,7 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
         {Icon && <Icon size={size} className={iconClassName} />}
         {children}
         {badge !== undefined && (
-          <span className="absolute -top-1 -end-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg">
+          <span className="absolute -top-1 -end-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-lg">
             {badge}
           </span>
         )}

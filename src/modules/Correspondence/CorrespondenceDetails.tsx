@@ -383,7 +383,7 @@ const DetailTab = ({ active, onClick, label, icon }: any) => (
     onClick={onClick}
     className={`flex items-center gap-2 px-6 py-4.5 text-sm transition-all whitespace-nowrap ${
       active 
-        ? 'border-b-2 border-primary text-primary font-black bg-primary/5' 
+        ? 'border-b-2 border-primary text-primary font-bold bg-primary/5' 
         : 'border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-bold'
     }`}
   >

@@ -259,7 +259,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-[var(--color-bg-main)]">
-          <div className="max-w-7xl mx-auto w-full">
+          <div className="max-w-7xl mx-auto w-full animate-fade-in">
             {children}
           </div>
         </div>

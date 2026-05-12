@@ -43,14 +43,14 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
             <div className="p-8 space-y-6 flex-1">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">
                     {program.program_code}
                   </span>
-                  <h3 className="text-xl font-black text-slate-800 leading-tight group-hover:text-primary transition-colors">
+                  <h3 className="text-xl font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors">
                     {program.program_title}
                   </h3>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                   program.status === AuditStatus.APPROVED ? 'bg-emerald-100 text-emerald-600' :
                   program.status === AuditStatus.DRAFT ? 'bg-slate-100 text-slate-400' : 'bg-primary/10 text-primary'
                 }`}>
@@ -60,13 +60,13 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('program.department')}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('program.department')}</span>
                   <p className="text-xs font-bold text-slate-700 truncate">
                     {program.department}
                   </p>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('program.auditType')}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('program.auditType')}</span>
                   <p className="text-xs font-bold text-slate-700">
                     {t(`plan.${program.audit_type?.toLowerCase() || ''}`)}
                   </p>
@@ -111,7 +111,7 @@ const AuditProgramGrid: React.FC<AuditProgramGridProps> = ({
               </div>
               <button 
                 onClick={() => onViewProcedures(program)}
-                className="text-xs font-black text-primary flex items-center gap-1 hover:gap-2 transition-all"
+                className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
               >
                 {t('program.viewProcedures')}
                 <ChevronRight size={14} className={isRTL ? 'rotate-180' : ''} />

@@ -36,7 +36,7 @@ const ExecutiveCharts: React.FC<ExecutiveChartsProps> = ({ execData, language })
             <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
               <TrendingUp size={20} />
             </div>
-            <h3 className="text-xl font-black text-[var(--color-text-main)]">{t('reports.findingsTrend')}</h3>
+            <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('reports.findingsTrend')}</h3>
           </div>
         </div>
         <div className="h-64 w-full min-w-0">
@@ -84,7 +84,7 @@ const ExecutiveCharts: React.FC<ExecutiveChartsProps> = ({ execData, language })
             <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
               <BarChart3 size={20} />
             </div>
-            <h3 className="text-xl font-black text-[var(--color-text-main)]">{t('reports.findingsByDepartment')}</h3>
+            <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('reports.findingsByDepartment')}</h3>
           </div>
         </div>
         <div className="h-64 w-full min-w-0">

@@ -87,7 +87,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
               setTypeFilter('All');
               setPagination(prev => ({ ...prev, page: 1 }));
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-black transition-all ${typeFilter === 'All' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'All' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             {t('correspondence.all')}
           </button>
@@ -96,7 +96,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
               setTypeFilter('Incoming');
               setPagination(prev => ({ ...prev, page: 1 }));
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-black transition-all ${typeFilter === 'Incoming' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'Incoming' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             {t('correspondence.incoming')}
           </button>
@@ -105,7 +105,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
               setTypeFilter('Outgoing');
               setPagination(prev => ({ ...prev, page: 1 }));
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-black transition-all ${typeFilter === 'Outgoing' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${typeFilter === 'Outgoing' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             {t('correspondence.outgoing')}
           </button>
@@ -117,12 +117,12 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.type')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.seqNumber')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.entity')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.archiveDate')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.type')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.seqNumber')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.entity')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.archiveDate')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -147,10 +147,10 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
                       ) : (
                         <Send size={16} className="text-teal-500" />
                       )}
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">{t(`correspondence.${item.type.toLowerCase()}`)}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t(`correspondence.${item.type.toLowerCase()}`)}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-black text-slate-300 tracking-widest">{formatNumber(item.sequence_number)}</td>
+                  <td className="px-6 py-4 text-xs font-bold text-slate-300 tracking-widest">{formatNumber(item.sequence_number)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700 max-w-xs truncate">{item.subject}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700">{item.entity}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700">

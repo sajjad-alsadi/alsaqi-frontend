@@ -102,22 +102,22 @@ const Reports: React.FC = () => {
             <BarChart3 size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('reports.title')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('reports.executiveSubtitle')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('reports.title')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('reports.executiveSubtitle')}</p>
           </div>
         </div>
         
         <div className="flex items-center gap-2 p-1.5 bg-slate-100/50 rounded-2xl border border-slate-100 shadow-sm">
           <button 
             onClick={() => setActiveSubTab('executive')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'executive' ? 'bg-white shadow-sm text-[var(--color-primary)]' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'executive' ? 'bg-white shadow-sm text-[var(--color-primary)]' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <LayoutDashboard size={16} />
             {t('reports.executiveReports')}
           </button>
           <button 
             onClick={() => setActiveSubTab('audit')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'audit' ? 'bg-white shadow-sm text-[var(--color-primary)]' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeSubTab === 'audit' ? 'bg-white shadow-sm text-[var(--color-primary)]' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <FileBarChart size={16} />
             {t('reports.auditReports')}
@@ -150,7 +150,7 @@ const Reports: React.FC = () => {
                       setIsScheduleModalOpen(true);
                       setError(null);
                     }}
-                    className="px-6 py-2.5 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] text-xs font-black uppercase tracking-wider hover:bg-[var(--color-border-soft)] transition-all flex items-center gap-2 border border-[var(--color-border-soft)]"
+                    className="px-6 py-2.5 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-main)] text-xs font-bold uppercase tracking-wider hover:bg-[var(--color-border-soft)] transition-all flex items-center gap-2 border border-[var(--color-border-soft)]"
                   >
                     <Calendar size={18} />
                     {t('reports.scheduleReport')}
@@ -175,7 +175,7 @@ const Reports: React.FC = () => {
                       <div className="w-10 h-10 rounded-xl bg-[var(--color-warning)]/10 text-[var(--color-warning)] flex items-center justify-center">
                         <LayoutDashboard size={20} />
                       </div>
-                      <h3 className="text-xl font-black text-[var(--color-text-main)]">{t('reports.riskDistribution')}</h3>
+                      <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('reports.riskDistribution')}</h3>
                     </div>
                     <div className="h-64 w-full min-w-0">
                       <ChartContainer debugName="RiskDistributionChart" minHeight={256}>

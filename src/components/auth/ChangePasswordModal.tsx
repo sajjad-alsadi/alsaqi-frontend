@@ -51,7 +51,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         )}
 
         <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">
             {t('newPassword')}
           </label>
           <div className="relative">
@@ -79,7 +79,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         </div>
 
         <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">
             {t('confirmPassword')}
           </label>
           <div className="relative">

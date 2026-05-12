@@ -40,15 +40,15 @@ const UserList: React.FC<UserListProps> = ({
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[var(--color-bg-soft)] rounded-xl flex items-center justify-center text-[var(--color-text-muted)] group-hover:bg-[var(--color-primary)]/10 group-hover:text-[var(--color-primary)] transition-colors duration-500 flex-shrink-0">
-                  <span className="text-base font-black uppercase">{user.name?.charAt(0)}</span>
+                  <span className="text-base font-bold uppercase">{user.name?.charAt(0)}</span>
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-black text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors truncate">{translateName(user.name)}</h3>
+                  <h3 className="text-sm font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors truncate">{translateName(user.name)}</h3>
                   <p className="text-[10px] font-bold text-[var(--color-text-muted)] truncate">@{user.username}</p>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider ${
                   user.status === 'Active' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 
                   user.status === 'Locked' ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]' : 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'
                 }`}>
@@ -58,7 +58,7 @@ const UserList: React.FC<UserListProps> = ({
                   <div className="flex flex-col items-end gap-0.5">
                     <button 
                       onClick={() => onUnlock(user.id)}
-                      className="flex items-center gap-1 text-[8px] font-black text-[var(--color-success)] hover:underline"
+                      className="flex items-center gap-1 text-[8px] font-bold text-[var(--color-success)] hover:underline"
                     >
                       <Unlock size={10} />
                       {t('userManagement.userCard.unlock')}
@@ -87,7 +87,7 @@ const UserList: React.FC<UserListProps> = ({
             </div>
 
             <div className="pt-3 border-t border-[var(--color-border-soft)] flex items-center justify-between">
-              <span className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.userCard.lastLogin')}</span>
+              <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.userCard.lastLogin')}</span>
               <span className="text-[9px] font-bold text-[var(--color-text-main)] opacity-70 truncate">{user.last_login ? formatDateTime(user.last_login) : t('userManagement.userCard.never')}</span>
             </div>
           </div>
@@ -118,7 +118,7 @@ const UserList: React.FC<UserListProps> = ({
             </div>
             <button 
               onClick={() => onSuspend(user.id)}
-              className={`text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all ${
+              className={`text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all ${
                 user.status === 'Active' ? 'text-[var(--color-warning)] hover:bg-[var(--color-warning)]/10' : 'text-[var(--color-success)] hover:bg-[var(--color-success)]/10'
               }`}
             >

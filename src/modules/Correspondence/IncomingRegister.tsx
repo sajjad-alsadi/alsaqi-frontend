@@ -236,16 +236,16 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">
                   {t('correspondence.seqNumber')}
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.letterNo')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.sender')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.status')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.priority')}</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.letterNo')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.sender')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.status')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('correspondence.priority')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -263,7 +263,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
                 </tr>
               ) : (Array.isArray(items) ? items : []).map((item) => (
                 <tr key={item.id} className="hover:bg-primary/5 transition-colors group">
-                  <td className="px-6 py-4 text-xs font-black text-slate-300 tracking-widest">{formatNumber(item.sequence_number)}</td>
+                  <td className="px-6 py-4 text-xs font-bold text-slate-300 tracking-widest">{formatNumber(item.sequence_number)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700">{formatNumber(item.letter_number) || '-'}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-700">
                     <div className="flex items-center gap-2">
@@ -275,11 +275,11 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-slate-700">{formatDate(item.letter_date)}</span>
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('correspondence.recPrefix')}{formatDate(item.receipt_date)}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('correspondence.recPrefix')}{formatDate(item.receipt_date)}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${getStatusColor(item.status)}`}>
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${getStatusColor(item.status)}`}>
                       {getStatusLabel(item.status)}
                     </span>
                   </td>

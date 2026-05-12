@@ -62,8 +62,8 @@ const SystemLogsManagement: React.FC = () => {
             <Terminal size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('SystemLogsManagement')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('SystemLogsManagementDesc')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('SystemLogsManagement')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('SystemLogsManagementDesc')}</p>
           </div>
         </div>
       </div>
@@ -77,7 +77,7 @@ const SystemLogsManagement: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-black transition-all ${
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
                 isActive 
                   ? 'bg-white text-[var(--color-primary)] shadow-sm shadow-slate-200 border border-slate-100' 
                   : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
@@ -107,14 +107,14 @@ const SystemLogsManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
                     <History size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('SystemLogsAudit')}</h3>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">{t('SystemLogsAudit')}</h3>
                   <p className="text-sm font-bold text-slate-400 leading-relaxed">
                     {t('systemLogsManagement.auditDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('audit')}
-                  className="mt-8 flex items-center gap-2 text-blue-500 font-black text-sm group/btn"
+                  className="mt-8 flex items-center gap-2 text-blue-500 font-bold text-sm group/btn"
                 >
                   {t('systemLogsManagement.openLog')} 
                   <Activity size={16} className="group-hover/btn:translate-x-1 transition-transform rtl:rotate-180" />
@@ -126,14 +126,14 @@ const SystemLogsManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 mb-6 group-hover:scale-110 transition-transform">
                     <AlertCircle size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('SystemLogsErrors')}</h3>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">{t('SystemLogsErrors')}</h3>
                   <p className="text-sm font-bold text-slate-400 leading-relaxed">
                     {t('systemLogsManagement.errorsDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('errors')}
-                  className="mt-8 flex items-center gap-2 text-rose-500 font-black text-sm group/btn"
+                  className="mt-8 flex items-center gap-2 text-rose-500 font-bold text-sm group/btn"
                 >
                   {t('systemLogsManagement.openLog')} 
                   <Activity size={16} className="group-hover/btn:translate-x-1 transition-transform rtl:rotate-180" />
@@ -148,10 +148,10 @@ const SystemLogsManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 mb-6 group-hover:scale-110 transition-transform">
                     <ShieldCheck size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('systemLogsManagement.systemHealth')}</h3>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">{t('systemLogsManagement.systemHealth')}</h3>
                   <p className="text-sm font-bold text-slate-400">{t('systemLogsManagement.serverStatus')}</p>
                   <div className="mt-6 flex items-end gap-2">
-                    <span className="text-5xl font-black tracking-tighter text-emerald-500">99.9%</span>
+                    <span className="text-5xl font-bold tracking-tighter text-emerald-500">99.9%</span>
                     <span className="text-slate-400 font-bold mb-1 text-xs uppercase tracking-widest">{t('systemLogsManagement.stable')}</span>
                   </div>
                 </div>

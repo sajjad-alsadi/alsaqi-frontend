@@ -247,10 +247,10 @@ const OrgStructure: React.FC = () => {
             <Network size={32} />
           </div>
           <div>
-            <h1 className="text-4xl font-black text-slate-800 tracking-tight">
+            <h1 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">
               {t('organizationalStructure')}
             </h1>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('orgStructureDesc')}</p>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('orgStructureDesc')}</p>
           </div>
         </div>
         
@@ -294,7 +294,7 @@ const OrgStructure: React.FC = () => {
             {treeLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-slate-400 font-bold">{t('loadingTree')}</p>
+                <p className="text-[var(--color-text-muted)] font-bold">{t('loadingTree')}</p>
               </div>
             ) : treeData.length > 0 ? (
               <div className="space-y-1">
@@ -418,10 +418,10 @@ const OrgStructure: React.FC = () => {
                 <div className="p-2 bg-green-100 text-green-700 rounded-xl">
                   <LayoutGrid size={24} />
                 </div>
-                <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full">{t('activeUnits')}</span>
+                <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{t('activeUnits')}</span>
               </div>
-              <h3 className="text-3xl font-black text-slate-900">{stats.activeUnits}</h3>
-              <p className="text-sm text-slate-400 font-bold">{t('totalActiveUnits')}</p>
+              <h3 className="text-3xl font-bold text-slate-900">{stats.activeUnits}</h3>
+              <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('totalActiveUnits')}</p>
             </div>
             
             <div className="glass-card p-6 space-y-2">
@@ -429,10 +429,10 @@ const OrgStructure: React.FC = () => {
                 <div className="p-2 bg-amber-100 text-amber-700 rounded-xl">
                   <User size={24} />
                 </div>
-                <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-full">{t('missingManager')}</span>
+                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">{t('missingManager')}</span>
               </div>
-              <h3 className="text-3xl font-black text-slate-900">{stats.noManager}</h3>
-              <p className="text-sm text-slate-400 font-bold">{t('unitsWithoutManager')}</p>
+              <h3 className="text-3xl font-bold text-slate-900">{stats.noManager}</h3>
+              <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('unitsWithoutManager')}</p>
             </div>
 
             <div className="glass-card p-6 space-y-2">
@@ -440,14 +440,14 @@ const OrgStructure: React.FC = () => {
                 <div className="p-2 bg-slate-100 text-slate-700 rounded-xl">
                   <AlertCircle size={24} />
                 </div>
-                <span className="text-[10px] font-black text-slate-600 bg-slate-50 px-2 py-1 rounded-full">{t('inactiveLabel')}</span>
+                <span className="text-[10px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-full">{t('inactiveLabel')}</span>
               </div>
-              <h3 className="text-3xl font-black text-slate-900">{stats.inactiveUnits}</h3>
-              <p className="text-sm text-slate-400 font-bold">{t('suspendedUnits')}</p>
+              <h3 className="text-3xl font-bold text-slate-900">{stats.inactiveUnits}</h3>
+              <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('suspendedUnits')}</p>
             </div>
 
             <div className="glass-card p-6 flex flex-col justify-center">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">{t('distributionByType')}</h4>
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">{t('distributionByType')}</h4>
               <div className="space-y-3">
                 {Object.entries(stats.byType).map(([type, count]) => (
                   <div key={type} className="space-y-1">
@@ -545,7 +545,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Hash size={12} />
               {t('unitCode')} *
             </label>
@@ -561,7 +561,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <LayoutGrid size={12} />
               {t('entityType')} *
             </label>
@@ -578,7 +578,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Info size={12} />
               {t('nameAr')} *
             </label>
@@ -592,7 +592,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Info size={12} />
               {t('nameEn')}
             </label>
@@ -605,7 +605,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Building2 size={12} />
               {t('parentUnit')}
             </label>
@@ -624,7 +624,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <User size={12} />
               {t('managerName')}
             </label>
@@ -637,7 +637,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <MapPin size={12} />
               {t('location')}
             </label>
@@ -650,7 +650,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Hash size={12} />
               {t('costCenter')}
             </label>
@@ -663,7 +663,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="col-span-1 md:col-span-2 space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Plus size={12} />
               {t('description')}
             </label>
@@ -675,7 +675,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               {t('status')}
             </label>
             <div className="flex items-center gap-4 mt-2">

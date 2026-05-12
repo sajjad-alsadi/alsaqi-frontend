@@ -84,8 +84,8 @@ export const AccessGate: React.FC<AccessGateProps> = ({
               <ShieldAlert size={32} />
             </div>
             <div>
-              <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('integrity.fraud')}</h2>
-              <p className="text-sm text-rose-600 font-black uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
+              <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.fraud')}</h2>
+              <p className="text-sm text-rose-600 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
                 <Lock size={14} />
                 {t('integrity.confidentialAccess')}
               </p>
@@ -102,7 +102,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
             <div className="w-24 h-24 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-10 text-rose-600 shadow-xl">
               <AlertCircle size={48} />
             </div>
-            <h3 className="text-3xl font-black text-slate-800 mb-6 tracking-tight">{t('integrity.accessRestricted')}</h3>
+            <h3 className="text-3xl font-bold text-slate-800 mb-6 tracking-tight">{t('integrity.accessRestricted')}</h3>
             <p className="text-slate-500 font-medium leading-relaxed mb-10">
               {t('integrity.accessRestrictedDesc')}
             </p>
@@ -137,13 +137,13 @@ export const AccessGate: React.FC<AccessGateProps> = ({
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <button 
                   onClick={() => setIsRequestModalOpen(true)}
-                  className="px-10 py-4 bg-rose-600 text-white font-black rounded-xl shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs"
+                  className="px-10 py-4 bg-rose-600 text-white font-bold rounded-xl shadow-2xl shadow-rose-200 hover:bg-rose-700 transition-all uppercase tracking-widest text-xs"
                 >
                   {t('integrity.requestAccess')}
                 </button>
                 <button 
                   onClick={() => setIsPolicyOpen(true)}
-                  className="px-10 py-4 bg-white text-slate-400 font-black rounded-xl border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-widest text-xs"
+                  className="px-10 py-4 bg-white text-slate-400 font-bold rounded-xl border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-widest text-xs"
                 >
                   {t('integrity.viewPolicy')}
                 </button>

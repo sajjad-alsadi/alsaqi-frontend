@@ -23,7 +23,7 @@ const ResetRequests: React.FC<ResetRequestsProps> = ({
           <Key size={24} />
         </div>
         <div>
-          <h3 className="text-2xl font-black text-[var(--color-text-main)]">{t('userManagement.resets.title')}</h3>
+          <h3 className="text-2xl font-bold text-[var(--color-text-main)]">{t('userManagement.resets.title')}</h3>
           <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('userManagement.resets.pendingRequests')}</p>
         </div>
       </div>
@@ -36,13 +36,13 @@ const ResetRequests: React.FC<ResetRequestsProps> = ({
         >
           <div className="flex items-center gap-3 text-[var(--color-success)]">
             <CheckCircle size={24} />
-            <h4 className="text-lg font-black">{t('userManagement.resets.passwordResetSuccess')}</h4>
+            <h4 className="text-lg font-bold">{t('userManagement.resets.passwordResetSuccess')}</h4>
           </div>
           <p className="text-sm text-[var(--color-success)] font-bold opacity-80">
             {t('userManagement.resets.tempPasswordGeneratedNote')}
           </p>
           <div className="flex items-center gap-4">
-            <div className="flex-1 bg-[var(--color-card)] p-4 rounded-2xl border border-[var(--color-success)]/20 font-mono text-2xl font-black text-center tracking-widest text-[var(--color-success)]">
+            <div className="flex-1 bg-[var(--color-card)] p-4 rounded-2xl border border-[var(--color-success)]/20 font-mono text-2xl font-bold text-center tracking-widest text-[var(--color-success)]">
               {tempPassword}
             </div>
             <button 
@@ -66,10 +66,10 @@ const ResetRequests: React.FC<ResetRequestsProps> = ({
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-[var(--color-bg-soft)] rounded-2xl flex items-center justify-center text-[var(--color-text-muted)] group-hover:bg-[var(--color-primary)]/10 group-hover:text-[var(--color-primary)] transition-colors">
-                <span className="text-lg font-black uppercase">{req.username?.charAt(0)}</span>
+                <span className="text-lg font-bold uppercase">{req.username?.charAt(0)}</span>
               </div>
               <div>
-                <h4 className="text-lg font-black text-[var(--color-text-main)]">@{req.username}</h4>
+                <h4 className="text-lg font-bold text-[var(--color-text-main)]">@{req.username}</h4>
                 <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-text-muted)]">
                   <Clock size={14} />
                   {new Date(req.created_at).toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}

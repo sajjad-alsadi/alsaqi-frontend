@@ -50,11 +50,11 @@ const SupportRequests: React.FC = () => {
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case 'pending':
-        return <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[var(--color-warning)]/10 text-[var(--color-warning)] flex items-center gap-1"><Clock size={12} /> {t('userManagement.supportRequests.pending')}</span>;
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--color-warning)]/10 text-[var(--color-warning)] flex items-center gap-1"><Clock size={12} /> {t('userManagement.supportRequests.pending')}</span>;
       case 'resolved':
-        return <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[var(--color-success)]/10 text-[var(--color-success)] flex items-center gap-1"><CheckCircle size={12} /> {t('userManagement.supportRequests.resolved')}</span>;
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--color-success)]/10 text-[var(--color-success)] flex items-center gap-1"><CheckCircle size={12} /> {t('userManagement.supportRequests.resolved')}</span>;
       case 'rejected':
-        return <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[var(--color-danger)]/10 text-[var(--color-danger)] flex items-center gap-1"><XCircle size={12} /> {t('userManagement.supportRequests.rejected')}</span>;
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--color-danger)]/10 text-[var(--color-danger)] flex items-center gap-1"><XCircle size={12} /> {t('userManagement.supportRequests.rejected')}</span>;
       default:
         return null;
     }
@@ -106,7 +106,7 @@ const SupportRequests: React.FC = () => {
       ) : filteredRequests.length === 0 ? (
         <div className="text-center py-16 bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] border-dashed">
           <MessageSquare size={48} className="mx-auto text-[var(--color-text-muted)] mb-4 opacity-30" />
-          <h3 className="text-lg font-black text-[var(--color-text-main)] mb-1">{t('userManagement.supportRequests.noRequests')}</h3>
+          <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-1">{t('userManagement.supportRequests.noRequests')}</h3>
           <p className="text-[var(--color-text-muted)] font-bold">{t('common.noDataDesc')}</p>
         </div>
       ) : (
@@ -121,7 +121,7 @@ const SupportRequests: React.FC = () => {
               <div className="flex flex-col lg:flex-row gap-6 justify-between">
                 <div className="space-y-4 flex-1">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-[10px] font-mono font-black text-[var(--color-text-muted)] bg-[var(--color-bg-soft)] px-2 py-1 rounded-md border border-[var(--color-border-soft)]">
+                    <span className="text-[10px] font-mono font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-soft)] px-2 py-1 rounded-md border border-[var(--color-border-soft)]">
                       {request.ticketId}
                     </span>
                     {getStatusBadge(request.status)}
@@ -137,8 +137,8 @@ const SupportRequests: React.FC = () => {
                         <User size={20} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('common.name')}</p>
-                        <p className="font-black text-[var(--color-text-main)]">{request.fullName}</p>
+                        <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('common.name')}</p>
+                        <p className="font-bold text-[var(--color-text-main)]">{request.fullName}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -146,8 +146,8 @@ const SupportRequests: React.FC = () => {
                         <Mail size={20} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('userManagement.form.contactInfo')}</p>
-                        <p className="font-black text-[var(--color-text-main)]">{request.contactInfo}</p>
+                        <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('userManagement.form.contactInfo')}</p>
+                        <p className="font-bold text-[var(--color-text-main)]">{request.contactInfo}</p>
                       </div>
                     </div>
                   </div>
@@ -155,7 +155,7 @@ const SupportRequests: React.FC = () => {
                   <div className="bg-[var(--color-bg-soft)] p-4 rounded-xl border border-[var(--color-border-soft)]">
                     <div className="flex items-center gap-2 mb-2">
                       <FileText size={16} className="text-[var(--color-text-muted)]" />
-                      <span className="font-black text-[var(--color-text-main)] text-sm uppercase tracking-widest">{getRequestTypeLabel(request.requestType)}</span>
+                      <span className="font-bold text-[var(--color-text-main)] text-sm uppercase tracking-widest">{getRequestTypeLabel(request.requestType)}</span>
                     </div>
                     <p className="text-[var(--color-text-muted)] text-sm font-bold whitespace-pre-wrap">{request.requestDetails || t('userManagement.supportRequests.noDetails')}</p>
                   </div>
@@ -165,14 +165,14 @@ const SupportRequests: React.FC = () => {
                   <div className="flex lg:flex-col gap-3 shrink-0 lg:w-40">
                     <button 
                       onClick={() => handleUpdateStatus(request.id!, 'resolved')}
-                      className="flex-1 lg:flex-none py-2.5 bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20 font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2"
+                      className="flex-1 lg:flex-none py-2.5 bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2"
                     >
                       <CheckCircle size={18} />
                       {t('userManagement.supportRequests.resolve')}
                     </button>
                     <button 
                       onClick={() => handleUpdateStatus(request.id!, 'rejected')}
-                      className="flex-1 lg:flex-none py-2.5 bg-[var(--color-danger)]/10 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/20 font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2"
+                      className="flex-1 lg:flex-none py-2.5 bg-[var(--color-danger)]/10 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2"
                     >
                       <XCircle size={18} />
                       {t('userManagement.supportRequests.reject')}

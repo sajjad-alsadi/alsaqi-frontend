@@ -189,8 +189,8 @@ const AuditEvidence: React.FC = () => {
             <FolderOpen size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('evidence.title')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('evidence.secureDocumentRepository')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('evidence.title')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('evidence.secureDocumentRepository')}</p>
           </div>
         </div>
         
@@ -245,12 +245,12 @@ const AuditEvidence: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="glass-card p-10 border-primary/20"
         >
-          <h3 className="text-xl font-black text-slate-800 mb-8">
+          <h3 className="text-xl font-bold text-slate-800 mb-8">
             {editingId ? (t('evidence.editEvidence')) : (t('evidence.uploadNewEvidence'))}
           </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.auditEngagement')}</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('evidence.auditEngagement')}</label>
               <select 
                 required
                 className="input-field"
@@ -265,7 +265,7 @@ const AuditEvidence: React.FC = () => {
             </div>
             
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.relatedFindingOptional')}</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('evidence.relatedFindingOptional')}</label>
               <select 
                 className="input-field"
                 value={formData.finding_id || ''}
@@ -279,7 +279,7 @@ const AuditEvidence: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.evidenceType')}</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('evidence.evidenceType')}</label>
               <select 
                 required
                 className="input-field"
@@ -295,19 +295,19 @@ const AuditEvidence: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                 {t('evidence.fileAttachment')} {editingId && (t('evidence.optional'))}
               </label>
               <input 
                 type="file" 
                 required={!editingId}
                 onChange={handleFileChange}
-                className="input-field file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                className="input-field file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
               />
             </div>
 
             <div className="md:col-span-2 space-y-3">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('evidence.description')}</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('evidence.description')}</label>
               <textarea 
                 required
                 className="input-field min-h-[100px]"
@@ -326,7 +326,7 @@ const AuditEvidence: React.FC = () => {
                   setFormData({ type: 'Document' });
                   setFile(null);
                 }} 
-                className="px-8 py-4 rounded-xl font-black text-slate-400 hover:bg-slate-100 transition-all uppercase tracking-widest text-xs"
+                className="px-8 py-4 rounded-xl font-bold text-slate-400 hover:bg-slate-100 transition-all uppercase tracking-widest text-xs"
               >
                 {t('common.cancel')}
               </button>
@@ -390,7 +390,7 @@ const AuditEvidence: React.FC = () => {
                 </div>
               </div>
 
-              <h3 className="text-lg font-black text-slate-800 mb-2 line-clamp-2" title={ev.file_name}>
+              <h3 className="text-lg font-bold text-slate-800 mb-2 line-clamp-2" title={ev.file_name}>
                 {ev.file_name}
               </h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">
@@ -434,7 +434,7 @@ const AuditEvidence: React.FC = () => {
             <div className="w-24 h-24 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-8 text-slate-300 shadow-inner">
               <AlertCircle size={48} />
             </div>
-            <h3 className="text-2xl font-black text-slate-800 mb-3 tracking-tight">{t('evidence.noEvidenceFound')}</h3>
+            <h3 className="text-2xl font-bold text-slate-800 mb-3 tracking-tight">{t('evidence.noEvidenceFound')}</h3>
             <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">{t('evidence.uploadDocumentsToBuildTrail')}</p>
           </div>
         )}

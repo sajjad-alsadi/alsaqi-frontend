@@ -58,8 +58,8 @@ const IntegrityManagement: React.FC = () => {
             <Scale size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('integrity.title')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('integrity.subTitle')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.title')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('integrity.subTitle')}</p>
           </div>
         </div>
       </div>
@@ -73,7 +73,7 @@ const IntegrityManagement: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-black transition-all ${
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
                 isActive 
                   ? 'bg-white text-[var(--color-primary)] shadow-sm shadow-slate-200' 
                   : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
@@ -103,14 +103,14 @@ const IntegrityManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 mb-6">
                     <Users size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('integrity.conflicts')}</h3>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">{t('integrity.conflicts')}</h3>
                   <p className="text-sm font-bold text-slate-400 leading-relaxed">
                     {t('integrity.conflictsDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('conflicts')}
-                  className="mt-8 flex items-center gap-2 text-[var(--color-primary)] font-black text-sm group"
+                  className="mt-8 flex items-center gap-2 text-[var(--color-primary)] font-bold text-sm group"
                 >
                   {t('integrity.goToLog')} 
                   <Plus size={16} className="group-hover:rotate-90 transition-transform" />
@@ -122,14 +122,14 @@ const IntegrityManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 mb-6">
                     <ShieldAlert size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('integrity.fraud')}</h3>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">{t('integrity.fraud')}</h3>
                   <p className="text-sm font-bold text-slate-400 leading-relaxed">
                     {t('integrity.fraudDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('fraud')}
-                  className="mt-8 flex items-center gap-2 text-rose-500 font-black text-sm group"
+                  className="mt-8 flex items-center gap-2 text-rose-500 font-bold text-sm group"
                 >
                   {t('integrity.goToLog')} 
                   <Plus size={16} className="group-hover:rotate-90 transition-transform" />
@@ -144,10 +144,10 @@ const IntegrityManagement: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
                     <Scale size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">{t('integrity.totalReports')}</h3>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">{t('integrity.totalReports')}</h3>
                   <p className="text-sm font-bold text-slate-400">{t('integrity.integrityActivity')} {getMonthName()} {new Date().getFullYear()}</p>
                   <div className="mt-6 flex items-end gap-2">
-                    <span className="text-5xl font-black tracking-tighter text-slate-800">
+                    <span className="text-5xl font-bold tracking-tighter text-slate-800">
                       {loading ? '...' : stats.summary.total}
                     </span>
                     <span className="text-slate-400 font-bold mb-1 text-xs uppercase tracking-widest">{t('integrity.activeStatus')}</span>

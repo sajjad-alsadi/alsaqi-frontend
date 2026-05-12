@@ -73,8 +73,8 @@ const Notifications: React.FC = () => {
             <Bell size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">{t('common.notifications')}</h2>
-            <p className="text-sm text-slate-400 font-bold">{t('common.stayUpdated')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight mb-2">{t('common.notifications')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('common.stayUpdated')}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -93,19 +93,19 @@ const Notifications: React.FC = () => {
           <div className="flex gap-2 p-1 bg-slate-100 rounded-xl w-fit">
             <button 
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${filter === 'all' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'all' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
             >
               {t('common.all')}
             </button>
             <button 
               onClick={() => setFilter('unread')}
-              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${filter === 'unread' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'unread' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
             >
               {t('common.unread')}
             </button>
             <button 
               onClick={() => setFilter('read')}
-              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${filter === 'read' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'read' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
             >
               {t('common.read')}
             </button>
@@ -133,7 +133,7 @@ const Notifications: React.FC = () => {
                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
                   <Bell size={40} />
                 </div>
-                <h3 className="text-xl font-black text-slate-800 mb-2">{t('common.noNotificationsFound')}</h3>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{t('common.noNotificationsFound')}</h3>
                 <p className="text-slate-400 text-sm font-bold">{t('common.tryAdjustingFilters')}</p>
               </motion.div>
             ) : (
@@ -153,7 +153,7 @@ const Notifications: React.FC = () => {
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1 pe-12">
-                        <span className={`text-xs font-black uppercase tracking-widest ${notification.status === 'Unread' ? 'text-primary' : 'text-slate-400'}`}>
+                        <span className={`text-xs font-bold uppercase tracking-widest ${notification.status === 'Unread' ? 'text-primary' : 'text-slate-400'}`}>
                           {getTranslatedNotificationModule(notification.related_module, t)}
                         </span>
                         <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
@@ -173,7 +173,7 @@ const Notifications: React.FC = () => {
                               e.stopPropagation();
                               notification.id && markAsRead(notification.id);
                             }}
-                            className="text-xs font-black text-primary hover:text-primary/80 uppercase tracking-wider flex items-center gap-1"
+                            className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-wider flex items-center gap-1"
                           >
                             <Check size={14} /> {t('common.markAsRead')}
                           </button>
@@ -186,7 +186,7 @@ const Notifications: React.FC = () => {
                               setIsDeleteModalOpen(true);
                             }
                           }}
-                          className="text-xs font-black text-slate-400 hover:text-rose-500 uppercase tracking-wider flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-xs font-bold text-slate-400 hover:text-rose-500 uppercase tracking-wider flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Trash2 size={14} /> {t('common.delete')}
                         </button>

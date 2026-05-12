@@ -46,8 +46,8 @@ const AuditFindings: React.FC = () => {
             <AlertTriangle size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('findings.title')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('findings.professionalFramework')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('findings.title')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('findings.professionalFramework')}</p>
           </div>
         </div>
         <motion.button 

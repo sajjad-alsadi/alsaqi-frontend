@@ -81,8 +81,8 @@ const AuditTrailModule: React.FC = () => {
             <History size={32} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{t('common.trail')}</h2>
-            <p className="text-sm text-slate-400 font-bold mt-2">{t('common.trailSubtitle')}</p>
+            <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.trail')}</h2>
+            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('common.trailSubtitle')}</p>
           </div>
         </div>
         
@@ -132,11 +132,11 @@ const AuditTrailModule: React.FC = () => {
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.timestamp_label')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.user_label')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.action_label')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.module')}</th>
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.details')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.timestamp_label')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.user_label')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.action_label')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.module')}</th>
+                <th className="px-10 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-start">{t('common.details')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -153,14 +153,14 @@ const AuditTrailModule: React.FC = () => {
                   </td>
                   <td className="px-10 py-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-[10px] font-black text-primary shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-[10px] font-bold text-primary shadow-sm">
                         {log.user.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-sm font-black text-slate-800">{translateName(log.user)}</span>
+                      <span className="text-sm font-bold text-slate-800">{translateName(log.user)}</span>
                     </div>
                   </td>
                   <td className="px-10 py-6">
-                    <span className={`inline-flex items-center px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                       (log.action || '').toLowerCase().includes('delete') ? 'bg-rose-100 text-rose-600' :
                       (log.action || '').toLowerCase().includes('created') ? 'bg-emerald-100 text-emerald-600' :
                       (log.action || '').toLowerCase().includes('failed') ? 'bg-rose-100 text-rose-600' : 'bg-primary/10 text-primary'
@@ -168,7 +168,7 @@ const AuditTrailModule: React.FC = () => {
                       {translateAction(log.action)}
                     </span>
                   </td>
-                  <td className="px-10 py-6 text-xs font-black text-slate-400 uppercase tracking-widest">
+                  <td className="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-widest">
                     {translateModule(log.module)}
                   </td>
                   <td className="px-10 py-6 text-sm font-bold text-slate-500 max-w-xs truncate" title={log.details}>
