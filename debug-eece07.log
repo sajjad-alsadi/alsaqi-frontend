@@ -1,0 +1,6 @@
+{"sessionId":"eece07","timestamp":1778588106493,"hypothesisId":"H0","location":"server.ts:bootstrap","message":"invoking_startServer","data":{"cwd":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi","dirname":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi"}}
+{"sessionId":"eece07","timestamp":1778588106502,"hypothesisId":"H3","location":"server.ts:startServer","message":"startServer_enter","data":{"nodeEnv":null,"hasGemini":false}}
+{"sessionId":"eece07","timestamp":1778588108693,"hypothesisId":"H1","location":"server.ts:startServer","message":"vite_ready","data":{"ok":true}}
+{"sessionId":"eece07","timestamp":1778588108697,"hypothesisId":"H2","location":"server.ts:startServer","message":"before_listen","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778588108705,"hypothesisId":"H2","location":"server.ts:listen","message":"listening","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778588111819,"hypothesisId":"H4","location":"server.ts:runDbMigrations","message":"db_ready","data":{"attempts":1,"isDbReady":true}}
