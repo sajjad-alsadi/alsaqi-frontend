@@ -90,22 +90,22 @@ const Notifications: React.FC = () => {
 
       <div className="glass-card p-6">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex gap-2 p-1 bg-[var(--color-bg-main)] rounded-xl w-fit">
+          <div className="flex gap-2 p-1.5 bg-[var(--color-card)] rounded-2xl w-fit border border-[var(--color-border-soft)]">
             <button 
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'all' ? 'bg-[var(--color-card)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${filter === 'all' ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'}`}
             >
               {t('common.all')}
             </button>
             <button 
               onClick={() => setFilter('unread')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'unread' ? 'bg-[var(--color-card)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${filter === 'unread' ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'}`}
             >
               {t('common.unread')}
             </button>
             <button 
               onClick={() => setFilter('read')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'read' ? 'bg-[var(--color-card)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)]'}`}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${filter === 'read' ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'}`}
             >
               {t('common.read')}
             </button>
@@ -222,7 +222,7 @@ const Notifications: React.FC = () => {
                 setIsDeleteModalOpen(false);
                 setNotificationToDelete(null);
               }}
-              className="px-6 py-3 rounded-2xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors"
+              className="btn-secondary"
             >
               {t('common.cancel')}
             </button>
@@ -234,7 +234,7 @@ const Notifications: React.FC = () => {
                   setNotificationToDelete(null);
                 }
               }}
-              className="px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200"
+              className="btn-danger"
             >
               {t('delete')}
             </button>

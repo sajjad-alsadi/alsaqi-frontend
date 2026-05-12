@@ -67,12 +67,12 @@ const FraudLog: React.FC = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-2xl shadow-rose-200">
+          <div className="w-16 h-16 bg-[var(--color-danger)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-danger)]/20">
             <ShieldAlert size={32} />
           </div>
           <div>
             <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.fraud')}</h2>
-            <p className="text-sm text-rose-600 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
+            <p className="text-sm text-[var(--color-danger)] font-semibold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
               <Lock size={14} />
               {t('integrity.confidentialAccess')}
             </p>
@@ -89,7 +89,7 @@ const FraudLog: React.FC = () => {
           {isManager && (
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="btn-primary bg-rose-600 hover:bg-rose-700 flex items-center gap-2"
+              className="btn-danger flex items-center gap-2"
             >
               <Plus size={20} />
               {t('integrity.reportCase')}

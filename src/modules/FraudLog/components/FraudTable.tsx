@@ -66,9 +66,9 @@ export const FraudTable: React.FC<FraudTableProps> = ({ cases }) => {
                 <td className="p-6 text-xs font-bold text-[var(--color-text-main)] whitespace-nowrap">{formatDate(item.detectionDate)}</td>
                 <td className="p-6">
                   <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest leading-none ${
-                    item.riskCategory === 'Financial' ? 'bg-rose-100 text-rose-800' :
-                    item.riskCategory === 'Operational' ? 'bg-amber-100 text-amber-800' :
-                    item.riskCategory === 'Compliance' ? 'bg-blue-100 text-blue-800' :
+                    item.riskCategory === 'Financial' ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]' :
+                    item.riskCategory === 'Operational' ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' :
+                    item.riskCategory === 'Compliance' ? 'bg-[var(--color-info)]/10 text-[var(--color-info)]' :
                     'bg-purple-100 text-purple-800'
                   }`}>
                     {getCategoryLabel(item.riskCategory)}
@@ -90,13 +90,13 @@ export const FraudTable: React.FC<FraudTableProps> = ({ cases }) => {
                     </button>
                   </div>
                 </td>
-                <td className="p-6 text-sm font-bold text-rose-700 whitespace-nowrap">{item.financialImpact}</td>
+                <td className="p-6 text-sm font-bold text-[var(--color-danger)] whitespace-nowrap">{item.financialImpact}</td>
                 <td className="p-6">
                   <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${
-                    item.status === 'Open' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-                    item.status === 'Under Investigation' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
-                    item.status.includes('Convicted') ? 'bg-rose-100 text-rose-800 border border-rose-300' :
-                    'bg-slate-200 text-[var(--color-text-main)] border border-[var(--color-border-strong)]'
+                    item.status === 'Open' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20' :
+                    item.status === 'Under Investigation' ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20' :
+                    item.status.includes('Convicted') ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/20' :
+                    'bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)]'
                   }`}>
                     {getStatusLabel(item.status)}
                   </span>

@@ -40,15 +40,15 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
       </div>
       
       <div className="flex flex-col md:flex-row md:items-center gap-3">
-        <div className="flex bg-[var(--color-bg-soft)] backdrop-blur-sm p-1 rounded-xl border border-[var(--color-border-soft)] shadow-inner overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex bg-[var(--color-card)] backdrop-blur-sm p-1.5 rounded-2xl border border-[var(--color-border-soft)] overflow-x-auto no-scrollbar scroll-smooth">
           {Object.values(UserManagementTab).map((tab) => (
             <button 
               key={tab}
               onClick={() => onTabChange(tab)}
-              className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              className={`px-3 py-2 rounded-xl text-[9px] font-semibold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === tab 
-                  ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm ring-1 ring-[var(--color-border-soft)]' 
-                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-card)]/30'
+                  ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' 
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'
               }`}
             >
               {t(`userManagement.tabs.${tab}`)}

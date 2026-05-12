@@ -65,7 +65,7 @@ const IntegrityManagement: React.FC = () => {
       </div>
 
       {/* Modern Tabs */}
-      <div className="flex flex-wrap gap-2 p-1.5 bg-[var(--color-bg-main)]/50 rounded-2xl w-fit self-start">
+      <div className="flex flex-wrap gap-2 p-1.5 bg-[var(--color-card)] rounded-2xl w-fit self-start border border-[var(--color-border-soft)]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -73,13 +73,13 @@ const IntegrityManagement: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 isActive 
-                  ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm shadow-[var(--color-border-soft)]' 
-                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-card)]/50'
+                  ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' 
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'
               }`}
             >
-              <Icon size={18} className={isActive ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'} />
+              <Icon size={18} className={isActive ? 'text-white' : ''} />
               {tab.label}
             </button>
           );
@@ -98,45 +98,45 @@ const IntegrityManagement: React.FC = () => {
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Quick Stats Bento Grid */}
-              <div className="p-8 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl shadow-sm flex flex-col justify-between">
+              <div className="interactive-card p-8 flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--color-warning)]/10 flex items-center justify-center text-[var(--color-warning)] mb-6">
                     <Users size={24} />
                   </div>
                   <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('integrity.conflicts')}</h3>
-                  <p className="text-sm font-bold text-[var(--color-text-muted)] leading-relaxed">
+                  <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
                     {t('integrity.conflictsDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('conflicts')}
-                  className="mt-8 flex items-center gap-2 text-[var(--color-primary)] font-bold text-sm group"
+                  className="mt-8 flex items-center gap-2 text-[var(--color-primary)] font-semibold text-sm group cursor-pointer"
                 >
                   {t('integrity.goToLog')} 
                   <Plus size={16} className="group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
 
-              <div className="p-8 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl shadow-sm flex flex-col justify-between">
+              <div className="interactive-card p-8 flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--color-danger)]/10 flex items-center justify-center text-[var(--color-danger)] mb-6">
                     <ShieldAlert size={24} />
                   </div>
                   <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('integrity.fraud')}</h3>
-                  <p className="text-sm font-bold text-[var(--color-text-muted)] leading-relaxed">
+                  <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
                     {t('integrity.fraudDesc')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('fraud')}
-                  className="mt-8 flex items-center gap-2 text-rose-500 font-bold text-sm group"
+                  className="mt-8 flex items-center gap-2 text-[var(--color-danger)] font-semibold text-sm group cursor-pointer"
                 >
                   {t('integrity.goToLog')} 
                   <Plus size={16} className="group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
 
-              <div className="p-8 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl shadow-sm flex flex-col justify-between group overflow-hidden relative">
+              <div className="interactive-card p-8 flex flex-col justify-between group overflow-hidden relative">
                 <div className="absolute top-0 end-0 p-8 opacity-[0.03] pointer-events-none">
                   <Scale size={120} className="text-[var(--color-primary)]" />
                 </div>
@@ -145,20 +145,20 @@ const IntegrityManagement: React.FC = () => {
                     <Scale size={24} />
                   </div>
                   <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('integrity.totalReports')}</h3>
-                  <p className="text-sm font-bold text-[var(--color-text-muted)]">{t('integrity.integrityActivity')} {getMonthName()} {new Date().getFullYear()}</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">{t('integrity.integrityActivity')} {getMonthName()} {new Date().getFullYear()}</p>
                   <div className="mt-6 flex items-end gap-2">
                     <span className="text-5xl font-bold tracking-tighter text-[var(--color-text-main)]">
                       {loading ? '...' : stats.summary.total}
                     </span>
-                    <span className="text-[var(--color-text-muted)] font-bold mb-1 text-xs uppercase tracking-widest">{t('integrity.activeStatus')}</span>
+                    <span className="text-[var(--color-text-muted)] font-semibold mb-1 text-xs uppercase tracking-widest">{t('integrity.activeStatus')}</span>
                   </div>
                 </div>
                 <div className="relative z-10 space-y-3 mt-8 pt-6 border-t border-[var(--color-border-soft)]">
-                  <div className="flex justify-between items-center text-xs font-bold text-[var(--color-text-muted)]">
-                    <span className="text-[var(--color-text-muted)]">{t('integrity.conflictOfInterestLabel')}</span>
+                  <div className="flex justify-between items-center text-xs font-semibold text-[var(--color-text-muted)]">
+                    <span>{t('integrity.conflictOfInterestLabel')}</span>
                     <span>{loading ? '...' : stats.conflicts.total} {t('integrity.disclosures')}</span>
                   </div>
-                  <div className="flex justify-between items-center text-xs font-bold text-rose-500">
+                  <div className="flex justify-between items-center text-xs font-semibold text-[var(--color-danger)]">
                     <span>{t('integrity.fraudLabel')}</span>
                     <span>{loading ? '...' : stats.fraud.total} {t('integrity.cases')}</span>
                   </div>

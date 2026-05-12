@@ -129,9 +129,9 @@ const ConflictOfInterest: React.FC = () => {
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{coi.related_party}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest ${
-                      coi.status === 'Resolved' ? 'bg-emerald-100 text-emerald-600' :
-                      coi.status === 'Reviewed' ? 'bg-blue-100 text-blue-600' :
-                      'bg-amber-100 text-amber-600'
+                      coi.status === 'Resolved' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' :
+                      coi.status === 'Reviewed' ? 'bg-[var(--color-info)]/10 text-[var(--color-info)]' :
+                      'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'
                     }`}>
                       {coi.status === 'Resolved' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
                       {coi.status === 'Resolved' ? t('integrity.resolved') : coi.status === 'Reviewed' ? t('integrity.reviewed') : t('integrity.pending')}

@@ -80,12 +80,12 @@ export const AccessGate: React.FC<AccessGateProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-2xl shadow-rose-200">
+            <div className="w-16 h-16 bg-[var(--color-danger)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-danger)]/20">
               <ShieldAlert size={32} />
             </div>
             <div>
               <h2 className="text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.fraud')}</h2>
-              <p className="text-sm text-rose-600 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
+              <p className="text-sm text-[var(--color-danger)] font-semibold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
                 <Lock size={14} />
                 {t('integrity.confidentialAccess')}
               </p>
@@ -161,7 +161,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
           <form onSubmit={(e) => { e.preventDefault(); submitAccessRequest(e); }} className="space-y-6">
             <div className="bg-[var(--color-primary-light)] p-4 rounded-lg flex items-start gap-3">
               <AlertCircle className="text-[var(--color-primary)] shrink-0 mt-0.5" size={20} />
-              <p className="text-sm text-blue-700">
+              <p className="text-sm text-[var(--color-primary)]">
                 {t('integrity.accessMonitoredDesc')}
               </p>
             </div>
@@ -420,7 +420,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               ) : (
                 <button 
                   onClick={onClose}
-                  className="px-6 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition-colors font-medium"
+                  className="px-6 py-2 bg-[var(--color-text-main)] text-[var(--color-bg-main)] rounded-lg hover:opacity-90 transition-colors font-medium"
                 >
                   {t('common.cancel')}
                 </button>
