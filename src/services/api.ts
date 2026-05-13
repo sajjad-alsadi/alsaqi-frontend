@@ -34,9 +34,10 @@ api.interceptors.response.use(
     const originalRequest = config;
     
     // Don't log 401 on GET /profile or GET /auth/me as it's expected during initial session check
-    const isSessionCheck = response?.status === 401 && config?.method === 'get' && (config?.url?.includes('/profile') || config?.url?.includes('/auth/me'));
+    const isSessionCheck = (response?.status === 401 || response?.status === 403) && config?.method === 'get' && (config?.url?.includes('/profile') || config?.url?.includes('/auth/me'));
     const isRefreshRequest = config?.url?.includes('/auth/refresh');
     const isLoginRequest = config?.url?.includes('/auth/login');
+    const isAuthRequest = config?.url?.includes('/auth/');
     
     if (!isSessionCheck && response?.status === 401 && !isRefreshRequest && !isLoginRequest) {
       if (isRefreshing) {
@@ -86,13 +87,12 @@ api.interceptors.response.use(
       } else if (response?.status === 403) {
         const errorCode = typeof errorData === 'object' ? errorData.code : response?.data?.code;
         if (errorCode === 'PASSWORD_CHANGE_REQUIRED') {
-          // Force logout so user goes back to login page where the change password modal will appear
-          toast.error(translatedMsg || i18n.t('passwordChangeRequired'));
-          if (window.location.pathname !== '/login') {
-            // Clear auth state and redirect to login
+          // Don't show toast for auth requests (handled by the calling component)
+          if (!isAuthRequest && window.location.pathname !== '/login' && window.location.pathname !== '/') {
+            toast.error(translatedMsg || i18n.t('passwordChangeRequired'));
             window.location.href = '/login';
           }
-        } else {
+        } else if (!isAuthRequest) {
           toast.error(translatedMsg || i18n.t('accessDenied'));
         }
       } else if (response?.status === 404) {

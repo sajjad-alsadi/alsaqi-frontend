@@ -33,7 +33,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     if (e.key !== 'Tab' || !modalRef.current) return;
 
     const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button:not([tabindex="-1"]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
@@ -51,16 +51,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     }
   }, [onClose]);
 
-  // Save previous focus and restore on close
+  // Initial focus when modal opens (runs only once per open)
+  const hasAutoFocused = useRef(false);
   useEffect(() => {
-    if (isOpen) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
-      document.addEventListener('keydown', handleKeyDown);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-      // Focus the modal after animation
+    if (isOpen && !hasAutoFocused.current) {
+      hasAutoFocused.current = true;
       setTimeout(() => {
-        // Prefer focusing the first input/textarea over buttons (like close button)
         const firstInput = modalRef.current?.querySelector<HTMLElement>(
           'input, select, textarea'
         );
@@ -68,11 +64,23 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
           firstInput.focus();
         } else {
           const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            'button:not([tabindex="-1"]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
           );
           firstFocusable?.focus();
         }
       }, 100);
+    }
+    if (!isOpen) {
+      hasAutoFocused.current = false;
+    }
+  }, [isOpen]);
+
+  // Keydown listener and body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {

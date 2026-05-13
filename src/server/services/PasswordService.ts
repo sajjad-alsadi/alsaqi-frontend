@@ -65,7 +65,7 @@ export class PasswordService {
   }
 
   static async changePassword(userId: string, newPassword: string) {
-    const user = await db.prepare("SELECT password, session_version, username, role FROM users WHERE id = ?").get(userId) as any;
+    const user = await db.prepare("SELECT id, password, session_version, username, role FROM users WHERE id = ?").get(userId) as any;
 
     if (!user) throw new NotFoundError("User not found");
 

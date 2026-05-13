@@ -34,6 +34,8 @@ export const translateError = (error: string | { message?: string; error?: strin
     'Invalid token': t('sessionExpired'),
     'User not found': t('failedLogin'),
     'Password change required': t('passwordChangeRequired'),
+    'New password cannot be the same as the current password': t('auth.cannotUseSamePassword'),
+    'Password has been used previously. Please choose a different one.': t('auth.passwordUsedBefore'),
     'Forbidden: Insufficient permissions': t('forbidden'),
     'An unexpected error occurred': t('errorOccurred'),
     'Missing required fields': t('validationErrors.required'),

@@ -50,7 +50,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       <form onSubmit={onSubmit} className="space-y-6" noValidate>
         <div className="p-4 bg-yellow-50 text-yellow-800 rounded-xl flex items-start gap-3 border border-yellow-100 shadow-sm">
           <ShieldCheck size={20} className="shrink-0 mt-0.5" />
-          <p className="text-sm font-bold leading-relaxed">{t('passwordChangeRequired')}</p>
+          <div>
+            <p className="text-sm font-bold leading-relaxed">{t('passwordChangeRequired')}</p>
+            <p className="text-xs mt-1 opacity-80">{t('auth.doNotReuseTempPassword')}</p>
+          </div>
         </div>
 
         {error && (

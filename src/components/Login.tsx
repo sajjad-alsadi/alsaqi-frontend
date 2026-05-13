@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import api from '../services/api';
 import { loginUser } from '../services/authService';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
@@ -23,11 +22,14 @@ const Login: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [changeError, setChangeError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [resetStatus, setResetStatus] = useState<ResetStatus>(ResetStatus.NONE);
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [pendingUser, setPendingUser] = useState<any>(null);
 
   React.useEffect(() => {
     try {
@@ -46,6 +48,8 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Don't process login if change password modal is open
+    if (showChangeModal) return;
     setError('');
     setSuccess('');
     setLoading(true);
@@ -56,6 +60,10 @@ const Login: React.FC = () => {
       if (result && result.user) {
         // Check if user needs to change password before granting access
         if (result.user.requires_password_change) {
+          setError('');
+          setChangeError('');
+          setPendingToken(result.token);
+          setPendingUser(result.user);
           setShowChangeModal(true);
           setLoading(false);
           return;
@@ -80,40 +88,56 @@ const Login: React.FC = () => {
 
   const handleChangeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
     if (newPassword !== confirmPassword) {
-      setError(t('auth.passwordMismatch'));
+      setChangeError(t('auth.passwordMismatch'));
       return;
     }
     if (newPassword.length < 8) {
-      setError(t('auth.passwordTooShort'));
+      setChangeError(t('auth.passwordTooShort'));
+      return;
+    }
+    if (!pendingToken) {
+      setChangeError(t('auth.errorChangingPassword'));
       return;
     }
 
     setLoading(true);
+    setChangeError('');
     try {
-      // First login with temp password to get token
-      const loginRes = await api.post('/auth/login', { usernameOrEmail: username, password });
-      const loginData = loginRes.data;
-      
-      const res = await api.post('/auth/change-password', 
-        { newPassword },
-        { headers: { 'Authorization': `Bearer ${loginData.token}` } }
-      );
+      // Use the token from the initial login (no need to login again)
+      const changeRes = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pendingToken}`
+        },
+        body: JSON.stringify({ newPassword })
+      });
+      const changeData = await changeRes.json();
 
-      const data = res.data;
+      if (!changeRes.ok) {
+        const errorMsg = typeof changeData.error === 'object' ? changeData.error.message : (changeData.error || '');
+        throw new Error(errorMsg || 'Failed to change password');
+      }
 
       setSuccess(t('auth.passwordChanged'));
       setShowChangeModal(false);
-      // Use the new token returned by the server which has the updated session version
-      login({ ...loginData.user, requires_password_change: false }, data.token);
+      login({ ...(pendingUser || {}), requires_password_change: false }, changeData.token);
     } catch (err: any) {
-      const apiError = err.response?.data?.error;
-      if (typeof apiError === 'string') {
-        setError(apiError);
-      } else if (apiError && typeof apiError === 'object') {
-        setError(apiError.message || 'Error changing password');
+      const errorMessage = err.message || '';
+      
+      if (errorMessage.includes('same as the current password')) {
+        setChangeError(t('auth.cannotUseSamePassword'));
+      } else if (errorMessage.includes('used previously')) {
+        setChangeError(t('auth.passwordUsedBefore'));
+      } else if (errorMessage.includes('Password change required')) {
+        setChangeError(t('auth.passwordChangeRequiredError'));
+      } else if (errorMessage && errorMessage !== 'Failed to change password') {
+        setChangeError(errorMessage);
       } else {
-        setError('Error changing password');
+        setChangeError(t('auth.errorChangingPassword'));
       }
     } finally {
       setLoading(false);
@@ -174,15 +198,18 @@ const Login: React.FC = () => {
       <ChangePasswordModal
         isOpen={showChangeModal}
         onClose={() => {
-          // Don't allow closing if password change is required (forced change)
-          // User must change password to proceed
+          // Reset state and go back to login form
+          setShowChangeModal(false);
+          setNewPassword('');
+          setConfirmPassword('');
+          setChangeError('');
         }}
         onSubmit={handleChangeSubmit}
         newPassword={newPassword}
         setNewPassword={setNewPassword}
         confirmPassword={confirmPassword}
         setConfirmPassword={setConfirmPassword}
-        error={error}
+        error={changeError}
         loading={loading}
       />
     </div>
