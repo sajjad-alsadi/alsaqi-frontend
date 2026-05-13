@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAppContext } from '../context/AppContext';
-import api from '../services/api';
+import { useAppContext } from '../../context/AppContext';
+import api from '../../services/api';
 import { useTranslation } from 'react-i18next';
 import { 
   User, Lock, Settings as SettingsIcon, Shield, 
   Camera, Check, AlertCircle, LogOut, Globe, 
   Bell, Layout as LayoutIcon, Info, X, Sun
 } from 'lucide-react';
-import { Language } from '../constants';
+import { Language } from '../../constants';
 import { motion, AnimatePresence } from 'motion/react';
-import AboutSection from '../components/AboutSection';
-import PDFSettingsSection from '../components/PDFSettingsSection';
-import { useDepartments } from '../hooks/useDepartments';
-import { PdfTemplateManagement } from '../components/PdfTemplateManagement';
+import AboutSection from '../../components/AboutSection';
+import PDFSettingsSection from '../../components/PDFSettingsSection';
+import { useDepartments } from '../../hooks/useDepartments';
+import { PdfTemplateManagement } from '../../components/PdfTemplateManagement';
 
 const Settings: React.FC = () => {
   const { user, token, language, setLanguage, theme, setTheme, dashboardLayout, setDashboardLayout, updateUser } = useAppContext();

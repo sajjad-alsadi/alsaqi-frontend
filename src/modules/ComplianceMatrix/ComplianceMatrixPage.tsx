@@ -7,9 +7,9 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
-import api from '../services/api';
-import Modal from '../components/Modal';
-import { useDepartments } from '../hooks/useDepartments';
+import api from '../../services/api';
+import Modal from '../../components/Modal';
+import { useDepartments } from '../../hooks/useDepartments';
 import toast from 'react-hot-toast';
 
 // --- Types ---

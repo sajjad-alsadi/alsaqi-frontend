@@ -38,8 +38,8 @@ export class AuthService {
           try {
             const admins = await db.prepare("SELECT id FROM users WHERE role = 'Admin' AND status = 'active'").all() as any[];
             for (const admin of admins) {
-              await db.prepare("INSERT INTO notifications (user_id, event_type, description, related_module, link, status) VALUES (?::uuid, ?::text, ?::text, ?::text, ?::text, 'Unread')")
-                .run(admin.id, 'Security', `Account "${user.username}" locked after 5 failed login attempts (IP: ${ipAddress || 'Unknown'})`, 'Security', '/users');
+              await db.prepare("INSERT INTO notifications (user_id, event_type, description, related_module, link, status, actor_id, entity_type) VALUES (?::uuid, ?::text, ?::text, ?::text, ?::text, 'Unread', ?::uuid, 'user')")
+                .run(admin.id, 'account_locked', `Account "${user.username}" locked after 5 failed login attempts (IP: ${ipAddress || 'Unknown'})`, 'Security', '/users', user.id);
             }
           } catch (notifErr) {
             console.error("[AuthService] Failed to send lockout notification:", notifErr);

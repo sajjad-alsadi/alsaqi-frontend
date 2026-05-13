@@ -108,7 +108,9 @@ const AuditTasksModule: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['audit-tasks'] });
     } catch (err: any) {
       console.error(err);
-      toast.error(err.response?.data?.error || t('errorOccurred'));
+      const apiError = err.response?.data?.error;
+      const errorMsg = typeof apiError === 'string' ? apiError : (apiError?.message || t('errorOccurred'));
+      toast.error(errorMsg);
     }
   };
 

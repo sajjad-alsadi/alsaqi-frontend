@@ -81,6 +81,34 @@ export const createUserRoutes = (
     // Log critical changes
     if (oldUser.role !== role || oldUser.status !== status || oldUser.access_scope !== access_scope) {
       await UserService.logPermissionChange(id, (req as any).user.id, oldUser.role, role || oldUser.role, "Profile update");
+      
+      // Notify the affected user about permission change
+      try {
+        const { NotificationService } = await import('../services/NotificationService');
+        const actorName = (req as any).user.name || (req as any).user.username;
+        let changeDesc = '';
+        if (oldUser.role !== role) changeDesc += `الدور: ${oldUser.role} → ${role}. `;
+        if (oldUser.status !== status) changeDesc += `الحالة: ${oldUser.status} → ${status}. `;
+        if (oldUser.access_scope !== access_scope) changeDesc += `نطاق الوصول تغيّر. `;
+        
+        await NotificationService.create(
+          id,
+          'permission_changed',
+          `تم تغيير صلاحياتك بواسطة ${actorName}. ${changeDesc}`,
+          'Security',
+          '/settings',
+          {
+            actorId: (req as any).user.id,
+            entityId: id,
+            entityType: 'user',
+            title: 'تغيير صلاحيات',
+            wss: (req.app as any).wss,
+            data: { old_role: oldUser.role, new_role: role, old_status: oldUser.status, new_status: status }
+          }
+        );
+      } catch (e) {
+        console.error("[Users] Permission change notification failed:", e);
+      }
     }
 
     invalidateUserCache(id);

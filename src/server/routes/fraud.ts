@@ -39,7 +39,7 @@ export const createFraudRoutes = (db: any, authenticate: any, authorize: any, lo
     
     await Promise.all(
       admins.map(admin => 
-        createNotification(admin.id, "Access Request", `${userName} requested access to Fraud Log`, "Fraud Log", "/fraud-log")
+        createNotification(admin.id, "access_requested", `${userName} requested access to Fraud Log`, "Fraud Log", "/fraud-log", { actorId: userId, wss: (req.app as any).wss })
       )
     );
 
@@ -74,7 +74,7 @@ export const createFraudRoutes = (db: any, authenticate: any, authorize: any, lo
     const request = await FraudService.approveRequest(id, duration, responderId);
 
     // Notify User
-    await createNotification(request.user_id, "Access Approved", "Your access request to Fraud Log has been approved.", "Fraud Log", "/fraud-log");
+    await createNotification(request.user_id, "access_approved", "Your access request to Fraud Log has been approved.", "Fraud Log", "/fraud-log", { actorId: typedReq.user.id, wss: (req.app as any).wss });
 
     await AuthService.logAudit(typedReq.user.username, "Approve Access", "Fraud Log", `Approved access for user ID ${request.user_id} for ${duration} days`);
 
@@ -94,7 +94,7 @@ export const createFraudRoutes = (db: any, authenticate: any, authorize: any, lo
     const request = await FraudService.rejectRequest(id, reason, responderId);
 
     // Notify User
-    await createNotification(request.user_id, "Access Rejected", `Your access request to Fraud Log was rejected: ${reason}`, "Fraud Log", "/fraud-log");
+    await createNotification(request.user_id, "access_rejected", `Your access request to Fraud Log was rejected: ${reason}`, "Fraud Log", "/fraud-log", { actorId: typedReq.user.id, wss: (req.app as any).wss });
 
     await AuthService.logAudit(typedReq.user.username, "Reject Access", "Fraud Log", `Rejected access for user ID ${request.user_id}`);
 

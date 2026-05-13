@@ -120,7 +120,51 @@ export const createCrudRoutes = (
       }
       
       await AuthService.logAudit(typedReq.user.username, `Created ${tableName}`, routeName, JSON.stringify(body));
-      await createNotification('all', 'Created', `New record in ${tableName}`, routeName, `/${routeName}`);
+      
+      // Targeted notification based on module type
+      const actorId = typedReq.user?.id;
+      const wss = (req.app as any).wss;
+      const notifyOptions = { actorId, entityId: result?.id, entityType: tableName, wss };
+      
+      // Determine who to notify based on the table/module
+      let targetUsers: string | string[] | 'all' = 'all';
+      let notifType = 'record_created';
+      let notifMessage = `New record in ${tableName}`;
+      let notifTitle: string | undefined;
+      
+      if (tableName === 'risk_register' && body.owner) {
+        // Notify risk owner + admins
+        const { NotificationService: NS } = await import('../services/NotificationService');
+        const ownerId = await NS.getUserIdByName(body.owner);
+        const adminIds = await NS.getAdminIds();
+        targetUsers = [...new Set([...(ownerId ? [ownerId] : []), ...adminIds])];
+        notifType = 'risk_added';
+        notifMessage = `تم إضافة خطر جديد: ${body.description || body.risk_id || ''}`;
+        notifTitle = 'خطر جديد';
+      } else if (tableName === 'recommendations' && body.responsible_person_id) {
+        targetUsers = body.responsible_person_id;
+        notifType = 'recommendation_added';
+        notifMessage = `تمت إضافة توصية جديدة مسندة إليك`;
+        notifTitle = 'توصية جديدة';
+      } else if (tableName === 'audit_tasks' && body.assigned_to) {
+        targetUsers = body.assigned_to;
+        notifType = 'task_assigned';
+        notifMessage = `تم تعيين مهمة جديدة لك: ${body.title || 'مهمة'}`;
+        notifTitle = 'مهمة جديدة لك';
+      } else if (tableName === 'audit_findings') {
+        // Notify admins for new findings
+        const { NotificationService: NS } = await import('../services/NotificationService');
+        targetUsers = await NS.getAdminIds();
+        notifType = 'finding_added';
+        notifMessage = `تم إضافة ملاحظة تدقيق جديدة: ${body.title || ''}`;
+        notifTitle = 'ملاحظة تدقيق جديدة';
+      } else if (tableName === 'audit_evidence') {
+        notifType = 'evidence_uploaded';
+        notifMessage = `تم رفع دليل جديد: ${body.description || body.file_name || ''}`;
+        notifTitle = 'دليل جديد';
+      }
+      
+      await createNotification(targetUsers, notifType, notifMessage, routeName, `/${routeName}`, { ...notifyOptions, title: notifTitle });
 
       res.json(result);
     }));

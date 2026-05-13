@@ -6,11 +6,11 @@ import {
   Filter, AlertCircle, Network
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import api from '../services/api';
-import { useDepartments, Department } from '../hooks/useDepartments';
-import Modal from '../components/Modal';
+import api from '../../services/api';
+import { useDepartments, Department } from '../../hooks/useDepartments';
+import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 
 // --- Components ---
 

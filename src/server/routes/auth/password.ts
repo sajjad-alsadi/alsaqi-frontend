@@ -47,7 +47,7 @@ export const createPasswordRoutes = (
     
     if (result.user && result.admins) {
       for (const admin of result.admins) {
-        await createNotification(admin.id, 'Security', result.alertMsg, 'Security', '/users');
+        await createNotification(admin.id, 'password_reset_request', result.alertMsg, 'Security', '/users', { actorId: result.user.id, wss: (req.app as any).wss });
       }
       await AuthService.logAudit(result.user.username, "Password Reset Request", "Security", "User requested password reset");
     }

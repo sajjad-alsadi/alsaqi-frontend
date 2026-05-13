@@ -112,7 +112,9 @@ export const PdfTemplateManagement: React.FC = () => {
       setShowModal(false);
       fetchTemplates();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || t('pdfTemplates.saveError'));
+      const apiError = err.response?.data?.error;
+      const errorMsg = typeof apiError === 'string' ? apiError : (apiError?.message || t('pdfTemplates.saveError'));
+      toast.error(errorMsg);
     }
   };
 

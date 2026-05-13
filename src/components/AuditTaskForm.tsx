@@ -4,18 +4,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslation } from 'react-i18next';
 import { AuditTask, AuditPlan } from '../types';
-import { AuditStatus } from '../constants';
+import { AuditType } from '../constants';
 import api from '../services/api';
 import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
 import { FormField } from './ui/FormField';
+import { Input } from './ui/Input';
 
 type TaskFormValues = {
-  audit_id: string;
-  procedure: string;
-  responsible: string;
-  status: AuditStatus;
-  evidence_id?: string;
+  title: string;
+  plan_id: string;
+  audit_type: string;
+  status: string;
+  assigned_to?: string;
+  audited_unit_id?: string;
+  planned_hours?: string;
+  period_from?: string;
+  period_to?: string;
+  due_date?: string;
 };
 
 interface AuditTaskFormProps {
@@ -29,46 +35,58 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
   const { t } = useTranslation();
   
   const taskSchema = z.object({
-    audit_id: z.string().min(1, t('plan.fieldRequired')),
-    procedure: z.string().min(1, t('plan.fieldRequired')),
-    responsible: z.string().min(1, t('tasks.responsibleRequired')),
-    status: z.nativeEnum(AuditStatus),
-    evidence_id: z.string().optional(),
+    title: z.string().min(1, t('plan.fieldRequired')),
+    plan_id: z.string().min(1, t('plan.fieldRequired')),
+    audit_type: z.string().min(1, t('plan.fieldRequired')),
+    status: z.string().min(1),
+    assigned_to: z.string().optional(),
+    audited_unit_id: z.string().optional(),
+    planned_hours: z.string().optional(),
+    period_from: z.string().optional(),
+    period_to: z.string().optional(),
+    due_date: z.string().optional(),
   });
 
   const [users, setUsers] = useState<any[]>([]);
-  const [evidenceList, setEvidenceList] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     mode: 'onBlur',
     defaultValues: {
-      audit_id: plans[0]?.id ? String(plans[0].id) : '',
-      procedure: '',
-      responsible: '',
-      status: AuditStatus.OPEN,
+      title: '',
+      plan_id: plans[0]?.id ? String(plans[0].id) : '',
+      audit_type: AuditType.OPERATIONAL,
+      status: 'draft',
+      assigned_to: '',
+      audited_unit_id: '',
+      planned_hours: '',
+      period_from: '',
+      period_to: '',
+      due_date: '',
     },
   });
 
-  const responsibleValue = watch('responsible');
-
   useEffect(() => {
     if (initialData) {
-      const sanitized = { ...initialData };
-      Object.keys(sanitized).forEach((key) => {
-        if (sanitized[key as keyof AuditTask] === null) {
-          (sanitized as any)[key] = '';
-        }
+      reset({
+        title: initialData.title || '',
+        plan_id: initialData.plan_id ? String(initialData.plan_id) : '',
+        audit_type: initialData.audit_type || AuditType.OPERATIONAL,
+        status: initialData.status || 'draft',
+        assigned_to: initialData.assigned_to || '',
+        audited_unit_id: initialData.audited_unit_id || '',
+        planned_hours: initialData.planned_hours ? String(initialData.planned_hours) : '',
+        period_from: initialData.period_from || '',
+        period_to: initialData.period_to || '',
+        due_date: initialData.due_date || '',
       });
-      reset(sanitized as any);
     }
   }, [initialData, reset]);
 
@@ -84,11 +102,11 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
       }
     };
 
-    const fetchEvidence = async () => {
+    const fetchDepartments = async () => {
       try {
-        const res = await api.get('/audit-evidence');
+        const res = await api.get('/departments');
         if (res.data) {
-          setEvidenceList(Array.isArray(res.data) ? res.data : (res.data.data || []));
+          setDepartments(Array.isArray(res.data) ? res.data : (res.data.data || []));
         }
       } catch (err) {
         console.error(err);
@@ -96,39 +114,46 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
     };
 
     fetchUsers();
-    fetchEvidence();
+    fetchDepartments();
   }, []);
 
   const onSubmit = async (data: TaskFormValues) => {
     try {
+      const payload: any = {
+        title: data.title,
+        plan_id: data.plan_id,
+        audit_type: data.audit_type,
+        status: data.status,
+      };
+
+      if (data.assigned_to) payload.assigned_to = data.assigned_to;
+      if (data.audited_unit_id) payload.audited_unit_id = data.audited_unit_id;
+      if (data.planned_hours) payload.planned_hours = parseInt(data.planned_hours);
+      if (data.period_from) payload.period_from = data.period_from;
+      if (data.period_to) payload.period_to = data.period_to;
+      if (data.due_date) payload.due_date = data.due_date;
+
       const url = initialData?.id 
         ? `/audit-tasks/${initialData.id}`
         : '/audit-tasks';
       
       if (initialData?.id) {
-        await api.put(url, data);
+        await api.put(url, payload);
       } else {
-        await api.post(url, data);
+        await api.post(url, payload);
       }
       onSuccess();
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.error || t('tasks.failedToSaveTask'));
+      const apiError = err.response?.data?.error;
+      if (typeof apiError === 'string') {
+        setError(apiError);
+      } else if (apiError && typeof apiError === 'object') {
+        setError(apiError.message || t('tasks.failedToSaveTask'));
+      } else {
+        setError(t('tasks.failedToSaveTask'));
+      }
     }
-  };
-
-  const handleAddResponsible = (name: string) => {
-    if (!name) return;
-    const current = responsibleValue ? responsibleValue.split(', ').filter(Boolean) : [];
-    if (!current.includes(name)) {
-      setValue('responsible', [...current, name].join(', '), { shouldValidate: true });
-    }
-  };
-
-  const handleRemoveResponsible = (name: string) => {
-    const current = responsibleValue ? responsibleValue.split(', ').filter(Boolean) : [];
-    const updated = current.filter(n => n !== name).join(', ');
-    setValue('responsible', updated, { shouldValidate: true });
   };
 
   return (
@@ -139,70 +164,81 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
         </div>
       )}
       <div className="grid grid-cols-1 gap-8">
-        <FormField label={t('common.auditPlan')} error={errors.audit_id?.message} required>
-          <Select {...register('audit_id')}>
-            <option value="">{t('tasks.selectAuditPlan')}</option>
-            {Array.isArray(plans) && plans.map(p => (
-              <option key={p.id} value={p.id}>{p.title}</option>
-            ))}
-          </Select>
+        <FormField label={t('tasks.taskTitle')} error={errors.title?.message} required>
+          <Input {...register('title')} placeholder={t('tasks.taskTitlePlaceholder')} />
         </FormField>
 
-        <FormField label={t('tasks.procedure')} error={errors.procedure?.message} required>
-          <Textarea rows={4} {...register('procedure')} />
-        </FormField>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <FormField label={t('tasks.responsible')} error={errors.responsible?.message} required>
-            <div className="space-y-3">
-              <Select
-                value=""
-                onChange={(e) => handleAddResponsible(e.target.value)}
-              >
-                <option value="">{t('tasks.selectResponsible')}</option>
-                {Array.isArray(users) && users.map(u => {
-                  const current = responsibleValue ? responsibleValue.split(', ').filter(Boolean) : [];
-                  if (current.includes(u.name)) return null;
-                  return <option key={u.id} value={u.name}>{u.name} ({u.department})</option>;
-                })}
-              </Select>
-              
-              {responsibleValue && (
-                <div className="flex flex-wrap gap-2">
-                  {responsibleValue.split(', ').filter(Boolean).map(name => (
-                    <span key={name} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-2">
-                      {name}
-                      <button 
-                        type="button" 
-                        className="hover:text-rose-500 transition-colors"
-                        onClick={() => handleRemoveResponsible(name)}
-                      >
-                        &times;
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+          <FormField label={t('common.auditPlan')} error={errors.plan_id?.message} required>
+            <Select {...register('plan_id')}>
+              <option value="">{t('tasks.selectAuditPlan')}</option>
+              {Array.isArray(plans) && plans.map(p => (
+                <option key={p.id} value={p.id}>{p.title}</option>
+              ))}
+            </Select>
           </FormField>
 
-          <FormField label={t('common.statusLabel')} error={errors.status?.message} required>
-            <Select {...register('status')}>
-              <option value={AuditStatus.OPEN}>{t('common.open')}</option>
-              <option value={AuditStatus.IN_PROGRESS}>{t('plan.in_progress')}</option>
-              <option value={AuditStatus.COMPLETED}>{t('plan.completed')}</option>
+          <FormField label={t('tasks.auditType')} error={errors.audit_type?.message} required>
+            <Select {...register('audit_type')}>
+              <option value={AuditType.OPERATIONAL}>{t('auditTypes.operational')}</option>
+              <option value={AuditType.FINANCIAL}>{t('auditTypes.financial')}</option>
+              <option value={AuditType.COMPLIANCE}>{t('auditTypes.compliance')}</option>
+              <option value={AuditType.IT}>{t('auditTypes.it')}</option>
+              <option value={AuditType.AML}>{t('auditTypes.aml')}</option>
+              <option value={AuditType.GOVERNANCE}>{t('auditTypes.governance')}</option>
             </Select>
           </FormField>
         </div>
 
-        <FormField label={t('tasks.evidence')} error={errors.evidence_id?.message}>
-          <Select {...register('evidence_id')}>
-            <option value="">{t('tasks.selectEvidence')}</option>
-            {Array.isArray(evidenceList) && evidenceList.map(e => (
-              <option key={e.id} value={e.id}>{e.description || e.file_name || `${t('tasks.evidence')} #${e.id}`}</option>
-            ))}
-          </Select>
-        </FormField>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <FormField label={t('tasks.assignedTo')} error={errors.assigned_to?.message}>
+            <Select {...register('assigned_to')}>
+              <option value="">{t('tasks.selectAssignedTo')}</option>
+              {Array.isArray(users) && users.map(u => (
+                <option key={u.id} value={u.id}>{u.name} ({u.department || u.role})</option>
+              ))}
+            </Select>
+          </FormField>
+
+          <FormField label={t('tasks.auditedUnit')} error={errors.audited_unit_id?.message}>
+            <Select {...register('audited_unit_id')}>
+              <option value="">{t('tasks.selectAuditedUnit')}</option>
+              {Array.isArray(departments) && departments.map(d => (
+                <option key={d.id} value={d.id}>{d.name_ar || d.name}</option>
+              ))}
+            </Select>
+          </FormField>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <FormField label={t('tasks.plannedHours')} error={errors.planned_hours?.message}>
+            <Input type="number" min="0" {...register('planned_hours')} placeholder="0" />
+          </FormField>
+
+          <FormField label={t('tasks.periodFrom')} error={errors.period_from?.message}>
+            <Input type="date" {...register('period_from')} />
+          </FormField>
+
+          <FormField label={t('tasks.periodTo')} error={errors.period_to?.message}>
+            <Input type="date" {...register('period_to')} />
+          </FormField>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <FormField label={t('tasks.dueDate')} error={errors.due_date?.message}>
+            <Input type="date" {...register('due_date')} />
+          </FormField>
+
+          <FormField label={t('common.statusLabel')} error={errors.status?.message} required>
+            <Select {...register('status')}>
+              <option value="draft">{t('plan.draft')}</option>
+              <option value="in_progress">{t('plan.in_progress')}</option>
+              <option value="review">{t('plan.review')}</option>
+              <option value="approved">{t('plan.approved')}</option>
+              <option value="completed">{t('plan.completed')}</option>
+            </Select>
+          </FormField>
+        </div>
       </div>
 
       <div className="flex justify-end gap-6 pt-8 border-t border-[var(--color-border-soft)] dark:border-slate-800">

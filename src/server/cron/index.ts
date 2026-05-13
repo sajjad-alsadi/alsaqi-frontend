@@ -55,7 +55,7 @@ const runDailyAutomations = async () => {
           if (user) {
             await NotificationService.create(
               user.id,
-              'Audit Plan Started',
+              'plan_started',
               `The audit plan "${plan.title}" has automatically started today.`,
               'info',
               `/plan`
@@ -93,7 +93,7 @@ const runDailyAutomations = async () => {
           if (user) {
             await NotificationService.create(
               user.id,
-              'Recommendation Overdue',
+              'recommendation_overdue',
               `A recommendation assigned to you is now overdue.`,
               'warning',
               `/recommendations`
@@ -127,7 +127,7 @@ const runDailyAutomations = async () => {
           if (user) {
             await NotificationService.create(
               user.id,
-              'Recommendation Due Soon',
+              'recommendation_due_soon',
               `A recommendation assigned to you is due in 7 days.`,
               'info',
               `/recommendations`
@@ -164,7 +164,7 @@ const runDailyAutomations = async () => {
       for (const admin of admins) {
         await NotificationService.create(
           admin.id,
-          'Instruction Overdue',
+          'instruction_overdue',
           `Central Bank Instruction(s) have become overdue. Please review.`,
           'warning',
           `/regulatory`
@@ -201,7 +201,7 @@ const runDailyAutomations = async () => {
       for (const admin of admins) {
         await NotificationService.create(
           admin.id,
-          'Policy Review Required',
+          'policy_review_required',
           `${policiesToReview.length} internal policies have reached their 1-year review mark.`,
           'info',
           `/legal`
@@ -210,6 +210,39 @@ const runDailyAutomations = async () => {
     }
   } catch (err) {
     logger.error('[CRON] Error updating internal policies:', err);
+  }
+
+  // 6. Audit Tasks — Deadline approaching (3 days before due_date)
+  try {
+    const threeDaysLater = new Date(now);
+    threeDaysLater.setDate(now.getDate() + 3);
+    const threeDaysStr = threeDaysLater.toISOString().split('T')[0];
+
+    const upcomingTasks = await db.prepare(`
+      SELECT id, title, assigned_to, due_date
+      FROM audit_tasks 
+      WHERE status NOT IN ('completed', 'cancelled') 
+        AND due_date = ? 
+        AND deleted_at IS NULL
+        AND assigned_to IS NOT NULL
+    `).all(threeDaysStr);
+
+    if (upcomingTasks && upcomingTasks.length > 0) {
+      logger.info(`[CRON] Found ${upcomingTasks.length} tasks due in 3 days.`);
+      
+      for (const task of upcomingTasks) {
+        await NotificationService.create(
+          task.assigned_to,
+          'task_status_changed',
+          `المهمة "${task.title}" تنتهي خلال 3 أيام (${task.due_date})`,
+          'AuditTasks',
+          `/tasks`,
+          { entityId: task.id, entityType: 'audit_task', title: 'موعد نهائي قريب' }
+        );
+      }
+    }
+  } catch (err) {
+    logger.error('[CRON] Error sending task deadline reminders:', err);
   }
 
   logger.info('[CRON] Daily automations completed.');

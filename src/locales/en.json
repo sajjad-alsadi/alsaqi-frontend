@@ -912,7 +912,17 @@
     "addTask": "Add Task",
     "editTask": "Edit Task",
     "taskNo": "Task No.",
+    "taskTitle": "Task Title",
+    "taskTitlePlaceholder": "Enter task title...",
+    "auditType": "Audit Type",
     "assignedTo": "Assigned To",
+    "selectAssignedTo": "Select Assignee",
+    "auditedUnit": "Audited Unit",
+    "selectAuditedUnit": "Select Audited Unit",
+    "plannedHours": "Planned Hours",
+    "periodFrom": "Period From",
+    "periodTo": "Period To",
+    "dueDate": "Due Date",
     "startTask": "Start Task",
     "submitForReview": "Submit for Review",
     "approve": "Approve",
@@ -930,6 +940,14 @@
     "previewNotAvailable": "Preview not available",
     "previewNotAvailableDesc": "Preview is not available for this file type. You can download it to view.",
     "downloadFile": "Download File"
+  },
+  "auditTypes": {
+    "operational": "Operational",
+    "financial": "Financial",
+    "compliance": "Compliance",
+    "it": "IT",
+    "aml": "AML",
+    "governance": "Governance"
   },
   "evidence": {
     "title": "Audit Evidence",

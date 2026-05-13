@@ -12,7 +12,7 @@ import { getTranslatedNotificationMessage, getTranslatedNotificationModule } fro
 
 const NotificationBell: React.FC = () => {
   const { language } = useAppContext();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotificationContext();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, bellShake } = useNotificationContext();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const NotificationBell: React.FC = () => {
   }, []);
 
   const handleNotificationClick = (notification: any) => {
-    if (notification.status === 'Unread') {
+    if (!notification.is_read && notification.status !== 'Read') {
       markAsRead(notification.id);
     }
     if (notification.link) {
@@ -63,11 +63,38 @@ const NotificationBell: React.FC = () => {
 
   const getIcon = (type: string) => {
     switch (type) {
+      case 'record_created':
       case 'Created': return <FileText size={16} className="text-emerald-500" />;
+      case 'task_assigned':
+      case 'plan_assigned':
       case 'Updated': return <Info size={16} className="text-blue-500" />;
+      case 'recommendation_overdue':
+      case 'recommendation_due_soon':
+      case 'instruction_overdue':
       case 'Alert': return <AlertTriangle size={16} className="text-amber-500" />;
+      case 'access_requested':
       case 'User': return <UserPlus size={16} className="text-purple-500" />;
+      case 'account_locked':
+      case 'password_reset_request':
+      case 'permission_changed':
       case 'Security': return <Shield size={16} className="text-rose-500" />;
+      case 'risk_added':
+      case 'risk_updated':
+      case 'risk_escalated':
+        return <AlertTriangle size={16} className="text-rose-500" />;
+      case 'finding_added':
+      case 'evidence_uploaded':
+        return <FileText size={16} className="text-blue-500" />;
+      case 'comment_added':
+      case 'comment_mentioned':
+        return <Info size={16} className="text-indigo-500" />;
+      case 'access_approved':
+        return <Settings size={16} className="text-emerald-500" />;
+      case 'access_rejected':
+        return <Shield size={16} className="text-rose-500" />;
+      case 'plan_started':
+      case 'task_completed':
+        return <FileText size={16} className="text-emerald-500" />;
       default: return <Bell size={16} className="text-[var(--color-text-muted)]" />;
     }
   };
@@ -82,7 +109,7 @@ const NotificationBell: React.FC = () => {
         badge={unreadCount > 0 ? (unreadCount > 9 ? formatNumber(9) + '+' : formatNumber(unreadCount)) : undefined}
         tooltip={t('common.notifications')}
         variant="outline"
-        className="!p-2.5"
+        className={`!p-2.5 ${bellShake ? 'animate-[bell-ring_0.6s_ease-in-out]' : ''}`}
         ariaExpanded={isOpen}
       />
 
@@ -124,14 +151,19 @@ const NotificationBell: React.FC = () => {
                     <div 
                       key={notification.id}
                       onClick={() => handleNotificationClick(notification)}
-                      className={`p-4 hover:bg-[var(--color-bg-soft)] transition-colors cursor-pointer ${notification.status === 'Unread' ? 'bg-[var(--color-primary-light)]' : ''}`}
+                      className={`p-4 hover:bg-[var(--color-bg-soft)] transition-colors cursor-pointer ${(!notification.is_read && notification.status !== 'Read') ? 'bg-[var(--color-primary-light)]' : ''}`}
                     >
                       <div className="flex gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notification.status === 'Unread' ? 'bg-[var(--color-card)] shadow-sm' : 'bg-[var(--color-bg-soft)]'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${(!notification.is_read && notification.status !== 'Read') ? 'bg-[var(--color-card)] shadow-sm' : 'bg-[var(--color-bg-soft)]'}`}>
                           {getIcon(notification.event_type)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm ${notification.status === 'Unread' ? 'font-bold text-[var(--color-text-main)]' : 'font-medium text-[var(--color-text-muted)]'}`}>
+                          {notification.title && (
+                            <p className={`text-xs font-bold ${(!notification.is_read && notification.status !== 'Read') ? 'text-[var(--color-text-main)]' : 'text-[var(--color-text-muted)]'}`}>
+                              {notification.title}
+                            </p>
+                          )}
+                          <p className={`text-sm ${(!notification.is_read && notification.status !== 'Read') ? 'font-bold text-[var(--color-text-main)]' : 'font-medium text-[var(--color-text-muted)]'}`}>
                             {getTranslatedNotificationMessage(notification.description, t, language)}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
@@ -144,7 +176,7 @@ const NotificationBell: React.FC = () => {
                             </span>
                           </div>
                         </div>
-                        {notification.status === 'Unread' && (
+                        {(!notification.is_read && notification.status !== 'Read') && (
                           <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] shrink-0 mt-2" />
                         )}
                       </div>

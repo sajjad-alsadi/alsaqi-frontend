@@ -12,7 +12,7 @@ import { getTranslatedNotificationMessage, getTranslatedNotificationModule } fro
 const Notifications: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { language } = useAppContext();
-  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationContext();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, loadMore, hasMore, isLoading } = useNotificationContext();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +20,7 @@ const Notifications: React.FC = () => {
   const [notificationToDelete, setNotificationToDelete] = useState<number | null>(null);
 
   const handleNotificationClick = (notification: any) => {
-    if (notification.status === 'Unread') {
+    if (!notification.is_read && notification.status !== 'Read') {
       markAsRead(notification.id);
     }
     if (notification.link) {
@@ -45,12 +45,15 @@ const Notifications: React.FC = () => {
     }
   };
 
+  const isUnread = (n: any) => !n.is_read && n.status !== 'Read';
+
   const filteredNotifications = notifications.filter(n => {
     const matchesFilter = filter === 'all' ? true : 
-                          filter === 'unread' ? n.status === 'Unread' : 
-                          n.status === 'Read';
+                          filter === 'unread' ? isUnread(n) : 
+                          !isUnread(n);
     const matchesSearch = (n.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
-                          (n.related_module?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+                          (n.related_module?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                          (n.title?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -144,16 +147,16 @@ const Notifications: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, height: 0 }}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`relative group p-6 rounded-2xl border transition-all cursor-pointer ${notification.status === 'Unread' ? 'bg-[var(--color-card)] border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/5' : 'bg-[var(--color-bg-soft)]/50 border-[var(--color-border-soft)]'}`}
+                  className={`relative group p-6 rounded-2xl border transition-all cursor-pointer ${isUnread(notification) ? 'bg-[var(--color-card)] border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/5' : 'bg-[var(--color-bg-soft)]/50 border-[var(--color-border-soft)]'}`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.status === 'Unread' ? 'bg-[var(--color-primary)]/10 shadow-inner' : 'bg-[var(--color-card)] border border-[var(--color-border-soft)]'}`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${isUnread(notification) ? 'bg-[var(--color-primary)]/10 shadow-inner' : 'bg-[var(--color-card)] border border-[var(--color-border-soft)]'}`}>
                       {getIcon(notification.event_type)}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1 pe-12">
-                        <span className={`text-xs font-bold uppercase tracking-widest ${notification.status === 'Unread' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}`}>
+                        <span className={`text-xs font-bold uppercase tracking-widest ${isUnread(notification) ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}`}>
                           {getTranslatedNotificationModule(notification.related_module, t)}
                         </span>
                         <span className="text-xs font-bold text-[var(--color-text-muted)] flex items-center gap-1">
@@ -162,12 +165,18 @@ const Notifications: React.FC = () => {
                         </span>
                       </div>
                       
-                      <h3 className={`text-lg font-bold mb-2 pe-12 ${notification.status === 'Unread' ? 'text-[var(--color-text-main)]' : 'text-[var(--color-text-muted)]'}`}>
+                      {notification.title && (
+                        <p className={`text-sm font-bold mb-1 ${isUnread(notification) ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}`}>
+                          {notification.title}
+                        </p>
+                      )}
+                      
+                      <h3 className={`text-lg font-bold mb-2 pe-12 ${isUnread(notification) ? 'text-[var(--color-text-main)]' : 'text-[var(--color-text-muted)]'}`}>
                         {getTranslatedNotificationMessage(notification.description, t, language)}
                       </h3>
                       
                       <div className="flex items-center gap-4 mt-4">
-                        {notification.status === 'Unread' && (
+                        {isUnread(notification) && (
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
@@ -194,13 +203,30 @@ const Notifications: React.FC = () => {
                     </div>
                   </div>
                   
-                  {notification.status === 'Unread' && (
+                  {isUnread(notification) && (
                     <div className="absolute top-1/2 -translate-y-1/2 end-6 w-3 h-3 bg-[var(--color-primary)] rounded-full shadow-lg shadow-[var(--color-primary)]/20 animate-pulse" />
                   )}
                 </motion.div>
               ))
             )}
           </AnimatePresence>
+          
+          {/* Load More Button */}
+          {hasMore && !isLoading && (
+            <div className="text-center pt-6">
+              <button 
+                onClick={loadMore}
+                className="btn-secondary px-8"
+              >
+                {t('common.loadMore') || 'تحميل المزيد'}
+              </button>
+            </div>
+          )}
+          {isLoading && (
+            <div className="text-center py-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)] mx-auto"></div>
+            </div>
+          )}
         </div>
       </div>
 

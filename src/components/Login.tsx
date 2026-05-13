@@ -101,7 +101,14 @@ const Login: React.FC = () => {
       // Use the new token returned by the server which has the updated session version
       login({ ...loginData.user, requires_password_change: false }, data.token);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error changing password');
+      const apiError = err.response?.data?.error;
+      if (typeof apiError === 'string') {
+        setError(apiError);
+      } else if (apiError && typeof apiError === 'object') {
+        setError(apiError.message || 'Error changing password');
+      } else {
+        setError('Error changing password');
+      }
     } finally {
       setLoading(false);
     }

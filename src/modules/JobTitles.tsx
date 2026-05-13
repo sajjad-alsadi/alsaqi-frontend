@@ -72,7 +72,14 @@ const JobTitles: React.FC = () => {
       setFormData({ name: '', department: '', job_level: 'Staff', description: '', reporting_to: '', status: 'Active' });
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.error || t('jobTitles.failedToSaveJobTitle'));
+      const apiError = err.response?.data?.error;
+      if (typeof apiError === 'string') {
+        setError(apiError);
+      } else if (apiError && typeof apiError === 'object') {
+        setError(apiError.message || t('jobTitles.failedToSaveJobTitle'));
+      } else {
+        setError(t('jobTitles.failedToSaveJobTitle'));
+      }
     }
   };
 
@@ -99,7 +106,14 @@ const JobTitles: React.FC = () => {
       setTitleToDelete(null);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.error || t('jobTitles.failedToDeleteJobTitle'));
+      const apiError = err.response?.data?.error;
+      if (typeof apiError === 'string') {
+        setError(apiError);
+      } else if (apiError && typeof apiError === 'object') {
+        setError(apiError.message || t('jobTitles.failedToDeleteJobTitle'));
+      } else {
+        setError(t('jobTitles.failedToDeleteJobTitle'));
+      }
     }
   };
 

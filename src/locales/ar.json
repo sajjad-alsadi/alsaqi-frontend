@@ -912,7 +912,17 @@
     "addTask": "إضافة مهمة",
     "editTask": "تعديل المهمة",
     "taskNo": "رقم المهمة",
+    "taskTitle": "عنوان المهمة",
+    "taskTitlePlaceholder": "أدخل عنوان المهمة...",
+    "auditType": "نوع التدقيق",
     "assignedTo": "المسند إليه",
+    "selectAssignedTo": "اختر المسند إليه",
+    "auditedUnit": "الوحدة المدققة",
+    "selectAuditedUnit": "اختر الوحدة المدققة",
+    "plannedHours": "الساعات المخططة",
+    "periodFrom": "من تاريخ",
+    "periodTo": "إلى تاريخ",
+    "dueDate": "تاريخ الاستحقاق",
     "startTask": "بدء المهمة",
     "submitForReview": "إرسال للمراجعة",
     "approve": "موافقة",
@@ -930,6 +940,14 @@
     "previewNotAvailable": "المعاينة غير متاحة",
     "previewNotAvailableDesc": "المعاينة غير متاحة لهذا النوع من الملفات. يمكنك تحميله لعرضه.",
     "downloadFile": "تحميل الملف"
+  },
+  "auditTypes": {
+    "operational": "تشغيلي",
+    "financial": "مالي",
+    "compliance": "امتثال",
+    "it": "تقنية معلومات",
+    "aml": "غسل أموال",
+    "governance": "الحوكمة"
   },
   "evidence": {
     "title": "أدلة التدقيق",

@@ -194,14 +194,22 @@ export interface FraudCase {
 }
 
 export interface Notification {
-  id?: number;
-  user_id: number;
+  id?: string | number;
+  recipient_row_id?: string;
+  user_id?: number;
   event_type: string;
+  title?: string | null;
   description: string;
   related_module: string;
   date: string;
-  status: 'Read' | 'Unread';
+  status?: 'Read' | 'Unread';
+  is_read?: boolean;
+  read_at?: string | null;
   link?: string;
+  actor_id?: string;
+  entity_id?: string;
+  entity_type?: string;
+  data?: Record<string, any>;
 }
 
 export interface AuditTrail {

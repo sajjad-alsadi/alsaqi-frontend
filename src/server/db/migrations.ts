@@ -752,6 +752,27 @@ export const runMigrations = async () => {
     console.error("Error creating comments table:", e);
   }
 
+  // Notification Recipients table (per-user isolation)
+  try {
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS notification_recipients (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        notification_id UUID NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
+        recipient_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        is_read BOOLEAN DEFAULT false,
+        read_at TIMESTAMP,
+        is_dismissed BOOLEAN DEFAULT false,
+        dismissed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+    await db.prepare("CREATE INDEX IF NOT EXISTS idx_notif_recip_user_read ON notification_recipients(recipient_id, is_read)").run();
+    await db.prepare("CREATE INDEX IF NOT EXISTS idx_notif_recip_user_date ON notification_recipients(recipient_id, created_at DESC)").run();
+    await db.prepare("CREATE INDEX IF NOT EXISTS idx_notif_recip_notif_id ON notification_recipients(notification_id)").run();
+  } catch (e) {
+    // Table may already exist
+  }
+
   // Column Migrations
   const migrations = [
     { table: "audit_findings", column: "finding_number", type: "VARCHAR(50) UNIQUE" },
@@ -836,6 +857,11 @@ export const runMigrations = async () => {
     { table: "outgoing_letters", column: "status", type: "TEXT DEFAULT 'Draft'" },
     { table: "audit_trail", column: "hash", type: "TEXT" },
     { table: "audit_trail", column: "previous_hash", type: "TEXT" },
+    { table: "notifications", column: "actor_id", type: "UUID" },
+    { table: "notifications", column: "entity_id", type: "UUID" },
+    { table: "notifications", column: "entity_type", type: "TEXT" },
+    { table: "notifications", column: "data", type: "JSONB DEFAULT '{}'" },
+    { table: "notifications", column: "title", type: "TEXT" },
   ];
 
   for (const m of migrations) {
@@ -940,6 +966,8 @@ export const runMigrations = async () => {
     "CREATE INDEX IF NOT EXISTS idx_outgoing_correspondence_date ON outgoing_correspondence(letter_date)",
     "CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id)",
     "CREATE INDEX IF NOT EXISTS idx_notifications_status ON notifications(status)",
+    "CREATE INDEX IF NOT EXISTS idx_notifications_user_status ON notifications(user_id, status)",
+    "CREATE INDEX IF NOT EXISTS idx_notifications_user_date ON notifications(user_id, date DESC)",
     "CREATE INDEX IF NOT EXISTS idx_audit_plans_status ON audit_plans(status)",
     "CREATE INDEX IF NOT EXISTS idx_audit_plans_risk ON audit_plans(risk_rating)",
     "CREATE INDEX IF NOT EXISTS idx_audit_plans_program_id ON audit_plans(program_id)",

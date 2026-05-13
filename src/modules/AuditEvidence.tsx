@@ -106,7 +106,14 @@ const AuditEvidence: React.FC = () => {
         setEditingId(null);
       } catch (err: any) {
         console.error(err);
-        setError(err.response?.data?.error || t('evidence.operationFailed'));
+        const apiError = err.response?.data?.error;
+        if (typeof apiError === 'string') {
+          setError(apiError);
+        } else if (apiError && typeof apiError === 'object') {
+          setError(apiError.message || t('evidence.operationFailed'));
+        } else {
+          setError(t('evidence.operationFailed'));
+        }
       }
     };
 

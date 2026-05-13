@@ -11,6 +11,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import Login from './components/Login';
 import Layout from './components/Layout';
 import { Toaster } from 'react-hot-toast';
+import NotificationToast from './components/NotificationToast';
 
 // Lazy load modules for better performance
 const Dashboard = lazy(() => import('./modules/Dashboard'));
@@ -62,6 +63,7 @@ const AppContent: React.FC = () => {
   return (
     <Layout>
       <Toaster position="top-center" reverseOrder={false} />
+      <NotificationToast />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
