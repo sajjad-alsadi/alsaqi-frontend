@@ -16,12 +16,12 @@ const approveResetSchema = z.object({
 });
 
 const changePasswordSchema = z.object({
-  newPassword: z.string().min(6).max(100)
+  newPassword: z.string().min(8).max(100)
 });
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(1),
-  newPassword: z.string().min(6).max(100)
+  newPassword: z.string().min(8).max(100)
 });
 
 export const createPasswordRoutes = (

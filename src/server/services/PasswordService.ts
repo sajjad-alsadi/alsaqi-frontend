@@ -1,10 +1,11 @@
 import bcrypt from 'bcryptjs';
 import { db } from '../db/index';
 import { NotFoundError, ValidationError, AuthError } from '../utils/errors';
+import { invalidateUserCache } from '../middleware/auth';
 
 export class PasswordService {
   static async requestReset(username: string) {
-    const user = await db.prepare("SELECT id, username, name, department FROM users WHERE username = ?").get(username) as any;
+    const user = await db.prepare("SELECT id, username, name, department FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)").get(username, username) as any;
     
     if (!user) {
       return { success: true, message: "If the username exists, a request has been sent to the administrator." };
@@ -30,7 +31,7 @@ export class PasswordService {
   }
 
   static async getResetStatus(username: string) {
-    const user = await db.prepare("SELECT id, requires_password_change FROM users WHERE username = ?").get(username) as any;
+    const user = await db.prepare("SELECT id, requires_password_change FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)").get(username, username) as any;
     if (!user) return 'None';
 
     if (user.requires_password_change === 0) return 'None';
@@ -69,6 +70,9 @@ export class PasswordService {
 
     if (!user) throw new NotFoundError("User not found");
 
+    // Validate password against policy settings
+    await this.validatePasswordPolicy(newPassword);
+
     if (bcrypt.compareSync(newPassword, user.password)) {
       throw new ValidationError("New password cannot be the same as the current password");
     }
@@ -90,6 +94,9 @@ export class PasswordService {
     
     await transaction();
     
+    // Invalidate cached user data so middleware picks up new session_version
+    invalidateUserCache(user.id);
+    
     const updatedUser = await db.prepare("SELECT id, username, role, session_version FROM users WHERE id = ?").get(user.id) as any;
     return updatedUser;
   }
@@ -106,6 +113,9 @@ export class PasswordService {
     if (currentPassword === newPassword) {
       throw new ValidationError("New password cannot be the same as the current password");
     }
+
+    // Validate password against policy settings
+    await this.validatePasswordPolicy(newPassword);
 
     const history = await db.prepare("SELECT password_hash FROM password_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 5").all(user.id) as { password_hash: string }[];
     
@@ -124,8 +134,40 @@ export class PasswordService {
     
     await transaction();
     
+    // Invalidate cached user data so middleware picks up new session_version
+    invalidateUserCache(user.id);
+    
     const updatedUser = await db.prepare("SELECT id, username, role, session_version FROM users WHERE id = ?").get(user.id) as any;
     return updatedUser;
+  }
+
+  /** Validate password against system policy settings */
+  private static async validatePasswordPolicy(password: string) {
+    try {
+      const settings = await db.prepare("SELECT password_min_length, password_require_uppercase, password_require_lowercase, password_require_numbers, password_require_symbols FROM user_management_settings WHERE id = 1").get() as any;
+      
+      if (!settings) return; // No settings, skip validation
+
+      const minLength = settings.password_min_length || 8;
+      if (password.length < minLength) {
+        throw new ValidationError(`Password must be at least ${minLength} characters`);
+      }
+      if (settings.password_require_uppercase && !/[A-Z]/.test(password)) {
+        throw new ValidationError("Password must contain at least one uppercase letter");
+      }
+      if (settings.password_require_lowercase && !/[a-z]/.test(password)) {
+        throw new ValidationError("Password must contain at least one lowercase letter");
+      }
+      if (settings.password_require_numbers && !/[0-9]/.test(password)) {
+        throw new ValidationError("Password must contain at least one number");
+      }
+      if (settings.password_require_symbols && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        throw new ValidationError("Password must contain at least one special character");
+      }
+    } catch (e) {
+      if (e instanceof ValidationError) throw e;
+      // If settings query fails, skip policy validation
+    }
   }
 
   static async getResetRequests() {

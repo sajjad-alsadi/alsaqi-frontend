@@ -99,7 +99,8 @@ const Login: React.FC = () => {
       return;
     }
     if (!pendingToken) {
-      setChangeError(t('auth.errorChangingPassword'));
+      setChangeError(t('auth.sessionExpired'));
+      setShowChangeModal(false);
       return;
     }
 
@@ -134,6 +135,12 @@ const Login: React.FC = () => {
         setChangeError(t('auth.passwordUsedBefore'));
       } else if (errorMessage.includes('Password change required')) {
         setChangeError(t('auth.passwordChangeRequiredError'));
+      } else if (errorMessage.includes('Invalid token') || errorMessage.includes('jwt expired')) {
+        setChangeError(t('auth.sessionExpired'));
+        // Token expired, close modal so user can login again
+        setTimeout(() => setShowChangeModal(false), 2000);
+      } else if (errorMessage.includes('must be at least') || errorMessage.includes('must contain')) {
+        setChangeError(errorMessage);
       } else if (errorMessage && errorMessage !== 'Failed to change password') {
         setChangeError(errorMessage);
       } else {
@@ -198,7 +205,6 @@ const Login: React.FC = () => {
       <ChangePasswordModal
         isOpen={showChangeModal}
         onClose={() => {
-          // Reset state and go back to login form
           setShowChangeModal(false);
           setNewPassword('');
           setConfirmPassword('');
@@ -211,6 +217,7 @@ const Login: React.FC = () => {
         setConfirmPassword={setConfirmPassword}
         error={changeError}
         loading={loading}
+        forced={true}
       />
     </div>
   );

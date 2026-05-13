@@ -51,3 +51,15 @@
 {"sessionId":"eece07","timestamp":1778669089919,"hypothesisId":"H2","location":"server.ts:startServer","message":"before_listen","data":{"port":3000}}
 {"sessionId":"eece07","timestamp":1778669089926,"hypothesisId":"H2","location":"server.ts:listen","message":"listening","data":{"port":3000}}
 {"sessionId":"eece07","timestamp":1778669092160,"hypothesisId":"H4","location":"server.ts:runDbMigrations","message":"db_ready","data":{"attempts":1,"isDbReady":true}}
+{"sessionId":"eece07","timestamp":1778669711165,"hypothesisId":"H0","location":"server.ts:bootstrap","message":"invoking_startServer","data":{"cwd":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi","dirname":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi"}}
+{"sessionId":"eece07","timestamp":1778669711172,"hypothesisId":"H3","location":"server.ts:startServer","message":"startServer_enter","data":{"nodeEnv":null,"hasGemini":false}}
+{"sessionId":"eece07","timestamp":1778669713025,"hypothesisId":"H1","location":"server.ts:startServer","message":"vite_ready","data":{"ok":true}}
+{"sessionId":"eece07","timestamp":1778669713027,"hypothesisId":"H2","location":"server.ts:startServer","message":"before_listen","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778669713034,"hypothesisId":"H2","location":"server.ts:listen","message":"listening","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778669715210,"hypothesisId":"H4","location":"server.ts:runDbMigrations","message":"db_ready","data":{"attempts":1,"isDbReady":true}}
+{"sessionId":"eece07","timestamp":1778671570576,"hypothesisId":"H0","location":"server.ts:bootstrap","message":"invoking_startServer","data":{"cwd":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi","dirname":"C:\\Users\\Sajjad.Abdulbaqi\\.gitlab\\alsaqi"}}
+{"sessionId":"eece07","timestamp":1778671570583,"hypothesisId":"H3","location":"server.ts:startServer","message":"startServer_enter","data":{"nodeEnv":null,"hasGemini":false}}
+{"sessionId":"eece07","timestamp":1778671572980,"hypothesisId":"H1","location":"server.ts:startServer","message":"vite_ready","data":{"ok":true}}
+{"sessionId":"eece07","timestamp":1778671572983,"hypothesisId":"H2","location":"server.ts:startServer","message":"before_listen","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778671572990,"hypothesisId":"H2","location":"server.ts:listen","message":"listening","data":{"port":3000}}
+{"sessionId":"eece07","timestamp":1778671574867,"hypothesisId":"H4","location":"server.ts:runDbMigrations","message":"db_ready","data":{"attempts":1,"isDbReady":true}}

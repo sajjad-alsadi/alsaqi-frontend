@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { ShieldCheck, AlertCircle, Eye, EyeOff, Check, X as XIcon } from 'lucide-react';
 import Modal from '../Modal';
 
 interface ChangePasswordModalProps {
@@ -13,6 +13,7 @@ interface ChangePasswordModalProps {
   setConfirmPassword: (password: string) => void;
   error: string;
   loading: boolean;
+  forced?: boolean;
 }
 
 const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
@@ -25,13 +26,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   setConfirmPassword,
   error,
   loading,
+  forced = false,
 }) => {
   const { t } = useTranslation();
   const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const newPasswordRef = React.useRef<HTMLInputElement>(null);
 
-  // Focus the password input when modal opens instead of close button
   React.useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -39,6 +40,18 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       }, 200);
     }
   }, [isOpen]);
+
+  // Password strength checks
+  const checks = {
+    minLength: newPassword.length >= 8,
+    uppercase: /[A-Z]/.test(newPassword),
+    lowercase: /[a-z]/.test(newPassword),
+    number: /[0-9]/.test(newPassword),
+    symbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword),
+  };
+  const passedChecks = Object.values(checks).filter(Boolean).length;
+  const strengthPercent = (passedChecks / 5) * 100;
+  const strengthColor = strengthPercent <= 40 ? 'bg-red-500' : strengthPercent <= 60 ? 'bg-amber-500' : strengthPercent <= 80 ? 'bg-blue-500' : 'bg-emerald-500';
 
   return (
     <Modal
@@ -86,9 +99,35 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          <p className="text-[10px] text-[var(--color-text-muted)] font-medium mt-1">
-            {t('passwordRequirements')}
-          </p>
+
+          {/* Password strength meter */}
+          {newPassword.length > 0 && (
+            <div className="space-y-2 mt-2">
+              <div className="h-1.5 bg-[var(--color-bg-soft)] rounded-full overflow-hidden">
+                <div className={`h-full ${strengthColor} transition-all duration-300 rounded-full`} style={{ width: `${strengthPercent}%` }} />
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  { key: 'minLength', label: t('auth.rule8Chars') },
+                  { key: 'uppercase', label: t('auth.ruleUppercase') },
+                  { key: 'lowercase', label: t('auth.ruleLowercase') },
+                  { key: 'number', label: t('auth.ruleNumber') },
+                  { key: 'symbol', label: t('auth.ruleSymbol') },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center gap-1.5">
+                    {checks[key as keyof typeof checks] ? (
+                      <Check size={12} className="text-emerald-500 shrink-0" />
+                    ) : (
+                      <XIcon size={12} className="text-[var(--color-text-muted)]/50 shrink-0" />
+                    )}
+                    <span className={`text-[10px] ${checks[key as keyof typeof checks] ? 'text-emerald-600 font-bold' : 'text-[var(--color-text-muted)]'}`}>
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -113,19 +152,24 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {confirmPassword && newPassword !== confirmPassword && (
+            <p className="text-[10px] text-red-500 font-bold mt-1">{t('auth.passwordMismatch')}</p>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border-soft)]">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2.5 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)] rounded-xl transition-all"
-          >
-            {t('common.cancel')}
-          </button>
+          {!forced && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2.5 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)] rounded-xl transition-all"
+            >
+              {t('common.cancel')}
+            </button>
+          )}
           <button
             type="submit"
-            disabled={loading || !newPassword || !confirmPassword || newPassword.length < 8}
+            disabled={loading || !newPassword || !confirmPassword || newPassword.length < 8 || newPassword !== confirmPassword}
             className="px-6 py-2.5 bg-[var(--color-primary)] text-white text-sm font-bold rounded-xl hover:bg-[var(--color-primary)]/90 transition-all shadow-lg shadow-[var(--color-primary)]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading ? (

@@ -76,11 +76,12 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
         requires_password_change: !!user.requires_password_change 
       };
 
-      // If password change is required, only allow access to auth routes (like password change)
+      // If password change is required, only allow access to password-related auth routes
       if (req.user.requires_password_change) {
         const url = req.originalUrl;
-        const isAuthRoute = url.includes('/auth/');
-        if (!isAuthRoute) {
+        const allowedPaths = ['/auth/change-password', '/auth/update-password', '/auth/logout', '/auth/refresh', '/auth/session'];
+        const isAllowed = allowedPaths.some(path => url.includes(path));
+        if (!isAllowed) {
           return res.status(403).json({ 
             error: "Password change required", 
             code: "PASSWORD_CHANGE_REQUIRED" 
