@@ -29,6 +29,16 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   const { t } = useTranslation();
   const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const newPasswordRef = React.useRef<HTMLInputElement>(null);
+
+  // Focus the password input when modal opens instead of close button
+  React.useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        newPasswordRef.current?.focus();
+      }, 200);
+    }
+  }, [isOpen]);
 
   return (
     <Modal
@@ -37,7 +47,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       title={t('changePassword')}
       size="md"
     >
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6" noValidate>
         <div className="p-4 bg-yellow-50 text-yellow-800 rounded-xl flex items-start gap-3 border border-yellow-100 shadow-sm">
           <ShieldCheck size={20} className="shrink-0 mt-0.5" />
           <p className="text-sm font-bold leading-relaxed">{t('passwordChangeRequired')}</p>
@@ -54,23 +64,23 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
             {t('newPassword')}
           </label>
-          <div className="relative">
+          <div className="relative" dir="ltr">
             <input
+              ref={newPasswordRef}
               type={showNewPassword ? 'text' : 'password'}
-              required
-              minLength={8}
-              className="w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-main)] rounded-xl px-4 py-3.5 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all font-medium placeholder:text-[var(--color-text-muted)]"
-              placeholder="••••••••"
+              autoComplete="new-password"
+              className="w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-main)] rounded-xl px-4 pe-12 py-3.5 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all font-medium text-start"
+              placeholder={t('auth.enterNewPassword')}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              dir="ltr"
             />
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1"
             >
-              {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           <p className="text-[10px] text-[var(--color-text-muted)] font-medium mt-1">
@@ -82,23 +92,22 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
             {t('confirmPassword')}
           </label>
-          <div className="relative">
+          <div className="relative" dir="ltr">
             <input
               type={showConfirmPassword ? 'text' : 'password'}
-              required
-              minLength={8}
-              className="w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-main)] rounded-xl px-4 py-3.5 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all font-medium placeholder:text-[var(--color-text-muted)]"
-              placeholder="••••••••"
+              autoComplete="new-password"
+              className="w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-main)] rounded-xl px-4 pe-12 py-3.5 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all font-medium text-start"
+              placeholder={t('auth.confirmNewPassword')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              dir="ltr"
             />
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1"
             >
-              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
         </div>
@@ -113,7 +122,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           </button>
           <button
             type="submit"
-            disabled={loading || !newPassword || !confirmPassword}
+            disabled={loading || !newPassword || !confirmPassword || newPassword.length < 8}
             className="px-6 py-2.5 bg-[var(--color-primary)] text-white text-sm font-bold rounded-xl hover:bg-[var(--color-primary)]/90 transition-all shadow-lg shadow-[var(--color-primary)]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading ? (

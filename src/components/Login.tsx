@@ -54,6 +54,12 @@ const Login: React.FC = () => {
       const result = await loginUser(username, password, rememberMe);
       
       if (result && result.user) {
+        // Check if user needs to change password before granting access
+        if (result.user.requires_password_change) {
+          setShowChangeModal(true);
+          setLoading(false);
+          return;
+        }
         login(result.user, result.token || 'authenticated'); 
       }
     } catch (err: any) {
@@ -167,7 +173,10 @@ const Login: React.FC = () => {
 
       <ChangePasswordModal
         isOpen={showChangeModal}
-        onClose={() => setShowChangeModal(false)}
+        onClose={() => {
+          // Don't allow closing if password change is required (forced change)
+          // User must change password to proceed
+        }}
         onSubmit={handleChangeSubmit}
         newPassword={newPassword}
         setNewPassword={setNewPassword}

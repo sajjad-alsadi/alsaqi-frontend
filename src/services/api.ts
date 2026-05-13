@@ -84,7 +84,17 @@ api.interceptors.response.use(
       } else if (response?.status === 400) {
         toast.error(translatedMsg || i18n.t('invalidRequest'));
       } else if (response?.status === 403) {
-        toast.error(translatedMsg || i18n.t('accessDenied'));
+        const errorCode = typeof errorData === 'object' ? errorData.code : response?.data?.code;
+        if (errorCode === 'PASSWORD_CHANGE_REQUIRED') {
+          // Force logout so user goes back to login page where the change password modal will appear
+          toast.error(translatedMsg || i18n.t('passwordChangeRequired'));
+          if (window.location.pathname !== '/login') {
+            // Clear auth state and redirect to login
+            window.location.href = '/login';
+          }
+        } else {
+          toast.error(translatedMsg || i18n.t('accessDenied'));
+        }
       } else if (response?.status === 404) {
         toast.error(i18n.t('resourceNotFound'));
       } else if (response?.status >= 500) {

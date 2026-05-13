@@ -60,10 +60,18 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
       document.body.style.overflow = 'hidden';
       // Focus the modal after animation
       setTimeout(() => {
-        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        // Prefer focusing the first input/textarea over buttons (like close button)
+        const firstInput = modalRef.current?.querySelector<HTMLElement>(
+          'input, select, textarea'
         );
-        firstFocusable?.focus();
+        if (firstInput) {
+          firstInput.focus();
+        } else {
+          const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          firstFocusable?.focus();
+        }
       }, 100);
     }
 

@@ -50,6 +50,27 @@ export class AuthService {
 
       await db.prepare("UPDATE users SET failed_attempts = 0, locked_until = NULL, last_login = CURRENT_TIMESTAMP WHERE id = ?::uuid").run(user.id);
 
+      // Check password expiry
+      let requiresPasswordChange = !!user.requires_password_change;
+      if (!requiresPasswordChange && user.password_last_changed) {
+        try {
+          const settings = await db.prepare("SELECT password_expiry_days FROM user_management_settings WHERE id = 1").get() as any;
+          const expiryDays = settings?.password_expiry_days || 90;
+          if (expiryDays > 0) {
+            const lastChanged = new Date(user.password_last_changed);
+            const daysSinceChange = Math.floor((Date.now() - lastChanged.getTime()) / (1000 * 60 * 60 * 24));
+            if (daysSinceChange >= expiryDays) {
+              requiresPasswordChange = true;
+              // Mark in DB so middleware also blocks
+              await db.prepare("UPDATE users SET requires_password_change = 1 WHERE id = ?::uuid").run(user.id);
+            }
+          }
+        } catch (e) {
+          // If settings table doesn't exist or query fails, skip expiry check
+          console.error("[AuthService] Password expiry check failed:", e);
+        }
+      }
+
       // Log login history
       try {
         await db.prepare("INSERT INTO login_history (user_id, ip_address, user_agent, status) VALUES (?::uuid, ?::text, ?::text, 'Success')")
@@ -91,7 +112,7 @@ export class AuthService {
           username: user.username,
           role: user.role,
           name: user.name,
-          requires_password_change: user.requires_password_change
+          requires_password_change: requiresPasswordChange
         },
         token,
         refreshToken

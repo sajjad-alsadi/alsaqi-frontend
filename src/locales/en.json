@@ -1104,6 +1104,8 @@
     "contactAdmin": "Contact Admin",
     "copyrightTextNew": "All rights reserved to Al Saqi Electronic Payment Services",
     "passwordChanged": "Password changed successfully",
+    "enterNewPassword": "Enter new password",
+    "confirmNewPassword": "Re-enter new password",
     "loginTitle": "Login to System",
     "loginFailed": "Login failed. Please check your credentials.",
     "resetPassword": "Reset Password",
