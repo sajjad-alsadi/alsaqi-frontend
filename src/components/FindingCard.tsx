@@ -43,11 +43,11 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
           </div>
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h4 className="font-bold text-xl text-[var(--color-text-main)]">{t('findings.findingNumber')}{formatNumber(finding.id)}</h4>
+              <h4 className="font-bold text-xl text-[var(--color-text-main)]">{t('findings.findingNumber')}{finding.finding_number || formatNumber(finding.id)}</h4>
               <Badge type="risk" value={finding.risk_level} />
             </div>
             <p className="text-xs text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
-              {t('common.auditPlan')}: {formatNumber(finding.audit_id)} • {t('common.statusLabel')}: <Badge type="status" value={finding.status} className="ms-2" />
+              {t('common.auditPlan')}: {finding.plan_code || formatNumber(finding.audit_id)} • {t('common.statusLabel')}: <Badge type="status" value={finding.status} className="ms-2" />
             </p>
           </div>
         </div>

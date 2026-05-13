@@ -2502,6 +2502,8 @@
     "systemHealth": "System Health",
     "serverStatus": "Server and System Services Status",
     "stable": "STABLE",
+    "degraded": "DEGRADED",
+    "critical": "CRITICAL",
     "auditToday": "Audit Actions Today",
     "actions": "actions",
     "totalErrors": "Error Log (Total)",

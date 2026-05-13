@@ -1,0 +1,118 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Finding Number Display and Generation Uses Raw UUIDs/Generic Format
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists in both display and generation
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases:
+    - FindingCard renders `finding.id` (UUID) instead of `finding.finding_number`
+    - FindingCard renders `finding.audit_id` (UUID) instead of parent plan's `plan_code`
+    - AppCodeGenerator generates `{DeptCode}-FD-{YY}-{NNN}` instead of `{plan_code}-FD-{NNN}` when plan has `plan_code`
+  - **Bug Condition from design**: `isBugCondition(input)` returns true when:
+    - `action == 'display'` AND `finding.id` is displayed as identifier OR `finding.audit_id` is displayed as plan reference
+    - `action == 'create'` AND `auditPlan.plan_code IS NOT NULL` AND generated `finding_number` does not start with `plan_code`
+  - **Test assertions (Expected Behavior)**:
+    - FindingCard output CONTAINS `finding.finding_number` (e.g., `IA-PL-25-003-FD-001`)
+    - FindingCard output CONTAINS parent plan's `plan_code` (e.g., `IA-PL-25-003`)
+    - Generated `finding_number` STARTS WITH `{plan_code}-FD-` when plan has `plan_code`
+    - Generated `finding_number` MATCHES pattern `{plan_code}-FD-{NNN}` with zero-padded sequential counter
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found:
+    - e.g., FindingCard renders UUID `deb0a161-f3bf-9d36-4de0-6343f183af8e` instead of `IA-PL-25-003-FD-001`
+    - e.g., `AppCodeGenerator.generateCode('audit_findings', 'IA')` returns `IA-FD-25-004` instead of `IA-PL-25-003-FD-001`
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Fallback Code Generation and Other Entity Behavior Unchanged
+  - **IMPORTANT**: Follow observation-first methodology
+  - **Observe behavior on UNFIXED code for non-buggy inputs**:
+    - Observe: `AppCodeGenerator.generateCode('audit_findings', 'IA')` returns `IA-FD-25-XXX` format (when plan has no `plan_code`)
+    - Observe: `AppCodeGenerator.generateCode('audit_plans', 'IA')` returns `IA-PL-25-XXX` format
+    - Observe: `AppCodeGenerator.generateCode('audit_programs', 'IA')` returns `IA-PG-25-XXX` format
+    - Observe: `AppCodeGenerator.generateCode('audit_tasks', 'IA')` returns `IA-TK-25-XXX` format
+    - Observe: `AppCodeGenerator.generateCode('recommendations', 'IA')` returns `IA-RC-25-XXX` format
+    - Observe: `AppCodeGenerator.generateCode('risk_register', 'IA')` returns `IA-RK-25-XXX` format
+    - Observe: `AppCodeGenerator.generateCode('compliance_items', 'IA')` returns `IA-CM-25-XXX` format
+    - Observe: FindingCard renders detail fields (condition, criteria, cause, consequence, recommendation) unchanged
+    - Observe: FindingCard renders badges, buttons, and interactions correctly
+  - **Write property-based tests capturing observed behavior**:
+    - For all non-finding entity types, `generateCode(entityType, dept)` output matches original format `{DeptCode}-{DocType}-{YY}-{NNN}`
+    - For findings created under plans with NO `plan_code`, generated code matches fallback format `{DeptCode}-FD-{YY}-{NNN}`
+    - For FindingCard with existing old-format `finding_number` values, display renders correctly
+    - For FindingCard detail fields, all non-identifier content renders unchanged
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+
+- [x] 3. Fix for meaningful finding numbers (display and generation)
+
+  - [x] 3.1 Add `finding_number` field to `AuditFinding` interface
+    - In `src/types.ts`, add `finding_number?: string` to the `AuditFinding` interface
+    - This enables type-safe access to the finding number in the UI
+    - _Bug_Condition: isBugCondition(input) where AuditFinding interface lacks finding_number field_
+    - _Expected_Behavior: AuditFinding interface includes finding_number as optional string_
+    - _Preservation: No existing fields are modified or removed_
+    - _Requirements: 2.1_
+
+  - [x] 3.2 Update `FindingCard` to display `finding_number` and `plan_code`
+    - In `src/components/FindingCard.tsx`, change line ~50 from `{formatNumber(finding.id)}` to display `finding.finding_number` with fallback to `finding.id`
+    - Change line ~53 from `{formatNumber(finding.audit_id)}` to display the parent plan's `plan_code` (pass as prop or resolve via data)
+    - Ensure backward compatibility: if `finding_number` is absent, fall back to `finding.id`
+    - _Bug_Condition: FindingCard displays finding.id (UUID) and finding.audit_id (UUID) as identifiers_
+    - _Expected_Behavior: FindingCard displays finding.finding_number and plan_code; falls back to UUID if finding_number absent_
+    - _Preservation: All other FindingCard elements (badges, buttons, detail fields, interactions) remain unchanged_
+    - _Requirements: 2.1, 2.3, 3.3, 3.4_
+
+  - [x] 3.3 Add `generateFindingCode` method to `AppCodeGenerator`
+    - In `src/server/utils/AppCodeGenerator.ts`, add a new static method `generateFindingCode(auditId: string)`
+    - Method looks up the audit plan by `auditId` to retrieve its `plan_code`
+    - If `plan_code` exists: generate `{plan_code}-FD-{NNN}` where NNN is zero-padded sequential counter scoped to that plan
+    - If `plan_code` is null/empty: fall back to existing `generateCode('audit_findings', department)` logic
+    - Sequential counter queries existing findings for that plan to determine next number
+    - _Bug_Condition: AppCodeGenerator has no plan-aware generation path; always uses generic {DeptCode}-FD-{YY}-{NNN}_
+    - _Expected_Behavior: generateFindingCode produces {plan_code}-FD-{NNN} when plan has plan_code_
+    - _Preservation: Fallback to {DeptCode}-FD-{YY}-{NNN} when plan has no plan_code; other entity generation unchanged_
+    - _Requirements: 2.2, 3.1, 3.2_
+
+  - [x] 3.4 Update `BaseService.create` to use plan-aware generation for findings
+    - In `src/server/services/BaseService.ts`, modify the `create` method
+    - When `tableName === 'audit_findings'` and `body.audit_id` is present, call `AppCodeGenerator.generateFindingCode(body.audit_id)` instead of generic `generateCode`
+    - Fall back to generic `generateCode` if `audit_id` is not provided
+    - _Bug_Condition: BaseService.create calls generateCode(tableName, body.department) without plan context for findings_
+    - _Expected_Behavior: BaseService.create calls generateFindingCode(body.audit_id) for audit_findings when audit_id present_
+    - _Preservation: All other entity creation paths remain unchanged; finding creation without audit_id uses fallback_
+    - _Requirements: 2.2, 3.1, 3.2_
+
+  - [x] 3.5 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Finding Number Display and Generation Uses Plan-Derived Code
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied:
+      - FindingCard displays `finding.finding_number` instead of UUID
+      - FindingCard displays `plan_code` instead of `audit_id` UUID
+      - Generated `finding_number` starts with `{plan_code}-FD-` for plans with `plan_code`
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - _Requirements: 2.1, 2.2, 2.3_
+
+  - [x] 3.6 Verify preservation tests still pass
+    - **Property 2: Preservation** - Fallback Code Generation and Other Entity Behavior Unchanged
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix:
+      - Other entity code generation unchanged
+      - Fallback finding code generation unchanged
+      - Existing findings display correctly
+      - FindingCard detail fields render unchanged
+
+- [x] 4. Checkpoint - Ensure all tests pass
+  - Run full test suite to confirm no regressions
+  - Verify bug condition test (Property 1) passes after fix
+  - Verify preservation tests (Property 2) still pass after fix
+  - Ensure all tests pass, ask the user if questions arise

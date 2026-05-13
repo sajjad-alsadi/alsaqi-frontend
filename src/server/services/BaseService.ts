@@ -155,7 +155,12 @@ export class BaseService {
       
       const codeCol = codeColumns[tableName];
       if (codeCol && !body[codeCol]) {
-         const code = await AppCodeGenerator.generateCode(tableName, body.department);
+         let code: string | null = null;
+         if (tableName === 'audit_findings' && body.audit_id) {
+           code = await AppCodeGenerator.generateFindingCode(body.audit_id);
+         } else {
+           code = await AppCodeGenerator.generateCode(tableName, body.department);
+         }
          if (code) body[codeCol] = code;
       }
 

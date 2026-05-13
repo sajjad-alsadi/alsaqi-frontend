@@ -1170,7 +1170,7 @@ export const runMigrations = async () => {
       const adminRole = await db.prepare("SELECT id FROM roles WHERE name = ?").get(ROLES.ADMIN);
       if (adminRole && adminRole.id) {
         console.log(`[SEED] Found Admin Role ID: ${adminRole.id}. Updating admin user...`);
-        const result = await db.prepare("UPDATE users SET role_id = ? WHERE username = 'admin' AND (role_id IS NULL OR role_id = '' OR role_id::text != ?)").run(adminRole.id, adminRole.id);
+        const result = await db.prepare("UPDATE users SET role_id = ? WHERE username = 'admin' AND (role_id IS NULL OR role_id != ?)").run(adminRole.id, adminRole.id);
         console.log(`[SEED] Admin update rows: ${result.changes}`);
       }
     }

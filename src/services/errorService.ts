@@ -3,8 +3,8 @@ import i18next from 'i18next';
 /**
  * Translates error messages from the backend to the current language
  */
-export const translateError = (error: any, language: 'en' | 'ar'): string => {
-  const t = (key: string, options?: any) => i18next.t(key, { lng: language, ...options });
+export const translateError = (error: string | { message?: string; error?: string } | null | undefined, language: 'en' | 'ar'): string => {
+  const t = (key: string, options?: Record<string, unknown>) => i18next.t(key, { lng: language, ...options });
   
   if (!error) return t('errorOccurred');
   

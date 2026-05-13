@@ -49,6 +49,39 @@ export class AppCodeGenerator {
     return deptCode;
   }
 
+  static async generateFindingCode(auditId: string): Promise<string | null> {
+    try {
+      // Look up the audit plan to get its plan_code
+      const plan = await db.prepare("SELECT plan_code, department FROM audit_plans WHERE id = ?").get(auditId) as any;
+
+      if (plan && plan.plan_code) {
+        // Generate plan-derived code: {plan_code}-FD-{NNN}
+        const prefix = `${plan.plan_code}-FD-`;
+
+        const latestFinding = await db.prepare(
+          "SELECT finding_number as code FROM audit_findings WHERE finding_number LIKE ? ORDER BY finding_number DESC LIMIT 1"
+        ).get(`${prefix}%`) as any;
+
+        let nextNumber = 1;
+        if (latestFinding && latestFinding.code) {
+          const parts = latestFinding.code.split('-');
+          const lastNumber = parseInt(parts[parts.length - 1]);
+          if (!isNaN(lastNumber)) {
+            nextNumber = lastNumber + 1;
+          }
+        }
+
+        return `${prefix}${nextNumber.toString().padStart(3, '0')}`;
+      }
+
+      // Fallback: use existing generic format
+      return await this.generateCode('audit_findings', plan?.department);
+    } catch (error) {
+      console.error('[AppCodeGenerator] Error generating finding code:', error);
+      return await this.generateCode('audit_findings');
+    }
+  }
+
   static async generateCode(tableName: string, departmentName?: string): Promise<string | null> {
     const codeColumn = TABLE_CODE_COLUMNS[tableName];
     if (!codeColumn) return null;

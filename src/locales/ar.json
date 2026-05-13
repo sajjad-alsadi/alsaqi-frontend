@@ -2502,6 +2502,8 @@
     "systemHealth": "سلامة النظام",
     "serverStatus": "حالة الخادم وخدمات النظام",
     "stable": "مستقر",
+    "degraded": "متدهور",
+    "critical": "حرج",
     "auditToday": "إجراءات التدقيق اليوم",
     "actions": "إجراء",
     "totalErrors": "سجل الأخطاء (إجمالي)",

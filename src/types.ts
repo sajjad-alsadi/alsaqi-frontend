@@ -99,6 +99,8 @@ export interface AuditProcedure {
 export interface AuditFinding {
   id?: number | string;
   audit_id: number | string;
+  finding_number?: string;
+  plan_code?: string;
   condition: string;
   criteria: string;
   cause: string;
