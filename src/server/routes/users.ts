@@ -1,4 +1,3 @@
-import { ADMIN_ROLES } from '../../constants';
 import express from 'express';
 import { z } from 'zod';
 import { UserService } from '../services/UserService';
@@ -28,21 +27,22 @@ export const createUserRoutes = (
   db: any,
   authenticate: any,
   authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
 
-  router.get(`/init`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get(`/init`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
     const data = await UserService.getInitData();
     res.json(data);
   }));
 
-  router.get(`/`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get(`/`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
     const result = await UserService.getUsers(req.query);
     res.json(result);
   }));
 
-  router.get(`/summary`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get(`/summary`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
     const summary = await UserService.getUserSummary();
     res.json(summary);
   }));
@@ -52,14 +52,14 @@ export const createUserRoutes = (
     res.json(data);
   }));
 
-  router.get(`/:id`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get(`/:id`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const user = await UserService.getUserById(id);
     if (!user) throw new NotFoundError("User not found");
     res.json(user);
   }));
 
-  router.post(`/`, authenticate, authorize(ADMIN_ROLES), validateSchema(userSchema), asyncHandler(async (req, res) => {
+  router.post(`/`, authenticate, checkPermission('User', 'Create'), validateSchema(userSchema), asyncHandler(async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
       throw new ValidationError("Username and password are required for new users");
@@ -72,7 +72,7 @@ export const createUserRoutes = (
     res.json(user);
   }));
 
-  router.put(`/:id`, authenticate, authorize(ADMIN_ROLES), validateSchema(userSchema), asyncHandler(async (req, res) => {
+  router.put(`/:id`, authenticate, checkPermission('User', 'Edit'), validateSchema(userSchema), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     
     const { oldUser } = await UserService.updateUser(id, req.body);
@@ -117,8 +117,20 @@ export const createUserRoutes = (
     res.json({ success: true });
   }));
 
-  router.post(`/:id/suspend`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post(`/:id/suspend`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
+    if ((req as any).user.id === req.params.id || (req as any).user.id === id) {
+      return res.status(403).json({ error: "Cannot perform this action on your own account" });
+    }
+    const targetUser = await db.prepare("SELECT role FROM users WHERE id = ?").get(id) as any;
+    if (targetUser && targetUser.role === 'Admin') {
+      const adminCount = await db.prepare(
+        "SELECT COUNT(*) as count FROM users WHERE role = 'Admin' AND status = 'Active' AND id != ?"
+      ).get(id) as any;
+      if (!adminCount || adminCount.count === 0) {
+        return res.status(403).json({ error: "Cannot remove the last admin user" });
+      }
+    }
     const currentStatus = await UserService.getStatus(id);
     const newStatus = currentStatus === 'Suspended' ? 'Active' : 'Suspended';
     const username = await UserService.setStatus(id, newStatus);
@@ -129,15 +141,27 @@ export const createUserRoutes = (
     res.json({ success: true, status: newStatus });
   }));
 
-  router.post(`/:id/archive`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post(`/:id/archive`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
+    if ((req as any).user.id === req.params.id || (req as any).user.id === id) {
+      return res.status(403).json({ error: "Cannot perform this action on your own account" });
+    }
+    const targetUser = await db.prepare("SELECT role FROM users WHERE id = ?").get(id) as any;
+    if (targetUser && targetUser.role === 'Admin') {
+      const adminCount = await db.prepare(
+        "SELECT COUNT(*) as count FROM users WHERE role = 'Admin' AND status = 'Active' AND id != ?"
+      ).get(id) as any;
+      if (!adminCount || adminCount.count === 0) {
+        return res.status(403).json({ error: "Cannot remove the last admin user" });
+      }
+    }
     const username = await UserService.setStatus(id, 'Archived');
     invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, "Archive", "User Management", `Archived user: ${username}`);
     res.json({ success: true });
   }));
 
-  router.post(`/:id/activate`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post(`/:id/activate`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.activateUser(id);
     invalidateUserCache(id);
@@ -145,15 +169,27 @@ export const createUserRoutes = (
     res.json({ success: true });
   }));
 
-  router.delete(`/:id`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.delete(`/:id`, authenticate, checkPermission('User', 'Delete'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
+    if ((req as any).user.id === req.params.id || (req as any).user.id === id) {
+      return res.status(403).json({ error: "Cannot perform this action on your own account" });
+    }
+    const targetUser = await db.prepare("SELECT role FROM users WHERE id = ?").get(id) as any;
+    if (targetUser && targetUser.role === 'Admin') {
+      const adminCount = await db.prepare(
+        "SELECT COUNT(*) as count FROM users WHERE role = 'Admin' AND status = 'Active' AND id != ?"
+      ).get(id) as any;
+      if (!adminCount || adminCount.count === 0) {
+        return res.status(403).json({ error: "Cannot remove the last admin user" });
+      }
+    }
     const username = await UserService.deleteUser(id);
     invalidateUserCache(id);
     await AuthService.logAudit((req as any).user.username, "Deleted User", "User Management", `Deleted user ${username}`);
     res.json({ success: true });
   }));
 
-  router.post(`/:id/unlock`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post(`/:id/unlock`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.unlockUser(id);
     invalidateUserCache(id);
@@ -165,7 +201,7 @@ export const createUserRoutes = (
     newPassword: z.string().min(6).max(100)
   });
 
-  router.post(`/:id/reset-password`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post(`/:id/reset-password`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const validation = resetPasswordSchema.safeParse(req.body);
     if (!validation.success) {

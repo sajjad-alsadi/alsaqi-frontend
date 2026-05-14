@@ -15,6 +15,7 @@ export interface User {
   status: 'Active' | 'Disabled';
   last_login?: string;
   theme?: 'light' | 'dark';
+  permissions?: Array<{ module: string; action: string }>;
 }
 
 export interface AuditPlan {

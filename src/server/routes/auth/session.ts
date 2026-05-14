@@ -14,9 +14,27 @@ export const createSessionRoutes = (
   const router = express.Router();
 
   // Current User
-  router.get("/me", authenticate, (req, res) => {
-    res.json({ user: (req as any).user });
-  });
+  router.get("/me", authenticate, asyncHandler(async (req, res) => {
+    const user = (req as any).user;
+    
+    // Fetch permissions from DB for the current user
+    let permissions: Array<{ module: string; action: string }> = [];
+    try {
+      permissions = await db.prepare(`
+        SELECT p.module, p.action FROM permissions p
+        JOIN role_permissions rp ON p.id = rp.permission_id
+        WHERE rp.role_id = (SELECT role_id FROM users WHERE id = ?)
+        UNION
+        SELECT p.module, p.action FROM permissions p
+        JOIN user_permissions up ON p.id = up.permission_id
+        WHERE up.user_id = ? AND up.is_allowed = 1
+      `).all(user.id, user.id) as Array<{ module: string; action: string }>;
+    } catch (e) {
+      console.error("[Session] Failed to fetch permissions:", e);
+    }
+
+    res.json({ user: { ...user, permissions } });
+  }));
 
   // Refresh Token
   router.post("/refresh", asyncHandler(async (req, res) => {

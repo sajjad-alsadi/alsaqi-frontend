@@ -172,3 +172,27 @@ export enum ModuleName {
   USER = 'User',
   SETTING = 'Setting',
 }
+
+/**
+ * Maps frontend MODULES values to backend DB permissions.module values.
+ * Used to bridge the gap between frontend route/module names and the
+ * permission module names stored in the database.
+ */
+export const PERMISSION_MODULE_MAP: Record<string, string> = {
+  'UserManagement': 'User',
+  'Settings': 'Setting',
+  'AuditPlans': 'Audit',
+  'AuditReports': 'Audit',
+  'AuditCharter': 'Audit',
+  'AuditTasks': 'Audit',
+  'AuditProgramLibrary': 'Audit',
+  'RiskRegister': 'Risk',
+  'FraudLog': 'Finding',
+  'SystemErrorLogs': 'Setting',
+  'ConflictOfInterest': 'Audit',
+  'InternalPolicies': 'Audit',
+  'ExecutiveReports': 'Audit',
+  'OrgStructure': 'Setting',
+  'AuditTrail': 'Setting',
+  'Dashboard': 'Audit',
+};

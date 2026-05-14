@@ -106,13 +106,30 @@ export class AuthService {
         console.error("[AuthService] Failed to create user session", e);
       }
 
+      // Fetch user permissions from DB (role_permissions + user_permissions)
+      let permissions: Array<{ module: string; action: string }> = [];
+      try {
+        permissions = await db.prepare(`
+          SELECT p.module, p.action FROM permissions p
+          JOIN role_permissions rp ON p.id = rp.permission_id
+          WHERE rp.role_id = (SELECT role_id FROM users WHERE id = ?::uuid)
+          UNION
+          SELECT p.module, p.action FROM permissions p
+          JOIN user_permissions up ON p.id = up.permission_id
+          WHERE up.user_id = ?::uuid AND up.is_allowed = 1
+        `).all(user.id, user.id) as Array<{ module: string; action: string }>;
+      } catch (e) {
+        console.error("[AuthService] Failed to fetch permissions during login:", e);
+      }
+
       return {
         user: {
           id: user.id,
           username: user.username,
           role: user.role,
           name: user.name,
-          requires_password_change: requiresPasswordChange
+          requires_password_change: requiresPasswordChange,
+          permissions
         },
         token,
         refreshToken

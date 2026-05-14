@@ -1,5 +1,6 @@
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_PERMISSIONS, Module, Permission, Role } from '../permissions';
+import { PERMISSION_MODULE_MAP } from '../constants';
 
 export const usePermissions = () => {
   const { user } = useAppContext();
@@ -10,14 +11,17 @@ export const usePermissions = () => {
     // Admin has all permissions
     if (user.role === 'Admin') return true;
     
-    let permissions = DEFAULT_PERMISSIONS;
+    // DB-sourced permissions (primary source of truth)
+    if (user.permissions && user.permissions.length > 0) {
+      const dbModule = PERMISSION_MODULE_MAP[module] || module;
+      return user.permissions.some(p => p.module === dbModule && p.action === permission);
+    }
     
-    const rolePermissions = permissions?.[user.role as Role];
+    // Fallback to static defaults when DB permissions unavailable
+    const rolePermissions = DEFAULT_PERMISSIONS[user.role as Role];
     if (!rolePermissions) return false;
-    
     const modulePermissions = rolePermissions[module];
     if (!modulePermissions) return false;
-    
     return modulePermissions.includes(permission);
   };
 

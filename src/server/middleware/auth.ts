@@ -108,8 +108,7 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
         const queryResult = await db.prepare(`
           SELECT 1 FROM permissions p
           JOIN role_permissions rp ON p.id = rp.permission_id
-          JOIN roles r ON rp.role_id = r.id
-          JOIN users u ON r.name = u.role
+          JOIN users u ON rp.role_id = u.role_id
           WHERE u.id = ? AND p.module = ? AND p.action = ?
           UNION
           SELECT 1 FROM permissions p
