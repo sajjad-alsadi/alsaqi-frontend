@@ -328,19 +328,18 @@ export const runMigrations = async () => {
     )`,
     `CREATE TABLE IF NOT EXISTS outgoing_letters (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      sequence_number TEXT NOT NULL,
-      letter_date TEXT NOT NULL,
-      recipient_entity TEXT NOT NULL,
-      subject TEXT NOT NULL,
-      classification TEXT NOT NULL,
-      sending_method TEXT NOT NULL,
+      sequence_number TEXT UNIQUE NOT NULL,
+      letter_date DATE,
+      recipient_entity TEXT,
+      subject TEXT,
+      classification TEXT,
+      sending_method TEXT,
       attachment_file TEXT,
-      created_by TEXT NOT NULL,
+      created_by TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       is_archived INTEGER DEFAULT 0
     )`,
-    `DROP TABLE IF EXISTS app_settings`,
     `CREATE TABLE IF NOT EXISTS app_settings (
       id INTEGER PRIMARY KEY,
       app_name TEXT,
@@ -376,7 +375,6 @@ export const runMigrations = async () => {
       updated_by TEXT,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`,
-    `DROP TABLE IF EXISTS pdf_settings`,
     `CREATE TABLE IF NOT EXISTS pdf_settings (
       id INTEGER PRIMARY KEY,
       arabic_font_name TEXT DEFAULT 'Simplified Arabic',
@@ -544,7 +542,6 @@ export const runMigrations = async () => {
       FOREIGN KEY (target_user_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (changed_by_id) REFERENCES users(id) ON DELETE CASCADE
     )`,
-    `DROP TABLE IF EXISTS user_management_settings`,
     `CREATE TABLE IF NOT EXISTS user_management_settings (
       id INTEGER PRIMARY KEY,
       failed_login_threshold INTEGER DEFAULT 3,
@@ -683,20 +680,6 @@ export const runMigrations = async () => {
       attachment_file TEXT,
       created_by TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS outgoing_letters (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      sequence_number TEXT UNIQUE NOT NULL,
-      letter_date DATE,
-      recipient_entity TEXT,
-      subject TEXT,
-      classification TEXT,
-      sending_method TEXT,
-      attachment_file TEXT,
-      created_by TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      is_archived INTEGER DEFAULT 0
     )`
   ];
 

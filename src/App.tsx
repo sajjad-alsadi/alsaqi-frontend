@@ -7,6 +7,8 @@ import { UserProvider } from './context/UserContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { useIdleTimeout } from './hooks/useIdleTimeout';
+import { usePermissions } from './hooks/usePermissions';
+import { MODULES } from './permissions';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Login from './components/Login';
 import Layout from './components/Layout';
@@ -46,6 +48,7 @@ const LoadingFallback = () => (
 const AppContent: React.FC = () => {
   const { user, language } = useAppContext();
   const { isCheckingSession } = useAuth();
+  const { canView } = usePermissions();
   
   // Initialize idle timeout
   useIdleTimeout();
@@ -57,8 +60,6 @@ const AppContent: React.FC = () => {
   if (!user) {
     return <Login />;
   }
-
-  const isAdmin = user.role === 'Admin' || user.role === 'Administrator';
 
   return (
     <Layout>
@@ -87,12 +88,12 @@ const AppContent: React.FC = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/departments" element={<DepartmentManagement />} />
           
-          {/* Admin Routes */}
-          <Route path="/system-logs" element={isAdmin ? <SystemLogsManagement /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/system-errors" element={isAdmin ? <Navigate to="/system-logs" replace /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/error-logs" element={isAdmin ? <SystemErrorLogs /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/trail" element={isAdmin ? <AuditTrail /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/users" element={isAdmin ? <UserManagement /> : <Navigate to="/dashboard" replace />} />
+          {/* Permission-gated Routes */}
+          <Route path="/system-logs" element={canView(MODULES.SYSTEM_LOGS) ? <SystemLogsManagement /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/system-errors" element={canView(MODULES.SYSTEM_LOGS) ? <Navigate to="/system-logs" replace /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/error-logs" element={canView(MODULES.SYSTEM_LOGS) ? <SystemErrorLogs /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/trail" element={canView(MODULES.SYSTEM_LOGS) ? <AuditTrail /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/users" element={canView(MODULES.USER_MANAGEMENT) ? <UserManagement /> : <Navigate to="/dashboard" replace />} />
           <Route path="/job-titles" element={<Navigate to="/departments" replace />} />
           
           <Route path="/settings" element={<Settings />} />

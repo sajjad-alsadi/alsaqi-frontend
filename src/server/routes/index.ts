@@ -91,7 +91,7 @@ export const setupRoutes = (
   // Modular Routes
   app.use("/api/job-titles", createJobTitleRoutes(db, authenticate, authorize, logError));
   app.use("/api/users", createUserRoutes(db, authenticate, authorize, checkPermission, logError));
-  app.use("/api", createRoleRoutes(db, authenticate, authorize, logError));
+  app.use("/api", createRoleRoutes(db, authenticate, authorize, checkPermission, logError));
   app.use("/api/user-sessions", createSessionRoutes(db, authenticate, authorize, logError));
   app.use("/api", createLogRoutes(db, authenticate, authorize, logError));
   app.use("/api", createSettingsRoutes(db, authenticate, authorize, logError));

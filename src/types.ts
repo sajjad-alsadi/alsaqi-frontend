@@ -1,4 +1,5 @@
 import { Type } from "@google/genai";
+import { UserRole } from "./constants";
 
 export { Language } from "./constants";
 
@@ -10,7 +11,7 @@ export interface User {
   email: string;
   department: string;
   job_title?: string;
-  role: 'Admin' | 'Administrator' | 'Internal Auditor' | 'Compliance Officer' | 'Risk Officer' | 'Manager' | 'Viewer' | 'Compliance';
+  role: `${UserRole}`;
   profile_picture?: string;
   status: 'Active' | 'Disabled';
   last_login?: string;

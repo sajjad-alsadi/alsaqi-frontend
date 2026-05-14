@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MessageSquare, Send, Trash2 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import api from '../services/api';
+import { UserRole } from '../constants';
 
 interface Comment {
   id: string | number;
@@ -75,7 +76,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
               <span className="text-[10px] font-bold text-[var(--color-text-muted)]">{new Date(comment.created_at).toLocaleString()}</span>
             </div>
             <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{comment.content}</p>
-            {(user?.id === comment.user_id || user?.role === 'Admin') && (
+            {(user?.id === comment.user_id || user?.role === UserRole.ADMIN) && (
               <button 
                 onClick={() => deleteComment(comment.id)} 
                 className="text-rose-500 hover:text-rose-700 mt-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest transition-colors"

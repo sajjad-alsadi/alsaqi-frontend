@@ -6,6 +6,7 @@ import { AuditTask, AuditEvidence as AuditEvidenceType } from '../types';
 import { useFormat } from '../services/formatService';
 import { useAppContext } from '../context/AppContext';
 import InteractiveIcon from './InteractiveIcon';
+import { UserRole } from '../constants';
 
 interface AuditTasksTableProps {
   tasks: AuditTask[];
@@ -31,8 +32,8 @@ const AuditTasksTable: React.FC<AuditTasksTableProps> = ({
   const { user } = useAppContext();
 
   const userRole = user?.role as any;
-  const canApprove = userRole === 'Manager';
-  const canSubmit = userRole === 'Internal Auditor' || userRole === 'Auditor';
+  const canApprove = userRole === UserRole.MANAGER;
+  const canSubmit = userRole === UserRole.INTERNAL_AUDITOR || userRole === 'Auditor';
   const canTransitionToInProgress = canSubmit || canApprove;
 
   return (

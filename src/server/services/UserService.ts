@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { db } from '../db/index';
 import { NotFoundError, ConflictError } from '../utils/errors';
 import { N8nService } from '../utils/n8nService';
+import { UserRole } from '../../constants';
 
 export class UserService {
   static async getUsers(query: any) {
@@ -56,7 +57,7 @@ export class UserService {
     const active = await db.prepare("SELECT COUNT(*) as count FROM users WHERE status = 'Active'").get() as any;
     const suspended = await db.prepare("SELECT COUNT(*) as count FROM users WHERE status = 'Suspended'").get() as any;
     const archived = await db.prepare("SELECT COUNT(*) as count FROM users WHERE status = 'Archived'").get() as any;
-    const admins = await db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'Admin'").get() as any;
+    const admins = await db.prepare(`SELECT COUNT(*) as count FROM users WHERE role = '${UserRole.ADMIN}'`).get() as any;
     
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

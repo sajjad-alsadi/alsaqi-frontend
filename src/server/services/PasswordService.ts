@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { db } from '../db/index';
 import { NotFoundError, ValidationError, AuthError } from '../utils/errors';
 import { invalidateUserCache } from '../middleware/auth';
+import { UserRole } from '../../constants';
 
 export class PasswordService {
   static async requestReset(username: string) {
@@ -19,7 +20,7 @@ export class PasswordService {
     await db.prepare(`INSERT INTO password_reset_requests (user_id, username, name, department) VALUES (?::uuid, ?::text, ?::text, ?::text)`)
       .run(user.id, user.username, user.name, user.department);
     
-    const admins = await db.prepare("SELECT id FROM users WHERE role = 'Admin'").all() as {id: number}[];
+    const admins = await db.prepare(`SELECT id FROM users WHERE role = '${UserRole.ADMIN}'`).all() as {id: number}[];
     const alertMsg = `Password Reset Request\nUsername: ${user.username}\nName: ${user.name}\nDepartment: ${user.department || 'N/A'}`;
     
     return {

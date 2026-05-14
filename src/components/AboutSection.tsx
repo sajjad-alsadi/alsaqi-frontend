@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/AppContext';
 import { Save, Edit2 } from 'lucide-react';
 import api from '../services/api';
+import { UserRole } from '../constants';
 
 const AboutSection: React.FC = () => {
   const { user } = useAppContext();
@@ -64,7 +65,7 @@ const AboutSection: React.FC = () => {
         <h3 className="text-xl font-bold text-[var(--color-text-main)] uppercase tracking-widest">
           {t('settings.aboutApplication')}
         </h3>
-        {user?.role === 'Admin' && (
+        {user?.role === UserRole.ADMIN && (
           <button 
             onClick={() => isEditing ? handleSave() : setIsEditing(true)}
             className="btn-primary flex items-center gap-2"

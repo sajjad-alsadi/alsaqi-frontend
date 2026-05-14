@@ -11,7 +11,24 @@ export class ProfileService {
     `).get(userId) as any;
     
     if (!user) throw new NotFoundError("User profile not found");
-    return user;
+
+    // Fetch user permissions from DB (role_permissions + user_permissions)
+    let permissions: Array<{ module: string; action: string }> = [];
+    try {
+      permissions = await db.prepare(`
+        SELECT p.module, p.action FROM permissions p
+        JOIN role_permissions rp ON p.id = rp.permission_id
+        WHERE rp.role_id = (SELECT role_id FROM users WHERE id = ?)
+        UNION
+        SELECT p.module, p.action FROM permissions p
+        JOIN user_permissions up ON p.id = up.permission_id
+        WHERE up.user_id = ? AND up.is_allowed = 1
+      `).all(userId, userId) as Array<{ module: string; action: string }>;
+    } catch (e) {
+      // If permissions query fails, return empty array (frontend will use fallback)
+    }
+
+    return { ...user, permissions };
   }
 
   static async updateProfile(userId: string | number, data: any, username: string) {

@@ -6,6 +6,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError, NotFoundError } from '../utils/errors';
 import { validateSchema } from '../middleware/validate';
 import { invalidateUserCache } from '../middleware/auth';
+import { UserRole } from '../../constants';
 
 const userSchema = z.object({
   username: z.string().min(3).max(50).optional(),
@@ -123,9 +124,9 @@ export const createUserRoutes = (
       return res.status(403).json({ error: "Cannot perform this action on your own account" });
     }
     const targetUser = await db.prepare("SELECT role FROM users WHERE id = ?").get(id) as any;
-    if (targetUser && targetUser.role === 'Admin') {
+    if (targetUser && targetUser.role === UserRole.ADMIN) {
       const adminCount = await db.prepare(
-        "SELECT COUNT(*) as count FROM users WHERE role = 'Admin' AND status = 'Active' AND id != ?"
+        `SELECT COUNT(*) as count FROM users WHERE role = '${UserRole.ADMIN}' AND status = 'Active' AND id != ?`
       ).get(id) as any;
       if (!adminCount || adminCount.count === 0) {
         return res.status(403).json({ error: "Cannot remove the last admin user" });
@@ -147,9 +148,9 @@ export const createUserRoutes = (
       return res.status(403).json({ error: "Cannot perform this action on your own account" });
     }
     const targetUser = await db.prepare("SELECT role FROM users WHERE id = ?").get(id) as any;
-    if (targetUser && targetUser.role === 'Admin') {
+    if (targetUser && targetUser.role === UserRole.ADMIN) {
       const adminCount = await db.prepare(
-        "SELECT COUNT(*) as count FROM users WHERE role = 'Admin' AND status = 'Active' AND id != ?"
+        `SELECT COUNT(*) as count FROM users WHERE role = '${UserRole.ADMIN}' AND status = 'Active' AND id != ?`
       ).get(id) as any;
       if (!adminCount || adminCount.count === 0) {
         return res.status(403).json({ error: "Cannot remove the last admin user" });
@@ -175,9 +176,9 @@ export const createUserRoutes = (
       return res.status(403).json({ error: "Cannot perform this action on your own account" });
     }
     const targetUser = await db.prepare("SELECT role FROM users WHERE id = ?").get(id) as any;
-    if (targetUser && targetUser.role === 'Admin') {
+    if (targetUser && targetUser.role === UserRole.ADMIN) {
       const adminCount = await db.prepare(
-        "SELECT COUNT(*) as count FROM users WHERE role = 'Admin' AND status = 'Active' AND id != ?"
+        `SELECT COUNT(*) as count FROM users WHERE role = '${UserRole.ADMIN}' AND status = 'Active' AND id != ?`
       ).get(id) as any;
       if (!adminCount || adminCount.count === 0) {
         return res.status(403).json({ error: "Cannot remove the last admin user" });

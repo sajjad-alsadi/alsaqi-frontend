@@ -5,7 +5,7 @@ import { FraudService } from "../services/FraudService";
 import { AuthService } from "../services/AuthService";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ValidationError } from "../utils/errors";
-import { ADMIN_ROLES } from "../../constants";
+import { ADMIN_ROLES, UserRole } from "../../constants";
 
 const fraudRequestSchema = z.object({
   reason: z.string().min(5).max(1000),
@@ -35,7 +35,7 @@ export const createFraudRoutes = (db: any, authenticate: any, authorize: any, lo
     const requestId = await FraudService.createRequest(userId, userName, reason);
 
     // Notify Admins/Managers in Parallel (Fixing Sequential Awaiting Delay)
-    const admins = await db.prepare("SELECT id FROM users WHERE role IN ('Admin', 'Administrator', 'Manager')").all() as { id: number }[];
+    const admins = await db.prepare(`SELECT id FROM users WHERE role IN ('${UserRole.ADMIN}', '${UserRole.MANAGER}')`).all() as { id: number }[];
     
     await Promise.all(
       admins.map(admin => 

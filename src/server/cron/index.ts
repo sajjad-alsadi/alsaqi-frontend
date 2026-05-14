@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { db } from '../db/index';
 import logger from '../utils/logger';
 import { NotificationService } from '../services/NotificationService';
+import { UserRole } from '../../constants';
 
 export const startAutomationJobs = () => {
   logger.info('[CRON] Starting automation jobs...');
@@ -160,7 +161,7 @@ const runDailyAutomations = async () => {
 
       // Notify department heads or compliance officers
       // For now, notify all admins
-      const admins = await db.prepare(`SELECT id FROM users WHERE role IN ('Admin', 'Administrator')`).all();
+      const admins = await db.prepare(`SELECT id FROM users WHERE role IN ('${UserRole.ADMIN}')`).all();
       for (const admin of admins) {
         await NotificationService.create(
           admin.id,
@@ -197,7 +198,7 @@ const runDailyAutomations = async () => {
       `);
       await updateStmt.run(lastYearStr);
 
-      const admins = await db.prepare(`SELECT id FROM users WHERE role IN ('Admin', 'Administrator')`).all();
+      const admins = await db.prepare(`SELECT id FROM users WHERE role IN ('${UserRole.ADMIN}')`).all();
       for (const admin of admins) {
         await NotificationService.create(
           admin.id,

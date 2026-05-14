@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useNotificationContext } from '../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
+import { usePermissions } from '../hooks/usePermissions';
+import { MODULES } from '../permissions';
 import NotificationBell from './NotificationBell';
 import { motion, AnimatePresence } from 'motion/react';
 import InteractiveIcon from './InteractiveIcon';
@@ -58,6 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { unreadCount } = useNotificationContext();
   const { t, i18n } = useTranslation();
   const { formatNumber, translateName } = useFormat();
+  const { canView } = usePermissions();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(() => {
@@ -69,30 +72,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const activeTab = location.pathname.substring(1) || 'dashboard';
 
-  const menuItems = [
-    { id: 'dashboard', label: t('common.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
-    { id: 'charter', label: t('common.auditCharter'), icon: BookOpen, path: '/charter' },
-    { id: 'plan', label: t('common.auditPlan'), icon: CalendarRange, path: '/plan' },
-    { id: 'tasks', label: t('common.tasks'), icon: ClipboardCheck, path: '/tasks' },
-    { id: 'library', label: t('common.library'), icon: Library, path: '/library' },
-    { id: 'findings', label: t('common.findings'), icon: FileSearch, path: '/findings' },
-    { id: 'evidence', label: t('common.evidence'), icon: FileText, path: '/evidence' },
-    { id: 'recommendations', label: t('common.recommendations'), icon: TrendingUp, path: '/recommendations' },
-    { id: 'risks', label: t('common.risks'), icon: ShieldAlert, path: '/risks' },
-    { id: 'compliance-matrix', label: t('common.complianceMatrix'), icon: ShieldCheck, path: '/compliance-matrix' },
-    { id: 'integrity', label: t('common.integrityManagement'), icon: Scale, path: '/integrity' },
-    { id: 'departments', label: t('common.departments'), icon: Building, path: '/departments' },
-    { id: 'reports', label: t('common.reportsAndAnalytics'), icon: BarChart3, path: '/reports' },
-    { id: 'cms', label: t('common.cms'), icon: Network, path: '/cms' },
-    { id: 'notifications', label: t('common.notifications'), icon: Bell, path: '/notifications', badge: unreadCount > 0 ? formatNumber(unreadCount) : undefined },
+  const allMenuItems = [
+    { id: 'dashboard', label: t('common.dashboard'), icon: LayoutDashboard, path: '/dashboard', module: MODULES.DASHBOARD },
+    { id: 'charter', label: t('common.auditCharter'), icon: BookOpen, path: '/charter', module: MODULES.AUDIT_CHARTER },
+    { id: 'plan', label: t('common.auditPlan'), icon: CalendarRange, path: '/plan', module: MODULES.AUDIT_PLANS },
+    { id: 'tasks', label: t('common.tasks'), icon: ClipboardCheck, path: '/tasks', module: MODULES.AUDIT_TASKS },
+    { id: 'library', label: t('common.library'), icon: Library, path: '/library', module: MODULES.AUDIT_PROGRAM_LIBRARY },
+    { id: 'findings', label: t('common.findings'), icon: FileSearch, path: '/findings', module: MODULES.AUDIT_FINDINGS },
+    { id: 'evidence', label: t('common.evidence'), icon: FileText, path: '/evidence', module: MODULES.AUDIT_EVIDENCE },
+    { id: 'recommendations', label: t('common.recommendations'), icon: TrendingUp, path: '/recommendations', module: MODULES.RECOMMENDATIONS },
+    { id: 'risks', label: t('common.risks'), icon: ShieldAlert, path: '/risks', module: MODULES.RISK_REGISTER },
+    { id: 'compliance-matrix', label: t('common.complianceMatrix'), icon: ShieldCheck, path: '/compliance-matrix', module: MODULES.COMPLIANCE_MATRIX },
+    { id: 'integrity', label: t('common.integrityManagement'), icon: Scale, path: '/integrity', module: MODULES.INTEGRITY_MANAGEMENT },
+    { id: 'departments', label: t('common.departments'), icon: Building, path: '/departments', module: MODULES.DEPARTMENTS },
+    { id: 'reports', label: t('common.reportsAndAnalytics'), icon: BarChart3, path: '/reports', module: MODULES.REPORTS },
+    { id: 'cms', label: t('common.cms'), icon: Network, path: '/cms', module: MODULES.CORRESPONDENCE },
+    { id: 'notifications', label: t('common.notifications'), icon: Bell, path: '/notifications', module: MODULES.NOTIFICATIONS, badge: unreadCount > 0 ? formatNumber(unreadCount) : undefined },
+    { id: 'users', label: t('common.users'), icon: Users, path: '/users', module: MODULES.USER_MANAGEMENT },
+    { id: 'system-logs', label: t('SystemLogsManagement'), icon: Terminal, path: '/system-logs', module: MODULES.SYSTEM_LOGS },
+    { id: 'settings', label: t('common.settings'), icon: Settings, path: '/settings', module: MODULES.SETTINGS },
   ];
 
-  if (user?.role === 'Admin' || user?.role === 'Administrator') {
-    menuItems.push({ id: 'users', label: t('common.users'), icon: Users, path: '/users' });
-    menuItems.push({ id: 'system-logs', label: t('SystemLogsManagement'), icon: Terminal, path: '/system-logs' });
-  }
-
-  menuItems.push({ id: 'settings', label: t('common.settings'), icon: Settings, path: '/settings' });
+  // Filter menu items based on user permissions
+  const menuItems = allMenuItems.filter(item => canView(item.module));
 
   return (
     <div className={`flex min-h-screen bg-[var(--color-bg-main)] transition-colors duration-300 ${isRTL ? 'font-sans' : ''} ${theme === 'dark' ? 'dark' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>

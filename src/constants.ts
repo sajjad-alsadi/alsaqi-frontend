@@ -3,11 +3,6 @@
  * Prevents magic strings and ensures consistency across the codebase.
  */
 
-// Role Constants to prevent DRY violations across services
-export const ADMIN_ROLES = ['Admin', 'Administrator', 'Manager'];
-export const COMPLIANCE_ROLES = ['Admin', 'Administrator', 'Manager', 'Compliance', 'Compliance Officer'];
-export const STAFF_ROLES = ['Admin', 'Administrator', 'Manager', 'Staff', 'User', 'Auditor'];
-
 export enum AuditStatus {
   OPEN = 'Open',
   IN_PROGRESS = 'In Progress',
@@ -56,11 +51,17 @@ export enum Priority {
 
 export enum UserRole {
   ADMIN = 'Admin',
-  ADMINISTRATOR = 'Administrator',
+  INTERNAL_AUDITOR = 'Internal Auditor',
+  COMPLIANCE_OFFICER = 'Compliance Officer',
+  RISK_OFFICER = 'Risk Officer',
   MANAGER = 'Manager',
-  AUDITOR = 'Auditor',
-  USER = 'User',
+  VIEWER = 'Viewer',
 }
+
+// Role Constants to prevent DRY violations across services
+export const ADMIN_ROLES = [UserRole.ADMIN, UserRole.MANAGER] as const;
+export const COMPLIANCE_ROLES = [UserRole.ADMIN, UserRole.MANAGER, UserRole.COMPLIANCE_OFFICER] as const;
+export const STAFF_ROLES = [UserRole.ADMIN, UserRole.MANAGER, UserRole.INTERNAL_AUDITOR, UserRole.VIEWER] as const;
 
 export enum UserStatus {
   ACTIVE = 'Active',

@@ -1,20 +1,21 @@
 import { db } from '../db/index';
 import { NotFoundError, ValidationError, ForbiddenError } from '../utils/errors';
 import { N8nService } from '../utils/n8nService';
+import { UserRole } from '../../constants';
 
 const ALLOWED_TRANSITIONS: Record<string, Record<string, { roles: string[] }>> = {
   'draft': {
-    'in_progress': { roles: ['Auditor', 'Internal Auditor', 'Manager'] }
+    'in_progress': { roles: ['Auditor', UserRole.INTERNAL_AUDITOR, UserRole.MANAGER] }
   },
   'in_progress': {
-    'review': { roles: ['Auditor', 'Internal Auditor'] }
+    'review': { roles: ['Auditor', UserRole.INTERNAL_AUDITOR] }
   },
   'review': {
-    'approved': { roles: ['Manager'] },
-    'in_progress': { roles: ['Manager'] }
+    'approved': { roles: [UserRole.MANAGER] },
+    'in_progress': { roles: [UserRole.MANAGER] }
   },
   'approved': {
-    'completed': { roles: ['Manager'] }
+    'completed': { roles: [UserRole.MANAGER] }
   }
 };
 

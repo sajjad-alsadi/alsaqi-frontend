@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { rateLimit } from 'express-rate-limit';
+import { UserRole } from '../../constants';
 
 // Simple in-memory cache to reduce DB load
 // In a distributed environment, use Redis. Since this often runs locally/embedded, memory is fine.
@@ -101,7 +102,7 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
   const checkPermission = (module: string, action: string) => {
     return async (req: any, res: any, next: any) => {
       const user = req.user;
-      if (user.role === 'Admin') return next();
+      if (user.role === UserRole.ADMIN) return next();
 
       const cacheKey = `perm_${user.id}_${module}_${action}`;
       const hasPermission = await getCachedOrDb(cacheKey, async () => {
@@ -125,7 +126,7 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
     };
   };
 
-  const authorize = (allowedRoles: string[]) => {
+  const authorize = (allowedRoles: readonly string[]) => {
     return (req: any, res: any, next: any) => {
       if (!allowedRoles.includes(req.user.role)) {
         return res.status(403).json({ error: "Forbidden: Insufficient permissions" });

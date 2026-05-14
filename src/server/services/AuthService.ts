@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { db } from '../db/index';
 import { AuthError, ForbiddenError } from '../utils/errors';
+import { UserRole } from '../../constants';
 
 export class AuthService {
   static async login(usernameOrEmail: string, password: string, jwtSecret: string, JWT_PRIVATE_KEY: string, ipAddress?: string, userAgent?: string, rememberMe?: boolean) {
@@ -36,7 +37,7 @@ export class AuthService {
           
           // Notify all admins about the locked account
           try {
-            const admins = await db.prepare("SELECT id FROM users WHERE role = 'Admin' AND status = 'active'").all() as any[];
+            const admins = await db.prepare(`SELECT id FROM users WHERE role = '${UserRole.ADMIN}' AND status = 'active'`).all() as any[];
             for (const admin of admins) {
               await db.prepare("INSERT INTO notifications (user_id, event_type, description, related_module, link, status, actor_id, entity_type) VALUES (?::uuid, ?::text, ?::text, ?::text, ?::text, 'Unread', ?::uuid, 'user')")
                 .run(admin.id, 'account_locked', `Account "${user.username}" locked after 5 failed login attempts (IP: ${ipAddress || 'Unknown'})`, 'Security', '/users', user.id);

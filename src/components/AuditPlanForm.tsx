@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslation } from 'react-i18next';
 import { AuditPlan } from '../types';
-import { AuditStatus, AuditType, RiskLevel } from '../constants';
+import { AuditStatus, AuditType, RiskLevel, UserRole } from '../constants';
 import api from '../services/api';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
@@ -101,7 +101,7 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
       .then(res => {
         const users = Array.isArray(res.data) ? res.data : (res.data.data || []);
         // Filter for role 'Manager'
-        setAuditors(users.filter((u: any) => u.role === 'Manager'));
+        setAuditors(users.filter((u: any) => u.role === UserRole.MANAGER));
       })
       .catch(() => setAuditors([]));
   }, []);

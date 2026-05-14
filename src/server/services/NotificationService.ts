@@ -1,4 +1,5 @@
 import { db } from '../db/index';
+import { UserRole } from '../../constants';
 
 export type NotificationEventType =
   | 'plan_started' | 'plan_assigned' | 'plan_status_changed'
@@ -287,7 +288,7 @@ export class NotificationService {
   /** Get admin user IDs */
   static async getAdminIds(): Promise<string[]> {
     const admins = await db.prepare(
-      "SELECT id FROM users WHERE role IN ('Admin', 'Administrator') AND status = 'active'"
+      `SELECT id FROM users WHERE role = '${UserRole.ADMIN}' AND status = 'active'`
     ).all() as any[];
     return admins.map((a: any) => a.id);
   }
