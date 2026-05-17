@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Building, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import api from '../services/api';
+import { extractErrorMessage } from '../services/errorService';
 import toast from 'react-hot-toast';
 import { useDepartments } from '../hooks/useDepartments';
 import JobTitles from './JobTitles';
@@ -29,7 +30,7 @@ const DepartmentManagement: React.FC = () => {
       refresh();
     } catch (error: any) {
       logger.error("Error adding department:", error);
-      const msg = error.response?.data?.error || t('failedToAddDepartment');
+      const msg = extractErrorMessage(error, t('failedToAddDepartment'));
       setError(msg);
       toast.error(msg);
     } finally {
@@ -56,7 +57,7 @@ const DepartmentManagement: React.FC = () => {
       setDeptToDelete(null);
     } catch (error: any) {
       logger.error("Error deleting department:", error);
-      const msg = error.response?.data?.error || t('failedToDeleteDepartment');
+      const msg = extractErrorMessage(error, t('failedToDeleteDepartment'));
       setError(msg);
       toast.error(msg);
     }
@@ -71,7 +72,7 @@ const DepartmentManagement: React.FC = () => {
       refresh();
     } catch (error: any) {
       logger.error("Error updating department:", error);
-      const msg = error.response?.data?.error || t('failedToUpdateDepartment');
+      const msg = extractErrorMessage(error, t('failedToUpdateDepartment'));
       setError(msg);
       toast.error(msg);
     }

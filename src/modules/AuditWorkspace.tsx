@@ -19,6 +19,7 @@ import {
   Link as LinkIcon
 } from 'lucide-react';
 import api from '../services/api';
+import { extractErrorMessage } from '../services/errorService';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Badge from '../components/Badge';
@@ -100,7 +101,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
       toast.success(t('statusUpdated'));
       await fetchData();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t('errorOccurred'));
+      toast.error(extractErrorMessage(error, t('errorOccurred')));
     } finally {
       setIsUpdatingStatus(false);
     }

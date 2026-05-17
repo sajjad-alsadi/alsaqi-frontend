@@ -1,6 +1,22 @@
 import i18next from 'i18next';
 
 /**
+ * Extracts a displayable error message string from an API error response.
+ * Handles both old format ({ error: "string" }) and new format ({ error: { code, message, traceId } }).
+ */
+export const extractErrorMessage = (error: any, fallback?: string): string => {
+  const data = error?.response?.data;
+  if (!data) return fallback || i18next.t('errorOccurred');
+
+  const errorField = data.error;
+  if (typeof errorField === 'string') return errorField;
+  if (typeof errorField === 'object' && errorField?.message) return errorField.message;
+  if (typeof data.message === 'string') return data.message;
+
+  return fallback || i18next.t('errorOccurred');
+};
+
+/**
  * Translates error messages from the backend to the current language
  */
 export const translateError = (error: string | { message?: string; error?: string } | null | undefined, language: 'en' | 'ar'): string => {

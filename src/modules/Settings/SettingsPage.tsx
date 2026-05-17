@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useUser } from '../../context/UserContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import api from '../../services/api';
+import { extractErrorMessage } from '../../services/errorService';
 import { useTranslation } from 'react-i18next';
 import { 
   User, Lock, Settings as SettingsIcon, Shield, 
@@ -83,7 +84,7 @@ const Settings: React.FC = () => {
       fetchProfile();
     } catch (err: any) {
       logger.error('Operation failed', err);
-      const errorMsg = err.response?.data?.error || err.message || t('common.error');
+      const errorMsg = extractErrorMessage(err, t('common.error'));
       setMessage({ text: errorMsg, type: 'error' });
     }
   };
@@ -107,7 +108,7 @@ const Settings: React.FC = () => {
       setMessage({ text: t('settings.passwordChanged'), type: 'success' });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || t('failedToChangePassword');
+      const errorMsg = extractErrorMessage(err, t('failedToChangePassword'));
       setMessage({ text: errorMsg, type: 'error' });
     }
   };

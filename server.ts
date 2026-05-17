@@ -150,9 +150,9 @@ async function startServer() {
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws: wss:; frame-ancestors 'none'");
     if (process.env.NODE_ENV === 'production') {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws: wss:; frame-ancestors 'none'");
     }
     next();
   });
@@ -304,7 +304,7 @@ async function startServer() {
   // Validates CSRF tokens on state-changing requests (POST, PUT, PATCH, DELETE)
   // Must be after cookieParser (reads csrf-token cookie) and before routes
   app.use(csrfMiddleware({
-    exemptPaths: ['/api/auth/login', '/health'],
+    exemptPaths: ['/api/auth/login', '/api/auth/refresh', '/api/system-errors', '/api/log-error', '/api/security/events', '/health'],
     tokenHeader: 'x-csrf-token',
     cookieName: 'csrf-token',
     tokenByteLength: 32,

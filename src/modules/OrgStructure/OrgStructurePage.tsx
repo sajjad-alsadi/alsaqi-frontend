@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
+import { extractErrorMessage } from '../../services/errorService';
 import { useDepartments, Department } from '../../hooks/useDepartments';
 import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';
@@ -233,7 +234,7 @@ const OrgStructure: React.FC = () => {
       refresh();
       if (activeTab === 'tree') fetchTree();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t('archiveFailed'));
+      toast.error(extractErrorMessage(error, t('archiveFailed')));
     }
   };
 
@@ -529,7 +530,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
       onSave();
       onClose();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t('saveFailed'));
+      toast.error(extractErrorMessage(error, t('saveFailed')));
     } finally {
       setLoading(false);
     }

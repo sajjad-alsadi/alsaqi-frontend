@@ -7,6 +7,7 @@ import { UserManagementTab, AccessScope } from '../../constants';
 import { useFormat } from '../../services/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import api from '../../services/api';
+import { extractErrorMessage } from '../../services/errorService';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
 
@@ -227,7 +228,7 @@ const UserManagement: React.FC = () => {
       });
     } catch (err: any) {
       logger.error('Operation failed', err);
-      setUserError(err.response?.data?.error || t('userManagement.errorSavingUser'));
+      setUserError(extractErrorMessage(err, t('userManagement.errorSavingUser')));
     } finally {
       setIsSavingUser(false);
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, User, Mail, FileText, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
 import { submitContactAdminRequest, ContactAdminRequest } from '../../services/contactAdminService';
+import { extractErrorMessage } from '../../services/errorService';
 import api from '../../services/api';
 
 interface ContactAdminModalProps {
@@ -94,7 +95,7 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
       }
     } catch (error: any) {
       setStatus('error');
-      setErrorMessage(error.response?.data?.error || t('auth.contactAdminModal.errorMessage'));
+      setErrorMessage(extractErrorMessage(error, t('auth.contactAdminModal.errorMessage')));
     }
   };
 

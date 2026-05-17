@@ -79,7 +79,7 @@ export class DepartmentService {
          created_at, updated_at)
       VALUES (?,?,?,?,?,?,?,?,'Active',?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
     `).run(
-      id, data.entity_code, data.name_ar, data.name_en ?? null,
+      id, data.entity_code, data.name_ar, data.name_en || data.name_ar,
       data.entity_type ?? 'Department', data.parent_id ?? null,
       data.manager_name ?? null, level,
       data.description ?? null, data.location ?? null,

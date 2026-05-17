@@ -10,6 +10,14 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  // Attach CSRF token from cookie to request header
+  const csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrf-token='))
+    ?.split('=')[1];
+  if (csrfToken) {
+    config.headers['x-csrf-token'] = csrfToken;
+  }
   return config;
 });
 
