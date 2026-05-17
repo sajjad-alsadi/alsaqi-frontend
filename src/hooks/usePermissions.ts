@@ -1,9 +1,9 @@
-import { useAppContext } from '../context/AppContext';
+import { useUser } from '../context/UserContext';
 import { DEFAULT_PERMISSIONS, Module, Permission, Role } from '../permissions';
 import { UserRole } from '../constants';
 
 export const usePermissions = () => {
-  const { user } = useAppContext();
+  const { user } = useUser();
   
   const hasPermission = (module: Module, permission: Permission): boolean => {
     if (!user) return false;

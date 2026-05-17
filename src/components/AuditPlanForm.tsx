@@ -100,7 +100,7 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
     api.get('/users/list')
       .then(res => {
         const users = Array.isArray(res.data) ? res.data : (res.data.data || []);
-        // Filter for role 'Manager'
+        // Filter for role Manager
         setAuditors(users.filter((u: any) => u.role === UserRole.MANAGER));
       })
       .catch(() => setAuditors([]));

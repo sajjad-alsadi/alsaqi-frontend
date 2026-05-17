@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { Save } from 'lucide-react';
 import api from '../services/api';
 
 const PDFSettingsSection: React.FC = () => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);

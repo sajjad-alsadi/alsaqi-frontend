@@ -1,22 +1,13 @@
-import React, { createContext, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import i18n from '../i18n';
 import { useAuth } from './AuthContext';
 import { useUser } from './UserContext';
 import { usePreferences } from './PreferencesContext';
-import { User, Language } from '../types';
+import { User } from '../types';
 
 interface AppContextType {
-  user: User | null;
-  token: string | null;
-  language: Language;
-  theme: 'light' | 'dark';
-  dashboardLayout: 'standard' | 'compact' | 'detailed';
   login: (user: User, token: string) => void;
   logout: () => void;
-  setLanguage: (lang: Language) => void;
-  setTheme: (theme: 'light' | 'dark') => void;
-  setDashboardLayout: (layout: 'standard' | 'compact' | 'detailed') => void;
-  updateUser: (userData: Partial<User>) => void;
   setActiveTab: (tab: string) => void;
   fetchNotifications: () => Promise<void>;
 }
@@ -24,38 +15,44 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { token, setToken, logout: authLogout } = useAuth();
-  const { user, setUser, updateUser } = useUser();
-  const { language, theme, dashboardLayout, setLanguage, setTheme, setDashboardLayout } = usePreferences();
+  const { setToken, logout: authLogout } = useAuth();
+  const { setUser } = useUser();
+  const { language } = usePreferences();
   
   useEffect(() => {
     i18n.changeLanguage(language);
   }, [language]);
   
-  // State that remains in AppContext for now
-  const [activeTab, setActiveTab] = React.useState('dashboard');
+  // State that remains in AppContext for orchestration
+  const [, setActiveTab] = React.useState('dashboard');
 
-  const login = React.useCallback((userData: User, authToken: string) => {
+  const login = useCallback((userData: User, authToken: string) => {
     setUser(userData);
     setToken(authToken);
   }, [setUser, setToken]);
 
-  const logout = React.useCallback(async () => {
+  const logout = useCallback(async () => {
     authLogout();
     setUser(null);
   }, [authLogout, setUser]);
 
-  const fetchNotifications = async () => {};
+  const fetchNotifications = useCallback(async () => {}, []);
+
+  const value = useMemo(() => ({
+    login, logout, setActiveTab, fetchNotifications
+  }), [login, logout, fetchNotifications]);
+
+  // Memoize the directional wrapper to prevent re-renders of children
+  // when AppProvider re-renders due to auth state changes
+  const wrappedChildren = useMemo(() => (
+    <div dir={language === 'ar' ? 'rtl' : 'ltr'} className={language === 'ar' ? 'font-arabic' : 'font-sans'}>
+      {children}
+    </div>
+  ), [language, children]);
 
   return (
-    <AppContext.Provider value={{ 
-      user, token, language, theme, dashboardLayout,
-      login, logout, setLanguage, setTheme, setDashboardLayout, updateUser, setActiveTab,
-      fetchNotifications
-    }}>
-      <div dir={language === 'ar' ? 'rtl' : 'ltr'} className={language === 'ar' ? 'font-arabic' : 'font-sans'}>
-        {children}
-      </div>
+    <AppContext.Provider value={value}>
+      {wrappedChildren}
     </AppContext.Provider>
   );
 };

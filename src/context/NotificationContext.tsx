@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
 import { Notification } from '../types';
-import { useAppContext } from './AppContext';
+import { useUser } from './UserContext';
 import { useAuth } from './AuthContext';
 
 interface NotificationContextType {
@@ -24,7 +24,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAppContext();
+  const { user } = useUser();
   const { isCheckingSession } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);

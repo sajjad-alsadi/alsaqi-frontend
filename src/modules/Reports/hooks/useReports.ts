@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../../context/AuthContext';
+import { useUser } from '../../../context/UserContext';
 import { useAppContext } from '../../../context/AppContext';
 import { AuditReport, AuditPlan, AuditFinding, ExecData, ReportType } from '../types';
 import * as reportService from '../services/reportService';
 import { generatePdf, PdfSection } from '../../../utils/pdfExport';
 
 export const useReports = (activeSubTab: 'audit' | 'executive') => {
-  const { token, user, fetchNotifications } = useAppContext();
+  const { token } = useAuth();
+  const { user } = useUser();
+  const { fetchNotifications } = useAppContext();
   const { t, i18n } = useTranslation();
   
   // State

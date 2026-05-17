@@ -23,6 +23,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import Modal from '../../components/Modal';
 import PdfViewer from '../../components/PdfViewer';
 import Pagination from '../../components/Pagination';
+import { UserRole } from '../../constants';
 
 import OutgoingForm from './OutgoingForm';
 
@@ -185,7 +186,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
           />
         </div>
 
-        {userRole !== 'Viewer' && (
+        {userRole !== UserRole.VIEWER && (
           <button 
             onClick={() => setShowAddModal(true)}
             className="btn-primary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm"
@@ -262,7 +263,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                       <button className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-[var(--color-primary)] rounded-xl shadow-sm transition-all" title={t('common.download')}>
                         <Download size={16} />
                       </button>
-                      {userRole === 'Admin' && (
+                      {userRole === UserRole.ADMIN && (
                         <>
                           <button className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-amber-500 rounded-xl shadow-sm transition-all" title={t('common.edit')}>
                             <Edit2 size={16} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { AuditTrail } from '../types';
 import { History, Search, Filter, Clock, User, Activity, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -10,7 +10,7 @@ import { useFormat } from '../services/formatService';
 import Pagination from '../components/Pagination';
 
 const AuditTrailModule: React.FC = () => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDateTime, translateName, translateAction, translateModule } = useFormat();
   const [logs, setLogs] = useState<AuditTrail[]>([]);

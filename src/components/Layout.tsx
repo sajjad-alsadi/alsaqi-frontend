@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { useUser } from '../context/UserContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { useNotificationContext } from '../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../hooks/usePermissions';
@@ -56,7 +58,9 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, logout, language, setLanguage, theme, setTheme } = useAppContext();
+  const { logout } = useAppContext();
+  const { user } = useUser();
+  const { language, setLanguage, theme, setTheme } = usePreferences();
   const { unreadCount } = useNotificationContext();
   const { t, i18n } = useTranslation();
   const { formatNumber, translateName } = useFormat();

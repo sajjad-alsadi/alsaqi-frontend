@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { loginUser } from '../services/authService';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
@@ -13,7 +14,8 @@ import LoginForm from './Login/LoginForm';
 import LoginFooter from './Login/LoginFooter';
 
 const Login: React.FC = () => {
-  const { login, language, setLanguage } = useAppContext();
+  const { login } = useAppContext();
+  const { language, setLanguage } = usePreferences();
   const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

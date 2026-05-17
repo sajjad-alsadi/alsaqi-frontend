@@ -5,7 +5,7 @@ import {
   Plus, Scale
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
+import { usePreferences } from '../../context/PreferencesContext';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
 import { Language } from '../../constants';
 
@@ -18,7 +18,7 @@ import DashboardActivityFeed from './DashboardActivityFeed';
 import DashboardQuickActions from './DashboardQuickActions';
 
 const Dashboard: React.FC = () => {
-  const { language } = useAppContext();
+  const { language } = usePreferences();
   const { t } = useTranslation();
   const isRtl = language === Language.AR;
   

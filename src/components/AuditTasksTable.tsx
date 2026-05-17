@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { CheckCircle2, Clock, AlertCircle, Edit, Trash2, Eye } from 'lucide-react';
 import { AuditTask, AuditEvidence as AuditEvidenceType } from '../types';
 import { useFormat } from '../services/formatService';
-import { useAppContext } from '../context/AppContext';
+import { useUser } from '../context/UserContext';
 import InteractiveIcon from './InteractiveIcon';
 import { UserRole } from '../constants';
 
@@ -29,7 +29,7 @@ const AuditTasksTable: React.FC<AuditTasksTableProps> = ({
 }) => {
   const { t } = useTranslation();
   const { formatNumber, formatDate } = useFormat();
-  const { user } = useAppContext();
+  const { user } = useUser();
 
   const userRole = user?.role as any;
   const canApprove = userRole === UserRole.MANAGER;

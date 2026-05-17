@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Upload } from 'lucide-react';
 
@@ -10,7 +10,7 @@ interface LegalFormProps {
 }
 
 const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t } = useTranslation();
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

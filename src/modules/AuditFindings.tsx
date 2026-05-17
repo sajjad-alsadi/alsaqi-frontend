@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { AuditFinding } from '../types';
 import { Plus, AlertTriangle, FileText, CheckCircle2, MoreVertical, Search, Eye } from 'lucide-react';
@@ -17,7 +18,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import FindingCard from '../components/FindingCard';
 
 const AuditFindings: React.FC = () => {
-  const { token, setActiveTab } = useAppContext();
+  const { setActiveTab } = useAppContext();
+  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   
   const { findings, loading, fetchFindings } = useAuditFindings();

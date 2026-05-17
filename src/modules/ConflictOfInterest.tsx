@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { ShieldAlert, Plus, Edit, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -7,6 +8,7 @@ import Modal from '../components/Modal';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useFormat } from '../services/formatService';
+import { UserRole } from '../constants';
 
 interface COI {
   id: number;
@@ -20,7 +22,8 @@ interface COI {
 }
 
 const ConflictOfInterest: React.FC = () => {
-  const { token, user } = useAppContext();
+  const { token } = useAuth();
+  const { user } = useUser();
   const { t } = useTranslation();
   const { formatDate } = useFormat();
   const [declarations, setDeclarations] = useState<COI[]>([]);
@@ -83,7 +86,7 @@ const ConflictOfInterest: React.FC = () => {
     }
   };
 
-  const isAdminOrCompliance = user?.role === 'Admin' || user?.role === 'Administrator' || user?.role === 'Compliance' || user?.role === 'Compliance Officer';
+  const isAdminOrCompliance = user?.role === UserRole.ADMIN || user?.role === UserRole.COMPLIANCE_OFFICER;
 
   return (
     <div className="space-y-10">

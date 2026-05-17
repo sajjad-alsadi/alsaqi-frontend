@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Recommendation, AuditFinding } from '../types';
@@ -14,7 +14,7 @@ import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const RecommendationsModule: React.FC = () => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);

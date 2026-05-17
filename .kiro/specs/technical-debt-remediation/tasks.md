@@ -65,13 +65,13 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Framework: Vitest + fast-check
     - Strategy: Generate migrations in random order, verify execution order is strictly ascending by version string
 
-- [ ] 4. Unify Role Naming Convention
+- [x] 4. Unify Role Naming Convention
   - [x] 4.1 Update `src/constants.ts` to define a `UserRole` enum with canonical identifiers and remove `'Administrator'` from all role arrays
   - [x] 4.2 Update `ADMIN_ROLES`, `COMPLIANCE_ROLES`, and `STAFF_ROLES` arrays to use only `UserRole` enum values without duplicates
   - [x] 4.3 Update the `User` type definition in `src/types.ts` or `src/server/types.ts` to reference the `UserRole` enum
   - [x] 4.4 Create a versioned data migration that updates existing users with `role = 'Administrator'` to `role = 'Admin'`
-  - [-] 4.5 Update all role checks across the codebase to use the canonical `UserRole` enum
-  - [~] 4.6 Write property test: Role arrays contain only canonical identifiers (Property 5) [PBT]
+  - [x] 4.5 Update all role checks across the codebase to use the canonical `UserRole` enum
+  - [x] 4.6 Write property test: Role arrays contain only canonical identifiers (Property 5) [PBT]
 
     **Validates: Requirements 4.1, 4.5**
     - Test file: `src/server/__tests__/roles.property.test.ts`
@@ -79,19 +79,19 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Strategy: Enumerate all role group arrays, verify every element is a value from UserRole enum and no duplicates exist
 
 - [ ] 5. Add CSRF Protection
-  - [~] 5.1 Create `src/server/middleware/csrf.ts` with `generateCsrfToken()`, `csrfMiddleware()`, and `attachCsrfToken()` functions
-  - [~] 5.2 Implement timing-safe token comparison using `crypto.timingSafeEqual`
-  - [~] 5.3 Configure exempt paths (`/api/auth/login`, `/health`) that bypass CSRF validation
-  - [~] 5.4 Integrate CSRF middleware into the Express app in `server.ts` after auth middleware
-  - [~] 5.5 Update the auth login and token refresh handlers to call `attachCsrfToken()` on successful authentication
-  - [~] 5.6 Write property test: CSRF token generation on authentication events (Property 3) [PBT]
+  - [x] 5.1 Create `src/server/middleware/csrf.ts` with `generateCsrfToken()`, `csrfMiddleware()`, and `attachCsrfToken()` functions
+  - [x] 5.2 Implement timing-safe token comparison using `crypto.timingSafeEqual`
+  - [x] 5.3 Configure exempt paths (`/api/auth/login`, `/health`) that bypass CSRF validation
+  - [x] 5.4 Integrate CSRF middleware into the Express app in `server.ts` after auth middleware
+  - [x] 5.5 Update the auth login and token refresh handlers to call `attachCsrfToken()` on successful authentication
+  - [x] 5.6 Write property test: CSRF token generation on authentication events (Property 3) [PBT]
 
     **Validates: Requirements 3.1, 3.6, 3.7**
     - Test file: `src/server/__tests__/csrf.property.test.ts`
     - Framework: Vitest + fast-check
     - Strategy: Generate authentication events, verify each produces a unique token with at least 32 bytes of entropy (64 hex chars)
 
-  - [~] 5.7 Write property test: CSRF validation on state-changing requests (Property 4) [PBT]
+  - [x] 5.7 Write property test: CSRF validation on state-changing requests (Property 4) [PBT]
 
     **Validates: Requirements 3.2, 3.3**
     - Test file: `src/server/__tests__/csrf.property.test.ts`
@@ -99,18 +99,18 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Strategy: Generate state-changing requests (POST/PUT/PATCH/DELETE) with and without valid tokens to non-exempt paths; verify rejection (403) without token and acceptance with valid token
 
 - [ ] 6. Fix RSA Key Persistence
-  - [~] 6.1 Create `src/server/utils/keyStore.ts` with `KeyStore` class implementing `load()`, `save()`, and `getOrCreate()` methods
-  - [~] 6.2 Implement AES-256-GCM encryption for keys at rest using key derived from `SHA-256(JWT_SECRET + '_rsa_enc')`
-  - [~] 6.3 Implement storage path resolution: `DATA_DIR` env variable with fallback to `./data` directory; never use `/tmp`
-  - [~] 6.4 Integrate `KeyStore` into server startup, replacing in-memory key generation in `server.ts`
-  - [~] 6.5 Write property test: RSA key persistence round-trip (Property 10) [PBT]
+  - [x] 6.1 Create `src/server/utils/keyStore.ts` with `KeyStore` class implementing `load()`, `save()`, and `getOrCreate()` methods
+  - [x] 6.2 Implement AES-256-GCM encryption for keys at rest using key derived from `SHA-256(JWT_SECRET + '_rsa_enc')`
+  - [x] 6.3 Implement storage path resolution: `DATA_DIR` env variable with fallback to `./data` directory; never use `/tmp`
+  - [x] 6.4 Integrate `KeyStore` into server startup, replacing in-memory key generation in `server.ts`
+  - [x] 6.5 Write property test: RSA key persistence round-trip (Property 10) [PBT]
 
     **Validates: Requirements 6.3**
     - Test file: `src/server/__tests__/keyStore.property.test.ts`
     - Framework: Vitest + fast-check
     - Strategy: Generate valid RSA key pairs or mock PEM strings, persist via KeyStore, load back, verify byte-for-byte PEM equality
 
-  - [~] 6.6 Write property test: RSA keys encrypted at rest (Property 11) [PBT]
+  - [x] 6.6 Write property test: RSA keys encrypted at rest (Property 11) [PBT]
 
     **Validates: Requirements 6.5**
     - Test file: `src/server/__tests__/keyStore.property.test.ts`
@@ -118,16 +118,16 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Strategy: Generate key pairs, persist them, read raw file content, verify no PEM markers appear in the file; decrypt with correct secret and verify valid key material
 
 - [ ] 7. Add ESLint and Prettier Configuration
-  - [~] 7.1 Create `eslint.config.mjs` with flat config format supporting TypeScript, React 19, and React Hooks rules
-  - [~] 7.2 Create `.prettierrc` with project formatting options and `.prettierignore` excluding dist, node_modules, coverage
-  - [~] 7.3 Add `lint` and `format` scripts to `package.json`
-  - [~] 7.4 Set pre-existing violations to `warn` level so the build is not blocked
-  - [~] 7.5 Verify `npm run lint` executes without errors (warnings are acceptable)
+  - [x] 7.1 Create `eslint.config.mjs` with flat config format supporting TypeScript, React 19, and React Hooks rules
+  - [x] 7.2 Create `.prettierrc` with project formatting options and `.prettierignore` excluding dist, node_modules, coverage
+  - [x] 7.3 Add `lint` and `format` scripts to `package.json`
+  - [x] 7.4 Set pre-existing violations to `warn` level so the build is not blocked
+  - [x] 7.5 Verify `npm run lint` executes without errors (warnings are acceptable)
 - [ ] 8. Fix Context Provider Re-renders
-  - [~] 8.1 Refactor `src/context/AppContext.tsx` to remove re-aggregation of auth/user/preferences state; keep only orchestration logic (login/logout coordination) with memoized value
-  - [~] 8.2 Memoize all context values in `AuthContext.tsx`, `UserContext.tsx`, and `PreferencesContext.tsx` using `useMemo`
-  - [~] 8.3 Memoize all callback functions in context providers using `useCallback`
-  - [~] 8.4 Update components that consume `AppContext` for combined state to import from domain-specific contexts directly
+  - [x] 8.1 Refactor `src/context/AppContext.tsx` to remove re-aggregation of auth/user/preferences state; keep only orchestration logic (login/logout coordination) with memoized value
+  - [x] 8.2 Memoize all context values in `AuthContext.tsx`, `UserContext.tsx`, and `PreferencesContext.tsx` using `useMemo`
+  - [x] 8.3 Memoize all callback functions in context providers using `useCallback`
+  - [x] 8.4 Update components that consume `AppContext` for combined state to import from domain-specific contexts directly
   - [~] 8.5 Write property test: Context cross-domain render isolation (Property 12) [PBT]
 
     **Validates: Requirements 9.4, 9.5**
@@ -136,11 +136,11 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Strategy: Generate preference state changes and auth state changes; use render counters to verify cross-domain isolation (preference changes don't re-render auth-only consumers and vice versa)
 
 - [ ] 9. Accessibility Improvements
-  - [~] 9.1 Create `src/components/SkipToContent.tsx` component and render as first focusable element in `src/App.tsx`
-  - [~] 9.2 Create `src/components/LiveRegion.tsx` component with `polite` and `assertive` politeness levels
-  - [~] 9.3 Integrate `LiveRegion` with route changes (polite) and toast notifications (assertive)
-  - [~] 9.4 Create `src/components/FocusTrap.tsx` component with Escape-to-close support and integrate with `Modal` component
-  - [~] 9.5 Verify `<html>` element `dir` and `lang` attributes update on language switch (existing `PreferencesContext` logic)
+  - [x] 9.1 Create `src/components/SkipToContent.tsx` component and render as first focusable element in `src/App.tsx`
+  - [x] 9.2 Create `src/components/LiveRegion.tsx` component with `polite` and `assertive` politeness levels
+  - [x] 9.3 Integrate `LiveRegion` with route changes (polite) and toast notifications (assertive)
+  - [x] 9.4 Create `src/components/FocusTrap.tsx` component with Escape-to-close support and integrate with `Modal` component
+  - [x] 9.5 Verify `<html>` element `dir` and `lang` attributes update on language switch (existing `PreferencesContext` logic)
   - [~] 9.6 Write property test: Dynamic content accessibility announcements (Property 14) [PBT]
 
     **Validates: Requirements 12.3, 12.4**

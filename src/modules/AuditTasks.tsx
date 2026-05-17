@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { AuditTask, AuditPlan, AuditEvidence as AuditEvidenceType } from '../types';
@@ -20,7 +20,7 @@ import Pagination from '../components/Pagination';
 import AuditTasksTable from '../components/AuditTasksTable';
 
 const AuditTasksModule: React.FC = () => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
   const queryClient = useQueryClient();

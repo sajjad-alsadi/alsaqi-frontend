@@ -390,3 +390,32 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* === Skip to Content Link === */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: auto;
+  height: auto;
+  z-index: 9999;
+  padding: 12px 24px;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(10, 125, 133, 0.25);
+  text-decoration: none;
+  outline: 2px solid var(--color-primary-hover);
+  outline-offset: 2px;
+}

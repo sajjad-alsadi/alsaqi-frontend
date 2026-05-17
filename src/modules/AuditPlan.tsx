@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { useAuditPlans } from '../hooks/useAuditPlans';
 import { auditService } from '../services/auditService';
@@ -21,7 +21,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 
 const AuditPlanModule: React.FC = () => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
   

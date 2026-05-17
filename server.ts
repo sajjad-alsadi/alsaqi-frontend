@@ -9,13 +9,11 @@ import { WebSocketServer } from "ws";
 import fileUpload from "express-fileupload";
 import path from "path";
 import { fileURLToPath } from "url";
-import crypto from "crypto";
 import cookieParser from "cookie-parser";
 import fs from "fs";
 import jwt from "jsonwebtoken";
 import { FileUploadRequest } from "./src/server/types";
 import { db, initDb as initializeDatabase } from "./src/server/db/index";
-import { getPersistentDataDir } from "./src/server/db/index";
 import { runMigrations } from "./src/server/db/migrations";
 import { MigrationRunner } from "./src/server/db/migrationRunner";
 import { versionedMigrations } from "./src/server/db/versionedMigrations";
@@ -24,7 +22,9 @@ import { startAutomationJobs } from "./src/server/cron/index";
 import { ALLOWED_EXTENSIONS, MIME_TO_EXT, createSaveFile, createLogError } from "./src/server/utils/serverUtils";
 import { SecurityService } from "./src/server/services/SecurityService";
 import { globalErrorHandler, notFoundHandler } from "./src/server/middleware/error";
+import { csrfMiddleware } from "./src/server/middleware/csrf";
 import logger from "./src/server/utils/logger";
+import { KeyStore, resolveDataDir } from "./src/server/utils/keyStore";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,92 +73,14 @@ let JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY?.replace(/\\n/g, '\n').replace
 let JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY?.replace(/\\n/g, '\n').replace(/\\r/g, '').replace(/^["']|["']$/g, '').trim();
 
 if (!JWT_PRIVATE_KEY || !JWT_PUBLIC_KEY || !JWT_PRIVATE_KEY.includes('-----BEGIN') || !JWT_PUBLIC_KEY.includes('-----BEGIN')) {
-  
-  const persistentDir = getPersistentDataDir();
-  const keysPath = path.join(persistentDir, '.rsa_keys.enc');
-
-  // Derive encryption key from JWT_SECRET for at-rest protection
-  const deriveEncKey = () => crypto.createHash('sha256').update(JWT_SECRET + '_rsa_enc').digest();
-
-  const encryptKeys = (data: string): string => {
-    const key = deriveEncKey();
-    const iv = crypto.randomBytes(12);
-    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-    let encrypted = cipher.update(data, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
-    const tag = cipher.getAuthTag();
-    return JSON.stringify({ iv: iv.toString('base64'), tag: tag.toString('base64'), data: encrypted });
-  };
-
-  const decryptKeys = (encStr: string): string => {
-    const key = deriveEncKey();
-    const { iv, tag, data } = JSON.parse(encStr);
-    const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64'));
-    decipher.setAuthTag(Buffer.from(tag, 'base64'));
-    let decrypted = decipher.update(data, 'base64', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
-  };
-
-  // Try loading encrypted keys
-  if (fs.existsSync(keysPath)) {
-    try {
-      const encContent = fs.readFileSync(keysPath, 'utf8');
-      const decrypted = decryptKeys(encContent);
-      const storedKeys = JSON.parse(decrypted);
-      JWT_PRIVATE_KEY = storedKeys.privateKey;
-      JWT_PUBLIC_KEY = storedKeys.publicKey;
-      logger.info("Loaded persisted RSA JWT keys from encrypted storage.");
-    } catch (e) {
-      logger.error("Failed to decrypt persisted RSA keys. Regenerating...");
-    }
-  }
-
-  // Migrate from old plaintext format if exists
-  const legacyPath = path.join(persistentDir, '.rsa_keys.json');
-  if ((!JWT_PRIVATE_KEY || !JWT_PUBLIC_KEY || !JWT_PRIVATE_KEY.includes('-----BEGIN')) && fs.existsSync(legacyPath)) {
-    try {
-      const storedKeys = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
-      JWT_PRIVATE_KEY = storedKeys.privateKey;
-      JWT_PUBLIC_KEY = storedKeys.publicKey;
-      // Re-save encrypted and remove legacy
-      fs.writeFileSync(keysPath, encryptKeys(JSON.stringify(storedKeys)));
-      fs.unlinkSync(legacyPath);
-      logger.info("Migrated RSA keys from plaintext to encrypted storage.");
-    } catch (e) {
-      logger.error("Failed to migrate legacy RSA keys.");
-    }
-  }
-
-  if (!JWT_PRIVATE_KEY || !JWT_PUBLIC_KEY || !JWT_PRIVATE_KEY.includes('-----BEGIN') || !JWT_PUBLIC_KEY.includes('-----BEGIN')) {
-    if (process.env.NODE_ENV === 'production') {
-      logger.warn("WARNING: RSA JWT keys are missing in production environment.");
-      logger.warn("Generating keys dynamically. Setting them via ENV vars is strongly recommended.");
-    } else {
-      logger.warn("RSA JWT keys are missing. Generating temporary RSA keys for development.");
-    }
-  
-    const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
-      modulusLength: 2048,
-      publicKeyEncoding: {
-        type: 'spki',
-        format: 'pem'
-      },
-      privateKeyEncoding: {
-        type: 'pkcs8',
-        format: 'pem'
-      }
-    });
-    JWT_PRIVATE_KEY = privateKey;
-    JWT_PUBLIC_KEY = publicKey;
-
-    try {
-      fs.writeFileSync(keysPath, encryptKeys(JSON.stringify({ privateKey, publicKey })));
-      logger.info("Persisted newly generated RSA keys (encrypted) to disk.");
-    } catch (e) {
-      logger.error("Failed to persist RSA keys to disk. Sessions will reset on reboot.");
-    }
-  }
+  // Keys will be loaded/generated via KeyStore during server startup
+  const keyStore = new KeyStore({
+    dataDir: resolveDataDir(),
+    encryptionSecret: JWT_SECRET,
+  });
+  const keys = await keyStore.getOrCreate();
+  JWT_PRIVATE_KEY = keys.privateKey;
+  JWT_PUBLIC_KEY = keys.publicKey;
 }
 
 // Initialize Database Schema
@@ -348,6 +270,16 @@ async function startServer() {
   });
 
   app.use(cookieParser());
+
+  // CSRF Protection Middleware
+  // Validates CSRF tokens on state-changing requests (POST, PUT, PATCH, DELETE)
+  // Must be after cookieParser (reads csrf-token cookie) and before routes
+  app.use(csrfMiddleware({
+    exemptPaths: ['/api/auth/login', '/health'],
+    tokenHeader: 'x-csrf-token',
+    cookieName: 'csrf-token',
+    tokenByteLength: 32,
+  }));
 
   // Serve uploaded files statically
   app.use('/uploads', express.static(uploadDir));

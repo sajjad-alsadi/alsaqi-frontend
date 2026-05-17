@@ -1,7 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from 'react';
 import api from '../services/api';
 import { Language } from '../types';
-import { useAuth } from './AuthContext';
 import { useTranslation } from 'react-i18next';
 
 interface PreferencesContextType {
@@ -25,8 +24,17 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [dashboardLayout, setDashboardLayoutState] = useState<'standard' | 'compact' | 'detailed'>(() => {
     return (localStorage.getItem('audit_layout') as 'standard' | 'compact' | 'detailed') || 'standard';
   });
-  const { token } = useAuth();
   const { i18n } = useTranslation();
+
+  // Use refs for values that callbacks need for API calls.
+  // This avoids subscribing to AuthContext which would couple preference
+  // consumers to auth state changes.
+  const languageRef = useRef(language);
+  languageRef.current = language;
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
+  const dashboardLayoutRef = useRef(dashboardLayout);
+  dashboardLayoutRef.current = dashboardLayout;
 
   useEffect(() => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
@@ -41,23 +49,23 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   }, [theme]);
 
-  const setLanguage = async (lang: Language) => {
+  const setLanguage = useCallback(async (lang: Language) => {
     setLanguageState(lang);
     i18n.changeLanguage(lang);
     try {
       localStorage.setItem('audit_lang', lang);
-      localStorage.setItem('i18nextLng', lang); // Important for i18n detection consistency
+      localStorage.setItem('i18nextLng', lang);
     } catch (e) {}
-    if (token) {
-      try {
-        await api.put('/preferences', { language: lang, theme, dashboard_layout: dashboardLayout, notifications_enabled: true });
-      } catch (err) {
-        console.error('Failed to save language preference', err);
-      }
+    // Persist to server - API uses cookie-based auth, so no token check needed.
+    // The request will simply fail with 401 if not authenticated (handled by api interceptor).
+    try {
+      await api.put('/preferences', { language: lang, theme: themeRef.current, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: true });
+    } catch (err) {
+      // Silently fail - local state is already updated
     }
-  };
+  }, [i18n]);
 
-  const setTheme = async (newTheme: 'light' | 'dark') => {
+  const setTheme = useCallback(async (newTheme: 'light' | 'dark') => {
     setThemeState(newTheme);
     try {
       localStorage.setItem('audit_theme', newTheme);
@@ -67,31 +75,31 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     } else {
       document.documentElement.classList.remove('dark');
     }
-    if (token) {
-      try {
-        await api.put('/preferences', { language, theme: newTheme, dashboard_layout: dashboardLayout, notifications_enabled: true });
-      } catch (err) {
-        console.error('Failed to save theme preference', err);
-      }
+    try {
+      await api.put('/preferences', { language: languageRef.current, theme: newTheme, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: true });
+    } catch (err) {
+      // Silently fail - local state is already updated
     }
-  };
+  }, []);
 
-  const setDashboardLayout = async (layout: 'standard' | 'compact' | 'detailed') => {
+  const setDashboardLayout = useCallback(async (layout: 'standard' | 'compact' | 'detailed') => {
     setDashboardLayoutState(layout);
     try {
       localStorage.setItem('audit_layout', layout);
     } catch (e) {}
-    if (token) {
-      try {
-        await api.put('/preferences', { language, theme, dashboard_layout: layout, notifications_enabled: true });
-      } catch (err) {
-        console.error('Failed to save layout preference', err);
-      }
+    try {
+      await api.put('/preferences', { language: languageRef.current, theme: themeRef.current, dashboard_layout: layout, notifications_enabled: true });
+    } catch (err) {
+      // Silently fail - local state is already updated
     }
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    language, theme, dashboardLayout, setLanguage, setTheme, setDashboardLayout
+  }), [language, theme, dashboardLayout, setLanguage, setTheme, setDashboardLayout]);
 
   return (
-    <PreferencesContext.Provider value={{ language, theme, dashboardLayout, setLanguage, setTheme, setDashboardLayout }}>
+    <PreferencesContext.Provider value={value}>
       {children}
     </PreferencesContext.Provider>
   );

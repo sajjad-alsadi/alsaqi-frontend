@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { useNotificationContext } from '../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { Bell, Check, Trash2, Filter, Search, Calendar, FileText, Info, AlertTriangle, UserPlus, Shield } from 'lucide-react';
@@ -11,7 +11,7 @@ import { getTranslatedNotificationMessage, getTranslatedNotificationModule } fro
 
 const Notifications: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { language } = useAppContext();
+  const { language } = usePreferences();
   const { notifications, markAsRead, markAllAsRead, deleteNotification, loadMore, hasMore, isLoading } = useNotificationContext();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { AuthService } from '../../services/AuthService';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { validateSchema } from '../../middleware/validate';
+import { generateCsrfToken, attachCsrfToken } from '../../middleware/csrf';
 
 const loginSchema = z.object({
   usernameOrEmail: z.string().min(1, "Username or Email is required").max(100),
@@ -48,6 +49,10 @@ export const createLoginRoutes = (
     });
 
     await AuthService.logAudit(result.user.username, "Login", "Authentication", "User logged in");
+
+    // Generate and attach CSRF token on successful login
+    const csrfToken = generateCsrfToken();
+    attachCsrfToken(res, csrfToken);
 
     // Return ONLY the access token in the response body:
     res.json({ user: result.user, token: result.token });

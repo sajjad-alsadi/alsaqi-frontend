@@ -1,0 +1,2851 @@
+openapi: '3.1.0'
+info:
+  title: AL-SAQI Internal Audit System API
+  version: '1.0.0'
+  description: >
+    REST API for the AL-SAQI internal audit management system.
+    Handles audit planning, findings, recommendations, risk management,
+    correspondence, compliance, and user management.
+servers:
+  - url: /api
+    description: Main API server
+
+security:
+  - BearerAuth: []
+    CsrfToken: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: RS256 JWT token passed via httpOnly cookie or Authorization header
+    CsrfToken:
+      type: apiKey
+      in: header
+      name: x-csrf-token
+      description: CSRF token required for state-changing requests (POST, PUT, PATCH, DELETE)
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        success:
+          type: boolean
+
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [Admin, Internal Auditor, Compliance Officer, Risk Officer, Manager, Viewer]
+        department:
+          type: string
+          nullable: true
+        job_title_id:
+          type: string
+          nullable: true
+        unit:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [Active, Suspended, Archived]
+        phone_number:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    AuditPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        plan_code:
+          type: string
+        program_id:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+        department:
+          type: string
+        type:
+          type: string
+        risk_rating:
+          type: string
+        planned_start_date:
+          type: string
+          format: date
+        planned_end_date:
+          type: string
+          format: date
+        status:
+          type: string
+        lead_auditor:
+          type: string
+          nullable: true
+        team_members:
+          type: string
+          nullable: true
+        objectives:
+          type: string
+          nullable: true
+        scope:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    AuditProgram:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        program_code:
+          type: string
+        program_title:
+          type: string
+        audit_area:
+          type: string
+        department:
+          type: string
+        audit_type:
+          type: string
+        audit_objective:
+          type: string
+          nullable: true
+        audit_scope:
+          type: string
+          nullable: true
+        key_risks:
+          type: string
+          nullable: true
+        status:
+          type: string
+        version_number:
+          type: string
+          nullable: true
+        created_by:
+          type: string
+          nullable: true
+
+    Finding:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        audit_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        finding_number:
+          type: string
+        finding_type:
+          type: string
+        risk_level:
+          type: string
+        status:
+          type: string
+        criteria:
+          type: string
+          nullable: true
+        condition:
+          type: string
+          nullable: true
+        cause:
+          type: string
+          nullable: true
+        consequence:
+          type: string
+          nullable: true
+        recommendation:
+          type: string
+          nullable: true
+
+    Recommendation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        finding_id:
+          type: string
+          format: uuid
+        department:
+          type: string
+          nullable: true
+        responsible:
+          type: string
+          nullable: true
+        responsible_person_id:
+          type: string
+          format: uuid
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        status:
+          type: string
+        risk_level:
+          type: string
+          nullable: true
+        rec_number:
+          type: string
+          nullable: true
+        action_plan:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          nullable: true
+        closure_evidence_path:
+          type: string
+          nullable: true
+
+    RiskItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        risk_id:
+          type: string
+        description:
+          type: string
+        owner:
+          type: string
+          nullable: true
+        source:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        likelihood:
+          type: string
+          nullable: true
+        impact:
+          type: string
+          nullable: true
+        score:
+          type: number
+          nullable: true
+        rating:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        controls:
+          type: string
+          nullable: true
+        mitigation:
+          type: string
+          nullable: true
+
+    Correspondence:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        letter_number:
+          type: string
+        sender_entity:
+          type: string
+        subject:
+          type: string
+        letter_date:
+          type: string
+          format: date
+        receipt_date:
+          type: string
+          format: date
+        classification:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          nullable: true
+        method:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        follow_up_required:
+          type: boolean
+        notes:
+          type: string
+          nullable: true
+
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      security: []
+      tags: [System]
+      responses:
+        '200':
+          description: Server health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                  database:
+                    type: string
+                  persistence:
+                    type: string
+
+  /auth/login:
+    post:
+      summary: User login
+      security: []
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [usernameOrEmail, password]
+              properties:
+                usernameOrEmail:
+                  type: string
+                password:
+                  type: string
+                rememberMe:
+                  type: boolean
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      summary: Get current user info
+      tags: [Auth]
+      responses:
+        '200':
+          description: Current user with permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      security: []
+      tags: [Auth]
+      responses:
+        '200':
+          description: Token refreshed
+        '401':
+          description: No valid refresh token
+
+  /auth/logout:
+    post:
+      summary: Logout current session
+      tags: [Auth]
+      responses:
+        '200':
+          description: Logged out successfully
+
+  /auth/logout-all:
+    post:
+      summary: Invalidate all active sessions
+      tags: [Auth]
+      responses:
+        '200':
+          description: All sessions invalidated
+
+  /auth/forgot-password:
+    post:
+      summary: Request password reset
+      security: []
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+      responses:
+        '200':
+          description: Reset request submitted
+
+  /auth/reset-status/{username}:
+    get:
+      summary: Check password reset status
+      security: []
+      tags: [Auth]
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reset status
+
+  /auth/reset-requests:
+    get:
+      summary: Get pending reset requests (Admin)
+      tags: [Auth]
+      responses:
+        '200':
+          description: List of reset requests
+
+  /auth/approve-reset:
+    post:
+      summary: Approve a password reset request (Admin)
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestId]
+              properties:
+                requestId:
+                  type: string
+      responses:
+        '200':
+          description: Reset approved
+
+  /auth/change-password:
+    post:
+      summary: Change password (mandatory or voluntary)
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              properties:
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Password changed
+
+  /auth/update-password:
+    post:
+      summary: Update password with current password verification
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Password updated
+
+  /users:
+    get:
+      summary: List users
+      tags: [Users]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated user list
+    post:
+      summary: Create a new user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User created
+
+  /users/init:
+    get:
+      summary: Get user initialization data (roles, departments, etc.)
+      tags: [Users]
+      responses:
+        '200':
+          description: Init data for user forms
+
+  /users/summary:
+    get:
+      summary: Get user summary statistics
+      tags: [Users]
+      responses:
+        '200':
+          description: User summary
+
+  /users/list:
+    get:
+      summary: Get active users list (simplified)
+      tags: [Users]
+      responses:
+        '200':
+          description: Active users
+
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details
+    put:
+      summary: Update user
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated
+    delete:
+      summary: Delete user
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User deleted
+
+  /users/{id}/suspend:
+    post:
+      summary: Toggle user suspension
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Status toggled
+
+  /users/{id}/archive:
+    post:
+      summary: Archive user
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User archived
+
+  /users/{id}/activate:
+    post:
+      summary: Activate user
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User activated
+
+  /users/{id}/unlock:
+    post:
+      summary: Unlock user account
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User unlocked
+
+  /users/{id}/reset-password:
+    post:
+      summary: Reset user password (Admin)
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              properties:
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Password reset
+
+  /roles:
+    get:
+      summary: Get all roles with permissions
+      tags: [Roles]
+      responses:
+        '200':
+          description: Roles list
+
+  /roles/{id}/permissions:
+    get:
+      summary: Get permissions for a role
+      tags: [Roles]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Role permissions
+    post:
+      summary: Update role permissions
+      tags: [Roles]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permissionIds]
+              properties:
+                permissionIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Permissions updated
+
+  /permissions:
+    get:
+      summary: Get all permissions
+      tags: [Roles]
+      responses:
+        '200':
+          description: Permissions list
+
+  /user-sessions:
+    get:
+      summary: Get active sessions (Admin)
+      tags: [Sessions]
+      responses:
+        '200':
+          description: Active sessions list
+
+  /user-sessions/{id}:
+    delete:
+      summary: Terminate a session (Admin)
+      tags: [Sessions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session terminated
+
+  /login-history:
+    get:
+      summary: Get login history (Admin)
+      tags: [Logs]
+      responses:
+        '200':
+          description: Login history
+
+  /audit-trail:
+    get:
+      summary: Get audit trail (Admin)
+      tags: [Logs]
+      responses:
+        '200':
+          description: Audit trail
+
+  /system-errors:
+    get:
+      summary: Get system errors (Admin)
+      tags: [Logs]
+      responses:
+        '200':
+          description: System errors list
+    post:
+      summary: Log a system error
+      security: []
+      tags: [Logs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message, module]
+              properties:
+                message:
+                  type: string
+                stack:
+                  type: string
+                module:
+                  type: string
+                severity:
+                  type: string
+      responses:
+        '200':
+          description: Error logged
+    delete:
+      summary: Clear all system errors (Admin)
+      tags: [Logs]
+      responses:
+        '200':
+          description: Errors cleared
+
+  /system-errors/export:
+    get:
+      summary: Export system errors as CSV (Admin)
+      tags: [Logs]
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /system-errors/analytics:
+    get:
+      summary: Get system error analytics (Admin)
+      tags: [Logs]
+      responses:
+        '200':
+          description: Error analytics
+
+  /log-error:
+    post:
+      summary: Log a frontend error
+      security: []
+      tags: [Logs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                stack:
+                  type: string
+                module:
+                  type: string
+      responses:
+        '200':
+          description: Error logged
+
+  /user-management-settings:
+    get:
+      summary: Get user management settings (Admin)
+      tags: [Settings]
+      responses:
+        '200':
+          description: Settings object
+    put:
+      summary: Update user management settings (Admin)
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                failed_login_threshold:
+                  type: integer
+                session_timeout_minutes:
+                  type: integer
+                password_min_length:
+                  type: integer
+      responses:
+        '200':
+          description: Settings updated
+
+  /pdf-settings:
+    get:
+      summary: Get PDF settings
+      tags: [Settings]
+      responses:
+        '200':
+          description: PDF settings
+    put:
+      summary: Update PDF settings (Admin)
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: PDF settings updated
+
+  /app-settings:
+    get:
+      summary: Get application settings
+      tags: [Settings]
+      responses:
+        '200':
+          description: App settings
+    put:
+      summary: Update application settings (Admin)
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: App settings updated
+
+  /profile:
+    get:
+      summary: Get current user profile
+      tags: [Profile]
+      responses:
+        '200':
+          description: User profile
+    put:
+      summary: Update current user profile
+      tags: [Profile]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Profile updated
+
+  /preferences:
+    put:
+      summary: Update user preferences
+      tags: [Profile]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                language:
+                  type: string
+                theme:
+                  type: string
+                dashboard_layout:
+                  type: string
+      responses:
+        '200':
+          description: Preferences updated
+
+  /dashboard-stats:
+    get:
+      summary: Get dashboard statistics
+      tags: [Dashboard]
+      parameters:
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: riskLevel
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dashboard stats
+
+  /my-tasks:
+    get:
+      summary: Get current user tasks
+      tags: [Dashboard]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User tasks list
+
+  /notifications:
+    get:
+      summary: Get notifications
+      tags: [Notifications]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated notifications
+
+  /notifications/unread-count:
+    get:
+      summary: Get unread notification count
+      tags: [Notifications]
+      responses:
+        '200':
+          description: Unread count
+
+  /notifications/{id}/read:
+    put:
+      summary: Mark notification as read
+      tags: [Notifications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Marked as read
+
+  /notifications/mark-all-read:
+    put:
+      summary: Mark all notifications as read
+      tags: [Notifications]
+      responses:
+        '200':
+          description: All marked as read
+
+  /notifications/{id}:
+    delete:
+      summary: Dismiss a notification
+      tags: [Notifications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification dismissed
+
+  /comments/{type}/{id}:
+    get:
+      summary: Get comments for an entity
+      tags: [Comments]
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comments list
+
+  /comments:
+    post:
+      summary: Create a comment
+      tags: [Comments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [related_type, related_id, content]
+              properties:
+                related_type:
+                  type: string
+                related_id:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Comment created
+
+  /job-titles:
+    get:
+      summary: Get all job titles
+      tags: [JobTitles]
+      responses:
+        '200':
+          description: Job titles list
+    post:
+      summary: Create a job title (Admin)
+      tags: [JobTitles]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title_ar]
+              properties:
+                title_ar:
+                  type: string
+                title_en:
+                  type: string
+                level:
+                  type: string
+      responses:
+        '200':
+          description: Job title created
+
+  /job-titles/{id}:
+    put:
+      summary: Update a job title (Admin)
+      tags: [JobTitles]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job title updated
+    delete:
+      summary: Delete a job title (Admin)
+      tags: [JobTitles]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job title deleted
+
+  /departments:
+    get:
+      summary: Get all departments
+      tags: [Departments]
+      responses:
+        '200':
+          description: Departments list
+    post:
+      summary: Create a department (Admin)
+      tags: [Departments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Department created
+
+  /departments/tree:
+    get:
+      summary: Get department tree structure
+      tags: [Departments]
+      responses:
+        '200':
+          description: Department tree
+
+  /departments/{id}:
+    put:
+      summary: Update a department (Admin)
+      tags: [Departments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Department updated
+    delete:
+      summary: Delete a department (Admin)
+      tags: [Departments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Department deleted
+
+  /correspondence/incoming:
+    get:
+      summary: Get incoming correspondence
+      tags: [Correspondence]
+      responses:
+        '200':
+          description: Incoming letters list
+    post:
+      summary: Create incoming correspondence
+      tags: [Correspondence]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Correspondence'
+      responses:
+        '200':
+          description: Letter created
+
+  /correspondence/incoming/{id}:
+    put:
+      summary: Update incoming correspondence (Admin)
+      tags: [Correspondence]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Letter updated
+    delete:
+      summary: Delete incoming correspondence (Admin)
+      tags: [Correspondence]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Letter deleted
+
+  /correspondence/outgoing:
+    get:
+      summary: Get outgoing correspondence
+      tags: [Correspondence]
+      responses:
+        '200':
+          description: Outgoing letters list
+    post:
+      summary: Create outgoing correspondence
+      tags: [Correspondence]
+      responses:
+        '200':
+          description: Letter created
+
+  /correspondence/outgoing/{id}:
+    put:
+      summary: Update outgoing correspondence (Admin)
+      tags: [Correspondence]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Letter updated
+    delete:
+      summary: Delete outgoing correspondence (Admin)
+      tags: [Correspondence]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Letter deleted
+
+  /correspondence/status/{type}/{id}:
+    put:
+      summary: Update correspondence status
+      tags: [Correspondence]
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [new_status]
+              properties:
+                new_status:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Status updated
+
+  /correspondence/refer:
+    post:
+      summary: Refer incoming correspondence
+      tags: [Correspondence]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [incoming_id, to_dept_id]
+              properties:
+                incoming_id:
+                  type: string
+                  format: uuid
+                to_dept_id:
+                  type: string
+                  format: uuid
+                to_user_id:
+                  type: string
+                  format: uuid
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Referral created
+
+  /correspondence/link:
+    post:
+      summary: Link incoming to outgoing correspondence
+      tags: [Correspondence]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [incoming_id, outgoing_id]
+              properties:
+                incoming_id:
+                  type: string
+                  format: uuid
+                outgoing_id:
+                  type: string
+                  format: uuid
+                link_type:
+                  type: string
+      responses:
+        '200':
+          description: Link created
+
+  /correspondence/archive/{type}/{id}:
+    put:
+      summary: Archive correspondence
+      tags: [Correspondence]
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Archived
+
+  /correspondence/archive:
+    get:
+      summary: Get archived correspondence
+      tags: [Correspondence]
+      responses:
+        '200':
+          description: Archive list
+
+  /correspondence/attachments/{type}/{id}:
+    get:
+      summary: Get attachments for correspondence
+      tags: [Correspondence]
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Attachments list
+
+  /correspondence/attachments:
+    post:
+      summary: Upload attachment
+      tags: [Correspondence]
+      responses:
+        '200':
+          description: Attachment uploaded
+
+  /correspondence/stats:
+    get:
+      summary: Get correspondence statistics
+      tags: [Correspondence]
+      responses:
+        '200':
+          description: Stats
+
+  /correspondence/details/{type}/{id}:
+    get:
+      summary: Get correspondence details
+      tags: [Correspondence]
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Correspondence details
+
+  /org-entities:
+    get:
+      summary: Get organizational entities
+      tags: [OrgStructure]
+      responses:
+        '200':
+          description: Org entities list
+    post:
+      summary: Create org entity (Admin)
+      tags: [OrgStructure]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [entity_code, name_ar]
+              properties:
+                entity_code:
+                  type: string
+                name_ar:
+                  type: string
+                name_en:
+                  type: string
+                parent_id:
+                  type: string
+                  format: uuid
+                entity_type:
+                  type: string
+      responses:
+        '200':
+          description: Entity created
+
+  /org-entities/{id}:
+    put:
+      summary: Update org entity (Admin)
+      tags: [OrgStructure]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entity updated
+    delete:
+      summary: Delete org entity (Admin)
+      tags: [OrgStructure]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entity deleted
+
+  /coi:
+    get:
+      summary: Get conflict of interest records
+      tags: [COI]
+      responses:
+        '200':
+          description: COI records
+    post:
+      summary: Submit a COI declaration
+      tags: [COI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [description, related_party]
+              properties:
+                description:
+                  type: string
+                related_party:
+                  type: string
+      responses:
+        '201':
+          description: COI created
+
+  /coi/{id}:
+    put:
+      summary: Update COI status (Compliance)
+      tags: [COI]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [Pending, Approved, Rejected, Closed]
+                reviewer_notes:
+                  type: string
+      responses:
+        '200':
+          description: COI updated
+
+  /policies:
+    get:
+      summary: Get all policies
+      tags: [Policies]
+      responses:
+        '200':
+          description: Policies list
+    post:
+      summary: Create a policy (Compliance)
+      tags: [Policies]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                department:
+                  type: string
+                version:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '201':
+          description: Policy created
+
+  /policies/{id}:
+    get:
+      summary: Get policy by ID
+      tags: [Policies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Policy details
+    put:
+      summary: Update a policy (Compliance)
+      tags: [Policies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Policy updated
+    delete:
+      summary: Delete a policy (Compliance)
+      tags: [Policies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Policy deleted
+
+  /policies/{id}/file:
+    get:
+      summary: Get policy file
+      tags: [Policies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Policy file data
+
+  /pdf-templates:
+    get:
+      summary: Get all PDF templates (Admin)
+      tags: [PDFTemplates]
+      responses:
+        '200':
+          description: Templates list
+    post:
+      summary: Create a PDF template (Admin)
+      tags: [PDFTemplates]
+      responses:
+        '200':
+          description: Template created
+
+  /pdf-templates/active:
+    get:
+      summary: Get active template by type
+      tags: [PDFTemplates]
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Active template
+
+  /pdf-templates/{id}:
+    get:
+      summary: Get PDF template by ID (Admin)
+      tags: [PDFTemplates]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Template details
+    put:
+      summary: Update a PDF template (Admin)
+      tags: [PDFTemplates]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Template updated
+    delete:
+      summary: Delete a PDF template (Admin)
+      tags: [PDFTemplates]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Template deleted
+
+  /executive-summary:
+    get:
+      summary: Get executive summary report
+      tags: [Reports]
+      responses:
+        '200':
+          description: Executive summary data
+
+  /analytics/findings-by-risk:
+    get:
+      summary: Get findings grouped by risk level (Admin)
+      tags: [Analytics]
+      responses:
+        '200':
+          description: Findings by risk
+
+  /analytics/findings-by-status:
+    get:
+      summary: Get findings grouped by status (Admin)
+      tags: [Analytics]
+      responses:
+        '200':
+          description: Findings by status
+
+  /analytics/recommendations-by-status:
+    get:
+      summary: Get recommendations grouped by status (Admin)
+      tags: [Analytics]
+      responses:
+        '200':
+          description: Recommendations by status
+
+  /integrity/stats:
+    get:
+      summary: Get integrity statistics
+      tags: [Integrity]
+      responses:
+        '200':
+          description: Integrity stats
+
+  /audit-programs:
+    get:
+      summary: Get audit programs
+      tags: [AuditPrograms]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated audit programs
+    post:
+      summary: Create an audit program
+      tags: [AuditPrograms]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditProgram'
+      responses:
+        '200':
+          description: Program created
+
+  /audit-programs/{id}:
+    get:
+      summary: Get audit program by ID
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Program details
+    put:
+      summary: Update an audit program
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Program updated
+    delete:
+      summary: Delete an audit program
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Program deleted
+
+  /audit-programs/{id}/duplicate:
+    post:
+      summary: Duplicate an audit program
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Program duplicated
+
+  /audit-programs/{id}/approve:
+    post:
+      summary: Approve an audit program (Admin)
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Program approved
+
+  /audit-tasks:
+    get:
+      summary: Get audit tasks
+      tags: [AuditTasks]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated audit tasks
+    post:
+      summary: Create an audit task
+      tags: [AuditTasks]
+      responses:
+        '200':
+          description: Task created
+
+  /audit-tasks/{id}:
+    get:
+      summary: Get audit task by ID
+      tags: [AuditTasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task details
+    put:
+      summary: Update an audit task
+      tags: [AuditTasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task updated
+    delete:
+      summary: Delete an audit task
+      tags: [AuditTasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task deleted
+
+  /audit-tasks/{id}/status:
+    patch:
+      summary: Change audit task status
+      tags: [AuditTasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Status updated
+
+  /recommendations:
+    get:
+      summary: Get recommendations
+      tags: [Recommendations]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated recommendations
+    post:
+      summary: Create a recommendation
+      tags: [Recommendations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recommendation'
+      responses:
+        '200':
+          description: Recommendation created
+
+  /recommendations/{id}:
+    get:
+      summary: Get recommendation by ID
+      tags: [Recommendations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recommendation details
+    put:
+      summary: Update a recommendation
+      tags: [Recommendations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recommendation updated
+    delete:
+      summary: Delete a recommendation
+      tags: [Recommendations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recommendation deleted
+
+  /recommendations/{id}/resolve:
+    patch:
+      summary: Resolve/close a recommendation
+      tags: [Recommendations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [closure_evidence_path]
+              properties:
+                closure_evidence_path:
+                  type: string
+      responses:
+        '200':
+          description: Recommendation resolved
+
+  /audit-plans:
+    get:
+      summary: Get audit plans
+      tags: [AuditPlans]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated audit plans
+    post:
+      summary: Create an audit plan
+      tags: [AuditPlans]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditPlan'
+      responses:
+        '200':
+          description: Plan created
+
+  /audit-plans/{id}:
+    get:
+      summary: Get audit plan by ID
+      tags: [AuditPlans]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Plan details
+    put:
+      summary: Update an audit plan
+      tags: [AuditPlans]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Plan updated
+    delete:
+      summary: Delete an audit plan
+      tags: [AuditPlans]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Plan deleted
+
+  /audit-findings:
+    get:
+      summary: Get audit findings
+      tags: [Findings]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated findings
+    post:
+      summary: Create an audit finding
+      tags: [Findings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Finding'
+      responses:
+        '200':
+          description: Finding created
+
+  /audit-findings/{id}:
+    get:
+      summary: Get finding by ID
+      tags: [Findings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Finding details
+    put:
+      summary: Update a finding
+      tags: [Findings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Finding updated
+    delete:
+      summary: Delete a finding
+      tags: [Findings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Finding deleted
+
+  /risk-register:
+    get:
+      summary: Get risk register
+      tags: [RiskRegister]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated risk items
+    post:
+      summary: Create a risk item
+      tags: [RiskRegister]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskItem'
+      responses:
+        '200':
+          description: Risk item created
+
+  /risk-register/{id}:
+    get:
+      summary: Get risk item by ID
+      tags: [RiskRegister]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Risk item details
+    put:
+      summary: Update a risk item
+      tags: [RiskRegister]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Risk item updated
+    delete:
+      summary: Delete a risk item
+      tags: [RiskRegister]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Risk item deleted
+
+  /fraud-log:
+    get:
+      summary: Get fraud log entries
+      tags: [FraudLog]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated fraud log
+    post:
+      summary: Create a fraud log entry
+      tags: [FraudLog]
+      responses:
+        '200':
+          description: Entry created
+
+  /fraud-log/{id}:
+    get:
+      summary: Get fraud log entry by ID
+      tags: [FraudLog]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Entry details
+    put:
+      summary: Update a fraud log entry
+      tags: [FraudLog]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Entry updated
+    delete:
+      summary: Delete a fraud log entry
+      tags: [FraudLog]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Entry deleted
+
+  /fraud-access-requests:
+    get:
+      summary: Get fraud access requests
+      tags: [FraudLog]
+      responses:
+        '200':
+          description: Access requests list
+    post:
+      summary: Request access to fraud log
+      tags: [FraudLog]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Request submitted
+
+  /fraud-access-requests/my-status:
+    get:
+      summary: Get current user fraud access status
+      tags: [FraudLog]
+      responses:
+        '200':
+          description: Access status
+
+  /fraud-access-requests/{id}/approve:
+    put:
+      summary: Approve fraud access request (Admin)
+      tags: [FraudLog]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [duration]
+              properties:
+                duration:
+                  type: integer
+      responses:
+        '200':
+          description: Request approved
+
+  /fraud-access-requests/{id}/reject:
+    put:
+      summary: Reject fraud access request (Admin)
+      tags: [FraudLog]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Request rejected
+
+  /compliance:
+    get:
+      summary: Get compliance items
+      tags: [Compliance]
+      parameters:
+        - name: source_type
+          in: query
+          schema:
+            type: string
+        - name: compliance_status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Compliance items list
+    post:
+      summary: Create a compliance item
+      tags: [Compliance]
+      responses:
+        '201':
+          description: Item created
+
+  /compliance/summary:
+    get:
+      summary: Get compliance summary
+      tags: [Compliance]
+      responses:
+        '200':
+          description: Compliance summary
+
+  /compliance/{id}:
+    get:
+      summary: Get compliance item by ID
+      tags: [Compliance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item details
+    put:
+      summary: Update a compliance item
+      tags: [Compliance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item updated
+    delete:
+      summary: Delete a compliance item (Admin)
+      tags: [Compliance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item deleted
+
+  /compliance/{id}/status:
+    patch:
+      summary: Update compliance item status
+      tags: [Compliance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [compliance_status]
+              properties:
+                compliance_status:
+                  type: string
+                  enum: [compliant, partial, non_compliant, under_review]
+      responses:
+        '200':
+          description: Status updated
+
+  /compliance-items:
+    get:
+      summary: Get compliance items (CRUD)
+      tags: [Compliance]
+      responses:
+        '200':
+          description: Compliance items
+    post:
+      summary: Create compliance item (CRUD)
+      tags: [Compliance]
+      responses:
+        '200':
+          description: Item created
+
+  /compliance-items/{id}:
+    get:
+      summary: Get compliance item by ID (CRUD)
+      tags: [Compliance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item details
+    put:
+      summary: Update compliance item (CRUD)
+      tags: [Compliance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item updated
+    delete:
+      summary: Delete compliance item (CRUD)
+      tags: [Compliance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item deleted
+
+  /audit-procedures:
+    get:
+      summary: Get audit procedures
+      tags: [AuditPrograms]
+      responses:
+        '200':
+          description: Procedures list
+    post:
+      summary: Create an audit procedure
+      tags: [AuditPrograms]
+      responses:
+        '200':
+          description: Procedure created
+
+  /audit-procedures/{id}:
+    get:
+      summary: Get audit procedure by ID
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Procedure details
+    put:
+      summary: Update an audit procedure
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Procedure updated
+    delete:
+      summary: Delete an audit procedure
+      tags: [AuditPrograms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Procedure deleted
+
+  /audit-evidence:
+    get:
+      summary: Get audit evidence
+      tags: [AuditTasks]
+      responses:
+        '200':
+          description: Evidence list
+    post:
+      summary: Upload audit evidence
+      tags: [AuditTasks]
+      responses:
+        '200':
+          description: Evidence uploaded
+
+  /audit-evidence/{id}:
+    get:
+      summary: Get audit evidence by ID
+      tags: [AuditTasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evidence details
+    put:
+      summary: Update audit evidence
+      tags: [AuditTasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evidence updated
+    delete:
+      summary: Delete audit evidence
+      tags: [AuditTasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evidence deleted
+
+  /audit-reports:
+    get:
+      summary: Get audit reports
+      tags: [Reports]
+      responses:
+        '200':
+          description: Reports list
+    post:
+      summary: Create an audit report
+      tags: [Reports]
+      responses:
+        '200':
+          description: Report created
+
+  /audit-reports/{id}:
+    get:
+      summary: Get audit report by ID
+      tags: [Reports]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report details
+    put:
+      summary: Update an audit report
+      tags: [Reports]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report updated
+    delete:
+      summary: Delete an audit report
+      tags: [Reports]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report deleted
+
+  /central-bank-instructions:
+    get:
+      summary: Get central bank instructions
+      tags: [Regulatory]
+      responses:
+        '200':
+          description: Instructions list
+    post:
+      summary: Create central bank instruction (Admin)
+      tags: [Regulatory]
+      responses:
+        '200':
+          description: Instruction created
+
+  /central-bank-instructions/{id}:
+    get:
+      summary: Get central bank instruction by ID
+      tags: [Regulatory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Instruction details
+    put:
+      summary: Update central bank instruction
+      tags: [Regulatory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Instruction updated
+    delete:
+      summary: Delete central bank instruction
+      tags: [Regulatory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Instruction deleted
+
+  /law-bank:
+    get:
+      summary: Get law bank entries
+      tags: [Regulatory]
+      responses:
+        '200':
+          description: Law bank list
+    post:
+      summary: Create law bank entry
+      tags: [Regulatory]
+      responses:
+        '200':
+          description: Entry created
+
+  /law-bank/{id}:
+    get:
+      summary: Get law bank entry by ID
+      tags: [Regulatory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entry details
+    put:
+      summary: Update law bank entry
+      tags: [Regulatory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entry updated
+    delete:
+      summary: Delete law bank entry
+      tags: [Regulatory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entry deleted
+
+  /docs:
+    get:
+      summary: Get OpenAPI specification
+      security: []
+      tags: [System]
+      responses:
+        '200':
+          description: OpenAPI YAML specification
+          content:
+            text/yaml:
+              schema:
+                type: string

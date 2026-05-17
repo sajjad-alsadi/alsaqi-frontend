@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAppContext } from '../../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import { 
   FileText, 

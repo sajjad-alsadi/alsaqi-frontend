@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { useUser } from '../context/UserContext';
+import { usePreferences } from '../context/PreferencesContext';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { AuditEvidence as AuditEvidenceType, AuditPlan, AuditFinding } from '../types';
@@ -8,12 +10,15 @@ import {
   Image as ImageIcon, Mail, FileCode, FileSignature, AlertCircle, Eye, Edit, FolderOpen
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { UserRole } from '../constants';
 import Modal from '../components/Modal';
 import PdfViewer from '../components/PdfViewer';
 import { useFormat } from '../services/formatService';
 
 const AuditEvidence: React.FC = () => {
-  const { token, language, user } = useAppContext();
+  const { token } = useAuth();
+  const { language } = usePreferences();
+  const { user } = useUser();
   const { t } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
   const [evidence, setEvidence] = useState<AuditEvidenceType[]>([]);
@@ -186,7 +191,7 @@ const AuditEvidence: React.FC = () => {
     }
   };
 
-  const canEdit = user?.role === 'Admin' || user?.role === 'Administrator' || user?.role === 'Internal Auditor';
+  const canEdit = user?.role === UserRole.ADMIN || user?.role === UserRole.INTERNAL_AUDITOR;
 
   return (
     <div className="space-y-10">

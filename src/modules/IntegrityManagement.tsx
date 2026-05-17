@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Scale, AlertTriangle, Users, History, LayoutDashboard, ShieldAlert, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAppContext } from '../context/AppContext';
+import { useUser } from '../context/UserContext';
 import api from '../services/api';
+import { UserRole } from '../constants';
 
 // Existing Module Logic
 import ConflictOfInterest from './ConflictOfInterest';
@@ -11,7 +12,7 @@ import FraudLog from './FraudLog';
 
 const IntegrityManagement: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { user } = useAppContext();
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState<'overview' | 'conflicts' | 'fraud'>('overview');
   const [stats, setStats] = useState({
     conflicts: { total: 0, pending: 0 },
@@ -47,7 +48,7 @@ const IntegrityManagement: React.FC = () => {
     { id: 'fraud', label: t('integrity.fraud'), icon: ShieldAlert },
   ];
 
-  const isAdmin = user?.role === 'Admin' || user?.role === 'Administrator' || user?.role === 'Manager';
+  const isAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER;
 
   return (
     <div className="space-y-8 pb-10">

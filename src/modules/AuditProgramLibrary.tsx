@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { AuditProgram, AuditProcedure } from '../types';
 import { motion } from 'motion/react';
@@ -17,7 +18,8 @@ import Modal from '../components/Modal';
 import { useDepartments } from '../hooks/useDepartments';
 
 const AuditProgramLibrary: React.FC = () => {
-  const { token, user } = useAppContext();
+  const { token } = useAuth();
+  const { user } = useUser();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const { formatDate } = useFormat();

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageSquare, Send, Trash2 } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { useUser } from '../context/UserContext';
 import api from '../services/api';
 import { UserRole } from '../constants';
 
@@ -19,7 +20,8 @@ interface CommentSectionProps {
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId }) => {
-  const { token, user } = useAppContext();
+  const { token } = useAuth();
+  const { user } = useUser();
   const { t, i18n } = useTranslation();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');

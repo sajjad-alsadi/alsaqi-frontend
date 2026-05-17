@@ -1,15 +1,17 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { AppProvider, useAppContext } from './context/AppContext';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { UserProvider } from './context/UserContext';
-import { PreferencesProvider } from './context/PreferencesContext';
+import { UserProvider, useUser } from './context/UserContext';
+import { PreferencesProvider, usePreferences } from './context/PreferencesContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { useIdleTimeout } from './hooks/useIdleTimeout';
 import { usePermissions } from './hooks/usePermissions';
 import { MODULES } from './permissions';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { SkipToContent } from './components/SkipToContent';
+import { LiveRegion } from './components/LiveRegion';
 import Login from './components/Login';
 import Layout from './components/Layout';
 import { Toaster } from 'react-hot-toast';
@@ -46,12 +48,21 @@ const LoadingFallback = () => (
 );
 
 const AppContent: React.FC = () => {
-  const { user, language } = useAppContext();
+  const { user } = useUser();
+  const { language } = usePreferences();
   const { isCheckingSession } = useAuth();
   const { canView } = usePermissions();
+  const location = useLocation();
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
   
   // Initialize idle timeout
   useIdleTimeout();
+
+  // Announce route changes to screen readers
+  useEffect(() => {
+    const pageName = location.pathname.replace('/', '') || 'dashboard';
+    setRouteAnnouncement(`Navigated to ${pageName}`);
+  }, [location.pathname]);
 
   if (isCheckingSession) {
     return <LoadingFallback />;
@@ -65,6 +76,7 @@ const AppContent: React.FC = () => {
     <Layout>
       <Toaster position="top-center" reverseOrder={false} />
       <NotificationToast />
+      <LiveRegion message={routeAnnouncement} politeness="polite" />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -118,6 +130,7 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <ErrorBoundary>
+      <SkipToContent />
       <QueryClientProvider client={queryClient}>
         <UserProvider>
           <AuthProvider>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Lock, Plus, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
+import { useUser } from '../../context/UserContext';
+import { UserRole } from '../../constants';
 
 // Refactored Assets
 import { useFraudLog } from './hooks/useFraudLog';
@@ -10,13 +11,13 @@ import { FraudTable } from './components/FraudTable';
 import { AddCaseModal } from './components/AddCaseModal';
 
 const FraudLog: React.FC = () => {
-  const { user } = useAppContext();
+  const { user } = useUser();
   const { t } = useTranslation();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
   const [policyContent, setPolicyContent] = useState('');
 
-  const isManager = user?.role === 'Admin' || user?.role === 'Administrator' || user?.role === 'Manager';
+  const isManager = user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER;
   
   const {
     cases,

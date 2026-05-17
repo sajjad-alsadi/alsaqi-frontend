@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -33,7 +33,7 @@ interface AuditWorkspaceProps {
 
 const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
   const { t, i18n } = useTranslation();
-  const { user } = useAppContext();
+  const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<any>(null);
   const [tasks, setTasks] = useState<any[]>([]);

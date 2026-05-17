@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { RiskItem } from '../types';
 import { Plus, Search, ShieldAlert, Activity, ArrowRight, Info, Upload, Edit, Trash2 } from 'lucide-react';
@@ -18,7 +18,7 @@ import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const RiskRegister: React.FC = () => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const language = i18n.language;
   const { formatDate, formatNumber } = useFormat();

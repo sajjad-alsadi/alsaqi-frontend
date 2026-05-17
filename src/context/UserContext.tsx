@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { User } from '../types';
 
 interface UserContextType {
@@ -12,13 +12,19 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const updateUser = (userData: Partial<User>) => {
-    if (!user) return;
-    setUser({ ...user, ...userData });
-  };
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      return { ...prev, ...userData };
+    });
+  }, []);
+
+  const value = useMemo(() => ({
+    user, setUser, updateUser
+  }), [user, updateUser]);
 
   return (
-    <UserContext.Provider value={{ user, setUser, updateUser }}>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );

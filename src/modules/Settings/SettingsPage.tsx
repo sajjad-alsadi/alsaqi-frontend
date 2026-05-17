@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../context/UserContext';
+import { usePreferences } from '../../context/PreferencesContext';
 import api from '../../services/api';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -7,7 +9,7 @@ import {
   Camera, Check, AlertCircle, LogOut, Globe, 
   Bell, Layout as LayoutIcon, Info, X, Sun
 } from 'lucide-react';
-import { Language } from '../../constants';
+import { Language, UserRole } from '../../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import AboutSection from '../../components/AboutSection';
 import PDFSettingsSection from '../../components/PDFSettingsSection';
@@ -15,7 +17,9 @@ import { useDepartments } from '../../hooks/useDepartments';
 import { PdfTemplateManagement } from '../../components/PdfTemplateManagement';
 
 const Settings: React.FC = () => {
-  const { user, token, language, setLanguage, theme, setTheme, dashboardLayout, setDashboardLayout, updateUser } = useAppContext();
+  const { token } = useAuth();
+  const { user, updateUser } = useUser();
+  const { language, setLanguage, theme, setTheme, dashboardLayout, setDashboardLayout } = usePreferences();
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'preferences' | 'security' | 'about' | 'pdf'>('profile');
   const [profile, setProfile] = useState<any>(null);
@@ -153,7 +157,7 @@ const Settings: React.FC = () => {
     { id: 'about', label: t('settings.aboutApplication'), icon: Info },
   ];
 
-  if (user?.role === 'Admin' || user?.role === 'Administrator' || user?.role === 'Manager') {
+  if (user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER) {
     tabs.push({ id: 'pdf', label: t('settings.pdfSettings'), icon: LayoutIcon });
   }
 

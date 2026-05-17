@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import api from '../services/api';
 import { User } from '../types';
 import { useUser } from './UserContext';
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [setUser]);
 
-  const logout = React.useCallback(async () => {
+  const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout');
     } catch (err) {
@@ -56,10 +56,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
       setToken(null);
     }
-  }, [setUser, setToken]);
+  }, [setUser]);
+
+  const value = useMemo(() => ({
+    token, setToken, logout, isCheckingSession
+  }), [token, logout, isCheckingSession]);
 
   return (
-    <AuthContext.Provider value={{ token, setToken, logout, isCheckingSession }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

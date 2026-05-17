@@ -5,13 +5,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Bell } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedNotificationMessage } from '../utils/notificationHelpers';
-import { useAppContext } from '../context/AppContext';
+import { usePreferences } from '../context/PreferencesContext';
 
 const TOAST_DURATION = 5000; // 5 seconds
 
 const NotificationToast: React.FC = () => {
   const { latestNotification, clearLatest, markAsRead } = useNotificationContext();
-  const { language } = useAppContext();
+  const { language } = usePreferences();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
@@ -76,7 +76,7 @@ const NotificationToast: React.FC = () => {
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
             role="alert"
-            aria-live="polite"
+            aria-live="assertive"
           >
             {/* Progress bar */}
             <div className="h-0.5 bg-[var(--color-bg-soft)] w-full">

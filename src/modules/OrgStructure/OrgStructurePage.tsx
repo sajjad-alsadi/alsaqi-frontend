@@ -10,7 +10,8 @@ import api from '../../services/api';
 import { useDepartments, Department } from '../../hooks/useDepartments';
 import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';
-import { useAppContext } from '../../context/AppContext';
+import { useUser } from '../../context/UserContext';
+import { UserRole } from '../../constants';
 
 // --- Components ---
 
@@ -142,8 +143,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onEdit, onAddChild, on
 const OrgStructure: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-  const { user } = useAppContext();
-  const isAdmin = ['Admin', 'Administrator', 'Manager'].includes(user?.role || '');
+  const { user } = useUser();
+  const isAdmin = [UserRole.ADMIN, UserRole.MANAGER].includes(user?.role as any || '');
 
   const [activeTab, setActiveTab] = useState<'tree' | 'table' | 'stats'>('tree');
   const { departments, refresh, loading: flatLoading, error } = useDepartments();

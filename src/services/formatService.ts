@@ -1,11 +1,11 @@
-import { useAppContext } from '../context/AppContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
 
 /**
  * Hook to provide localized formatting functions
  */
 export const useFormat = () => {
-  const { language: contextLanguage } = useAppContext();
+  const { language: contextLanguage } = usePreferences();
   const { t, i18n } = useTranslation();
   
   const language = contextLanguage || i18n.language || 'ar';

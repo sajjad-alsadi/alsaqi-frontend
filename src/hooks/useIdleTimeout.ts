@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
+import { useUser } from '../context/UserContext';
 import { useAppContext } from '../context/AppContext';
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 
 export const useIdleTimeout = () => {
-  const { user, logout } = useAppContext();
+  const { user } = useUser();
+  const { logout } = useAppContext();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const resetTimeout = () => {

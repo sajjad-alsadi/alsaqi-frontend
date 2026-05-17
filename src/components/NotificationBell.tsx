@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { useNotificationContext } from '../context/NotificationContext';
 import { Bell, Check, Trash2, ExternalLink, FileText, AlertTriangle, Info, UserPlus, Settings, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -11,7 +11,7 @@ import { useFormat } from '../services/formatService';
 import { getTranslatedNotificationMessage, getTranslatedNotificationModule } from '../utils/notificationHelpers';
 
 const NotificationBell: React.FC = () => {
-  const { language } = useAppContext();
+  const { language } = usePreferences();
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, bellShake } = useNotificationContext();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

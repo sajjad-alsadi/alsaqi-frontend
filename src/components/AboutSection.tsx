@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
+import { useUser } from '../context/UserContext';
 import { Save, Edit2 } from 'lucide-react';
 import api from '../services/api';
 import { UserRole } from '../constants';
 
 const AboutSection: React.FC = () => {
-  const { user } = useAppContext();
+  const { user } = useUser();
   const { t } = useTranslation();
   const [settings, setSettings] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);

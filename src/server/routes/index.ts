@@ -1,4 +1,7 @@
 import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { db } from "../db/index";
 import { createAuthMiddlewares } from "../middleware/auth";
 import { createAuthRoutes } from "./auth";
@@ -31,6 +34,9 @@ import { createRecommendationRoutes } from "./recommendations";
 import { NotificationService } from "../services/NotificationService";
 
 import rateLimit from "express-rate-limit";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const createNotification = NotificationService.create.bind(NotificationService);
 
@@ -74,6 +80,18 @@ export const setupRoutes = (
       database: dbType,
       persistence: persistence
     });
+  });
+
+  // OpenAPI Specification
+  app.get("/api/docs", (req, res) => {
+    try {
+      const specPath = path.resolve(__dirname, '../../../docs/openapi.yaml');
+      const spec = fs.readFileSync(specPath, 'utf-8');
+      res.setHeader('Content-Type', 'text/yaml; charset=utf-8');
+      res.send(spec);
+    } catch (err) {
+      res.status(404).json({ error: 'OpenAPI specification not found' });
+    }
   });
 
   // Auth Routes

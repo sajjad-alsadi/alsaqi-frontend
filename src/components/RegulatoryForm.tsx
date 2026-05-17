@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Upload } from 'lucide-react';
 
@@ -11,7 +11,7 @@ interface RegulatoryFormProps {
 }
 
 const RegulatoryForm: React.FC<RegulatoryFormProps> = ({ onSuccess, onClose, initialData }) => {
-  const { token } = useAppContext();
+  const { token } = useAuth();
   const { t } = useTranslation();
   const [departments, setDepartments] = useState<any[]>([]);
   const [instructions, setInstructions] = useState<any[]>([]);

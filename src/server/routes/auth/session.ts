@@ -3,6 +3,7 @@ import { SessionService } from '../../services/SessionService';
 import { AuthService } from '../../services/AuthService';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { AuthError } from '../../utils/errors';
+import { generateCsrfToken, attachCsrfToken } from '../../middleware/csrf';
 
 export const createSessionRoutes = (
   db: any,
@@ -74,6 +75,10 @@ export const createSessionRoutes = (
       });
 
       await AuthService.logAudit(result.user.username, "Refresh Token", "Auth", "Token refreshed successfully");
+
+      // Generate and attach CSRF token on successful refresh
+      const csrfToken = generateCsrfToken();
+      attachCsrfToken(res, csrfToken);
 
       res.json({ success: true });
     } catch (error) {

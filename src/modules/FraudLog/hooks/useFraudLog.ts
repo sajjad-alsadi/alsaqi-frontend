@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../../../services/api';
+import { useAuth } from '../../../context/AuthContext';
 import { useAppContext } from '../../../context/AppContext';
 import { FraudCase, AccessRequest, AccessStatus } from '../types';
 
 export const useFraudLog = (isManager: boolean) => {
-  const { token, fetchNotifications } = useAppContext();
+  const { token } = useAuth();
+  const { fetchNotifications } = useAppContext();
   const [cases, setCases] = useState<FraudCase[]>([]);
   const [policyContent, setPolicyContent] = useState('');
   
