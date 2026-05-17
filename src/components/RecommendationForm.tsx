@@ -10,6 +10,7 @@ import api from '../services/api';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { FormField } from './ui/FormField';
+import logger from '../utils/logger';
 
 const recommendationSchema = z.object({
   finding_id: z.string().min(1, 'Field is required'),
@@ -78,7 +79,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCa
       }
       onSuccess();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

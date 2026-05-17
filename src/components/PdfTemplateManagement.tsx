@@ -4,6 +4,7 @@ import api from '../services/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { FileText, Plus, Edit2, Trash2, CheckCircle, X, Search, Globe, Layout, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import logger from '../utils/logger';
 
 interface PdfTemplate {
   id: string;
@@ -55,7 +56,7 @@ export const PdfTemplateManagement: React.FC = () => {
       const res = await api.get('/pdf-templates');
       setTemplates(res.data);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('pdfTemplates.loadError'));
     } finally {
       setLoading(false);

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import api from '../services/api';
 import { User } from '../types';
 import { useUser } from './UserContext';
+import logger from '../utils/logger';
 
 interface AuthContextType {
   token: string | null;
@@ -34,7 +35,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setIsCheckingSession(false);
         } catch (err: any) {
           if (err.response?.status === 503 && retries > 0) {
-            console.warn(`Server is starting up, retrying session check in 2s... (${retries} left)`);
+            logger.warn(`Server is starting up, retrying session check in 2s... (${retries} left)`);
             setTimeout(() => checkLocalSession(retries - 1), 2000);
             return;
           }
@@ -51,7 +52,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await api.post('/auth/logout');
     } catch (err) {
-      console.error('Logout failed', err);
+      logger.error('Logout failed', err);
     } finally {
       setUser(null);
       setToken(null);

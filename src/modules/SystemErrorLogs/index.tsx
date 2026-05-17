@@ -6,6 +6,7 @@ import { useFormat } from '../../services/formatService';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import SystemErrorAnalytics from './SystemErrorAnalytics';
+import logger from '../../utils/logger';
 
 interface SystemError {
   id: number;
@@ -61,7 +62,7 @@ const SystemErrorLogs: React.FC = () => {
         setLogs(response.data);
       }
     } catch (error) {
-      console.error('Error fetching logs:', error);
+      logger.error('Error fetching logs:', error);
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,7 @@ const SystemErrorLogs: React.FC = () => {
       const response = await api.get('/system-errors/analytics');
       setAnalytics(response.data);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      logger.error('Error fetching analytics:', error);
     }
   };
 
@@ -83,7 +84,7 @@ const SystemErrorLogs: React.FC = () => {
       await Promise.all([fetchLogs(), fetchAnalytics()]);
       setIsClearModalOpen(false);
     } catch (error) {
-      console.error('Error clearing logs:', error);
+      logger.error('Error clearing logs:', error);
     } finally {
       setIsClearing(false);
     }
@@ -101,7 +102,7 @@ const SystemErrorLogs: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error exporting logs:', error);
+      logger.error('Error exporting logs:', error);
     }
   };
 
@@ -159,7 +160,7 @@ const SystemErrorLogs: React.FC = () => {
           // Error handled by onclose
         };
       } catch (e) {
-        console.error("Failed to initiate WebSocket:", e);
+        logger.error("Failed to initiate WebSocket:", e);
       }
     };
 

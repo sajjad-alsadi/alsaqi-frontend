@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../context/UserContext';
 import api from '../services/api';
 import { UserRole } from '../constants';
+import logger from '../utils/logger';
 
 // Existing Module Logic
 import ConflictOfInterest from './ConflictOfInterest';
@@ -26,7 +27,7 @@ const IntegrityManagement: React.FC = () => {
       const res = await api.get('/integrity/stats');
       setStats(res.data);
     } catch (error) {
-      console.error('Error fetching integrity stats:', error);
+      logger.error('Error fetching integrity stats:', error);
     } finally {
       setLoading(false);
     }

@@ -24,6 +24,7 @@ import Modal from '../../components/Modal';
 import PdfViewer from '../../components/PdfViewer';
 import Pagination from '../../components/Pagination';
 import { UserRole } from '../../constants';
+import logger from '../../utils/logger';
 
 import OutgoingForm from './OutgoingForm';
 
@@ -72,7 +73,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
         setItems(response.data);
       }
     } catch (error) {
-      console.error("Failed to fetch outgoing correspondence", error);
+      logger.error("Failed to fetch outgoing correspondence", error);
       toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);
@@ -92,7 +93,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (error) {
-      console.error('Error deleting letter:', error);
+      logger.error('Error deleting letter:', error);
       toast.error(t('errorOccurred'));
     }
   };

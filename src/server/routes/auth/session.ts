@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { SessionService } from '../../services/SessionService';
 import { AuthService } from '../../services/AuthService';
 import { asyncHandler } from '../../utils/asyncHandler';
@@ -13,6 +14,14 @@ export const createSessionRoutes = (
   logError: any
 ) => {
   const router = express.Router();
+
+  const refreshLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    message: { error: "TOO_MANY_ATTEMPTS" },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
 
   // Current User
   router.get("/me", authenticate, asyncHandler(async (req, res) => {
@@ -38,7 +47,7 @@ export const createSessionRoutes = (
   }));
 
   // Refresh Token
-  router.post("/refresh", asyncHandler(async (req, res) => {
+  router.post("/refresh", refreshLimiter, asyncHandler(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     
     if (!refreshToken) {

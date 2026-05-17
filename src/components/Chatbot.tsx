@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useFormat } from '../services/formatService';
+import logger from '../utils/logger';
 
 interface SearchResult {
   id: string | number;
@@ -133,7 +134,7 @@ const Chatbot: React.FC = () => {
 
       setMessages(prev => [...prev, botMsg]);
     } catch (error) {
-      console.error('Search error:', error);
+      logger.error('Search error:', error);
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         text: t('chatbot.errorOccurred'),

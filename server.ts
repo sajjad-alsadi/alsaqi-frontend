@@ -131,6 +131,17 @@ async function runDbMigrations() {
 async function startServer() {
   const app = express();
   
+  // Validate critical environment variables in production
+  if (process.env.NODE_ENV === 'production') {
+    const recommendedEnvVars = ['DATABASE_URL', 'CORS_ORIGIN', 'DATA_DIR'];
+    
+    for (const envVar of recommendedEnvVars) {
+      if (!process.env[envVar]) {
+        logger.warn(`WARNING: ${envVar} is not set. Using defaults which may not be suitable for production.`);
+      }
+    }
+  }
+
   // Security Headers
   app.disable('x-powered-by');
   app.use((req, res, next) => {
@@ -139,6 +150,7 @@ async function startServer() {
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws: wss:; frame-ancestors 'none'");
     if (process.env.NODE_ENV === 'production') {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
@@ -159,6 +171,8 @@ async function startServer() {
   // Supports authenticated (message-based) and unauthenticated (notification-only) modes
   wss.on('connection', (ws, req) => {
     (ws as any).authenticated = false;
+    (ws as any).isAlive = true;
+    ws.on('pong', () => { (ws as any).isAlive = true; });
 
     ws.on('message', (data) => {
       try {
@@ -178,6 +192,21 @@ async function startServer() {
   
   wss.on('error', (err) => {
     logger.error('WebSocketServer Error:', err);
+  });
+
+  // WebSocket heartbeat to detect stale connections
+  const wsHeartbeatInterval = setInterval(() => {
+    wss.clients.forEach((ws: any) => {
+      if (ws.isAlive === false) {
+        return ws.terminate();
+      }
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', () => {
+    clearInterval(wsHeartbeatInterval);
   });
 
   // Make wss accessible to routes

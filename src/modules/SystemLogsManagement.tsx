@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { History, AlertCircle, LayoutDashboard, Terminal, Activity, ShieldCheck, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import api from '../services/api';
+import logger from '../utils/logger';
 
 // Existing Module Logic
 import AuditTrail from './AuditTrail';
@@ -63,7 +64,7 @@ const SystemLogsManagement: React.FC = () => {
         healthStatus
       });
     } catch (error) {
-      console.error('Error fetching logs stats:', error);
+      logger.error('Error fetching logs stats:', error);
     } finally {
       setLoading(false);
     }

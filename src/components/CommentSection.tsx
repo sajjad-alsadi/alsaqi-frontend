@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import api from '../services/api';
 import { UserRole } from '../constants';
+import logger from '../utils/logger';
 
 interface Comment {
   id: string | number;
@@ -38,7 +39,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
         setComments(res.data);
       }
     } catch (err) {
-      console.error('Failed to fetch comments', err);
+      logger.error('Failed to fetch comments', err);
     }
   };
 
@@ -49,7 +50,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
       setNewComment('');
       fetchComments();
     } catch (err) {
-      console.error('Failed to add comment', err);
+      logger.error('Failed to add comment', err);
     }
   };
 
@@ -59,7 +60,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
       await api.delete(`/comments/${id}`);
       fetchComments();
     } catch (err) {
-      console.error('Failed to delete comment', err);
+      logger.error('Failed to delete comment', err);
     }
   };
 

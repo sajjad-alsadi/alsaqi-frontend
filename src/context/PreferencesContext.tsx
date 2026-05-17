@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import api from '../services/api';
 import { Language } from '../types';
 import { useTranslation } from 'react-i18next';
+import logger from '../utils/logger';
 
 interface PreferencesContextType {
   language: Language;

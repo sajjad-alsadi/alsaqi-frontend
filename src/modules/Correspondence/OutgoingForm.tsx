@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { FormField } from '../../components/ui/FormField';
+import logger from '../../utils/logger';
 
 const outgoingSchema = z.object({
   letter_date: z.string().min(1, 'Field is required'),
@@ -63,7 +64,7 @@ const OutgoingForm: React.FC<OutgoingFormProps> = ({ language, onSuccess, onCanc
       await api.post('/correspondence/outgoing', formData);
       onSuccess();
     } catch (error) {
-      console.error("Failed to save outgoing correspondence", error);
+      logger.error("Failed to save outgoing correspondence", error);
       toast.error(t('errorOccurred'));
     }
   };

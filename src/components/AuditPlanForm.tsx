@@ -10,6 +10,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { FormField } from './ui/FormField';
 import { useDepartments } from '../hooks/useDepartments';
+import logger from '../utils/logger';
 
 type AuditPlanFormValues = {
   title: string;
@@ -150,7 +151,7 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
       }
       onSuccess();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

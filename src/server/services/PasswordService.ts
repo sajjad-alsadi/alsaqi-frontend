@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { db } from '../db/index';
 import { NotFoundError, ValidationError, AuthError } from '../utils/errors';
@@ -50,7 +51,7 @@ export class PasswordService {
       throw new NotFoundError("Request not found");
     }
 
-    const tempPass = Math.random().toString(36).slice(-8) + "!";
+    const tempPass = crypto.randomBytes(6).toString('base64url') + "!";
     const hashedTemp = bcrypt.hashSync(tempPass, 12);
 
     await db.prepare("UPDATE users SET password = ?::text, requires_password_change = 1, failed_attempts = 0, locked_until = NULL, session_version = session_version + 1 WHERE id = ?::uuid")

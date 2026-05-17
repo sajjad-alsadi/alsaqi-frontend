@@ -3,6 +3,7 @@ import api from '../services/api';
 import { Notification } from '../types';
 import { useUser } from './UserContext';
 import { useAuth } from './AuthContext';
+import logger from '../utils/logger';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -55,7 +56,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setHasMore(data.length === 20);
     } catch (err: any) {
       if (err.response?.status !== 401 && err.response?.status !== 403) {
-        console.error('Failed to fetch notifications:', err);
+        logger.error('Failed to fetch notifications:', err);
       }
     } finally {
       setIsLoading(false);
@@ -174,7 +175,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       await api.put(`/notifications/${id}/read`);
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (err) { console.error('Failed to mark notification as read:', err); }
+    } catch (err) { logger.error('Failed to mark notification as read:', err); }
   };
 
   const markAllAsRead = async () => {
@@ -183,7 +184,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       await api.put('/notifications/mark-all-read');
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true, status: 'Read' })));
       setUnreadCount(0);
-    } catch (err) { console.error('Failed to mark all as read:', err); }
+    } catch (err) { logger.error('Failed to mark all as read:', err); }
   };
 
   const deleteNotification = async (id: string | number) => {
@@ -197,7 +198,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
         return prev.filter(x => x.id !== id);
       });
-    } catch (err) { console.error('Failed to dismiss notification:', err); }
+    } catch (err) { logger.error('Failed to dismiss notification:', err); }
   };
 
   const clearLatest = () => setLatestNotification(null);

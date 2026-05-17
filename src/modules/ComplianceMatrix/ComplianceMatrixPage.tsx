@@ -11,6 +11,7 @@ import api from '../../services/api';
 import Modal from '../../components/Modal';
 import { useDepartments } from '../../hooks/useDepartments';
 import toast from 'react-hot-toast';
+import logger from '../../utils/logger';
 
 // --- Types ---
 type ComplianceStatus = 'compliant' | 'partial' | 'non_compliant' | 'under_review';
@@ -106,7 +107,7 @@ export default function ComplianceMatrix() {
       const res = await api.get('/compliance?' + q.toString());
       if (res.data.success) setItems(res.data.data);
     } catch (e) {
-      console.error(e);
+      logger.error('Operation failed', e);
       toast.error(t('complianceMatrix.loadError'));
     } finally {
       setLoading(false);
@@ -118,7 +119,7 @@ export default function ComplianceMatrix() {
       const res = await api.get('/compliance/summary');
       if (res.data.success) setSummary(res.data.data);
     } catch (e) {
-      console.error(e);
+      logger.error('Operation failed', e);
     }
   };
 
@@ -162,7 +163,7 @@ export default function ComplianceMatrix() {
       fetchItems();
       fetchSummary();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('complianceMatrix.saveError'));
     }
   };
@@ -177,7 +178,7 @@ export default function ComplianceMatrix() {
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (e) {
-      console.error(e);
+      logger.error('Operation failed', e);
       toast.error(t('complianceMatrix.deleteError'));
     }
   };
@@ -194,7 +195,7 @@ export default function ComplianceMatrix() {
       fetchItems();
       fetchSummary();
     } catch (e) {
-      console.error(e);
+      logger.error('Operation failed', e);
       toast.error(t('complianceMatrix.statusUpdateError'));
     }
   };

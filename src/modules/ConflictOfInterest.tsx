@@ -9,6 +9,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useFormat } from '../services/formatService';
 import { UserRole } from '../constants';
+import logger from '../utils/logger';
 
 interface COI {
   id: number;
@@ -54,7 +55,7 @@ const ConflictOfInterest: React.FC = () => {
         setDeclarations(Array.isArray(res.data) ? res.data : []);
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       setDeclarations([]);
     }
   };
@@ -67,7 +68,7 @@ const ConflictOfInterest: React.FC = () => {
       setFormData({ description: '', related_party: '' });
       fetchDeclarations();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
   };
@@ -81,7 +82,7 @@ const ConflictOfInterest: React.FC = () => {
       setSelectedCOI(null);
       fetchDeclarations();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
   };

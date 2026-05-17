@@ -13,6 +13,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { AuditStatus } from '../constants';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
 import AuditPlanForm from '../components/AuditPlanForm';
@@ -63,7 +64,7 @@ const AuditPlanModule: React.FC = () => {
       setIsDeleteModalOpen(false);
       setPlanToDelete(null);
     } catch (err: any) {
-      console.error("Network error during delete:", err);
+      logger.error("Network error during delete:", err);
       toast.error(t('errorOccurred'));
     }
   };

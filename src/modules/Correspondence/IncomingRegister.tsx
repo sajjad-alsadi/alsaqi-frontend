@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import Pagination from '../../components/Pagination';
 import { useFormat } from '../../services/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
+import logger from '../../utils/logger';
 
 import IncomingForm from './IncomingForm';
 
@@ -83,7 +84,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
         setItems(response.data);
       }
     } catch (error) {
-      console.error("Failed to fetch incoming correspondence", error);
+      logger.error("Failed to fetch incoming correspondence", error);
     } finally {
       setLoading(false);
     }
@@ -98,7 +99,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
       setDepartments(deptsRes.data);
       setUsers(usersRes.data);
     } catch (error) {
-      console.error("Failed to fetch metadata", error);
+      logger.error("Failed to fetch metadata", error);
     }
   };
 

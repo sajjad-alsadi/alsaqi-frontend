@@ -10,6 +10,7 @@ import api from '../services/api';
 import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
 import { FormField } from './ui/FormField';
+import logger from '../utils/logger';
 
 const findingSchema = z.object({
   audit_id: z.string().min(1, 'Field is required'),
@@ -83,7 +84,7 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
         setPlans(Array.isArray(res.data) ? res.data : (res.data.data || []));
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 
@@ -98,7 +99,7 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
       }
       onSuccess();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

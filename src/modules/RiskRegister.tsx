@@ -11,6 +11,7 @@ import api from '../services/api';
 import InteractiveIcon from '../components/InteractiveIcon';
 import { useFormat } from '../services/formatService';
 import toast from 'react-hot-toast';
+import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
 import RiskForm from '../components/RiskForm';
@@ -54,7 +55,7 @@ const RiskRegister: React.FC = () => {
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
   };
@@ -118,7 +119,7 @@ const RiskRegister: React.FC = () => {
         
         fetchRisks();
       } catch (error) {
-        console.error('Error parsing Excel:', error);
+        logger.error('Error parsing Excel:', error);
       }
     };
     reader.readAsBinaryString(file);

@@ -65,7 +65,7 @@ export const createLogRoutes = (
     const wss = (req.app as any).wss;
     if (wss) {
       wss.clients.forEach((client: any) => {
-        if (client.readyState === 1) { // OPEN
+        if (client.readyState === 1 && (client as any).authenticated) {
           client.send(JSON.stringify({ type: 'NEW_SYSTEM_ERROR', message, module, severity }));
         }
       });

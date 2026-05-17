@@ -14,6 +14,7 @@ import { UserRole } from '../constants';
 import Modal from '../components/Modal';
 import PdfViewer from '../components/PdfViewer';
 import { useFormat } from '../services/formatService';
+import logger from '../utils/logger';
 
 const AuditEvidence: React.FC = () => {
   const { token } = useAuth();
@@ -60,7 +61,7 @@ const AuditEvidence: React.FC = () => {
       setAudits(audRes.data.data || (Array.isArray(audRes.data) ? audRes.data : []));
       setFindings(findRes.data.data || (Array.isArray(findRes.data) ? findRes.data : []));
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     } finally {
       setLoading(false);
     }
@@ -110,7 +111,7 @@ const AuditEvidence: React.FC = () => {
         setFile(null);
         setEditingId(null);
       } catch (err: any) {
-        console.error(err);
+        logger.error('Operation failed', err);
         const apiError = err.response?.data?.error;
         if (typeof apiError === 'string') {
           setError(apiError);
@@ -156,7 +157,7 @@ const AuditEvidence: React.FC = () => {
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

@@ -4,6 +4,7 @@ import { useUser } from '../context/UserContext';
 import { Save, Edit2 } from 'lucide-react';
 import api from '../services/api';
 import { UserRole } from '../constants';
+import logger from '../utils/logger';
 
 const AboutSection: React.FC = () => {
   const { user } = useUser();
@@ -24,7 +25,7 @@ const AboutSection: React.FC = () => {
         setEditForm(response.data);
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 
@@ -34,7 +35,7 @@ const AboutSection: React.FC = () => {
       setIsEditing(false);
       fetchSettings();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

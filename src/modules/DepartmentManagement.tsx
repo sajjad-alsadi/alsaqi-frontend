@@ -6,6 +6,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useDepartments } from '../hooks/useDepartments';
 import JobTitles from './JobTitles';
+import logger from '../utils/logger';
 
 const DepartmentManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ const DepartmentManagement: React.FC = () => {
       toast.success(t('createSuccess'));
       refresh();
     } catch (error: any) {
-      console.error("Error adding department:", error);
+      logger.error("Error adding department:", error);
       const msg = error.response?.data?.error || t('failedToAddDepartment');
       setError(msg);
       toast.error(msg);
@@ -54,7 +55,7 @@ const DepartmentManagement: React.FC = () => {
       setShowDeleteConfirm(false);
       setDeptToDelete(null);
     } catch (error: any) {
-      console.error("Error deleting department:", error);
+      logger.error("Error deleting department:", error);
       const msg = error.response?.data?.error || t('failedToDeleteDepartment');
       setError(msg);
       toast.error(msg);
@@ -69,7 +70,7 @@ const DepartmentManagement: React.FC = () => {
       setEditingDept(null);
       refresh();
     } catch (error: any) {
-      console.error("Error updating department:", error);
+      logger.error("Error updating department:", error);
       const msg = error.response?.data?.error || t('failedToUpdateDepartment');
       setError(msg);
       toast.error(msg);

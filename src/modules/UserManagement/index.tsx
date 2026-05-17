@@ -8,6 +8,7 @@ import { useFormat } from '../../services/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import logger from '../../utils/logger';
 
 // Sub-components
 import UserManagementHeader from './UserManagementHeader';
@@ -141,7 +142,7 @@ const UserManagement: React.FC = () => {
       toast.success(t('updateSuccess'));
       refreshAll();
     } catch (err: any) {
-      console.error('Error updating permissions:', err);
+      logger.error('Error updating permissions:', err);
       refreshAll();
       toast.error(t('userManagement.permissionUpdateFailed'));
     }
@@ -155,7 +156,7 @@ const UserManagement: React.FC = () => {
       toast.success(t('updateSuccess'));
       refreshAll();
     } catch (err) { 
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
   };
@@ -164,7 +165,7 @@ const UserManagement: React.FC = () => {
     try {
       await userService.revokeSession(sessionId);
       refreshAll();
-    } catch (err) { console.error(err); }
+    } catch (err) { logger.error('Operation failed', err); }
   };
 
   const handleExportUsers = () => {
@@ -225,7 +226,7 @@ const UserManagement: React.FC = () => {
         access_scope: AccessScope.GLOBAL, phone_number: '', notes: ''
       });
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       setUserError(err.response?.data?.error || t('userManagement.errorSavingUser'));
     } finally {
       setIsSavingUser(false);
@@ -258,7 +259,7 @@ const UserManagement: React.FC = () => {
       toast.success(t('updateSuccess'));
       refreshAll();
     } catch (err) { 
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
     setShowSuspendConfirm(false);
@@ -272,7 +273,7 @@ const UserManagement: React.FC = () => {
       toast.success(t('deleteSuccess'));
       refreshAll();
     } catch (err) { 
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
     setShowDeleteConfirm(false);
@@ -310,7 +311,7 @@ const UserManagement: React.FC = () => {
       setShowUnlockConfirm(false);
       setSelectedUserId(null);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('userManagement.errorUnlockingUser'));
     }
   };
@@ -319,7 +320,7 @@ const UserManagement: React.FC = () => {
     try {
       await userService.approveReset({ requestId });
       refreshAll();
-    } catch (err) { console.error(err); }
+    } catch (err) { logger.error('Operation failed', err); }
   };
 
   const handleConfirmApproveReset = async () => {
@@ -329,7 +330,7 @@ const UserManagement: React.FC = () => {
       setTempPassword(res.data.tempPassword);
       refreshAll();
       setShowResetConfirm(false);
-    } catch (err) { console.error(err); }
+    } catch (err) { logger.error('Operation failed', err); }
   };
 
   const filteredUsers = users;

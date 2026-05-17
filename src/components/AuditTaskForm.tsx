@@ -10,6 +10,7 @@ import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
 import { FormField } from './ui/FormField';
 import { Input } from './ui/Input';
+import logger from '../utils/logger';
 
 type TaskFormValues = {
   title: string;
@@ -98,7 +99,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
           setUsers(Array.isArray(res.data) ? res.data : (res.data.data || []));
         }
       } catch (err) {
-        console.error(err);
+        logger.error('Operation failed', err);
       }
     };
 
@@ -109,7 +110,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
           setDepartments(Array.isArray(res.data) ? res.data : (res.data.data || []));
         }
       } catch (err) {
-        console.error(err);
+        logger.error('Operation failed', err);
       }
     };
 
@@ -144,7 +145,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
       }
       onSuccess();
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       const apiError = err.response?.data?.error;
       if (typeof apiError === 'string') {
         setError(apiError);

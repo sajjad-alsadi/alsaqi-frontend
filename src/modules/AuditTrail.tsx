@@ -8,6 +8,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useFormat } from '../services/formatService';
 import Pagination from '../components/Pagination';
+import logger from '../utils/logger';
 
 const AuditTrailModule: React.FC = () => {
   const { token } = useAuth();
@@ -60,7 +61,7 @@ const AuditTrailModule: React.FC = () => {
       }));
     } catch (err: any) {
       if (err?.name !== 'CanceledError') {
-        console.error(err);
+        logger.error('Operation failed', err);
         toast.error(t('errorOccurred'));
       }
     } finally {

@@ -12,6 +12,7 @@ import InteractiveIcon from '../components/InteractiveIcon';
 import { useFormat } from '../services/formatService';
 import { useDebounce } from '../hooks/useDebounce';
 import { AuditStatus } from '../constants';
+import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
 import AuditTaskForm from '../components/AuditTaskForm';
@@ -96,7 +97,7 @@ const AuditTasksModule: React.FC = () => {
       setIsDeleteModalOpen(false);
       setTaskToDelete(null);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
   };
@@ -107,7 +108,7 @@ const AuditTasksModule: React.FC = () => {
       toast.success(t('tasks.statusUpdateSuccess'));
       queryClient.invalidateQueries({ queryKey: ['audit-tasks'] });
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       const apiError = err.response?.data?.error;
       const errorMsg = typeof apiError === 'string' ? apiError : (apiError?.message || t('errorOccurred'));
       toast.error(errorMsg);

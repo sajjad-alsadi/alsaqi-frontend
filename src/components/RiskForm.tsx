@@ -10,6 +10,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
 import { FormField } from './ui/FormField';
+import logger from '../utils/logger';
 
 type RiskFormValues = {
   risk_id: string;
@@ -132,7 +133,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
       }
       onSuccess();
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

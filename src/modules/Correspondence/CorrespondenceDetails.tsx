@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../services/formatService';
+import logger from '../../utils/logger';
 
 interface CorrespondenceDetailsProps {
   type: 'Incoming' | 'Outgoing';
@@ -59,7 +60,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
       const response = await api.get(endpoint);
       setData(response.data);
     } catch (error) {
-      console.error("Failed to fetch details", error);
+      logger.error("Failed to fetch details", error);
     } finally {
       setLoading(false);
     }
@@ -441,7 +442,7 @@ const ArchiveModal = ({ language, id, type, onClose, onSuccess }: any) => {
       await api.put(`/correspondence/archive/${type}/${id}`);
       onSuccess();
     } catch (error) {
-      console.error("Failed to archive", error);
+      logger.error("Failed to archive", error);
     } finally {
       setSubmitting(false);
     }
@@ -483,7 +484,7 @@ const StatusUpdateModal = ({ language, id, type, currentStatus, onClose, onSucce
       await api.put(`/correspondence/status/${type}/${id}`, { new_status: status, notes });
       onSuccess();
     } catch (error) {
-      console.error("Failed to update status", error);
+      logger.error("Failed to update status", error);
     } finally {
       setSubmitting(false);
     }
@@ -552,7 +553,7 @@ const ReferralModal = ({ language, id, onClose, onSuccess }: any) => {
       await api.post('/correspondence/refer', { incoming_id: id, to_dept_id: deptId, to_user_id: userId, instructions });
       onSuccess();
     } catch (error) {
-      console.error("Failed to refer", error);
+      logger.error("Failed to refer", error);
     } finally {
       setSubmitting(false);
     }

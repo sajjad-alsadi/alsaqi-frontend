@@ -78,7 +78,7 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Framework: Vitest + fast-check
     - Strategy: Enumerate all role group arrays, verify every element is a value from UserRole enum and no duplicates exist
 
-- [ ] 5. Add CSRF Protection
+- [x] 5. Add CSRF Protection
   - [x] 5.1 Create `src/server/middleware/csrf.ts` with `generateCsrfToken()`, `csrfMiddleware()`, and `attachCsrfToken()` functions
   - [x] 5.2 Implement timing-safe token comparison using `crypto.timingSafeEqual`
   - [x] 5.3 Configure exempt paths (`/api/auth/login`, `/health`) that bypass CSRF validation
@@ -98,7 +98,7 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Framework: Vitest + fast-check
     - Strategy: Generate state-changing requests (POST/PUT/PATCH/DELETE) with and without valid tokens to non-exempt paths; verify rejection (403) without token and acceptance with valid token
 
-- [ ] 6. Fix RSA Key Persistence
+- [x] 6. Fix RSA Key Persistence
   - [x] 6.1 Create `src/server/utils/keyStore.ts` with `KeyStore` class implementing `load()`, `save()`, and `getOrCreate()` methods
   - [x] 6.2 Implement AES-256-GCM encryption for keys at rest using key derived from `SHA-256(JWT_SECRET + '_rsa_enc')`
   - [x] 6.3 Implement storage path resolution: `DATA_DIR` env variable with fallback to `./data` directory; never use `/tmp`
@@ -117,76 +117,76 @@ This plan implements 12 technical debt remediation requirements for the AL-SAQI 
     - Framework: Vitest + fast-check
     - Strategy: Generate key pairs, persist them, read raw file content, verify no PEM markers appear in the file; decrypt with correct secret and verify valid key material
 
-- [ ] 7. Add ESLint and Prettier Configuration
+- [x] 7. Add ESLint and Prettier Configuration
   - [x] 7.1 Create `eslint.config.mjs` with flat config format supporting TypeScript, React 19, and React Hooks rules
   - [x] 7.2 Create `.prettierrc` with project formatting options and `.prettierignore` excluding dist, node_modules, coverage
   - [x] 7.3 Add `lint` and `format` scripts to `package.json`
   - [x] 7.4 Set pre-existing violations to `warn` level so the build is not blocked
   - [x] 7.5 Verify `npm run lint` executes without errors (warnings are acceptable)
-- [ ] 8. Fix Context Provider Re-renders
+- [x] 8. Fix Context Provider Re-renders
   - [x] 8.1 Refactor `src/context/AppContext.tsx` to remove re-aggregation of auth/user/preferences state; keep only orchestration logic (login/logout coordination) with memoized value
   - [x] 8.2 Memoize all context values in `AuthContext.tsx`, `UserContext.tsx`, and `PreferencesContext.tsx` using `useMemo`
   - [x] 8.3 Memoize all callback functions in context providers using `useCallback`
   - [x] 8.4 Update components that consume `AppContext` for combined state to import from domain-specific contexts directly
-  - [~] 8.5 Write property test: Context cross-domain render isolation (Property 12) [PBT]
+  - [x] 8.5 Write property test: Context cross-domain render isolation (Property 12) [PBT]
 
     **Validates: Requirements 9.4, 9.5**
     - Test file: `src/context/__tests__/context.property.test.tsx`
     - Framework: Vitest + fast-check + React Testing Library
     - Strategy: Generate preference state changes and auth state changes; use render counters to verify cross-domain isolation (preference changes don't re-render auth-only consumers and vice versa)
 
-- [ ] 9. Accessibility Improvements
+- [x] 9. Accessibility Improvements
   - [x] 9.1 Create `src/components/SkipToContent.tsx` component and render as first focusable element in `src/App.tsx`
   - [x] 9.2 Create `src/components/LiveRegion.tsx` component with `polite` and `assertive` politeness levels
   - [x] 9.3 Integrate `LiveRegion` with route changes (polite) and toast notifications (assertive)
   - [x] 9.4 Create `src/components/FocusTrap.tsx` component with Escape-to-close support and integrate with `Modal` component
   - [x] 9.5 Verify `<html>` element `dir` and `lang` attributes update on language switch (existing `PreferencesContext` logic)
-  - [~] 9.6 Write property test: Dynamic content accessibility announcements (Property 14) [PBT]
+  - [x] 9.6 Write property test: Dynamic content accessibility announcements (Property 14) [PBT]
 
     **Validates: Requirements 12.3, 12.4**
     - Test file: `src/components/__tests__/accessibility.property.test.tsx`
     - Framework: Vitest + fast-check + React Testing Library
     - Strategy: Generate form submission results and toast messages; verify content appears in appropriate aria-live regions (polite for forms, assertive for toasts)
 
-  - [~] 9.7 Write property test: Modal keyboard navigation (Property 15) [PBT]
+  - [x] 9.7 Write property test: Modal keyboard navigation (Property 15) [PBT]
 
     **Validates: Requirements 12.6**
     - Test file: `src/components/__tests__/accessibility.property.test.tsx`
     - Framework: Vitest + fast-check + React Testing Library
     - Strategy: Generate modal open/close sequences; verify focus is trapped within modal when open and Escape closes it returning focus to trigger
 
-  - [~] 9.8 Write property test: Language direction synchronization (Property 16) [PBT]
+  - [x] 9.8 Write property test: Language direction synchronization (Property 16) [PBT]
 
     **Validates: Requirements 12.7**
     - Test file: `src/components/__tests__/accessibility.property.test.tsx`
     - Framework: Vitest + fast-check + React Testing Library
     - Strategy: Generate language switches between LTR (en) and RTL (ar) languages; verify html dir and lang attributes immediately reflect the new direction
 
-- [ ] 10. Add OpenAPI Specification
-  - [~] 10.1 Create `docs/openapi.yaml` with OpenAPI 3.1 info, servers, and security scheme definitions (Bearer JWT + CSRF)
-  - [~] 10.2 Document all API endpoints from `src/server/routes/` with paths, methods, request/response schemas, and auth requirements
-  - [~] 10.3 Define reusable schema components for shared data models (User, AuditPlan, AuditProgram, Finding, Recommendation, RiskItem, Correspondence)
-  - [~] 10.4 Add a `/api/docs` endpoint in the Express app to serve the OpenAPI spec
-  - [~] 10.5 Write property test: OpenAPI specification completeness (Property 13) [PBT]
+- [x] 10. Add OpenAPI Specification
+  - [x] 10.1 Create `docs/openapi.yaml` with OpenAPI 3.1 info, servers, and security scheme definitions (Bearer JWT + CSRF)
+  - [x] 10.2 Document all API endpoints from `src/server/routes/` with paths, methods, request/response schemas, and auth requirements
+  - [x] 10.3 Define reusable schema components for shared data models (User, AuditPlan, AuditProgram, Finding, Recommendation, RiskItem, Correspondence)
+  - [x] 10.4 Add a `/api/docs` endpoint in the Express app to serve the OpenAPI spec
+  - [x] 10.5 Write property test: OpenAPI specification completeness (Property 13) [PBT]
 
     **Validates: Requirements 10.2, 10.3**
     - Test file: `src/server/__tests__/openapi.property.test.ts`
     - Framework: Vitest + fast-check
     - Strategy: Parse the Express route registry and the OpenAPI YAML; for each registered route/method pair, verify a corresponding path entry exists in the spec with request/response schemas and security requirements
 
-- [ ] 11. Add Dockerfile for Containerization
-  - [~] 11.1 Create `Dockerfile` with multi-stage build (builder stage with `node:20-alpine`, runtime stage with production deps only)
-  - [~] 11.2 Configure non-root user (`appuser`), `VOLUME ["/app/data"]`, `EXPOSE 3000`, and `NODE_ENV=production`
-  - [~] 11.3 Create `.dockerignore` excluding `node_modules`, `.git`, `src`, `*.md`, `*.log`, `*.map`, `**/*.test.*`
-  - [~] 11.4 Verify Dockerfile builds successfully with `docker build .` (if Docker is available)
-- [ ] 12. Increase Test Coverage
-  - [~] 12.1 Write unit tests for authentication flows (login, token refresh, logout, session invalidation) in `src/server/__tests__/auth.test.ts`
-  - [~] 12.2 Write unit tests for permission middleware (`checkPermission`, `authorize`) in `src/server/__tests__/permissions.test.ts`
-  - [~] 12.3 Write unit tests for the migration versioning system in `src/server/db/__tests__/migrations.test.ts`
-  - [~] 12.4 Write integration tests for at least 5 critical API routes in `src/server/routes/__tests__/` (auth, audit plans, findings, recommendations, users)
-  - [~] 12.5 Write component tests for at least 3 complex React components (FindingCard, AuditPlanForm, Layout)
-  - [~] 12.6 Configure Vitest coverage with v8 provider, reporters (text, lcov, html), and threshold of 40% for `src/server/`
-  - [~] 12.7 Verify `npm run test` produces a coverage report meeting the 40% threshold for `src/server/`
+- [x] 11. Add Dockerfile for Containerization
+  - [x] 11.1 Create `Dockerfile` with multi-stage build (builder stage with `node:20-alpine`, runtime stage with production deps only)
+  - [x] 11.2 Configure non-root user (`appuser`), `VOLUME ["/app/data"]`, `EXPOSE 3000`, and `NODE_ENV=production`
+  - [x] 11.3 Create `.dockerignore` excluding `node_modules`, `.git`, `src`, `*.md`, `*.log`, `*.map`, `**/*.test.*`
+  - [x] 11.4 Verify Dockerfile builds successfully with `docker build .` (if Docker is available)
+- [x] 12. Increase Test Coverage
+  - [x] 12.1 Write unit tests for authentication flows (login, token refresh, logout, session invalidation) in `src/server/__tests__/auth.test.ts`
+  - [x] 12.2 Write unit tests for permission middleware (`checkPermission`, `authorize`) in `src/server/__tests__/permissions.test.ts`
+  - [x] 12.3 Write unit tests for the migration versioning system in `src/server/db/__tests__/migrations.test.ts`
+  - [x] 12.4 Write integration tests for at least 5 critical API routes in `src/server/routes/__tests__/` (auth, audit plans, findings, recommendations, users)
+  - [x] 12.5 Write component tests for at least 3 complex React components (FindingCard, AuditPlanForm, Layout)
+  - [x] 12.6 Configure Vitest coverage with v8 provider, reporters (text, lcov, html), and threshold of 40% for `src/server/`
+  - [x] 12.7 Verify `npm run test` produces a coverage report meeting the 40% threshold for `src/server/`
 
 ## Task Dependency Graph
 

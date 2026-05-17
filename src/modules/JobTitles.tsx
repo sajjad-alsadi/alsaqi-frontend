@@ -4,6 +4,7 @@ import { Briefcase, Search, Plus, Edit2, Trash2, Archive } from 'lucide-react';
 import { motion } from 'motion/react';
 import api from '../services/api';
 import { useDepartments } from '../hooks/useDepartments';
+import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
 
@@ -38,7 +39,7 @@ const JobTitles: React.FC = () => {
       const res = await api.get('/job-titles');
       setJobTitles(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ const JobTitles: React.FC = () => {
       setEditingId(null);
       setFormData({ name: '', department: '', job_level: 'Staff', description: '', reporting_to: '', status: 'Active' });
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       const apiError = err.response?.data?.error;
       if (typeof apiError === 'string') {
         setError(apiError);
@@ -105,7 +106,7 @@ const JobTitles: React.FC = () => {
       setIsDeleteModalOpen(false);
       setTitleToDelete(null);
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       const apiError = err.response?.data?.error;
       if (typeof apiError === 'string') {
         setError(apiError);
@@ -128,7 +129,7 @@ const JobTitles: React.FC = () => {
       setIsStatusModalOpen(false);
       setTitleToChangeStatus(null);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

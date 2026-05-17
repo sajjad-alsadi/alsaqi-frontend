@@ -15,6 +15,7 @@ import AboutSection from '../../components/AboutSection';
 import PDFSettingsSection from '../../components/PDFSettingsSection';
 import { useDepartments } from '../../hooks/useDepartments';
 import { PdfTemplateManagement } from '../../components/PdfTemplateManagement';
+import logger from '../../utils/logger';
 
 const Settings: React.FC = () => {
   const { token } = useAuth();
@@ -67,7 +68,7 @@ const Settings: React.FC = () => {
         theme: data.theme || 'light'
       }));
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     } finally {
       setLoading(false);
     }
@@ -81,7 +82,7 @@ const Settings: React.FC = () => {
       updateUser(profileForm);
       fetchProfile();
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       const errorMsg = err.response?.data?.error || err.message || t('common.error');
       setMessage({ text: errorMsg, type: 'error' });
     }
@@ -116,7 +117,7 @@ const Settings: React.FC = () => {
       await api.post('/auth/logout-all');
       window.location.reload(); // Force logout current session too
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

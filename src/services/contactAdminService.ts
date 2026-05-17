@@ -57,10 +57,10 @@ export const submitContactAdminRequest = async (
     };
   }
 
-  const ticketId = `REQ-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+  const ticketId = `REQ-${crypto.getRandomValues(new Uint16Array(1))[0].toString().padStart(5, '0')}`;
   const newRequest: ContactAdminRequest = {
     ...requestData,
-    id: Math.random().toString(36).substr(2, 9),
+    id: crypto.getRandomValues(new Uint32Array(2)).reduce((s, v) => s + v.toString(36), '').slice(0, 12),
     ticketId,
     status: 'pending',
     createdAt: new Date().toISOString()
@@ -70,8 +70,6 @@ export const submitContactAdminRequest = async (
   const requests = stored ? (stored as ContactAdminRequest[]) : [];
   requests.unshift(newRequest);
   await secureStore.set(STORAGE_KEY, requests);
-
-  console.log('Contact Admin Request Submitted:', newRequest);
 
   return {
     success: true,

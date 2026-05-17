@@ -7,6 +7,7 @@ import { Plus, Search, Download, MoreVertical, CheckCircle2, Clock, AlertCircle,
 import { motion } from 'motion/react';
 import { generatePdf, PdfSection } from '../utils/pdfExport';
 import { useFormat } from '../services/formatService';
+import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
 import RecommendationForm from '../components/RecommendationForm';
@@ -40,7 +41,7 @@ const RecommendationsModule: React.FC = () => {
         setRecommendations(Array.isArray(res.data) ? res.data : []);
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       setRecommendations([]);
     } finally {
       setLoading(false);
@@ -56,7 +57,7 @@ const RecommendationsModule: React.FC = () => {
         setFindings(Array.isArray(res.data) ? res.data : []);
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       setFindings([]);
     }
   };
@@ -85,7 +86,7 @@ const RecommendationsModule: React.FC = () => {
       setIsDeleteModalOpen(false);
       setRecToDelete(null);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 

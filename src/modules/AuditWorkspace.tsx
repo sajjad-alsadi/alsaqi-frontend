@@ -25,6 +25,7 @@ import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import FindingForm from '../components/FindingForm';
 import { AuditStatus, RiskLevel } from '../constants';
+import logger from '../utils/logger';
 
 interface AuditWorkspaceProps {
   planId: string | number;
@@ -81,7 +82,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
         setActiveTask(tasksArray[0]);
       }
     } catch (error) {
-      console.error('Error fetching audit data:', error);
+      logger.error('Error fetching audit data:', error);
       toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);

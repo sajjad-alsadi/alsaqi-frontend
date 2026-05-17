@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Clock, Search, Filter, MessageSquare, User, Mail, FileText } from 'lucide-react';
 import { getContactAdminRequests, updateContactAdminRequestStatus, ContactAdminRequest } from '../../services/contactAdminService';
+import logger from '../../utils/logger';
 
 const SupportRequests: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -21,7 +22,7 @@ const SupportRequests: React.FC = () => {
       const data = await getContactAdminRequests();
       setRequests(data);
     } catch (error) {
-      console.error('Error fetching support requests:', error);
+      logger.error('Error fetching support requests:', error);
     } finally {
       setLoading(false);
     }
@@ -32,7 +33,7 @@ const SupportRequests: React.FC = () => {
       await updateContactAdminRequestStatus(id, status);
       fetchRequests(); // Refresh list
     } catch (error) {
-      console.error('Error updating status:', error);
+      logger.error('Error updating status:', error);
     }
   };
 

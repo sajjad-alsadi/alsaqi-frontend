@@ -8,6 +8,7 @@ import { useFormat } from '../services/formatService';
 import api from '../services/api';
 import { AuditStatus, AuditType, ControlTestType } from '../constants';
 import toast from 'react-hot-toast';
+import logger from '../utils/logger';
 
 // Sub-components
 import AuditProgramHeader from './AuditProgram/AuditProgramHeader';
@@ -63,7 +64,7 @@ const AuditProgramLibrary: React.FC = () => {
       });
       setPrograms(Array.isArray(res.data) ? res.data : (res.data.data || []));
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       setPrograms([]);
     } finally {
       setLoading(false);
@@ -78,7 +79,7 @@ const AuditProgramLibrary: React.FC = () => {
       const data = res.data.data || (Array.isArray(res.data) ? res.data : []);
       setProcedures(data);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     }
   };
 
@@ -120,7 +121,7 @@ const AuditProgramLibrary: React.FC = () => {
       fetchPrograms();
       setIsEditing(false);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     } finally {
       setIsSaving(false);
@@ -149,7 +150,7 @@ const AuditProgramLibrary: React.FC = () => {
       toast.success(t('deleteSuccess'));
       setShowDeleteConfirm({id: null, type: 'program'});
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       // If it's 404, it might be already deleted, so we can treat it as success in UI
       if (err.response?.status === 404) {
         if (deleteType === 'procedure') {
@@ -177,7 +178,7 @@ const AuditProgramLibrary: React.FC = () => {
       toast.success(t('createSuccess'));
       fetchPrograms();
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       if (err.response?.status === 404) {
         toast.error(t('program.programNotFound'));
         fetchPrograms();
@@ -200,7 +201,7 @@ const AuditProgramLibrary: React.FC = () => {
       fetchPrograms();
       setIsEditing(false);
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       if (err.response?.status === 404) {
         toast.error(t('program.programNotFound'));
         setIsEditing(false);
@@ -235,7 +236,7 @@ const AuditProgramLibrary: React.FC = () => {
       toast.success(t('createSuccess'));
       setProcedures([...procedures, res.data]);
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
     }
   };
@@ -247,7 +248,7 @@ const AuditProgramLibrary: React.FC = () => {
       });
       setProcedures(prev => prev.map(p => String(p.id) === String(id) ? { ...p, ...data } : p));
     } catch (err: any) {
-      console.error(err);
+      logger.error('Operation failed', err);
       if (err.response?.status === 404) {
         toast.error(t('program.programNotFound'));
         setProcedures(prev => prev.filter(p => String(p.id) !== String(id)));

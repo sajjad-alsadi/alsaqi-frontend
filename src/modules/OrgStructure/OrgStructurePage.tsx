@@ -12,6 +12,7 @@ import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
 import { UserRole } from '../../constants';
+import logger from '../../utils/logger';
 
 // --- Components ---
 
@@ -166,7 +167,7 @@ const OrgStructure: React.FC = () => {
       const res = await api.get('/departments/tree');
       setTreeData(res.data);
     } catch (e) {
-      console.error(e);
+      logger.error('Operation failed', e);
       toast.error(t('errorLoadingTree'));
     } finally {
       setTreeLoading(false);

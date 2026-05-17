@@ -13,6 +13,7 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
+import logger from '../../utils/logger';
 import { Textarea } from '../../components/ui/Textarea';
 import { FormField } from '../../components/ui/FormField';
 
@@ -77,7 +78,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
       await api.post('/correspondence/incoming', data);
       onSuccess();
     } catch (error) {
-      console.error("Failed to save incoming correspondence", error);
+      logger.error("Failed to save incoming correspondence", error);
       toast.error(t('errorOccurred'));
     }
   };

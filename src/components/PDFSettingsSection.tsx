@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Save } from 'lucide-react';
 import api from '../services/api';
+import logger from '../utils/logger';
 
 const PDFSettingsSection: React.FC = () => {
   const { token } = useAuth();
@@ -52,7 +53,7 @@ const PDFSettingsSection: React.FC = () => {
         setSettings(res.data);
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Operation failed', err);
     } finally {
       setLoading(false);
     }

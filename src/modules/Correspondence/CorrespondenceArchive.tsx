@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import logger from '../../utils/logger';
 import Pagination from '../../components/Pagination';
 import { useFormat } from '../../services/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -57,7 +58,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
         }));
       }
     } catch (error) {
-      console.error("Failed to fetch archived correspondence", error);
+      logger.error("Failed to fetch archived correspondence", error);
       toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);
