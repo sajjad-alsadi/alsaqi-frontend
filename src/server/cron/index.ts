@@ -235,10 +235,10 @@ const runDailyAutomations = async () => {
         await NotificationService.create(
           task.assigned_to,
           'task_status_changed',
-          `المهمة "${task.title}" تنتهي خلال 3 أيام (${task.due_date})`,
+          JSON.stringify({ key: 'notifications.taskDeadlineNear', params: { title: task.title, date: task.due_date } }),
           'AuditTasks',
           `/tasks`,
-          { entityId: task.id, entityType: 'audit_task', title: 'موعد نهائي قريب' }
+          { entityId: task.id, entityType: 'audit_task', title: JSON.stringify({ key: 'notifications.taskDeadlineNear' }) }
         );
       }
     }

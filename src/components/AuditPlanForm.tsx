@@ -203,7 +203,7 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
 
         <FormField label={t('plan.leadAuditor')} error={errors.lead_auditor?.message} required>
           <Select {...register('lead_auditor')}>
-            <option value="">{t('plan.selectLeadAuditor') || 'Select Lead Auditor'}</option>
+            <option value="">{t('plan.selectLeadAuditor')}</option>
             {auditors.map((auditor) => (
               <option key={auditor.id} value={auditor.name}>{auditor.name}</option>
             ))}

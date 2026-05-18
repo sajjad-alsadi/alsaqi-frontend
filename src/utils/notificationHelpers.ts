@@ -1,5 +1,15 @@
 export const getTranslatedNotificationMessage = (desc: string, t: any, language: string) => {
-  if (!desc) return desc;
+  if (!desc) return '';
+  
+  // Try to parse as JSON translation key (new format from server)
+  try {
+    const parsed = JSON.parse(desc);
+    if (parsed && parsed.key) {
+      return t(parsed.key, parsed.params || {});
+    }
+  } catch {
+    // Not JSON - continue with legacy pattern matching (backward compatibility)
+  }
   
   // Check for "New record in X"
   const newRecordMatch = desc.match(/^New record in (.*)$/);
@@ -17,38 +27,38 @@ export const getTranslatedNotificationMessage = (desc: string, t: any, language:
     else if (table === 'audit_reports') moduleKey = 'AuditReports';
     
     const translatedModule = t(`modules.${moduleKey}`, moduleKey);
-    return language === 'ar' ? `سجل جديد في ${translatedModule}` : `New record in ${translatedModule}`;
+    return t('notifications.newRecord', { module: translatedModule });
   }
   
   // Other common backend strings
   if (desc === 'New audit finding created') {
-    return language === 'ar' ? 'تم إنشاء حالة تدقيق جديدة' : desc;
+    return t('notifications.newAuditFinding');
   }
 
   if (desc.includes('requested access to Fraud Log')) {
     const user = desc.split(' ')[0];
-    return language === 'ar' ? `طلب ${user} صلاحية الوصول إلى سجل الاحتيال` : desc;
+    return t('notifications.fraudAccessRequested', { user });
   }
   
   if (desc === 'Your access request to Fraud Log has been approved.') {
-    return language === 'ar' ? 'تمت الموافقة على طلب الوصول إلى سجل الاحتيال.' : desc;
+    return t('notifications.fraudAccessApproved');
   }
   
   if (desc.startsWith('Your access request to Fraud Log was rejected:')) {
     const reason = desc.split(': ')[1] || '';
-    return language === 'ar' ? `تم رفض طلب الوصول إلى سجل الاحتيال: ${reason}` : desc;
+    return t('notifications.fraudAccessRejected', { reason });
   }
 
   // Security and Password Reset Alerts
   if (desc.includes('Password reset attempt for non-existent or inactive user:')) {
     const reason = desc.split(': ')[1] || '';
-    return language === 'ar' ? `محاولة إعادة تعيين كلمة مرور لمستخدم غير موجود أو غير نشط: ${reason}` : desc;
+    return t('notifications.passwordResetInvalidUser', { reason });
   }
 
   if (desc.includes('Password reset request submitted for')) {
     const args = desc.split('for ');
     const userPart = args.length > 1 ? args[1] : '';
-    return language === 'ar' ? `تم إرسال طلب إعادة تعيين كلمة المرور للمستخدم ${userPart}` : desc;
+    return t('notifications.passwordResetSubmitted', { user: userPart });
   }
 
   return desc;

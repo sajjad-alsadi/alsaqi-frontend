@@ -4,6 +4,9 @@ import api from '../services/api';
 import handlebars from 'handlebars';
 import html2canvas from 'html2canvas';
 import { TAHOMA_FONT_BASE64 } from '../assets/fonts/tahoma-base64';
+import i18n from '../i18n';
+
+const t = i18n.t.bind(i18n);
 
 export const generateDynamicPdf = async (
   templateContent: string,
@@ -189,7 +192,7 @@ export const generatePdf = async (
             const val = row[c.dataKey];
             return val !== undefined && val !== null ? String(val) : '';
           }))
-        : [[{ content: isRTL ? 'لا توجد بيانات' : 'No data available', colSpan: section.columns.length, styles: { halign: 'center' as const } }]];
+        : [[{ content: t('export.noData'), colSpan: section.columns.length, styles: { halign: 'center' as const } }]];
 
       autoTable(doc, {
         startY: currentY,
@@ -226,7 +229,7 @@ export const generatePdf = async (
     doc.setPage(i);
     if (settings.footer_template || settings.show_page_number === 1) {
       doc.setFontSize(10);
-      const footerText = `${settings.footer_template} ${settings.show_page_number === 1 ? (isRTL ? `صفحة ${i}` : `Page ${i}`) : ''}`;
+      const footerText = `${settings.footer_template} ${settings.show_page_number === 1 ? t('export.pageOf', { current: i, total: pageCount }) : ''}`;
       doc.text(footerText, pageWidth / 2, pageHeight - settings.margin_bottom / 2, { align: 'center' });
     }
   }

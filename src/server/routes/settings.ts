@@ -27,6 +27,12 @@ export const createSettingsRoutes = (
 ) => {
   const router = express.Router();
 
+  // Public endpoint for session timeout (needed by all authenticated users for idle timeout)
+  router.get(`/session-config`, authenticate, asyncHandler(async (req, res) => {
+    const settings = await SettingsService.getUserManagementSettings();
+    res.json({ session_timeout_minutes: settings.session_timeout_minutes || 30 });
+  }));
+
   router.get(`/user-management-settings`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
     const settings = await SettingsService.getUserManagementSettings();
     res.json(settings);

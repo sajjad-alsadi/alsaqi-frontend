@@ -32,7 +32,15 @@ export class AuthService {
       if (!bcrypt.compareSync(password, user.password)) {
         console.warn(`[AuthService] Login failed: Invalid password for "${user.username}"`);
         await db.prepare("UPDATE users SET failed_attempts = failed_attempts + 1 WHERE id = ?::uuid").run(user.id);
-        if (user.failed_attempts + 1 >= 5) {
+        
+        // Read threshold from settings (default 5 if not configured)
+        let lockThreshold = 5;
+        try {
+          const settings = await db.prepare("SELECT failed_login_threshold FROM user_management_settings WHERE id = 1").get() as any;
+          if (settings?.failed_login_threshold) lockThreshold = settings.failed_login_threshold;
+        } catch (e) { /* use default */ }
+        
+        if (user.failed_attempts + 1 >= lockThreshold) {
           await db.prepare("UPDATE users SET locked_until = ?::timestamp WHERE id = ?::uuid").run(new Date(Date.now() + 15 * 60 * 1000).toISOString(), user.id);
           
           // Notify all admins about the locked account

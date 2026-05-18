@@ -101,7 +101,7 @@ const NotificationToast: React.FC = () => {
                   {getTranslatedNotificationMessage(latestNotification.description, t, language)}
                 </p>
                 <p className="text-[10px] text-[var(--color-text-muted)] mt-1 opacity-70">
-                  {t('common.now') || 'الآن'}
+                  {t('common.now')}
                 </p>
               </div>
               <button

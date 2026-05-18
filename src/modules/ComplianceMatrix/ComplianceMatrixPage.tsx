@@ -635,23 +635,24 @@ export default function ComplianceMatrix() {
             <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('complianceMatrix.subTitle')}</p>
           </div>
         </div>
+      </div>
 
-        <div className="flex items-center p-1.5 bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)]">
-          {[
-            { id: 'registry', label: t('complianceMatrix.generalRegistry'), icon: List },
-            { id: 'matrix', label: t('complianceMatrix.gapMatrixTab'), icon: Layers },
-            { id: 'dashboard', label: t('complianceMatrix.dashboard'), icon: LayoutGrid }
-          ].map(tab => (
-            <button 
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest transition-all cursor-pointer
-                ${activeTab === tab.id ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'}`}
-            >
-              <tab.icon size={14} /> {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Tabs — matches system-wide tab pattern */}
+      <div className="flex gap-2 p-1 bg-[var(--color-bg-main)] rounded-2xl w-fit">
+        {[
+          { id: 'registry', label: t('complianceMatrix.generalRegistry'), icon: List },
+          { id: 'matrix', label: t('complianceMatrix.gapMatrixTab'), icon: Layers },
+          { id: 'dashboard', label: t('complianceMatrix.dashboard'), icon: LayoutGrid }
+        ].map(tab => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer
+              ${activeTab === tab.id ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+          >
+            <tab.icon size={18} /> {tab.label}
+          </button>
+        ))}
       </div>
 
       <motion.div

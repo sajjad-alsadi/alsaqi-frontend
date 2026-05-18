@@ -120,7 +120,7 @@ const UserForm: React.FC<UserFormProps> = ({
               disabled={isFormDisabled}
             >
               {allRoles.length === 0 ? (
-                <option value="">{t('userManagement.form.loadingRoles') || '...جاري التحميل'}</option>
+                <option value="">{t('userManagement.form.loadingRoles')}</option>
               ) : (
                 allRoles.map(role => (
                   <option key={role.id} value={role.name}>{getRoleLabel(role.name)}</option>

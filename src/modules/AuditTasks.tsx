@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { AuditTask, AuditPlan, AuditEvidence as AuditEvidenceType } from '../types';
-import { Plus, Search, Download, MoreVertical, CheckCircle2, Clock, AlertCircle, Edit, Trash2, FileText, Eye } from 'lucide-react';
+import { Plus, Search, MoreVertical, CheckCircle2, Clock, AlertCircle, Edit, Trash2, FileText, Eye } from 'lucide-react';
 import { motion } from 'motion/react';
 import toast from 'react-hot-toast';
-import { generatePdf, PdfSection } from '../utils/pdfExport';
-import InteractiveIcon from '../components/InteractiveIcon';
 import { useFormat } from '../services/formatService';
 import { useDebounce } from '../hooks/useDebounce';
 import { AuditStatus } from '../constants';
@@ -21,7 +18,6 @@ import Pagination from '../components/Pagination';
 import AuditTasksTable from '../components/AuditTasksTable';
 
 const AuditTasksModule: React.FC = () => {
-  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
   const queryClient = useQueryClient();
@@ -115,30 +111,6 @@ const AuditTasksModule: React.FC = () => {
     }
   };
 
-  const exportPDF = async () => {
-    const sections: PdfSection[] = [{
-      type: 'table',
-      columns: [
-        { header: t('common.id'), dataKey: 'id' },
-        { header: t('tasks.procedure'), dataKey: 'procedure' },
-        { header: t('tasks.responsible'), dataKey: 'responsible' },
-        { header: t('common.statusLabel'), dataKey: 'status' }
-      ],
-      data: tasks.map(task => ({
-        id: task.id,
-        procedure: task.procedure,
-        responsible: task.responsible,
-        status: task.status
-      }))
-    }];
-
-    await generatePdf(t('tasks.title'), sections, token, (i18n.language === 'ar' ? 'ar' : 'en') as 'ar' | 'en', t('tasks.auditTasksReport'), {
-      title: t('tasks.title'),
-      report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
-      tasks: filteredTasks
-    });
-  };
-
   const getPlanTitle = (id: string | number) => {
     return plans.find(p => String(p.id) === String(id))?.title || `${t('common.auditPlan')} #${formatNumber(id)}`;
   };
@@ -175,14 +147,6 @@ const AuditTasksModule: React.FC = () => {
             />
           </div>
           <div className="flex items-center gap-4">
-            <InteractiveIcon 
-              icon={Download}
-              onClick={exportPDF}
-              tooltip={t('common.exportPdf')}
-              variant="outline"
-              className="!w-14 !h-14 !rounded-xl"
-              size={24}
-            />
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

@@ -88,21 +88,21 @@ export const createUserRoutes = (
         const { NotificationService } = await import('../services/NotificationService');
         const actorName = (req as any).user.name || (req as any).user.username;
         let changeDesc = '';
-        if (oldUser.role !== role) changeDesc += `الدور: ${oldUser.role} → ${role}. `;
-        if (oldUser.status !== status) changeDesc += `الحالة: ${oldUser.status} → ${status}. `;
-        if (oldUser.access_scope !== access_scope) changeDesc += `نطاق الوصول تغيّر. `;
+        if (oldUser.role !== role) changeDesc += `Role: ${oldUser.role} → ${role}. `;
+        if (oldUser.status !== status) changeDesc += `Status: ${oldUser.status} → ${status}. `;
+        if (oldUser.access_scope !== access_scope) changeDesc += `Access scope changed. `;
         
         await NotificationService.create(
           id,
           'permission_changed',
-          `تم تغيير صلاحياتك بواسطة ${actorName}. ${changeDesc}`,
+          JSON.stringify({ key: 'notifications.permissionsChanged', params: { actor: actorName, details: changeDesc } }),
           'Security',
           '/settings',
           {
             actorId: (req as any).user.id,
             entityId: id,
             entityType: 'user',
-            title: 'تغيير صلاحيات',
+            title: JSON.stringify({ key: 'notifications.permissionsChanged' }),
             wss: (req.app as any).wss,
             data: { old_role: oldUser.role, new_role: role, old_status: oldUser.status, new_status: status }
           }

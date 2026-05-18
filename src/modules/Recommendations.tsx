@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Recommendation, AuditFinding } from '../types';
-import { Plus, Search, Download, MoreVertical, CheckCircle2, Clock, AlertCircle, TrendingUp } from 'lucide-react';
+import { Plus, Search, MoreVertical, CheckCircle2, Clock, AlertCircle, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';
-import { generatePdf, PdfSection } from '../utils/pdfExport';
 import { useFormat } from '../services/formatService';
 import logger from '../utils/logger';
 
@@ -15,7 +13,6 @@ import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const RecommendationsModule: React.FC = () => {
-  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -90,32 +87,6 @@ const RecommendationsModule: React.FC = () => {
     }
   };
 
-  const exportPDF = async () => {
-    const sections: PdfSection[] = [{
-      type: 'table',
-      columns: [
-        { header: t('recommendations.id'), dataKey: 'id' },
-        { header: t('recommendations.department'), dataKey: 'department' },
-        { header: t('recommendations.responsible'), dataKey: 'responsible' },
-        { header: t('recommendations.dueDate'), dataKey: 'due_date' },
-        { header: t('recommendations.status'), dataKey: 'status' }
-      ],
-      data: (Array.isArray(recommendations) ? recommendations : []).map(r => ({
-        id: r.id,
-        department: r.department,
-        responsible: r.responsible,
-        due_date: r.due_date,
-        status: r.status
-      }))
-    }];
-
-    await generatePdf(t('recommendations.title'), sections, token, i18n.language as 'en' | 'ar', t('recommendations.title'), {
-      title: t('recommendations.title'),
-      report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
-      recommendations: filteredRecs
-    });
-  };
-
   const getFindingRecommendation = (id: string | number) => {
     return findings.find(f => String(f.id) === String(id))?.recommendation || `${t('findings.findingNumber')} #${formatNumber(id)}`;
   };
@@ -148,11 +119,6 @@ const RecommendationsModule: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
-          <div className="flex items-center gap-4">
-            <button onClick={exportPDF} className="w-14 h-14 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-[var(--color-text-main)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-all flex items-center justify-center shadow-sm">
-              <Download size={24} />
-            </button>
           </div>
         </div>
       </div>

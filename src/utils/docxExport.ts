@@ -4,6 +4,9 @@ import {
   TextDirection, VerticalAlign, ShadingType
 } from 'docx';
 import { saveAs } from 'file-saver';
+import i18n from '../i18n';
+
+const t = i18n.t.bind(i18n);
 
 const PRIMARY_COLOR = "0A7D85";
 const MUTED_COLOR = "64748B";
@@ -28,9 +31,7 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
           },
           children: [
             new TextRun({
-              text: isRtl 
-                ? "شركة الساقي لخدمات الدفع الإلكتروني | قسم الرقابة والتدقيق الداخلي | التقرير الفصلي"
-                : "Al-Saqi E-Payment Services | Internal Audit Department | Quarterly Report",
+              text: t('export.companyHeader'),
               bold: true,
               size: 20, // 10pt
               color: PRIMARY_COLOR,
@@ -66,7 +67,7 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
                       bidirectional: isRtl,
                       children: [
                         new TextRun({
-                          text: isRtl ? "للاستخدام الداخلي" : "Internal Use Only",
+                          text: t('export.internalUseOnly'),
                           size: 20,
                           rightToLeft: isRtl,
                         }),
@@ -82,7 +83,7 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
                       bidirectional: isRtl,
                       children: [
                         new TextRun({
-                          text: isRtl ? "قسم الرقابة والتدقيق الداخلي" : "Internal Audit Department",
+                          text: t('export.auditDepartment'),
                           size: 20,
                           rightToLeft: isRtl,
                         }),
@@ -98,7 +99,7 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
                       bidirectional: isRtl,
                       children: [
                         new TextRun({
-                          text: isRtl ? "صفحة " : "Page ",
+                          text: t('export.page') + ' ',
                           size: 20,
                           rightToLeft: isRtl,
                         }),
@@ -144,34 +145,20 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
   };
 
   const createTocTable = () => {
-    const rows = isRtl ? [
-      ["القسم", "الصفحة / الملاحظة"],
-      ["بيانات الوثيقة والتحكم بالإصدار", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["الملخص التنفيذي", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["مقدمة التقرير", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["الخطة الفصلية مقابل المنجز", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["الأعمال والمهمات التدقيقية المنجزة", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["الملاحظات الجوهرية والنتائج الرقابية", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["حالة تنفيذ التوصيات السابقة", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["القضايا الرقابية والتحديات", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["الاحتياجات والدعم المطلوب", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["أولويات الفصل القادم", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["الخاتمة", "[تُحدّث تلقائياً عند استخدام Word]"],
-      ["التوقيعات والاعتماد", "[تُحدّث تلقائياً عند استخدام Word]"],
-    ] : [
-      ["Section", "Page / Note"],
-      ["Document Data and Version Control", "[Auto-updated in Word]"],
-      ["Executive Summary", "[Auto-updated in Word]"],
-      ["Report Introduction", "[Auto-updated in Word]"],
-      ["Quarterly Plan vs. Achieved", "[Auto-updated in Word]"],
-      ["Completed Audit Engagements and Tasks", "[Auto-updated in Word]"],
-      ["Material Findings and Audit Results", "[Auto-updated in Word]"],
-      ["Status of Previous Recommendations", "[Auto-updated in Word]"],
-      ["Audit Issues and Challenges", "[Auto-updated in Word]"],
-      ["Needs and Required Support", "[Auto-updated in Word]"],
-      ["Priorities for Next Quarter", "[Auto-updated in Word]"],
-      ["Conclusion", "[Auto-updated in Word]"],
-      ["Signatures and Approval", "[Auto-updated in Word]"],
+    const rows = [
+      [t('export.tocSection'), t('export.tocPageNote')],
+      [t('export.tocDocControl'), t('export.tocAutoUpdate')],
+      [t('export.executiveSummary'), t('export.tocAutoUpdate')],
+      [t('export.reportIntroduction'), t('export.tocAutoUpdate')],
+      [t('export.tocPlanVsAchieved'), t('export.tocAutoUpdate')],
+      [t('export.tocCompletedWork'), t('export.tocAutoUpdate')],
+      [t('export.tocFindings'), t('export.tocAutoUpdate')],
+      [t('export.tocRecommendations'), t('export.tocAutoUpdate')],
+      [t('export.tocIssues'), t('export.tocAutoUpdate')],
+      [t('export.tocNeeds'), t('export.tocAutoUpdate')],
+      [t('export.tocPriorities'), t('export.tocAutoUpdate')],
+      [t('export.tocConclusion'), t('export.tocAutoUpdate')],
+      [t('export.tocSignatures'), t('export.tocAutoUpdate')],
     ];
 
     return new Table({
@@ -213,7 +200,7 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
             spacing: { before: 2000, after: 400 },
             children: [
               new TextRun({
-                text: isRtl ? "شركة الساقي لخدمات الدفع الإلكتروني" : "Al-Saqi E-Payment Services",
+                text: t('export.companyName'),
                 bold: true,
                 size: 48,
                 color: PRIMARY_COLOR,
@@ -225,7 +212,7 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
             spacing: { after: 2000 },
             children: [
               new TextRun({
-                text: isRtl ? "التقرير الفصلي للرقابة والتدقيق الداخلي" : "Quarterly Internal Audit Report",
+                text: t('export.quarterlyReport'),
                 bold: true,
                 size: 36,
               }),
@@ -242,58 +229,53 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
         headers: { default: createHeader() },
         footers: { default: createFooter() },
         children: [
-          createHeading(isRtl ? "فهرس المحتويات" : "Table of Contents", 1),
-          createParagraph(
-            isRtl 
-              ? "يوضح هذا الفهرس الهيكل المقترح للتقرير الفصلي. يمكن تحديث الفهرس التلقائي داخل Microsoft Word بعد الانتهاء من إدخال المحتوى النهائي."
-              : "This index outlines the proposed structure for the quarterly report. The automatic TOC can be updated in Microsoft Word after final content is entered.",
-            MUTED_COLOR
-          ),
+          createHeading(t('export.tableOfContents'), 1),
+          createParagraph(t('export.tocDescription'), MUTED_COLOR),
           createTocTable(),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "الملخص التنفيذي" : "Executive Summary", 1),
-          createParagraph(isRtl ? "محتوى الملخص التنفيذي..." : "Executive summary content..."),
+          createHeading(t('export.executiveSummary'), 1),
+          createParagraph(t('export.executiveSummaryContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "مقدمة التقرير" : "Report Introduction", 1),
-          createParagraph(isRtl ? "محتوى المقدمة..." : "Introduction content..."),
+          createHeading(t('export.reportIntroduction'), 1),
+          createParagraph(t('export.reportIntroductionContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "الخطة الفصلية مقابل المنجز" : "Quarterly Plan vs. Achieved", 1),
-          createParagraph(isRtl ? "محتوى الخطة..." : "Plan content..."),
+          createHeading(t('export.quarterlyPlanVsAchieved'), 1),
+          createParagraph(t('export.quarterlyPlanContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "الأعمال والمهمات التدقيقية المنجزة" : "Completed Audit Engagements", 1),
-          createParagraph(isRtl ? "محتوى الأعمال المنجزة..." : "Completed engagements content..."),
+          createHeading(t('export.completedEngagements'), 1),
+          createParagraph(t('export.completedEngagementsContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "الملاحظات الجوهرية والنتائج الرقابية" : "Material Findings and Audit Results", 1),
-          createParagraph(isRtl ? "محتوى الملاحظات..." : "Findings content..."),
+          createHeading(t('export.materialFindings'), 1),
+          createParagraph(t('export.materialFindingsContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "حالة تنفيذ التوصيات السابقة" : "Status of Previous Recommendations", 1),
-          createParagraph(isRtl ? "محتوى التوصيات..." : "Recommendations content..."),
+          createHeading(t('export.previousRecommendations'), 1),
+          createParagraph(t('export.previousRecommendationsContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "القضايا الرقابية والتحديات" : "Audit Issues and Challenges", 1),
-          createParagraph(isRtl ? "محتوى التحديات..." : "Challenges content..."),
+          createHeading(t('export.auditIssues'), 1),
+          createParagraph(t('export.auditIssuesContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "الاحتياجات والدعم المطلوب" : "Needs and Required Support", 1),
-          createParagraph(isRtl ? "محتوى الاحتياجات..." : "Needs content..."),
+          createHeading(t('export.needsAndSupport'), 1),
+          createParagraph(t('export.needsAndSupportContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "أولويات الفصل القادم" : "Priorities for Next Quarter", 1),
-          createParagraph(isRtl ? "محتوى الأولويات..." : "Priorities content..."),
+          createHeading(t('export.nextQuarterPriorities'), 1),
+          createParagraph(t('export.nextQuarterPrioritiesContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "الخاتمة" : "Conclusion", 1),
-          createParagraph(isRtl ? "محتوى الخاتمة..." : "Conclusion content..."),
+          createHeading(t('export.conclusion'), 1),
+          createParagraph(t('export.conclusionContent')),
           new Paragraph({ children: [new PageBreak()] }),
           
-          createHeading(isRtl ? "التوقيعات والاعتماد" : "Signatures and Approval", 1),
-          createParagraph(isRtl ? "التوقيعات..." : "Signatures..."),
+          createHeading(t('export.signaturesAndApproval'), 1),
+          createParagraph(t('export.signaturesContent')),
         ],
       },
     ],

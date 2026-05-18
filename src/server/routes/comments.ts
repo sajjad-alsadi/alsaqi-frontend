@@ -42,14 +42,14 @@ export const createCommentRoutes = (db: any, authenticate: any, logError: any) =
         await NotificationService.create(
           recipientIds,
           'comment_added',
-          `${actorName} أضاف تعليقاً على ${related_type}`,
+          JSON.stringify({ key: 'notifications.commentAdded', params: { actor: actorName, type: related_type } }),
           related_type,
           `/${related_type}`,
           {
             actorId: userId,
             entityId: related_id,
             entityType: related_type,
-            title: 'تعليق جديد',
+            title: JSON.stringify({ key: 'notifications.commentAdded' }),
             wss: (req.app as any).wss
           }
         );

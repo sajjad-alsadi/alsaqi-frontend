@@ -845,6 +845,7 @@ export const runMigrations = async () => {
     { table: "notifications", column: "entity_type", type: "TEXT" },
     { table: "notifications", column: "data", type: "JSONB DEFAULT '{}'" },
     { table: "notifications", column: "title", type: "TEXT" },
+    { table: "user_management_settings", column: "two_factor_auth", type: "INTEGER DEFAULT 0" },
   ];
 
   for (const m of migrations) {

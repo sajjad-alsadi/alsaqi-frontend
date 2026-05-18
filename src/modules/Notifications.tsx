@@ -218,7 +218,7 @@ const Notifications: React.FC = () => {
                 onClick={loadMore}
                 className="btn-secondary px-8"
               >
-                {t('common.loadMore') || 'تحميل المزيد'}
+                {t('common.loadMore')}
               </button>
             </div>
           )}

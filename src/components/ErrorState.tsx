@@ -40,14 +40,14 @@ const ErrorState: React.FC<ErrorStateProps> = ({
       </div>
       <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2">
         {isNetworkError 
-          ? (t('common.networkError') || 'Connection Error') 
-          : (t('common.errorOccurred') || 'Something went wrong')
+          ? t('common.networkError')
+          : t('common.errorOccurred')
         }
       </h3>
       <p className="text-sm text-[var(--color-text-muted)] max-w-sm mb-6">
         {message || (isNetworkError 
-          ? (t('common.networkErrorDesc') || 'Please check your internet connection and try again.')
-          : (t('common.errorDesc') || 'An unexpected error occurred. Please try again.')
+          ? t('common.networkErrorDesc')
+          : t('common.errorDesc')
         )}
       </p>
       {onRetry && (
@@ -56,7 +56,7 @@ const ErrorState: React.FC<ErrorStateProps> = ({
           className="btn-secondary flex items-center gap-2 cursor-pointer"
         >
           <RefreshCw size={16} />
-          {t('common.retry') || 'Try Again'}
+          {t('common.retry')}
         </button>
       )}
     </div>

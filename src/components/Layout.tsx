@@ -107,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         href="#main-content" 
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[200] focus:px-6 focus:py-3 focus:bg-[var(--color-primary)] focus:text-white focus:rounded-xl focus:shadow-xl focus:font-bold focus:text-sm"
       >
-        {t('common.skipToContent') || 'Skip to main content'}
+        {t('common.skipToContent')}
       </a>
 
       {/* Sidebar Overlay for Mobile */}
@@ -138,7 +138,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`p-2 rounded-full hover:bg-[var(--color-bg-main)] text-[var(--color-text-muted)] transition-colors ${isCollapsed ? 'mt-4' : ''} hidden md:block`}
-            aria-label={isCollapsed ? (t('common.expandSidebar') || 'Expand sidebar') : (t('common.collapseSidebar') || 'Collapse sidebar')}
+            aria-label={isCollapsed ? t('common.expandSidebar') : t('common.collapseSidebar')}
           >
             {isRTL ? (
               isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />
@@ -275,7 +275,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     setIsHeaderHidden(true);
                     try { localStorage.setItem('audit_header_hidden', 'true'); } catch {}
                   }}
-                  tooltip={t('common.hideHeader') || 'Hide header'}
+                  tooltip={t('common.hideHeader')}
                   size={20}
                   variant="ghost"
                   className="!p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
@@ -321,7 +321,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 try { localStorage.setItem('audit_header_hidden', 'false'); } catch {}
               }}
               className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-bg-soft)] transition-colors cursor-pointer"
-              title={t('common.showHeader') || 'Show header'}
+              title={t('common.showHeader')}
             >
               <PanelTop size={18} />
             </button>
@@ -334,7 +334,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {children}
           </div>
         </div>
-        <Chatbot />
+        {location.pathname === '/dashboard' && <Chatbot />}
       </main>
     </div>
   );

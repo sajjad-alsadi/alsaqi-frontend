@@ -1,6 +1,9 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { TAHOMA_FONT_BASE64 } from '../assets/fonts/tahoma-base64';
+import i18n from '../i18n';
+
+const t = i18n.t.bind(i18n);
 
 /**
  * PDF Service - Generates audit reports with full Arabic/English support.
@@ -55,7 +58,7 @@ export const generateAuditReport = async (data: AuditReportData, options: { lang
 
   // === Header ===
   doc.setFontSize(18);
-  const title = data.title || (isRtl ? 'تقرير التدقيق الداخلي' : 'Internal Audit Report');
+  const title = data.title || t('export.internalAuditReport');
   doc.text(title, pageWidth / 2, y, { align: 'center' });
   y += 12;
 
@@ -68,12 +71,12 @@ export const generateAuditReport = async (data: AuditReportData, options: { lang
   // === Report Info ===
   doc.setFontSize(10);
   const infoItems = [
-    { label: isRtl ? 'رمز الخطة' : 'Plan Code', value: data.planCode || '-' },
-    { label: isRtl ? 'القسم' : 'Department', value: data.department || '-' },
-    { label: isRtl ? 'المدقق الرئيسي' : 'Lead Auditor', value: data.leadAuditor || '-' },
-    { label: isRtl ? 'الحالة' : 'Status', value: data.status || '-' },
-    { label: isRtl ? 'تاريخ البدء' : 'Start Date', value: data.startDate || '-' },
-    { label: isRtl ? 'تاريخ الانتهاء' : 'End Date', value: data.endDate || '-' },
+    { label: t('export.planCode'), value: data.planCode || '-' },
+    { label: t('export.department'), value: data.department || '-' },
+    { label: t('export.leadAuditor'), value: data.leadAuditor || '-' },
+    { label: t('export.status'), value: data.status || '-' },
+    { label: t('export.startDate'), value: data.startDate || '-' },
+    { label: t('export.endDate'), value: data.endDate || '-' },
   ];
 
   for (const item of infoItems) {
@@ -86,13 +89,13 @@ export const generateAuditReport = async (data: AuditReportData, options: { lang
   // === Tasks Table ===
   if (data.tasks && data.tasks.length > 0) {
     doc.setFontSize(13);
-    const tasksTitle = isRtl ? 'المهام' : 'Tasks';
+    const tasksTitle = t('export.tasks');
     doc.text(tasksTitle, isRtl ? pageWidth - margin : margin, y, { align: isRtl ? 'right' : 'left' });
     y += 8;
 
     const taskHeaders = isRtl 
-      ? ['الحالة', 'المكلف', 'المهمة', '#']
-      : ['#', 'Task', 'Assignee', 'Status'];
+      ? [t('export.taskStatus'), t('export.assignedTo'), t('export.task'), '#']
+      : ['#', t('export.task'), t('export.assignedTo'), t('export.taskStatus')];
 
     const taskRows = data.tasks.map((t, i) => {
       const row = [String(i + 1), t.title, t.assignee || '-', t.status];
@@ -126,13 +129,13 @@ export const generateAuditReport = async (data: AuditReportData, options: { lang
     if (y > 240) { doc.addPage(); y = 20; }
 
     doc.setFontSize(13);
-    const findingsTitle = isRtl ? 'النتائج' : 'Findings';
+    const findingsTitle = t('export.findings');
     doc.text(findingsTitle, isRtl ? pageWidth - margin : margin, y, { align: isRtl ? 'right' : 'left' });
     y += 8;
 
     const findingHeaders = isRtl
-      ? ['مستوى المخاطر', 'الوصف', 'النتيجة', '#']
-      : ['#', 'Finding', 'Description', 'Risk Level'];
+      ? [t('export.riskLevel'), t('export.description'), t('export.finding'), '#']
+      : ['#', t('export.finding'), t('export.description'), t('export.riskLevel')];
 
     const findingRows = data.findings.map((f, i) => {
       const row = [String(i + 1), f.title, f.description || '-', f.riskLevel];
@@ -165,13 +168,13 @@ export const generateAuditReport = async (data: AuditReportData, options: { lang
     if (y > 240) { doc.addPage(); y = 20; }
 
     doc.setFontSize(13);
-    const recTitle = isRtl ? 'التوصيات' : 'Recommendations';
+    const recTitle = t('export.recommendations');
     doc.text(recTitle, isRtl ? pageWidth - margin : margin, y, { align: isRtl ? 'right' : 'left' });
     y += 8;
 
     const recHeaders = isRtl
-      ? ['الموعد النهائي', 'الحالة', 'الإجراء', '#']
-      : ['#', 'Action', 'Status', 'Deadline'];
+      ? [t('export.deadline'), t('export.recStatus'), t('export.action'), '#']
+      : ['#', t('export.action'), t('export.recStatus'), t('export.deadline')];
 
     const recRows = data.recommendations.map((r, i) => {
       const row = [String(i + 1), r.action, r.status, r.deadline || '-'];
@@ -205,7 +208,7 @@ export const generateAuditReport = async (data: AuditReportData, options: { lang
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(128);
-    const footerText = isRtl ? `صفحة ${i} من ${pageCount}` : `Page ${i} of ${pageCount}`;
+    const footerText = t('export.pageOf', { current: i, total: pageCount });
     doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
     
     const dateText = new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US');

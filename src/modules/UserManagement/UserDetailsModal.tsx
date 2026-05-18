@@ -57,7 +57,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClose }) =>
               <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest border-b border-[var(--color-border-soft)] pb-4">{t('common.basicInformation')}</h4>
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('settings.userId') || t('common.id') || 'User ID'}</p>
+                  <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('settings.userId')}</p>
                   <p className="text-sm font-bold text-[var(--color-text-main)]">{user.employee_id || user.id}</p>
                 </div>
                 <div>

@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { useAuditPlans } from '../hooks/useAuditPlans';
 import { auditService } from '../services/auditService';
 import { AuditPlan } from '../types';
-import { Plus, Search, Filter, Download, MoreVertical, Calendar, User, Tag, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, MoreVertical, Calendar, User, Tag, Edit, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { generatePdf, PdfSection } from '../utils/pdfExport';
-import InteractiveIcon from '../components/InteractiveIcon';
 import { useFormat } from '../services/formatService';
 import { useDebounce } from '../hooks/useDebounce';
 import { AuditStatus } from '../constants';
@@ -22,7 +19,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 
 const AuditPlanModule: React.FC = () => {
-  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
   
@@ -74,36 +70,6 @@ const AuditPlanModule: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const exportPDF = async () => {
-    const sections: PdfSection[] = [{
-      type: 'table',
-      columns: [
-        { header: t('code'), dataKey: 'plan_code' },
-        { header: t('title'), dataKey: 'title' },
-        { header: t('department'), dataKey: 'department' },
-        { header: t('type'), dataKey: 'type' },
-        { header: t('riskRating'), dataKey: 'risk_rating' },
-        { header: t('startDate'), dataKey: 'planned_start_date' },
-        { header: t('status'), dataKey: 'status' }
-      ],
-      data: (Array.isArray(plans) ? plans : []).map(p => ({
-        plan_code: p.plan_code || `#${p.id}`,
-        title: p.title,
-        department: p.department,
-        type: p.type,
-        risk_rating: p.risk_rating,
-        planned_start_date: p.planned_start_date,
-        status: p.status
-      }))
-    }];
-
-    await generatePdf(t('auditPlan'), sections, token, (i18n.language === 'ar' ? 'ar' : 'en') as 'ar' | 'en', t('plan.auditPlanReport'), {
-      title: t('auditPlan'),
-      report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
-      plans: filteredPlans
-    });
-  };
-
   const filteredPlans = plans;
 
   return (
@@ -131,14 +97,6 @@ const AuditPlanModule: React.FC = () => {
             />
           </div>
           <div className="flex items-center gap-4">
-            <InteractiveIcon 
-              icon={Download}
-              onClick={exportPDF}
-              tooltip={t('plan.exportToPdf')}
-              variant="outline"
-              className="!w-14 !h-14 !rounded-xl"
-              size={24}
-            />
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

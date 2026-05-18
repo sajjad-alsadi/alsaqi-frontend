@@ -34,14 +34,14 @@ export const createAuditTaskRoutes = (
             await NotificationService.create(
               recipients,
               'task_status_changed',
-              `حالة المهمة "${task.title}" تغيرت إلى ${status}`,
+              JSON.stringify({ key: 'notifications.taskStatusChanged', params: { title: task.title, status: status } }),
               'AuditTasks',
               '/tasks',
               {
                 actorId: userId,
                 entityId: id,
                 entityType: 'audit_task',
-                title: 'تغيير حالة مهمة',
+                title: JSON.stringify({ key: 'notifications.taskStatusChanged' }),
                 wss: (req.app as any).wss,
                 data: { new_status: status }
               }

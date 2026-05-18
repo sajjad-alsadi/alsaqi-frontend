@@ -129,7 +129,7 @@ export const createCrudRoutes = (
       // Determine who to notify based on the table/module
       let targetUsers: string | string[] | 'all' = 'all';
       let notifType = 'record_created';
-      let notifMessage = `New record in ${tableName}`;
+      let notifMessage = JSON.stringify({ key: 'notifications.newRecord', params: { module: tableName } });
       let notifTitle: string | undefined;
       
       if (tableName === 'risk_register' && body.owner) {
@@ -139,29 +139,29 @@ export const createCrudRoutes = (
         const adminIds = await NS.getAdminIds();
         targetUsers = [...new Set([...(ownerId ? [ownerId] : []), ...adminIds])];
         notifType = 'risk_added';
-        notifMessage = `تم إضافة خطر جديد: ${body.description || body.risk_id || ''}`;
-        notifTitle = 'خطر جديد';
+        notifMessage = JSON.stringify({ key: 'notifications.riskAdded', params: { description: body.description || body.risk_id || '' } });
+        notifTitle = JSON.stringify({ key: 'notifications.riskAdded' });
       } else if (tableName === 'recommendations' && body.responsible_person_id) {
         targetUsers = body.responsible_person_id;
         notifType = 'recommendation_added';
-        notifMessage = `تمت إضافة توصية جديدة مسندة إليك`;
-        notifTitle = 'توصية جديدة';
+        notifMessage = JSON.stringify({ key: 'notifications.recommendationAdded' });
+        notifTitle = JSON.stringify({ key: 'notifications.recommendationAdded' });
       } else if (tableName === 'audit_tasks' && body.assigned_to) {
         targetUsers = body.assigned_to;
         notifType = 'task_assigned';
-        notifMessage = `تم تعيين مهمة جديدة لك: ${body.title || 'مهمة'}`;
-        notifTitle = 'مهمة جديدة لك';
+        notifMessage = JSON.stringify({ key: 'notifications.taskAssigned', params: { title: body.title || '' } });
+        notifTitle = JSON.stringify({ key: 'notifications.taskAssigned' });
       } else if (tableName === 'audit_findings') {
         // Notify admins for new findings
         const { NotificationService: NS } = await import('../services/NotificationService');
         targetUsers = await NS.getAdminIds();
         notifType = 'finding_added';
-        notifMessage = `تم إضافة ملاحظة تدقيق جديدة: ${body.title || ''}`;
-        notifTitle = 'ملاحظة تدقيق جديدة';
+        notifMessage = JSON.stringify({ key: 'notifications.findingAdded', params: { title: body.title || '' } });
+        notifTitle = JSON.stringify({ key: 'notifications.findingAdded' });
       } else if (tableName === 'audit_evidence') {
         notifType = 'evidence_uploaded';
-        notifMessage = `تم رفع دليل جديد: ${body.description || body.file_name || ''}`;
-        notifTitle = 'دليل جديد';
+        notifMessage = JSON.stringify({ key: 'notifications.evidenceUploaded', params: { description: body.description || body.file_name || '' } });
+        notifTitle = JSON.stringify({ key: 'notifications.evidenceUploaded' });
       }
       
       await createNotification(targetUsers, notifType, notifMessage, routeName, `/${routeName}`, { ...notifyOptions, title: notifTitle });

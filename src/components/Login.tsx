@@ -75,13 +75,13 @@ const Login: React.FC = () => {
     } catch (err: any) {
       const message = err.message || err.toString();
       if (message === 'Invalid credentials') {
-        setError(t('auth.invalidCredentials') || 'Invalid username or password');
+        setError(t('auth.invalidCredentials'));
       } else if (message === 'Account suspended') {
-        setError(t('auth.accountSuspended') || 'Your account has been suspended');
+        setError(t('auth.accountSuspended'));
       } else if (message === 'Account locked') {
-        setError(t('auth.accountLocked') || 'Your account is locked. Try again later.');
+        setError(t('auth.accountLocked'));
       } else {
-        setError(message || t('auth.loginFailed') || 'Login failed');
+        setError(message || t('auth.loginFailed'));
       }
     } finally {
       setLoading(false);

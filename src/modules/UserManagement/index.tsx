@@ -337,7 +337,7 @@ const UserManagement: React.FC = () => {
   const filteredUsers = users;
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700" dir={i18n.dir()}>
+    <div className="space-y-10 animate-in fade-in duration-700" dir={i18n.dir()}>
       <UserManagementHeader 
         activeTab={activeTab}
         searchTerm={searchTerm}
