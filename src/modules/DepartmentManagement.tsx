@@ -155,7 +155,7 @@ const DepartmentManagement: React.FC = () => {
                   className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   <Plus size={20} />
-                  {loading ? "..." : t('add')}
+                  {loading ? "..." : t('common.add')}
                 </button>
               </div>
             </div>
@@ -163,7 +163,7 @@ const DepartmentManagement: React.FC = () => {
             <div className="mb-6">
               <input 
                 className="input-field" 
-                placeholder={t('search')} 
+                placeholder={t('common.search')} 
                 value={searchTerm} 
                 onChange={e => setSearchTerm(e.target.value)} 
               />
@@ -182,7 +182,7 @@ const DepartmentManagement: React.FC = () => {
                     )}
                     <div className="flex gap-2">
                       {editingDept?.id === dept.id ? (
-                        <button onClick={() => editDept(dept.id, editingDept.name)} className="btn-primary text-xs">{t('save')}</button>
+                        <button onClick={() => editDept(dept.id, editingDept.name)} className="btn-primary text-xs">{t('common.save')}</button>
                       ) : (
                         <button onClick={() => setEditingDept(dept)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"><Edit2 size={18} /></button>
                       )}
@@ -220,13 +220,13 @@ const DepartmentManagement: React.FC = () => {
                 onClick={() => setShowDeleteConfirm(false)}
                 className="px-4 py-2 text-[var(--color-text-muted)] font-medium hover:bg-[var(--color-bg-main)] rounded-lg transition-colors"
               >
-                {t('cancel')}
+                {t('common.cancel')}
               </button>
               <button 
                 onClick={confirmDelete}
                 className="px-4 py-2 bg-rose-500 text-white font-medium rounded-lg hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20"
               >
-                {t('delete')}
+                {t('common.delete')}
               </button>
             </div>
           </motion.div>

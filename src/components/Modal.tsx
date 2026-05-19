@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import Portal from './Portal';
 import { FocusTrap } from './FocusTrap';
 
@@ -13,6 +14,7 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
 
   const sizeClasses = {
@@ -64,7 +66,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
                   <button 
                     onClick={onClose} 
                     className="p-2 hover:bg-[var(--color-bg-soft)] rounded-full transition-all text-[var(--color-text-muted)] cursor-pointer"
-                    aria-label="Close"
+                    aria-label={t('accessibility.closeModal')}
                   >
                     <X size={20} />
                   </button>

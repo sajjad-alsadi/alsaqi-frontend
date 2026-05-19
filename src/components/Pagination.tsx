@@ -58,7 +58,7 @@ const Pagination: React.FC<PaginationProps> = ({
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 p-1 bg-[var(--color-bg-soft)]/50 rounded-2xl border border-[var(--color-border-soft)]" aria-label="Pagination">
+        <nav className="flex items-center gap-1 p-1 bg-[var(--color-bg-soft)]/50 rounded-2xl border border-[var(--color-border-soft)]" aria-label={t('accessibility.pagination')}>
           <button
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { extractErrorMessage } from '../services/errorService';
+import { useFormat } from '../services/formatService';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Badge from '../components/Badge';
@@ -35,6 +36,7 @@ interface AuditWorkspaceProps {
 
 const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
   const { t, i18n } = useTranslation();
+  const { formatNumber } = useFormat();
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<any>(null);
@@ -249,7 +251,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                         <div className="flex-1 h-2 bg-[var(--color-bg-main)] rounded-full overflow-hidden">
                            <div className={`h-full rounded-full ${activeTask?.status === 'completed' ? 'bg-emerald-500 w-full' : 'bg-[var(--color-primary-light)]0 w-1/2'}`} />
                         </div>
-                        <span className="text-xs font-bold text-[var(--color-text-main)]">{activeTask?.status === 'completed' ? '100%' : '50%'}</span>
+                        <span className="text-xs font-bold text-[var(--color-text-main)]">{activeTask?.status === 'completed' ? formatNumber(100) + '%' : formatNumber(50) + '%'}</span>
                       </div>
                     </div>
                   </div>

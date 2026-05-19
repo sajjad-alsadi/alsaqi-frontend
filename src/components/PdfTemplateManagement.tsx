@@ -288,7 +288,7 @@ export const PdfTemplateManagement: React.FC = () => {
                       <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('pdfTemplates.templateContent')}</label>
                       <span className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-1 rounded">{t('pdfTemplates.supportsHandlebars')}</span>
                     </div>
-                    <p className="text-xs text-[var(--color-text-muted)] mb-3 font-medium">استخدم المتغيرات مثل <code className="bg-[var(--color-bg-main)] px-1 py-0.5 rounded text-rose-500">{"{{report_number}}"}</code> و الحلقات مثل <code className="bg-[var(--color-bg-main)] px-1 py-0.5 rounded text-rose-500">{"{{#findings}} ... {{/findings}}"}</code></p>
+                    <p className="text-xs text-[var(--color-text-muted)] mb-3 font-medium">{t('pdfTemplates.variablesHint')} <code className="bg-[var(--color-bg-main)] px-1 py-0.5 rounded text-rose-500">{"{{report_number}}"}</code> {t('pdfTemplates.loopsHint')} <code className="bg-[var(--color-bg-main)] px-1 py-0.5 rounded text-rose-500">{"{{#findings}} ... {{/findings}}"}</code></p>
                     <textarea 
                       required
                       className="w-full h-80 p-4 rounded-2xl border-2 border-[var(--color-border-soft)] font-mono text-sm leading-relaxed focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 transition-all bg-[var(--color-bg-soft)] text-left"

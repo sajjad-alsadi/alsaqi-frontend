@@ -227,8 +227,8 @@ const JobTitles: React.FC = () => {
               <div>
                 <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">{t('common.statusLabel')}</label>
                 <select className="input-field" value={formData.status || 'Active'} onChange={e => setFormData({...formData, status: e.target.value})}>
-                  <option value="Active">{t('active')}</option>
-                  <option value="Inactive">{t('inactive')}</option>
+                  <option value="Active">{t('common.active')}</option>
+                  <option value="Inactive">{t('common.inactive')}</option>
                 </select>
               </div>
             </div>

@@ -206,7 +206,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             
             {isCollapsed && (
               <div className={`absolute ${isRTL ? 'end-full me-4' : 'start-full ms-4'} top-1/2 -translate-y-1/2 px-3 py-2 bg-[var(--color-danger)] text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-xl`}>
-                {t('logout')}
+                {t('common.logout')}
               </div>
             )}
           </div>

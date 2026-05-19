@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -8,6 +9,7 @@ interface LoadingSpinnerProps {
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', className = '', fullPage = false }) => {
+  const { t } = useTranslation();
   const sizes = {
     sm: 'w-6 h-6 border-2',
     md: 'w-10 h-10 border-4',
@@ -20,7 +22,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', className 
       transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
       className={`${sizes[size]} rounded-full border-[var(--color-primary)] border-t-transparent ${className}`}
       role="status"
-      aria-label="Loading"
+      aria-label={t('accessibility.loading')}
     />
   );
 

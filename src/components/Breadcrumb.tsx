@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface BreadcrumbItem {
   label: string;
@@ -23,12 +24,13 @@ interface BreadcrumbProps {
  * ]} />
  */
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   if (items.length <= 1) return null;
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs mb-4">
+    <nav aria-label={t('accessibility.breadcrumb')} className="flex items-center gap-1.5 text-xs mb-4">
       <ol className="flex items-center gap-1.5 list-none p-0 m-0">
         {items.map((item, idx) => {
           const isLast = idx === items.length - 1;

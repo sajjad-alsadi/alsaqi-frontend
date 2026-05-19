@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import api from '../../services/api';
 import Modal from '../../components/Modal';
 import { useDepartments } from '../../hooks/useDepartments';
+import { useFormat } from '../../services/formatService';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
 
@@ -43,6 +44,7 @@ interface ComplianceItem {
 
 export default function ComplianceMatrix() {
   const { t } = useTranslation();
+  const { formatNumber } = useFormat();
 
   const statusConfig: Record<ComplianceStatus, { color: string, icon: any, label: string }> = {
     compliant: { color: 'emerald', icon: CheckCircle, label: t('complianceMatrix.compliant') },
@@ -306,7 +308,7 @@ export default function ComplianceMatrix() {
                         </span>
                         {item.open_findings_count ? (
                           <span className="flex items-center gap-1 text-[9px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">
-                            <AlertTriangle size={10} /> {item.open_findings_count} {t('complianceMatrix.remarks')}
+                            <AlertTriangle size={10} /> {formatNumber(item.open_findings_count)} {t('complianceMatrix.remarks')}
                           </span>
                         ) : null}
                       </div>
@@ -430,7 +432,7 @@ export default function ComplianceMatrix() {
                     <span className="font-bold text-[var(--color-text-main)] text-[11px] uppercase tracking-wider">{config.label}</span>
                   </div>
                   <span className={`bg-${config.color}-100 text-${config.color}-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono border border-${config.color}-200`}>
-                    {stItems.length}
+                    {formatNumber(stItems.length)}
                   </span>
                 </div>
 
@@ -502,7 +504,7 @@ export default function ComplianceMatrix() {
                    </div>
                    <span className="text-[10px] font-bold text-[var(--color-text-muted)] group-hover:text-[var(--color-text-muted)] uppercase tracking-widest">{stat.label}</span>
                 </div>
-                <div className={`text-3xl font-bold text-[var(--color-text-main)] group-hover:text-${stat.color}-600 transition-colors`}>{stat.value}</div>
+                <div className={`text-3xl font-bold text-[var(--color-text-main)] group-hover:text-${stat.color}-600 transition-colors`}>{formatNumber(stat.value)}</div>
              </motion.div>
            ))}
         </div>
@@ -532,7 +534,7 @@ export default function ComplianceMatrix() {
                   >
                     <div className="flex items-start gap-4">
                        <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 font-bold text-sm shadow-inner group-hover:scale-110 transition-transform">
-                          0{idx + 1}
+                          {formatNumber(idx + 1)}
                        </div>
                        <div className="min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -547,7 +549,7 @@ export default function ComplianceMatrix() {
                     </div>
                     <div className="flex flex-col items-end gap-2 mt-4 sm:mt-0">
                        <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-100 text-rose-700 rounded-xl text-[10px] font-bold border border-rose-200 shadow-sm animate-pulse">
-                           {t('complianceMatrix.overdue')} {Math.ceil((new Date().getTime() - new Date(item.review_date!).getTime()) / (1000 * 3600 * 24))} {t('complianceMatrix.overdueDays')}
+                           {t('complianceMatrix.overdue')} {formatNumber(Math.ceil((new Date().getTime() - new Date(item.review_date!).getTime()) / (1000 * 3600 * 24)))} {t('complianceMatrix.overdueDays')}
                        </div>
                        <div className="text-[10px] font-bold px-2 py-1 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-lg shadow-sm text-[var(--color-text-muted)] font-mono tracking-tighter">
                           {item.review_date}
@@ -584,10 +586,10 @@ export default function ComplianceMatrix() {
                       <div className="flex justify-between items-end mb-2">
                         <div>
                           <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">{label}</span>
-                          <span className={`text-xs font-bold text-${color}-600`}>{pct}% {t('complianceMatrix.ofTotal')}</span>
+                          <span className={`text-xs font-bold text-${color}-600`}>{formatNumber(pct)}% {t('complianceMatrix.ofTotal')}</span>
                         </div>
                         <div className="text-end">
-                          <span className="text-xl font-bold text-[var(--color-text-main)] leading-none">{count}</span>
+                          <span className="text-xl font-bold text-[var(--color-text-main)] leading-none">{formatNumber(count)}</span>
                           <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest block">{t('complianceMatrix.activeRecord')}</span>
                         </div>
                       </div>
@@ -610,7 +612,7 @@ export default function ComplianceMatrix() {
                     <h4 className="text-sm font-bold text-[var(--color-primary)] mb-2">{t('complianceMatrix.maturityLevel')}</h4>
                     <div className="flex items-end gap-3 mb-4">
                        <span className="text-4xl font-bold text-[var(--color-primary)] leading-none">
-                         {Math.round(items.reduce((acc, i) => acc + (i.maturity_score || 0), 0) / (items.length || 1))}%
+                         {formatNumber(Math.round(items.reduce((acc, i) => acc + (i.maturity_score || 0), 0) / (items.length || 1)))}%
                        </span>
                        <span className="text-[10px] font-bold text-[var(--color-primary)] opacity-40 uppercase tracking-widest pb-1 italic leading-none">{t('complianceMatrix.overallRating')}</span>
                     </div>
@@ -847,7 +849,7 @@ export default function ComplianceMatrix() {
               onClick={confirmDelete}
               className="btn-danger"
             >
-              {t('delete')}
+              {t('common.delete')}
             </button>
           </div>
         </div>
@@ -905,7 +907,7 @@ export default function ComplianceMatrix() {
                   {selectedItem.gap_notes && (
                     <section>
                       <h3 className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-3 flex items-center gap-2">
-                         <AlertTriangle size={14} className="text-amber-500" /> الفجوات وال{t('complianceMatrix.actions')} التصحيحية
+                         <AlertTriangle size={14} className="text-amber-500" /> {t('complianceMatrix.gapsAndCorrectiveActions')}
                       </h3>
                       <div className="p-6 bg-amber-50/50 rounded-3xl border border-amber-100 text-sm text-amber-900 font-bold leading-relaxed shadow-inner">
                          {selectedItem.gap_notes}
@@ -921,7 +923,7 @@ export default function ComplianceMatrix() {
                        <h3 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 border-b border-[var(--color-border-soft)] pb-2">{t('complianceMatrix.maturityEvaluation')}</h3>
                        <div className="flex items-center justify-between mb-4">
                           <span className="text-xs font-bold text-[var(--color-text-muted)]">{t('complianceMatrix.percentage')}</span>
-                          <span className="text-3xl font-bold text-[var(--color-text-main)]">{selectedItem.maturity_score || 0}%</span>
+                          <span className="text-3xl font-bold text-[var(--color-text-main)]">{formatNumber(selectedItem.maturity_score || 0)}%</span>
                        </div>
                        <div className="h-2 w-full bg-[var(--color-bg-main)] rounded-full overflow-hidden shadow-inner flex p-0.5">
                           <motion.div 

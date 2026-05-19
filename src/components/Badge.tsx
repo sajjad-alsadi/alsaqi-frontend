@@ -34,23 +34,23 @@ const Badge: React.FC<BadgeProps> = ({ type, value, className = '' }) => {
   const typeClass = type === 'risk' ? getRiskClass(value) : type === 'status' ? getStatusClass(value) : 'bg-[var(--color-bg-main)] text-[var(--color-text-muted)]';
 
   const displayValue = type === 'risk' ? (
-    value && value.toLowerCase() === 'critical' ? t('critical') :
-    value && value.toLowerCase() === 'high' ? t('high') :
-    value && (value.toLowerCase() === 'medium' || value.toLowerCase() === 'med') ? t('medium') :
-    value && value.toLowerCase() === 'low' ? t('low') : value
+    value && value.toLowerCase() === 'critical' ? t('common.critical') :
+    value && value.toLowerCase() === 'high' ? t('common.high') :
+    value && (value.toLowerCase() === 'medium' || value.toLowerCase() === 'med') ? t('common.medium') :
+    value && value.toLowerCase() === 'low' ? t('common.low') : value
   ) : type === 'status' ? (
-    value && value.toLowerCase() === 'closed' ? t('closed') :
-    value && value.toLowerCase() === 'implemented' ? t('implemented') :
-    value && value.toLowerCase() === 'completed' ? t('completed') :
+    value && value.toLowerCase() === 'closed' ? t('common.closed') :
+    value && value.toLowerCase() === 'implemented' ? t('common.implemented') :
+    value && value.toLowerCase() === 'completed' ? t('common.completed') :
     value && value.toLowerCase() === 'fieldwork' ? t('fieldwork') :
-    value && value.toLowerCase() === 'in progress' ? t('inProgress') :
-    value && value.toLowerCase() === 'active' ? t('active') :
-    value && value.toLowerCase() === 'reporting' ? t('reporting') :
-    value && value.toLowerCase() === 'planning' ? t('planning') :
-    value && value.toLowerCase() === 'open' ? t('open') :
+    value && value.toLowerCase() === 'in progress' ? t('common.inProgress') :
+    value && value.toLowerCase() === 'active' ? t('common.active') :
+    value && value.toLowerCase() === 'reporting' ? t('common.reporting') :
+    value && value.toLowerCase() === 'planning' ? t('common.planning') :
+    value && value.toLowerCase() === 'open' ? t('common.open') :
     value && value.toLowerCase() === 'planned' ? t('planned') :
     value && value.toLowerCase() === 'draft' ? t('draft') :
-    value && value.toLowerCase() === 'overdue' ? t('overdue') : value
+    value && value.toLowerCase() === 'overdue' ? t('common.overdue') : value
   ) : value;
 
   return (

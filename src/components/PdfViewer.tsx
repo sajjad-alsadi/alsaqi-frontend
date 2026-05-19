@@ -3,6 +3,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
+import { useFormat } from '../services/formatService';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 // @ts-ignore
@@ -16,6 +17,7 @@ interface PdfViewerProps {
 
 const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
   const { t } = useTranslation();
+  const { formatNumber } = useFormat();
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
@@ -150,7 +152,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
             <ZoomOut size={20} />
           </button>
           <span className="text-sm font-medium text-[var(--color-text-muted)] min-w-[3rem] text-center">
-            {Math.round(scale * 100)}%
+            {formatNumber(Math.round(scale * 100))}%
           </span>
           <button 
             onClick={zoomIn}
@@ -171,7 +173,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
             <ChevronRight size={20} />
           </button>
           <p className="text-sm font-medium text-[var(--color-text-muted)]">
-            {t('page')} {pageNumber || (numPages ? 1 : '--')} {t('of')} {numPages || '--'}
+            {t('page')} {formatNumber(pageNumber || (numPages ? 1 : 0)) || '--'} {t('of')} {numPages ? formatNumber(numPages) : '--'}
           </p>
           <button
             type="button"

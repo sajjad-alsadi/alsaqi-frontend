@@ -45,7 +45,7 @@ const ScheduleReportModal: React.FC<ScheduleReportModalProps> = ({ isOpen, onClo
         </div>
         <div>
           <label className="block text-sm font-bold text-[var(--color-text-main)] mb-2">{t('reports.recipients')}</label>
-          <input type="text" className="input-field w-full" placeholder="executive-board@bank.com, audit-committee@bank.com" />
+          <input type="text" className="input-field w-full" placeholder={t('placeholders.emailRecipients')} />
         </div>
         <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
           <button 

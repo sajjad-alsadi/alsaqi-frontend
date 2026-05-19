@@ -262,7 +262,7 @@ const Notifications: React.FC = () => {
               }}
               className="btn-danger"
             >
-              {t('delete')}
+              {t('common.delete')}
             </button>
           </div>
         </div>

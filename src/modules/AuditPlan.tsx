@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
+import InteractiveIcon from '../components/InteractiveIcon';
 import AuditPlanForm from '../components/AuditPlanForm';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';

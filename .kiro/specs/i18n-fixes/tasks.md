@@ -29,17 +29,17 @@
   - [x] 3.4 تعديل `src/utils/pdfExport.ts` لاستخدام `i18n.t()` بدلاً من النصوص المباشرة
   - [x] 3.5 تعديل `src/utils/notificationHelpers.ts` لاستخدام `t()` مع مفاتيح الترجمة بدلاً من شروط `language === 'ar'`
 
-- [ ] 4. إصلاح النصوص المباشرة في واجهة المستخدم
-  - [-] 4.1 إضافة مفاتيح `accessibility.*` و `placeholders.*` إلى ملفي الترجمة
-  - [~] 4.2 تعديل `src/components/LoadingSpinner.tsx`, `Modal.tsx`, `Breadcrumb.tsx`, `Pagination.tsx` لاستخدام `t()` في aria-labels
-  - [~] 4.3 تعديل `src/components/PdfTemplateManagement.tsx` لنقل النص التعليمي العربي إلى مفتاح ترجمة
-  - [~] 4.4 تعديل `src/modules/ComplianceMatrix/ComplianceMatrixPage.tsx` لإزالة النص العربي المختلط واستخدام مفتاح ترجمة كامل
-  - [~] 4.5 تعديل `src/modules/OrgStructure/OrgStructurePage.tsx` و `src/modules/Reports/components/ScheduleReportModal.tsx` لترجمة placeholders
+- [x] 4. إصلاح النصوص المباشرة في واجهة المستخدم
+  - [x] 4.1 إضافة مفاتيح `accessibility.*` و `placeholders.*` إلى ملفي الترجمة
+  - [x] 4.2 تعديل `src/components/LoadingSpinner.tsx`, `Modal.tsx`, `Breadcrumb.tsx`, `Pagination.tsx` لاستخدام `t()` في aria-labels
+  - [x] 4.3 تعديل `src/components/PdfTemplateManagement.tsx` لنقل النص التعليمي العربي إلى مفتاح ترجمة
+  - [x] 4.4 تعديل `src/modules/ComplianceMatrix/ComplianceMatrixPage.tsx` لإزالة النص العربي المختلط واستخدام مفتاح ترجمة كامل
+  - [x] 4.5 تعديل `src/modules/OrgStructure/OrgStructurePage.tsx` و `src/modules/Reports/components/ScheduleReportModal.tsx` لترجمة placeholders
 
-- [ ] 5. تحسين بنية ملفات الترجمة
-  - [~] 5.1 توثيق المفاتيح المكررة بين المستوى الأعلى و `common.*` (مثل `active`, `closed`, `open`, `status`, `delete`, `save`, `cancel`)
-  - [~] 5.2 تحديث المكونات التي تستخدم المفاتيح من المستوى الأعلى لاستخدام `common.*` بدلاً منها
-  - [~] 5.3 إزالة المفاتيح المكررة من المستوى الأعلى بعد التأكد من عدم استخدامها في أي مكان
+- [x] 5. تحسين بنية ملفات الترجمة
+  - [x] 5.1 توثيق المفاتيح المكررة بين المستوى الأعلى و `common.*` (مثل `active`, `closed`, `open`, `status`, `delete`, `save`, `cancel`)
+  - [x] 5.2 تحديث المكونات التي تستخدم المفاتيح من المستوى الأعلى لاستخدام `common.*` بدلاً منها
+  - [x] 5.3 إزالة المفاتيح المكررة من المستوى الأعلى بعد التأكد من عدم استخدامها في أي مكان
 
 ## Task Dependency Graph
 

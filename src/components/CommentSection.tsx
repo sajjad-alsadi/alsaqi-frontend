@@ -85,7 +85,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
                 className="text-rose-500 hover:text-rose-700 mt-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest transition-colors"
               >
                 <Trash2 size={12} />
-                {t('delete')}
+                {t('common.delete')}
               </button>
             )}
           </div>

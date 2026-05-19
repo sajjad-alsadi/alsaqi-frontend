@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { extractErrorMessage } from '../../services/errorService';
 import { useDepartments, Department } from '../../hooks/useDepartments';
+import { useFormat } from '../../services/formatService';
 import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
@@ -144,6 +145,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onEdit, onAddChild, on
 
 const OrgStructure: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { formatNumber } = useFormat();
   const isRTL = i18n.language === 'ar';
   const { user } = useUser();
   const isAdmin = [UserRole.ADMIN, UserRole.MANAGER].includes(user?.role as any || '');
@@ -343,7 +345,7 @@ const OrgStructure: React.FC = () => {
                   onChange={(e) => setFilterType(e.target.value)}
                 >
                   <option value="All">{t('allTypes')}</option>
-                  {entityTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                  {entityTypes.map(type => <option key={type} value={type}>{t(`orgTypes.${type}`, type)}</option>)}
                 </select>
                 <select 
                   className="input-field w-full md:w-32"
@@ -351,8 +353,8 @@ const OrgStructure: React.FC = () => {
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
                   <option value="All">{t('allStatuses')}</option>
-                  <option value="Active">{t('active')}</option>
-                  <option value="Inactive">{t('inactive')}</option>
+                  <option value="Active">{t('common.active')}</option>
+                  <option value="Inactive">{t('common.inactive')}</option>
                 </select>
               </div>
             </div>
@@ -423,7 +425,7 @@ const OrgStructure: React.FC = () => {
                 </div>
                 <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{t('activeUnits')}</span>
               </div>
-              <h3 className="text-3xl font-bold text-[var(--color-text-main)]">{stats.activeUnits}</h3>
+              <h3 className="text-3xl font-bold text-[var(--color-text-main)]">{formatNumber(stats.activeUnits)}</h3>
               <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('totalActiveUnits')}</p>
             </div>
             
@@ -434,7 +436,7 @@ const OrgStructure: React.FC = () => {
                 </div>
                 <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">{t('missingManager')}</span>
               </div>
-              <h3 className="text-3xl font-bold text-[var(--color-text-main)]">{stats.noManager}</h3>
+              <h3 className="text-3xl font-bold text-[var(--color-text-main)]">{formatNumber(stats.noManager)}</h3>
               <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('unitsWithoutManager')}</p>
             </div>
 
@@ -445,7 +447,7 @@ const OrgStructure: React.FC = () => {
                 </div>
                 <span className="text-[10px] font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-soft)] px-2 py-1 rounded-full">{t('inactiveLabel')}</span>
               </div>
-              <h3 className="text-3xl font-bold text-[var(--color-text-main)]">{stats.inactiveUnits}</h3>
+              <h3 className="text-3xl font-bold text-[var(--color-text-main)]">{formatNumber(stats.inactiveUnits)}</h3>
               <p className="text-sm text-[var(--color-text-muted)] font-bold">{t('suspendedUnits')}</p>
             </div>
 
@@ -456,7 +458,7 @@ const OrgStructure: React.FC = () => {
                   <div key={type} className="space-y-1">
                     <div className="flex justify-between text-[10px] font-bold">
                       <span className="text-[var(--color-text-muted)]">{type}</span>
-                      <span className="text-[var(--color-text-muted)]">{count}</span>
+                      <span className="text-[var(--color-text-muted)]">{formatNumber(count as number)}</span>
                     </div>
                     <div className="h-1.5 bg-[var(--color-bg-main)] rounded-full overflow-hidden">
                       <div 
@@ -556,7 +558,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
               type="text"
               required
               className="input-field"
-              placeholder="e.g. DEPT-001"
+              placeholder={t('placeholders.entityCode')}
               value={formData.entity_code}
               onChange={(e) => setFormData({ ...formData, entity_code: e.target.value })}
               onBlur={handleEntityCodeBlur}
@@ -690,7 +692,7 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
                   checked={formData.status === 'Active'}
                   onChange={() => setFormData({ ...formData, status: 'Active' })}
                 />
-                <span className="text-sm font-bold text-[var(--color-text-main)]">{t('active')}</span>
+                <span className="text-sm font-bold text-[var(--color-text-main)]">{t('common.active')}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input 
@@ -700,14 +702,14 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
                   checked={formData.status === 'Inactive'}
                   onChange={() => setFormData({ ...formData, status: 'Inactive' })}
                 />
-                <span className="text-sm font-bold text-[var(--color-text-main)]">{t('inactive')}</span>
+                <span className="text-sm font-bold text-[var(--color-text-main)]">{t('common.inactive')}</span>
               </label>
             </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-6 border-t">
-          <button type="button" onClick={onClose} className="btn-secondary">{t('cancel')}</button>
+          <button type="button" onClick={onClose} className="btn-secondary">{t('common.cancel')}</button>
           <button type="submit" disabled={loading} className="btn-primary min-w-[120px]">
             {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : (editingNode?.id ? t('update') : t('create'))}
           </button>

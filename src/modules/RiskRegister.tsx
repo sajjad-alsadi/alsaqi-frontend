@@ -162,7 +162,7 @@ const RiskRegister: React.FC = () => {
             className="btn-primary flex items-center justify-center gap-3"
           >
             <Plus size={24} />
-            <span>{t('add')}</span>
+            <span>{t('common.add')}</span>
           </motion.button>
         </div>
       </div>
@@ -201,7 +201,7 @@ const RiskRegister: React.FC = () => {
                 <InteractiveIcon 
                   icon={Edit}
                   onClick={() => { setEditingRisk(risk); setIsModalOpen(true); }}
-                  tooltip={t('edit')}
+                  tooltip={t('common.edit')}
                   variant="ghost"
                   size={16}
                   className="!p-2"
@@ -209,7 +209,7 @@ const RiskRegister: React.FC = () => {
                 <InteractiveIcon 
                   icon={Trash2}
                   onClick={() => risk.id && handleDelete(risk.id)}
-                  tooltip={t('delete')}
+                  tooltip={t('common.delete')}
                   variant="danger"
                   size={16}
                   className="!p-2"
@@ -359,7 +359,7 @@ const RiskRegister: React.FC = () => {
                 onClick={() => setSelectedRisk(null)}
                 className="px-8 py-4 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] font-bold rounded-xl hover:bg-[var(--color-bg-soft)]/80 transition-colors uppercase tracking-widest text-xs"
               >
-                {t('close')}
+                {t('common.close')}
               </button>
             </div>
           </div>
@@ -391,7 +391,7 @@ const RiskRegister: React.FC = () => {
                   onClick={confirmDelete}
                   className="px-6 py-3 rounded-2xl bg-[var(--color-danger)] text-white font-bold hover:bg-[var(--color-danger)]/90 transition-colors shadow-lg shadow-[var(--color-danger)]/20"
                 >
-                  {t('delete')}
+                  {t('common.delete')}
                 </button>
               </div>
         </div>
