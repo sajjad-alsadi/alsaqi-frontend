@@ -176,11 +176,6 @@
     "errorTrends": "Error Trends"
   },
   "permissions": {
-    "view": "View",
-    "create": "Create",
-    "edit": "Edit",
-    "delete": "Delete",
-    "approve": "Approve",
     "View": "View",
     "Create": "Create",
     "Edit": "Edit",

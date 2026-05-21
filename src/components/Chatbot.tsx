@@ -37,13 +37,13 @@ const Chatbot: React.FC = () => {
       setMessages([
         {
           id: 'welcome',
-          text: t('chatbot.welcomeMessage'),
+          text: 'chatbot.welcomeMessage', // Store key, translate at render time
           sender: 'bot',
           timestamp: new Date()
         }
       ]);
     }
-  }, [isOpen, i18n.language]);
+  }, [isOpen]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -119,9 +119,9 @@ const Chatbot: React.FC = () => {
 
       let reply = '';
       if (results.length > 0) {
-        reply = t('chatbot.foundResults');
+        reply = 'chatbot.foundResults'; // Store key for dynamic translation
       } else {
-        reply = t('chatbot.noResults');
+        reply = 'chatbot.noResults';
       }
 
       const botMsg: Message = {
@@ -137,7 +137,7 @@ const Chatbot: React.FC = () => {
       logger.error('Search error:', error);
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
-        text: t('chatbot.errorOccurred'),
+        text: 'chatbot.errorOccurred',
         sender: 'bot',
         timestamp: new Date()
       };
@@ -212,7 +212,7 @@ const Chatbot: React.FC = () => {
                         ? 'bg-[var(--color-primary)] text-white rounded-tr-none' 
                         : 'bg-[var(--color-card)] dark:bg-slate-800 border border-[var(--color-border-soft)] text-[var(--color-text-main)] dark:text-white rounded-tl-none'
                     }`}>
-                      <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                      <p className="whitespace-pre-wrap leading-relaxed">{msg.sender === 'bot' ? t(msg.text) : msg.text}</p>
                       <span className={`text-[10px] mt-2 block font-bold uppercase tracking-widest ${msg.sender === 'user' ? 'text-white/60' : 'text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]'}`}>
                         {formatDateTime(msg.timestamp)}
                       </span>

@@ -176,11 +176,6 @@
     "errorTrends": "اتجاهات الأخطاء"
   },
   "permissions": {
-    "view": "عرض",
-    "create": "إنشاء",
-    "edit": "تعديل",
-    "delete": "حذف",
-    "approve": "موافقة",
     "View": "عرض",
     "Create": "إنشاء",
     "Edit": "تعديل",
