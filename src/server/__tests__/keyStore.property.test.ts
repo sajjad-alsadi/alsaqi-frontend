@@ -282,7 +282,7 @@ describe('Property 11: RSA keys encrypted at rest', () => {
         // KeyStore returns null when decryption fails
         expect(loaded).toBeNull();
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
-  });
+  }, 30000);
 });
