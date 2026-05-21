@@ -132,6 +132,11 @@ export default function App() {
     <ErrorBoundary>
       <SkipToContent />
       <QueryClientProvider client={queryClient}>
+        {/* 
+          Provider order is critical:
+          UserProvider MUST wrap AuthProvider because AuthProvider calls useUser().
+          Do NOT reorder these providers without updating the dependency chain.
+        */}
         <UserProvider>
           <AuthProvider>
             <PreferencesProvider>

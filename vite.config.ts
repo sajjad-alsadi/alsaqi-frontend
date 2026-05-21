@@ -28,14 +28,13 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
-      hmr: false,
-      ws: false,
+      hmr: true,
     },
     optimizeDeps: {
       force: true,
     },
     build: {
-      sourcemap: true,
+      sourcemap: process.env.NODE_ENV === 'production' ? 'hidden' : true,
       rollupOptions: {
         output: {
           manualChunks(id) {

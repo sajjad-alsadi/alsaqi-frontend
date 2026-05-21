@@ -25,6 +25,7 @@ import { globalErrorHandler, notFoundHandler } from "./src/server/middleware/err
 import { csrfMiddleware } from "./src/server/middleware/csrf";
 import logger from "./src/server/utils/logger";
 import { KeyStore, resolveDataDir } from "./src/server/utils/keyStore";
+import { correlationIdMiddleware } from "./src/server/middleware/correlationId";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -151,8 +152,8 @@ async function startServer() {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     if (process.env.NODE_ENV === 'production') {
-      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws: wss:; frame-ancestors 'none'");
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
     }
     next();
   });
@@ -172,7 +173,15 @@ async function startServer() {
   wss.on('connection', (ws, req) => {
     (ws as any).authenticated = false;
     (ws as any).isAlive = true;
+    (ws as any).connectedAt = Date.now();
     ws.on('pong', () => { (ws as any).isAlive = true; });
+
+    // Terminate unauthenticated connections after 30 seconds
+    const authTimeout = setTimeout(() => {
+      if (!(ws as any).authenticated) {
+        ws.close(4001, 'Authentication timeout');
+      }
+    }, 30000);
 
     ws.on('message', (data) => {
       try {
@@ -182,11 +191,16 @@ async function startServer() {
           (ws as any).userId = decoded.id;
           (ws as any).username = decoded.username;
           (ws as any).authenticated = true;
+          clearTimeout(authTimeout);
           ws.send(JSON.stringify({ type: 'auth_ok' }));
         }
       } catch (err) {
         // Auth failed — connection stays in unauthenticated mode (receives broadcasts only)
       }
+    });
+
+    ws.on('close', () => {
+      clearTimeout(authTimeout);
     });
   });
   
@@ -299,6 +313,9 @@ async function startServer() {
   });
 
   app.use(cookieParser());
+
+  // Correlation ID Middleware for request tracing
+  app.use(correlationIdMiddleware);
 
   // CSRF Protection Middleware
   // Validates CSRF tokens on state-changing requests (POST, PUT, PATCH, DELETE)

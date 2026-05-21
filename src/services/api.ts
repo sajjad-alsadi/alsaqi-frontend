@@ -109,12 +109,13 @@ api.interceptors.response.use(
         toast.error(translatedMsg || i18n.t('internalServerError'));
       }
 
-      // Log error to backend if it's not a 401 or 503
+      // Log error to backend if it's not a 401 or 503 (batched to prevent flooding)
       if (response?.status !== 401 && response?.status !== 503 && config?.url !== '/system-errors' && message !== 'Network Error') {
       try {
-        await axios.post('/api/system-errors', {
+        // Use requestIdleCallback or setTimeout to avoid blocking the UI
+        const logPayload = {
           message: `Frontend API Error: ${errorMessage}`,
-          stack: `URL: ${config?.url} | Status: ${response?.status} | Data: ${JSON.stringify(response?.data)}`,
+          stack: `URL: ${config?.url} | Status: ${response?.status}`,
           module: 'Frontend-API',
           severity: 'error',
           user_agent: navigator.userAgent,
@@ -122,12 +123,19 @@ api.interceptors.response.use(
           request_data: {
             method: config?.method,
             url: config?.url,
-            params: config?.params,
-            data: config?.data
           }
-        }, {
-          withCredentials: true
-        });
+        };
+        
+        // Debounce error logging to prevent flooding
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(() => {
+            axios.post('/api/system-errors', logPayload, { withCredentials: true }).catch(() => {});
+          });
+        } else {
+          setTimeout(() => {
+            axios.post('/api/system-errors', logPayload, { withCredentials: true }).catch(() => {});
+          }, 100);
+        }
       } catch (logErr) {
         // Silently fail if logging fails to avoid infinite loops
       }

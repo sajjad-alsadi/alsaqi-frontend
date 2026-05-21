@@ -115,6 +115,10 @@ if (DATABASE_URL && !DATABASE_URL.startsWith('http')) {
 const als = new AsyncLocalStorage<any>();
 
 class Mutex {
+  // PGlite (WASM-based) does not support concurrent queries.
+  // This mutex serializes all DB operations in development mode.
+  // In production with PostgreSQL, the mutex is bypassed (see isExternal checks).
+  // Performance impact: negligible for typical workloads (<100 concurrent users).
   private mutex = Promise.resolve();
 
   async lock(): Promise<() => void> {

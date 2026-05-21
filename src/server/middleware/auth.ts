@@ -4,8 +4,12 @@ import { UserRole } from '../../constants';
 
 // Simple in-memory cache to reduce DB load
 // In a distributed environment, use Redis. Since this often runs locally/embedded, memory is fine.
+// TODO: For multi-instance deployments, replace with Redis:
+//   import Redis from 'ioredis';
+//   const redis = new Redis(process.env.REDIS_URL);
 const cache = new Map<string, { data: any, expires: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 1000; // Prevent unbounded memory growth
 
 // Invalidate all cache entries for a specific user (call after role/permission/status changes)
 export const invalidateUserCache = (userId: string) => {
@@ -29,6 +33,23 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
   const getCachedOrDb = async (key: string, fetcher: () => Promise<any>) => {
     const cached = cache.get(key);
     if (cached && cached.expires > Date.now()) return cached.data;
+    
+    // Evict expired entries and enforce max size
+    if (cache.size >= MAX_CACHE_SIZE) {
+      const now = Date.now();
+      for (const [k, v] of cache) {
+        if (v.expires < now) cache.delete(k);
+      }
+      // If still too large, clear oldest 20%
+      if (cache.size >= MAX_CACHE_SIZE) {
+        const entries = [...cache.entries()].sort((a, b) => a[1].expires - b[1].expires);
+        const toRemove = Math.ceil(entries.length * 0.2);
+        for (let i = 0; i < toRemove; i++) {
+          cache.delete(entries[i][0]);
+        }
+      }
+    }
+    
     const data = await fetcher();
     cache.set(key, { data, expires: Date.now() + CACHE_TTL });
     return data;

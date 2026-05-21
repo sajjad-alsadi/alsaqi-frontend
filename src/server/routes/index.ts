@@ -49,36 +49,67 @@ export const setupRoutes = (
   logError: any
 ) => {
   // Global API Rate Limiter
+  // Higher limit to accommodate corporate NAT environments where many users share one IP
   const globalApiLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: 150, // limit each IP to 150 requests per windowMs
+    max: 300, // limit each IP to 300 requests per windowMs (increased for NAT environments)
     message: { error: "TOO_MANY_ATTEMPTS" },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req: any) => {
+      // Skip rate limiting for health checks
+      return req.path === '/health' || req.path === '/api/health';
+    },
   });
 
   // Apply to all API routes
   app.use('/api/', globalApiLimiter);
 
+  // API Version Header - prepares for future versioning
+  app.use('/api/', (req: any, res: any, next: any) => {
+    res.setHeader('X-API-Version', '1.0');
+    next();
+  });
+
   // Auth Middleware
   const { authenticate, checkPermission, authorize, authLimiter } = createAuthMiddlewares(db, JWT_SECRET, JWT_PUBLIC_KEY);
 
   // Health Check
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health", async (req, res) => {
     let dbType = 'PostgreSQL';
     let persistence = 'persistent';
+    let dbStatus = 'unknown';
     
     if (!db.isExternal) {
       dbType = 'PGlite';
-      // PGlite instance has dataDir if it's persistent
       persistence = db.client?.dataDir ? 'persistent' : 'in-memory';
     }
 
-    res.json({ 
-      status: "ok", 
+    // Actually verify database connectivity
+    try {
+      await db.prepare("SELECT 1 AS check_val").get();
+      dbStatus = 'connected';
+    } catch (err) {
+      dbStatus = 'disconnected';
+    }
+
+    const status = dbStatus === 'connected' ? 'ok' : 'degraded';
+    const httpStatus = dbStatus === 'connected' ? 200 : 503;
+
+    res.status(httpStatus).json({ 
+      status,
       timestamp: new Date().toISOString(), 
-      database: dbType,
-      persistence: persistence
+      database: {
+        type: dbType,
+        persistence,
+        status: dbStatus
+      },
+      uptime: process.uptime(),
+      memory: {
+        rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
+        heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+      }
     });
   });
 

@@ -3,6 +3,7 @@ import { db } from '../db/index';
 import logger from '../utils/logger';
 import { NotificationService } from '../services/NotificationService';
 import { UserRole } from '../../constants';
+import { createBackup } from '../utils/backup';
 
 export const startAutomationJobs = () => {
   logger.info('[CRON] Starting automation jobs...');
@@ -15,6 +16,16 @@ export const startAutomationJobs = () => {
       await runDailyAutomations();
     } catch (error) {
       logger.error('[CRON] Error running daily automations:', error);
+    }
+  });
+
+  // Daily backup at 2:00 AM
+  cron.schedule('0 2 * * *', async () => {
+    logger.info('[CRON] Running daily backup...');
+    try {
+      await createBackup();
+    } catch (error) {
+      logger.error('[CRON] Error running backup:', error);
     }
   });
 
