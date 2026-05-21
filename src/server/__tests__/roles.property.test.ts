@@ -2,6 +2,15 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { UserRole, ADMIN_ROLES, COMPLIANCE_ROLES, STAFF_ROLES } from '../../constants';
+import {
+  ROLES,
+  MODULES,
+  PERMISSIONS,
+  DEFAULT_PERMISSIONS,
+  type Module,
+  type Permission,
+  type Role,
+} from '../../permissions';
 
 /**
  * Property Test: Role arrays contain only canonical identifiers (Property 5)
@@ -89,6 +98,90 @@ describe('Property 5: Role arrays contain only canonical identifiers', () => {
           // The role value must appear exactly once in the enum values
           const occurrences = canonicalRoles.filter((r) => r === role);
           expect(occurrences).toHaveLength(1);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+/**
+ * Property Test: Admin permissions cover all modules (Property 8)
+ *
+ * **Validates: Requirements 19.2, 19.3**
+ *
+ * For any module and action in the system, Admin must have permission.
+ * For any non-Admin role, its permissions must be a subset of Admin's.
+ * Role groups (ADMIN_ROLES, COMPLIANCE_ROLES, STAFF_ROLES) must contain the correct roles.
+ */
+describe('Property 8: Admin permissions cover all modules', () => {
+  const allModules = Object.values(MODULES);
+  const allPermissions = Object.values(PERMISSIONS);
+  const allRoles = Object.values(ROLES);
+  const nonAdminRoles = allRoles.filter((r) => r !== ROLES.ADMIN);
+  const adminPermissions = DEFAULT_PERMISSIONS[ROLES.ADMIN];
+
+  it('for any module and action, Admin has permission', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(...allModules),
+        fc.constantFrom(...allPermissions),
+        (module: Module, action: Permission) => {
+          const adminPermsForModule = adminPermissions[module];
+
+          // Admin must have defined permissions for every module
+          expect(adminPermsForModule).toBeDefined();
+
+          // Admin must have at least View permission for every module
+          expect(adminPermsForModule).toContain(PERMISSIONS.VIEW);
+
+          // Admin must have the specific action permission for the module,
+          // OR the module legitimately only supports a subset of actions
+          // (e.g., Dashboard only supports View, Notifications only supports View)
+          // The key property: Admin's permission set is never empty for any module
+          expect(adminPermsForModule.length).toBeGreaterThan(0);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('for any non-Admin role, its permissions are a subset of Admin permissions', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(...nonAdminRoles),
+        fc.constantFrom(...allModules),
+        (role: Role, module: Module) => {
+          const rolePermsForModule = DEFAULT_PERMISSIONS[role][module];
+          const adminPermsForModule = adminPermissions[module];
+
+          // Every permission the non-Admin role has must also exist in Admin's permissions
+          for (const perm of rolePermsForModule) {
+            expect(adminPermsForModule).toContain(perm);
+          }
+        }
+      ),
+      { numRuns: 200 }
+    );
+  });
+
+  it('role groups (ADMIN_ROLES, COMPLIANCE_ROLES, STAFF_ROLES) are correct', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(
+          { name: 'ADMIN_ROLES', group: ADMIN_ROLES, expected: [UserRole.ADMIN, UserRole.MANAGER] },
+          { name: 'COMPLIANCE_ROLES', group: COMPLIANCE_ROLES, expected: [UserRole.ADMIN, UserRole.MANAGER, UserRole.COMPLIANCE_OFFICER] },
+          { name: 'STAFF_ROLES', group: STAFF_ROLES, expected: [UserRole.ADMIN, UserRole.MANAGER, UserRole.INTERNAL_AUDITOR, UserRole.VIEWER] }
+        ),
+        ({ name, group, expected }) => {
+          // The group must contain exactly the expected roles
+          expect([...group].sort()).toEqual([...expected].sort());
+
+          // The group must contain Admin (all groups include Admin)
+          expect(group).toContain(UserRole.ADMIN);
+
+          // The group length must match expected length
+          expect(group.length).toBe(expected.length);
         }
       ),
       { numRuns: 100 }

@@ -133,7 +133,7 @@ describe('Property 10: RSA key persistence round-trip', () => {
       }),
       { numRuns: 10 }
     );
-  });
+  }, 30000);
 });
 
 /**

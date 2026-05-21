@@ -514,8 +514,9 @@ describe('Preservation Property: Non-Health Display Behavior', () => {
           });
 
           // Wait for the error to be caught and logged
+          // logger.error prepends [ERROR] prefix to messages
           await waitFor(() => {
-            expect(consoleSpy).toHaveBeenCalledWith('Error fetching logs stats:', error);
+            expect(consoleSpy).toHaveBeenCalledWith('[ERROR] Error fetching logs stats:', error);
           });
 
           // Component should still be rendered (not crashed)

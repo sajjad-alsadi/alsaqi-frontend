@@ -79,7 +79,7 @@ const AuditTasksTable: React.FC<AuditTasksTableProps> = ({
                 }`}>
                   {task.status === 'completed' || task.status === 'approved' ? <CheckCircle2 size={12} /> : 
                    task.status === 'in_progress' ? <Clock size={12} /> : <AlertCircle size={12} />}
-                  {t(`plan.${task.status}`)}
+                  {t(`plan.${task.status?.toLowerCase() || ''}`)}
                 </span>
               </td>
               <td className="px-6 py-4 text-end">
