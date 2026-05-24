@@ -1,6 +1,7 @@
 import express from 'express';
 import { asyncHandler } from '../utils/asyncHandler';
 import { DashboardService } from '../services/DashboardService';
+import { parsePaginationParams } from '../utils/paginationService';
 
 export const createDashboardRoutes = (
   db: any,
@@ -22,9 +23,8 @@ export const createDashboardRoutes = (
   router.get(`/my-tasks`, authenticate, asyncHandler(async (req, res) => {
     const typedReq = req as unknown as any;
     const userId = typedReq.user.id;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const offset = parseInt(req.query.offset as string) || 0;
-    const tasks = await DashboardService.getMyTasks(userId, limit, offset);
+    const { page, pageSize } = parsePaginationParams(req.query as Record<string, any>);
+    const tasks = await DashboardService.getMyTasks(userId, page, pageSize);
     res.json(tasks);
   }));
 

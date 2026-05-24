@@ -1,5 +1,5 @@
-import axios from 'axios';
 import logger from './logger.js';
+import { getN8nCircuitBreaker } from '../services/CircuitBreaker.js';
 
 /**
  * N8n Webhook Integration Service
@@ -12,35 +12,20 @@ import logger from './logger.js';
  * 
  * For connected deployments: Set N8N_WEBHOOK_URL to your internal n8n instance
  * (must be on the same network, not external internet).
+ * 
+ * Uses CircuitBreaker for retry logic, exponential backoff, and dead letter queue
+ * to ensure graceful degradation when the external service is unavailable.
  */
 export class N8nService {
-  private static webhookUrl = process.env.N8N_WEBHOOK_URL || null;
-  private static apiKey = process.env.N8N_WEBHOOK_API_KEY || null;
-
   static async sendEvent(eventName: string, payload: any) {
-    if (!this.webhookUrl) {
-      logger.warn(`[n8n] Webhook URL is not configured. Skipped event: ${eventName}`);
-      return;
-    }
-
+    const circuitBreaker = getN8nCircuitBreaker();
+    
     try {
-      logger.info(`[n8n] Sending event ${eventName} to n8n...`);
-      
-      const headers: any = {};
-      if (this.apiKey) {
-        // Support both common patterns: X-N8N-API-KEY or Authorization header
-        headers['X-N8N-API-KEY'] = this.apiKey;
-        headers['Authorization'] = `Bearer ${this.apiKey}`;
-      }
-
-      await axios.post(this.webhookUrl, {
-        event: eventName,
-        timestamp: new Date().toISOString(),
-        data: payload,
-      }, { headers });
-      logger.info(`[n8n] Successfully sent event: ${eventName}`);
+      await circuitBreaker.call(eventName, payload);
     } catch (error: any) {
-      logger.error(`[n8n] Failed to send event ${eventName}: ${error.message}`);
+      // CircuitBreaker handles all error cases internally (retries, DLQ storage)
+      // This catch is a safety net for unexpected errors
+      logger.error(`[n8n] Unexpected error sending event ${eventName}: ${error.message}`);
     }
   }
 }

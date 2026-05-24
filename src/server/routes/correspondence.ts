@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { CorrespondenceService } from '../services/CorrespondenceService';
 import { AuthService } from '../services/AuthService';
 import { ValidationError } from '../utils/errors';
+import { parsePaginationParams } from '../utils/paginationService';
 import { ADMIN_ROLES, STAFF_ROLES } from '../../constants';
 
 const incomingSchema = z.object({
@@ -191,8 +192,7 @@ export const createCorrespondenceRoutes = (
 
   // Outgoing Letters Routes
   router.get("/outgoing", authenticate, asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const { page, pageSize } = parsePaginationParams(req.query as Record<string, any>);
     const result = await CorrespondenceService.getOutgoing(page, pageSize);
     res.json(result);
   }));

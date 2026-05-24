@@ -2,6 +2,7 @@ import express from 'express';
 import { AuditTaskService } from '../services/AuditTaskService';
 import { NotificationService } from '../services/NotificationService';
 import { asyncHandler } from '../utils/asyncHandler';
+import { methodNotAllowed } from '../utils/routeRegistry';
 
 export const createAuditTaskRoutes = (
   db: any,
@@ -63,6 +64,11 @@ export const createAuditTaskRoutes = (
     const tasks = await AuditTaskService.getTasks(req.query);
     res.json(tasks);
   }));
+
+  // 405 Method Not Allowed for methods not implemented on this custom route
+  // This route supports GET (list) and PATCH (status change) only
+  router.all('/', methodNotAllowed(['GET']));
+  router.all('/:id', methodNotAllowed(['PATCH']));
 
   return router;
 };

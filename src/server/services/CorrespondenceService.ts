@@ -2,6 +2,7 @@ import { db } from '../db/index';
 import { NotFoundError, ValidationError } from '../utils/errors';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { N8nService } from '../utils/n8nService';
+import { computePaginationMeta } from '../utils/paginationService';
 
 export class CorrespondenceService {
   private static db = db;
@@ -45,12 +46,7 @@ export class CorrespondenceService {
     
     return {
       data,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize)
-      }
+      pagination: computePaginationMeta(page, pageSize, total)
     };
   }
 
@@ -171,7 +167,7 @@ export class CorrespondenceService {
       qb.orderBy('updated_at', 'DESC');
       const pagination = qb.paginate(page, pageSize);
       const data = await this.db.prepare(`SELECT *, 'Incoming' as type, sender_entity as entity ${qb.buildDataQuery()}`).all(...qb.buildParams(pagination));
-      return { data, pagination: { page, pageSize, total: countRes?.total || 0, totalPages: Math.ceil((countRes?.total || 0) / pageSize) } };
+      return { data, pagination: computePaginationMeta(page, pageSize, countRes?.total || 0) };
       
     } else if (type === 'Outgoing') {
       const qb = new QueryBuilder(`FROM outgoing_letters`)
@@ -184,7 +180,7 @@ export class CorrespondenceService {
       qb.orderBy('updated_at', 'DESC');
       const pagination = qb.paginate(page, pageSize);
       const data = await this.db.prepare(`SELECT *, 'Outgoing' as type, recipient_entity as entity ${qb.buildDataQuery()}`).all(...qb.buildParams(pagination));
-      return { data, pagination: { page, pageSize, total: countRes?.total || 0, totalPages: Math.ceil((countRes?.total || 0) / pageSize) } };
+      return { data, pagination: computePaginationMeta(page, pageSize, countRes?.total || 0) };
       
     } else {
       // Combined Logic
@@ -211,7 +207,7 @@ export class CorrespondenceService {
       
       return {
         data,
-        pagination: { page, pageSize, total: countRes?.total || 0, totalPages: Math.ceil((countRes?.total || 0) / pageSize) }
+        pagination: computePaginationMeta(page, pageSize, countRes?.total || 0)
       };
     }
   }
@@ -293,12 +289,7 @@ export class CorrespondenceService {
     
     return {
       data,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize)
-      }
+      pagination: computePaginationMeta(page, pageSize, total)
     };
   }
 

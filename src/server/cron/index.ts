@@ -4,6 +4,7 @@ import logger from '../utils/logger';
 import { NotificationService } from '../services/NotificationService';
 import { UserRole } from '../../constants';
 import { createBackup } from '../utils/backup';
+import { updateCronLastRun } from '../routes/health';
 
 export const startAutomationJobs = () => {
   logger.info('[CRON] Starting automation jobs...');
@@ -81,41 +82,54 @@ const runDailyAutomations = async () => {
   }
 
   // 2. Auto-Status Update for Recommendations (Open/In Progress -> Overdue)
+  // Optimized: single JOIN query, bulk UPDATE, grouped notifications per user
   try {
-    const overdueRecs = await db.prepare(`
-      SELECT id, responsible, finding_id 
-      FROM recommendations 
-      WHERE status IN ('Open', 'In Progress') AND due_date < ?
-    `).all(todayStr);
+    // Single JOIN query to get overdue recommendations with resolved user info
+    const overdueWithUsers = await db.prepare(`
+      SELECT r.id, r.responsible, r.finding_id, u.id as user_id
+      FROM recommendations r
+      LEFT JOIN users u ON (u.name = r.responsible OR u.username = r.responsible)
+      WHERE r.status IN ('Open', 'In Progress') AND r.due_date < ?
+    `).all(todayStr) as Array<{ id: string; responsible: string; finding_id: string; user_id: string | null }>;
 
-    if (overdueRecs && overdueRecs.length > 0) {
-      logger.info(`[CRON] Found ${overdueRecs.length} overdue recommendations.`);
-      
-      const updateStmt = await db.prepare(`
+    if (overdueWithUsers && overdueWithUsers.length > 0) {
+      logger.info(`[CRON] Found ${overdueWithUsers.length} overdue recommendations.`);
+
+      // Single bulk UPDATE for all overdue recommendations
+      await db.prepare(`
         UPDATE recommendations 
         SET status = 'Overdue' 
         WHERE status IN ('Open', 'In Progress') AND due_date < ?
-      `);
-      await updateStmt.run(todayStr);
+      `).run(todayStr);
 
-      // Notify responsible persons
-      for (const rec of overdueRecs) {
-        if (rec.responsible) {
-          const user = await db.prepare(`SELECT id FROM users WHERE name = ? OR username = ?`).get(rec.responsible, rec.responsible);
-          if (user) {
-            await NotificationService.create(
-              user.id,
-              'recommendation_overdue',
-              `A recommendation assigned to you is now overdue.`,
-              'warning',
-              `/recommendations`
-            );
-          }
+      // Group notifications by user (one notification per user with count)
+      // Skip records where responsible doesn't resolve to a valid user
+      const userNotifications = new Map<string, number>();
+      for (const rec of overdueWithUsers) {
+        if (rec.user_id) {
+          userNotifications.set(
+            rec.user_id,
+            (userNotifications.get(rec.user_id) || 0) + 1
+          );
         }
       }
+
+      // Send one notification per user with their overdue count
+      for (const [userId, count] of userNotifications) {
+        await NotificationService.create(
+          userId,
+          'recommendation_overdue',
+          JSON.stringify({ key: 'notifications.recommendationsOverdue', params: { count } }),
+          'warning',
+          '/recommendations'
+        );
+      }
+
+      logger.info(`[CRON] Sent overdue notifications to ${userNotifications.size} users.`);
     }
   } catch (err) {
-    logger.error('[CRON] Error updating recommendations:', err);
+    logger.error('[CRON] Error updating overdue recommendations:', { error: err, date: todayStr });
+    // Abort: do not send partial notifications — error is logged with context
   }
 
   // 3. Smart Escalation (Reminders for upcoming recommendations - 7 days before)
@@ -258,4 +272,5 @@ const runDailyAutomations = async () => {
   }
 
   logger.info('[CRON] Daily automations completed.');
+  updateCronLastRun();
 };

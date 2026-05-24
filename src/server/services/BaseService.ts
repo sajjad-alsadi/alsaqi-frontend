@@ -2,6 +2,7 @@ import { db } from '../db/index';
 import { NotFoundError, ValidationError } from '../utils/errors';
 import { AppCodeGenerator } from '../utils/AppCodeGenerator';
 import { N8nService } from '../utils/n8nService';
+import { computePaginationMeta } from '../utils/paginationService';
 import crypto from 'crypto';
 
 export class BaseService {
@@ -43,8 +44,8 @@ export class BaseService {
     return sanitized;
   }
 
-  static async findAll(tableName: string, options: { page?: number; pageSize?: number; orderBy?: string; where?: Record<string, any>; select?: string[] } = {}) {
-    const { page = 1, pageSize = 10, orderBy = 'id DESC', where = {}, select } = options;
+  static async findAll(tableName: string, options: { page?: number; pageSize?: number; orderBy?: string; where?: Record<string, any>; select?: string[]; includeDeleted?: boolean } = {}) {
+    const { page = 1, pageSize = 10, orderBy = 'id DESC', where = {}, select, includeDeleted = false } = options;
     const offset = (page - 1) * pageSize;
 
     const validatedTable = this.db.validateIdentifier(tableName);
@@ -78,6 +79,15 @@ export class BaseService {
     if (whereKeys.length > 0) {
       whereClause = 'WHERE ' + whereKeys.map((key, i) => `${this.db.validateIdentifier(key)} = ?`).join(' AND ');
       whereValues.push(...Object.values(restWhere));
+    }
+
+    // Exclude soft-deleted records from standard queries (Requirement 8.2)
+    if (!includeDeleted) {
+      if (whereClause) {
+        whereClause += ' AND deleted_at IS NULL';
+      } else {
+        whereClause = 'WHERE deleted_at IS NULL';
+      }
     }
 
     // Add search functionality if provided
@@ -115,18 +125,15 @@ export class BaseService {
 
     return {
       data,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize)
-      }
+      pagination: computePaginationMeta(page, pageSize, total)
     };
   }
 
-  static async findById(tableName: string, id: string | number) {
+  static async findById(tableName: string, id: string | number, options: { includeDeleted?: boolean } = {}) {
+    const { includeDeleted = false } = options;
     const validatedTable = this.db.validateIdentifier(tableName);
-    const item = await this.db.prepare(`SELECT * FROM ${validatedTable} WHERE id = ?`).get(id);
+    const deletedFilter = includeDeleted ? '' : ' AND deleted_at IS NULL';
+    const item = await this.db.prepare(`SELECT * FROM ${validatedTable} WHERE id = ?${deletedFilter}`).get(id);
     if (!item) {
       throw new NotFoundError(`${tableName} item with ID ${id} not found`);
     }

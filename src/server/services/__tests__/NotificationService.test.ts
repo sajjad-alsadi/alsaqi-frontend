@@ -40,17 +40,31 @@ describe('NotificationService', () => {
         { id: 'n1', event_type: 'task_assigned', description: 'Task assigned', date: '2024-01-02' },
         { id: 'n2', event_type: 'comment_added', description: 'New comment', date: '2024-01-01' },
       ];
+      // First call: count query
+      mockGet.mockResolvedValueOnce({ total: 2 });
+      // Second call: data query
       mockAll.mockResolvedValueOnce(mockNotifications);
 
       const result = await NotificationService.getNotifications('user-1', 1, 20);
 
-      expect(result).toEqual(mockNotifications);
+      expect(result.data).toEqual(mockNotifications);
+      expect(result.pagination).toEqual({
+        page: 1,
+        pageSize: 20,
+        total: 2,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+      });
       expect(mockPrepare).toHaveBeenCalledWith(
         expect.stringContaining('ORDER BY n.date DESC')
       );
     });
 
     it('uses correct LIMIT and OFFSET based on page/pageSize', async () => {
+      // First call: count query
+      mockGet.mockResolvedValueOnce({ total: 30 });
+      // Second call: data query
       mockAll.mockResolvedValueOnce([]);
 
       await NotificationService.getNotifications('user-1', 3, 10);
@@ -60,9 +74,11 @@ describe('NotificationService', () => {
     });
 
     it('falls back to legacy table if notification_recipients fails', async () => {
-      // First call (new table) throws
-      mockAll.mockRejectedValueOnce(new Error('table not found'));
-      // Second call (legacy fallback) succeeds
+      // First call (count on new table) throws
+      mockGet.mockRejectedValueOnce(new Error('table not found'));
+      // Fallback: count query on legacy table
+      mockGet.mockResolvedValueOnce({ total: 1 });
+      // Fallback: data query on legacy table
       const legacyResults = [
         { id: 'n1', event_type: 'task_assigned', description: 'Legacy notification', date: '2024-01-01' },
       ];
@@ -70,10 +86,9 @@ describe('NotificationService', () => {
 
       const result = await NotificationService.getNotifications('user-1', 1, 20);
 
-      expect(result).toEqual(legacyResults);
-      // Should have been called twice: once for new table, once for legacy
-      expect(mockPrepare).toHaveBeenCalledTimes(2);
-      expect(mockPrepare).toHaveBeenLastCalledWith(
+      expect(result.data).toEqual(legacyResults);
+      expect(result.pagination.total).toBe(1);
+      expect(mockPrepare).toHaveBeenCalledWith(
         expect.stringContaining('FROM notifications WHERE user_id')
       );
     });

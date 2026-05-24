@@ -1,6 +1,7 @@
 import express from 'express';
 import { NotificationService } from '../services/NotificationService';
 import { asyncHandler } from '../utils/asyncHandler';
+import { parsePaginationParams } from '../utils/paginationService';
 
 export const createNotificationRoutes = (db: any, authenticate: any) => {
   const router = express.Router();
@@ -8,8 +9,7 @@ export const createNotificationRoutes = (db: any, authenticate: any) => {
   // Get notifications with pagination
   router.get("/", authenticate, asyncHandler(async (req, res) => {
     const userId = (req as any).user.id;
-    const page = Math.max(parseInt(req.query.page as string) || 1, 1);
-    const pageSize = Math.min(Math.max(parseInt(req.query.pageSize as string) || 20, 1), 50);
+    const { page, pageSize } = parsePaginationParams(req.query as Record<string, any>);
     
     const data = await NotificationService.getNotifications(userId, page, pageSize);
     res.json(data);

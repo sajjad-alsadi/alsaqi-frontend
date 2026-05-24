@@ -114,28 +114,147 @@ if (DATABASE_URL && !DATABASE_URL.startsWith('http')) {
 
 const als = new AsyncLocalStorage<any>();
 
-class Mutex {
-  // PGlite (WASM-based) does not support concurrent queries.
-  // This mutex serializes all DB operations in development mode.
-  // In production with PostgreSQL, the mutex is bypassed (see isExternal checks).
-  // Performance impact: negligible for typical workloads (<100 concurrent users).
-  private mutex = Promise.resolve();
+/**
+ * ReadWriteLock for PGlite mode.
+ * 
+ * PGlite (WASM-based) does not support truly concurrent queries, but it CAN
+ * handle multiple SELECT queries sequentially without corruption risk.
+ * This lock allows concurrent read operations (shared lock) while ensuring
+ * write operations (exclusive lock) block all other operations.
+ * 
+ * In production with PostgreSQL, the lock is bypassed entirely (see isExternal checks).
+ * 
+ * Behavior:
+ * - Multiple readers can hold the lock simultaneously
+ * - A writer must wait for all readers to finish, then blocks all new readers/writers
+ * - Queued requests wait up to LOCK_TIMEOUT_MS (5000ms) before receiving a 503
+ * - Writers are prioritized: when a writer is waiting, new readers queue behind it
+ */
+export class ReadWriteLock {
+  private _readers = 0;
+  private _writing = false;
+  private _writeQueue: Array<{ resolve: (release: () => void) => void; reject: (err: Error) => void }> = [];
+  private _readQueue: Array<{ resolve: (release: () => void) => void; reject: (err: Error) => void }> = [];
 
-  async lock(): Promise<() => void> {
+  static readonly LOCK_TIMEOUT_MS = 5000;
+
+  get readers() { return this._readers; }
+  get writing() { return this._writing; }
+  get writeQueueLength() { return this._writeQueue.length; }
+  get readQueueLength() { return this._readQueue.length; }
+
+  async acquireRead(): Promise<() => void> {
+    // If already inside a transaction context (ALS store set), skip locking
     if (als.getStore()) {
-      return () => {}; // Already locked in this context
+      return () => {};
     }
-    let begin: (unlock: () => void) => void = () => {};
-    this.mutex = this.mutex.then(() => {
-      return new Promise(begin);
+
+    // If no writer is active and no writer is waiting, grant read immediately
+    if (!this._writing && this._writeQueue.length === 0) {
+      this._readers++;
+      return () => this._releaseRead();
+    }
+
+    // Otherwise, queue the read request and wait
+    return this._enqueueWithTimeout(this._readQueue, 'read');
+  }
+
+  async acquireWrite(): Promise<() => void> {
+    // If already inside a transaction context (ALS store set), skip locking
+    if (als.getStore()) {
+      return () => {};
+    }
+
+    // If no readers and no writer, grant write immediately
+    if (!this._writing && this._readers === 0) {
+      this._writing = true;
+      return () => this._releaseWrite();
+    }
+
+    // Otherwise, queue the write request and wait
+    return this._enqueueWithTimeout(this._writeQueue, 'write');
+  }
+
+  private _enqueueWithTimeout(
+    queue: Array<{ resolve: (release: () => void) => void; reject: (err: Error) => void }>,
+    type: 'read' | 'write'
+  ): Promise<() => void> {
+    return new Promise<() => void>((resolve, reject) => {
+      const entry = { resolve, reject };
+      queue.push(entry);
+
+      const timer = setTimeout(() => {
+        // Remove from queue if still waiting
+        const idx = queue.indexOf(entry);
+        if (idx !== -1) {
+          queue.splice(idx, 1);
+          const error = new Error(
+            `Lock acquisition timeout: could not acquire ${type} lock within ${ReadWriteLock.LOCK_TIMEOUT_MS}ms`
+          );
+          (error as any).statusCode = 503;
+          reject(error);
+        }
+      }, ReadWriteLock.LOCK_TIMEOUT_MS);
+
+      // Wrap the resolve to clear the timeout
+      const originalResolve = entry.resolve;
+      entry.resolve = (release: () => void) => {
+        clearTimeout(timer);
+        originalResolve(release);
+      };
     });
-    return new Promise((res) => {
-      begin = res;
-    });
+  }
+
+  private _releaseRead(): void {
+    this._readers--;
+    this._processQueue();
+  }
+
+  private _releaseWrite(): void {
+    this._writing = false;
+    this._processQueue();
+  }
+
+  private _processQueue(): void {
+    // Priority: if there's a writer waiting and no readers, grant write
+    if (this._writeQueue.length > 0 && this._readers === 0 && !this._writing) {
+      this._writing = true;
+      const next = this._writeQueue.shift()!;
+      next.resolve(() => this._releaseWrite());
+      return;
+    }
+
+    // If no writer is active/waiting, drain all queued readers
+    if (!this._writing && this._writeQueue.length === 0 && this._readQueue.length > 0) {
+      while (this._readQueue.length > 0) {
+        this._readers++;
+        const next = this._readQueue.shift()!;
+        next.resolve(() => this._releaseRead());
+      }
+    }
   }
 }
 
-const dbMutex = new Mutex();
+const dbLock = new ReadWriteLock();
+
+/**
+ * Determines if a SQL statement is a read (SELECT) or write (INSERT, UPDATE, DELETE, etc.) operation.
+ */
+export function isReadQuery(sql: string): boolean {
+  const trimmed = sql.trimStart().toUpperCase();
+  // SELECT, EXPLAIN, SHOW, and WITH ... SELECT are read operations
+  if (trimmed.startsWith('SELECT') || trimmed.startsWith('EXPLAIN') || trimmed.startsWith('SHOW')) {
+    return true;
+  }
+  // WITH (CTE) that ends in SELECT is a read
+  if (trimmed.startsWith('WITH')) {
+    // Check if it's a CTE followed by SELECT (not INSERT/UPDATE/DELETE)
+    // Simple heuristic: if it doesn't contain INSERT/UPDATE/DELETE after the CTE
+    const hasWrite = /\)\s*(INSERT|UPDATE|DELETE)/i.test(sql);
+    return !hasWrite;
+  }
+  return false;
+}
 
 class DBWrapper {
   private _client: any;
@@ -272,7 +391,7 @@ class DBWrapper {
 
     return {
       get: async (...params: any[]) => {
-        const unlock = this.isExternal ? () => {} : await dbMutex.lock();
+        const unlock = this.isExternal ? () => {} : await dbLock.acquireRead();
         try {
           await this.ensureReady();
           const res = await executeWithRetry(conn => conn.query(convertedSql, params));
@@ -285,7 +404,7 @@ class DBWrapper {
         }
       },
       all: async (...params: any[]) => {
-        const unlock = this.isExternal ? () => {} : await dbMutex.lock();
+        const unlock = this.isExternal ? () => {} : await dbLock.acquireRead();
         try {
           await this.ensureReady();
           const res = await executeWithRetry(conn => conn.query(convertedSql, params));
@@ -298,7 +417,7 @@ class DBWrapper {
         }
       },
       run: async (...params: any[]) => {
-        const unlock = this.isExternal ? () => {} : await dbMutex.lock();
+        const unlock = this.isExternal ? () => {} : await dbLock.acquireWrite();
         try {
           await this.ensureReady();
           let finalSql = convertedSql;
@@ -334,7 +453,7 @@ class DBWrapper {
 
   transaction(fn: Function) {
     return async (...args: any[]) => {
-      const unlock = this.isExternal ? () => {} : await dbMutex.lock();
+      const unlock = this.isExternal ? () => {} : await dbLock.acquireWrite();
       try {
         await this.ensureReady();
           
@@ -386,7 +505,8 @@ class DBWrapper {
   }
 
   async exec(sql: string) {
-    const unlock = this.isExternal ? () => {} : await dbMutex.lock();
+    const isRead = isReadQuery(sql);
+    const unlock = this.isExternal ? () => {} : (isRead ? await dbLock.acquireRead() : await dbLock.acquireWrite());
     try {
       await this.ensureReady();
       

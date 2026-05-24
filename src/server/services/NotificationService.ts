@@ -1,5 +1,7 @@
 import { db } from '../db/index';
 import { UserRole } from '../../constants';
+import { computePaginationMeta } from '../utils/paginationService';
+import type { PaginationMeta } from '../types/api';
 
 export type NotificationEventType =
   | 'plan_started' | 'plan_assigned' | 'plan_status_changed'
@@ -48,11 +50,16 @@ export class NotificationService {
    * Get notifications for a user with pagination (uses notification_recipients join).
    * Falls back to legacy single-table if notification_recipients doesn't exist yet.
    */
-  static async getNotifications(userId: string | number, page = 1, pageSize = 20): Promise<NotificationFeedItem[]> {
+  static async getNotifications(userId: string | number, page = 1, pageSize = 20): Promise<{ data: NotificationFeedItem[]; pagination: PaginationMeta }> {
     const offset = (page - 1) * pageSize;
 
     try {
       // Try new two-table architecture first
+      const countRes = await db.prepare(
+        "SELECT COUNT(*) as total FROM notification_recipients WHERE recipient_id = ?::uuid AND is_dismissed = false"
+      ).get(userId) as any;
+      const total = countRes?.total || 0;
+
       const results = await db.prepare(`
         SELECT 
           n.id,
@@ -76,13 +83,24 @@ export class NotificationService {
         LIMIT ? OFFSET ?
       `).all(userId, pageSize, offset) as any[];
 
-      return results;
+      return {
+        data: results,
+        pagination: computePaginationMeta(page, pageSize, total)
+      };
     } catch {
       // Fallback to legacy single-table
+      const countRes = await db.prepare(
+        "SELECT COUNT(*) as total FROM notifications WHERE user_id = ?::uuid"
+      ).get(userId) as any;
+      const total = countRes?.total || 0;
+
       const results = await db.prepare(
         "SELECT id, id as recipient_row_id, event_type, description, related_module, link, actor_id, entity_id, entity_type, data, date, CASE WHEN status = 'Read' THEN true ELSE false END as is_read, NULL as read_at, NULL as title FROM notifications WHERE user_id = ?::uuid ORDER BY date DESC LIMIT ? OFFSET ?"
       ).all(userId, pageSize, offset) as any[];
-      return results;
+      return {
+        data: results,
+        pagination: computePaginationMeta(page, pageSize, total)
+      };
     }
   }
 

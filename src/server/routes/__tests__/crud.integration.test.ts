@@ -129,7 +129,7 @@ describe('CRUD Generator Integration Tests', () => {
           { id: 1, plan_code: 'IA-PL-24-001', title: 'خطة تدقيق' },
           { id: 2, plan_code: 'IA-PL-24-002', title: 'خطة تدقيق ثانية' },
         ],
-        pagination: { page: 1, pageSize: 50, total: 2, totalPages: 1 },
+        pagination: { page: 1, pageSize: 50, total: 2, totalPages: 1, hasNext: false, hasPrev: false },
       });
 
       const req = createAuthenticatedRequest(app);
@@ -142,13 +142,15 @@ describe('CRUD Generator Integration Tests', () => {
         pageSize: 50,
         total: 2,
         totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
       });
     });
 
     it('should pass search query parameter to BaseService.findAll', async () => {
       mockBaseService.findAll.mockResolvedValue({
         data: [],
-        pagination: { page: 1, pageSize: 50, total: 0, totalPages: 0 },
+        pagination: { page: 1, pageSize: 50, total: 0, totalPages: 0, hasNext: false, hasPrev: false },
       });
 
       const req = createAuthenticatedRequest(app);
@@ -504,58 +506,37 @@ describe('CRUD Generator Integration Tests', () => {
       );
     });
 
-    it('GET /api/audit-tasks should return paginated list', async () => {
-      mockBaseService.findAll.mockResolvedValue({
-        data: [{ id: 1, task_number: 'IA-TSK-24-001', title: 'مهمة' }],
-        pagination: { page: 1, pageSize: 50, total: 1, totalPages: 1 },
-      });
-
+    it('GET /api/audit-tasks should return 404 (excluded from CRUD generator, handled by custom routes)', async () => {
       const req = createAuthenticatedRequest(app);
       const res = await req.get('/api/audit-tasks');
 
-      expect(res.status).toBe(200);
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.pagination).toBeDefined();
+      // audit-tasks is excluded from CRUD generator (CRUD_EXCLUDED_ROUTES)
+      // and handled by dedicated custom route module instead
+      expect(res.status).toBe(404);
     });
 
-    it('POST /api/audit-tasks should send notification to assigned user', async () => {
-      mockBaseService.create.mockResolvedValue({
-        id: 'task-1',
-        task_number: 'IA-TSK-24-001',
-        title: 'مهمة جديدة',
-        assigned_to: 'user-assigned',
-      });
-
+    it('POST /api/audit-tasks should return 404 (excluded from CRUD generator, handled by custom routes)', async () => {
       const testApp = createCrudTestApp();
       const req = createAuthenticatedRequest(testApp.app);
-      await req.post('/api/audit-tasks').send({
+      const res = await req.post('/api/audit-tasks').send({
         title: 'مهمة جديدة',
         plan_id: 'plan-1',
         assigned_to: 'user-assigned',
         audit_type: 'Financial',
       });
 
-      expect(testApp.createNotification).toHaveBeenCalledWith(
-        'user-assigned',
-        'task_assigned',
-        expect.any(String),
-        'audit-tasks',
-        '/audit-tasks',
-        expect.objectContaining({ entityType: 'audit_tasks' })
-      );
+      // audit-tasks is excluded from CRUD generator (CRUD_EXCLUDED_ROUTES)
+      // Notifications for audit-tasks are handled by the custom route module
+      expect(res.status).toBe(404);
     });
 
-    it('GET /api/recommendations should work with BaseService', async () => {
-      mockBaseService.findAll.mockResolvedValue({
-        data: [{ id: 1, rec_number: 'REC-001', status: 'Open' }],
-        pagination: { page: 1, pageSize: 50, total: 1, totalPages: 1 },
-      });
-
+    it('GET /api/recommendations should return 404 (excluded from CRUD generator, handled by custom routes)', async () => {
       const req = createAuthenticatedRequest(app);
       const res = await req.get('/api/recommendations');
 
-      expect(res.status).toBe(200);
-      expect(res.body.data[0].rec_number).toBe('REC-001');
+      // recommendations is excluded from CRUD generator (CRUD_EXCLUDED_ROUTES)
+      // and handled by dedicated custom route module instead
+      expect(res.status).toBe(404);
     });
 
     it('DELETE /api/fraud-log/:id should work', async () => {
@@ -572,7 +553,7 @@ describe('CRUD Generator Integration Tests', () => {
     it('GET /api/compliance-items should work', async () => {
       mockBaseService.findAll.mockResolvedValue({
         data: [{ id: 1, ref_number: 'CMP-24-001', title: 'تعليمات' }],
-        pagination: { page: 1, pageSize: 50, total: 1, totalPages: 1 },
+        pagination: { page: 1, pageSize: 50, total: 1, totalPages: 1, hasNext: false, hasPrev: false },
       });
 
       const req = createAuthenticatedRequest(app);

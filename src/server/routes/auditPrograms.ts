@@ -6,6 +6,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { AuditProgramService } from "../services/AuditProgramService";
 import { AuthService } from "../services/AuthService";
 import { ValidationError } from "../utils/errors";
+import { methodNotAllowed } from "../utils/routeRegistry";
 
 export const createAuditProgramRoutes = (db: any, authenticate: any, authorize: any, logError: any) => {
   const router = Router();
@@ -39,6 +40,11 @@ export const createAuditProgramRoutes = (db: any, authenticate: any, authorize: 
       
     res.json({ success: true });
   }));
+
+  // 405 Method Not Allowed for methods not implemented on this custom route
+  // This route only supports POST (duplicate, approve) - no GET, PUT, DELETE at root level
+  router.all("/", methodNotAllowed(['POST']));
+  router.all("/:id", methodNotAllowed(['POST']));
 
   return router;
 };

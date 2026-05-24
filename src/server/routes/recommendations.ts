@@ -1,6 +1,7 @@
 import express from 'express';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
+import { methodNotAllowed } from '../utils/routeRegistry';
 
 export const createRecommendationRoutes = (
   db: any,
@@ -36,6 +37,11 @@ export const createRecommendationRoutes = (
       res.status(500).json({ success: false, error: { message: err.message, code: 'INTERNAL_ERROR' } });
     }
   }));
+
+  // 405 Method Not Allowed for methods not implemented on this custom route
+  // This route only supports PATCH (resolve) - no GET, POST, PUT, DELETE at root level
+  router.all('/', methodNotAllowed(['PATCH']));
+  router.all('/:id', methodNotAllowed(['PATCH']));
 
   return router;
 };

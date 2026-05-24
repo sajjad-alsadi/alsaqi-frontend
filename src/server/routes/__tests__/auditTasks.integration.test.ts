@@ -15,7 +15,7 @@ import { UserRole } from '../../../constants';
 // Mock AuditTaskService
 const mockAuditTaskService = {
   changeStatus: vi.fn().mockResolvedValue({ changes: 1 }),
-  getTasks: vi.fn().mockResolvedValue({ data: [], pagination: { total: 0, page: 1, pageSize: 20, totalPages: 0 } }),
+  getTasks: vi.fn().mockResolvedValue({ data: [], pagination: { total: 0, page: 1, pageSize: 20, totalPages: 0, hasNext: false, hasPrev: false } }),
 };
 
 vi.mock('../../services/AuditTaskService', () => ({
@@ -229,7 +229,7 @@ describe('Audit Tasks Integration Tests', () => {
     it('should return 200 with task list', async () => {
       mockAuditTaskService.getTasks.mockResolvedValueOnce({
         data: [{ id: 'task-1', title: 'Audit Task 1', status: 'draft' }],
-        pagination: { total: 1, page: 1, pageSize: 20, totalPages: 1 },
+        pagination: { total: 1, page: 1, pageSize: 20, totalPages: 1, hasNext: false, hasPrev: false },
       });
 
       const res = await request(app)

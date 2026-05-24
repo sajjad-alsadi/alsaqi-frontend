@@ -98,6 +98,8 @@ describe('BaseService', () => {
         pageSize: 10,
         total: 25,
         totalPages: 3,
+        hasNext: true,
+        hasPrev: true,
       });
       expect(result.data).toHaveLength(2);
     });

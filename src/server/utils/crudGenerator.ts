@@ -6,8 +6,20 @@ import { BaseService } from '../services/BaseService';
 import { AuthService } from '../services/AuthService';
 import { AuditPlanService } from '../services/AuditPlanService';
 import { RiskService } from '../services/RiskService';
+import { registerRoutes } from './routeRegistry';
+import { parsePaginationParams } from './paginationService';
 import fs from 'fs';
 import path from 'path';
+
+/**
+ * Route names excluded from CRUD generation because they have custom route files.
+ * These resources are handled by dedicated route modules with specialized logic.
+ */
+export const CRUD_EXCLUDED_ROUTES: string[] = [
+  'audit-tasks',
+  'audit-programs',
+  'recommendations',
+];
 
 export const createCrudRoutes = (
   db: any,
@@ -47,9 +59,20 @@ export const createCrudRoutes = (
       return;
     }
 
+    // Skip routes that have custom route files to prevent duplicate registration
+    if (CRUD_EXCLUDED_ROUTES.includes(routeName)) {
+      return;
+    }
+
+    // Register routes in the route registry for duplicate detection
+    registerRoutes(
+      ['GET', 'POST', 'PUT', 'DELETE'],
+      `/api/${routeName}`,
+      'crudGenerator'
+    );
+
     router.get(`/${routeName}`, authenticate, checkPermission(moduleName, 'View'), asyncHandler(async (req, res) => {
-      const page = Math.max(parseInt(req.query.page as string) || 1, 1);
-      const pageSize = Math.min(Math.max(parseInt(req.query.pageSize as string) || 50, 1), 200); // Bounded: 1-200
+      const { page, pageSize } = parsePaginationParams(req.query as Record<string, any>);
 
       // Extract all query params except page and pageSize as filters
       const { page: _, pageSize: __, ...filters } = req.query;

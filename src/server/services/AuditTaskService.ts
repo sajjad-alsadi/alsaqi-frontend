@@ -2,6 +2,7 @@ import { db } from '../db/index';
 import { NotFoundError, ValidationError, ForbiddenError } from '../utils/errors';
 import { N8nService } from '../utils/n8nService';
 import { UserRole } from '../../constants';
+import { parsePaginationParams, computePaginationMeta } from '../utils/paginationService';
 
 const ALLOWED_TRANSITIONS: Record<string, Record<string, { roles: string[] }>> = {
   'draft': {
@@ -76,9 +77,7 @@ export class AuditTaskService {
   }
 
   static async getTasks(params: any = {}) {
-    const page = parseInt(params.page) || 1;
-    const pageSize = parseInt(params.pageSize) || 20;
-    const offset = (page - 1) * pageSize;
+    const { page, pageSize, offset } = parsePaginationParams(params);
 
     let query = `
       SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.assigned_to, t.priority,
@@ -110,12 +109,7 @@ export class AuditTaskService {
 
     return {
       data,
-      pagination: {
-        total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize)
-      }
+      pagination: computePaginationMeta(page, pageSize, total)
     };
   }
 }

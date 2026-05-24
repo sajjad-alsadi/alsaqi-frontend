@@ -1,6 +1,7 @@
 import { db } from '../db/index';
 import { NotFoundError } from '../utils/errors';
 import { QueryBuilder } from '../utils/QueryBuilder';
+import { computePaginationMeta } from '../utils/paginationService';
 
 export class DashboardService {
   private static db = db;
@@ -150,7 +151,8 @@ export class DashboardService {
     };
   }
 
-  static async getMyTasks(userId: string | number, limit: number = 10, offset: number = 0) {
+  static async getMyTasks(userId: string | number, page: number = 1, pageSize: number = 10) {
+    const offset = (page - 1) * pageSize;
     const query = `
       SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.priority,
              p.title as plan_title
@@ -164,13 +166,15 @@ export class DashboardService {
     const countQuery = "SELECT COUNT(*) as total FROM audit_tasks WHERE assigned_to = ?";
 
     const [data, countRes] = await Promise.all([
-      this.db.prepare(query).all(userId, limit, offset),
+      this.db.prepare(query).all(userId, pageSize, offset),
       this.db.prepare(countQuery).get(userId)
     ]) as [any[], any];
 
+    const total = countRes?.total || 0;
+
     return {
       data,
-      total: countRes?.total || 0
+      pagination: computePaginationMeta(page, pageSize, total)
     };
   }
 }

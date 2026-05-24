@@ -26,6 +26,11 @@ import { csrfMiddleware } from "./src/server/middleware/csrf";
 import logger from "./src/server/utils/logger";
 import { KeyStore, resolveDataDir } from "./src/server/utils/keyStore";
 import { correlationIdMiddleware } from "./src/server/middleware/correlationId";
+import { createRateLimiter } from "./src/server/middleware/rateLimiter";
+import { createResponseWrapper } from "./src/server/middleware/responseWrapper";
+import { createRequestLogger } from "./src/server/middleware/requestLogger";
+import { createSecureFileMiddleware } from "./src/server/middleware/secureFile";
+import { createAuthMiddlewares } from "./src/server/middleware/auth";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -314,10 +319,17 @@ async function startServer() {
 
   app.use(cookieParser());
 
-  // Correlation ID Middleware for request tracing
+  // ─── Middleware Order (per API Audit spec) ─────────────────────────────────
+  // 1. Rate Limiter (per-user sliding window)
+  app.use(createRateLimiter());
+
+  // 2. Correlation ID Middleware for request tracing
   app.use(correlationIdMiddleware);
 
-  // CSRF Protection Middleware
+  // 3. Response Wrapper (unified envelope for all JSON responses)
+  app.use(createResponseWrapper({ excludePaths: ['/health'] }));
+
+  // 4. CSRF Protection Middleware
   // Validates CSRF tokens on state-changing requests (POST, PUT, PATCH, DELETE)
   // Must be after cookieParser (reads csrf-token cookie) and before routes
   app.use(csrfMiddleware({
@@ -327,8 +339,17 @@ async function startServer() {
     tokenByteLength: 32,
   }));
 
-  // Serve uploaded files statically
-  app.use('/uploads', express.static(uploadDir));
+  // 5. Auth - applied per-route in setupRoutes
+  // 6. Validation - applied per-route in setupRoutes
+  // 7. Idempotency - applied per-route in setupRoutes (needs user context)
+
+  // 8. Request Logger (records method, path, status, duration, user, IP)
+  app.use(createRequestLogger());
+
+  // Secure File Access (replaces express.static for /uploads)
+  // Requires authentication and module-level permission checks
+  const { authenticate: fileAuthenticate } = createAuthMiddlewares(db, JWT_SECRET, JWT_PUBLIC_KEY!);
+  app.use('/uploads', createSecureFileMiddleware(fileAuthenticate, uploadDir));
 
   // Setup API Routes
   setupRoutes(app, JWT_SECRET, JWT_PRIVATE_KEY!, JWT_PUBLIC_KEY!, saveFile, logError);
