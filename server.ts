@@ -19,7 +19,7 @@ import { MigrationRunner } from "./src/server/db/migrationRunner";
 import { versionedMigrations } from "./src/server/db/versionedMigrations";
 import { setupRoutes } from "./src/server/routes/index";
 import { startAutomationJobs } from "./src/server/cron/index";
-import { ALLOWED_EXTENSIONS, MIME_TO_EXT, createSaveFile, createLogError } from "./src/server/utils/serverUtils";
+import { ALLOWED_EXTENSIONS, MIME_TO_EXT, createSaveFile, createLogError, createEncryptedSaveFile } from "./src/server/utils/serverUtils";
 import { SecurityService } from "./src/server/services/SecurityService";
 import { globalErrorHandler, notFoundHandler } from "./src/server/middleware/error";
 import { csrfMiddleware } from "./src/server/middleware/csrf";
@@ -31,10 +31,20 @@ import { createResponseWrapper } from "./src/server/middleware/responseWrapper";
 import { createRequestLogger } from "./src/server/middleware/requestLogger";
 import { createSecureFileMiddleware } from "./src/server/middleware/secureFile";
 import { createAuthMiddlewares } from "./src/server/middleware/auth";
+import { createHelmetMiddleware } from "./src/server/middleware/helmet";
+import { createCompressionMiddleware } from "./src/server/middleware/compression";
+import { runSecretsValidation } from "./src/server/utils/secretsValidator";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ─── Secrets Validation (MUST run before any other initialization) ────────────
+// In production: exits with code 1 if critical secrets are weak/missing
+// In development: logs warnings but never blocks startup
+const secretsValidation = runSecretsValidation();
+if (process.env.NODE_ENV === 'production' && !secretsValidation.isValid) {
+  process.exit(1);
+}
 
 // Setup Directories
 let uploadDir = path.join(process.cwd(), 'uploads');
@@ -66,13 +76,8 @@ if (!ensureDir(tmpDir)) {
   ensureDir(tmpDir);
 }
 
-const saveFile = createSaveFile(uploadDir);
+const saveFile = createEncryptedSaveFile(uploadDir, db);
 const logError = createLogError(db);
-
-if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'alsaqi-dev-secret-key-123')) {
-  logger.error("FATAL: JWT_SECRET must be set to a secure value in production. Exiting.");
-  process.exit(1);
-}
 
 const JWT_SECRET = process.env.JWT_SECRET || 'alsaqi-dev-secret-key-123';
 let JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/\\r/g, '').replace(/^["']|["']$/g, '').trim();
@@ -148,20 +153,12 @@ async function startServer() {
     }
   }
 
-  // Security Headers
-  app.disable('x-powered-by');
-  app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    if (process.env.NODE_ENV === 'production') {
-      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-    }
-    next();
-  });
+  // Security Headers (Helmet.js)
+  app.use(createHelmetMiddleware(process.env.NODE_ENV || 'development'));
+
+  // Response Compression (gzip for text-based content > 1KB)
+  // Placed after security headers, before routes
+  app.use(createCompressionMiddleware());
 
   // Enable CORS
   const corsOrigin = process.env.CORS_ORIGIN;
@@ -171,42 +168,41 @@ async function startServer() {
   }));
 
   const server = http.createServer(app);
-  const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({ noServer: true });
+
+  // Manual WebSocket upgrade handling (noServer mode)
+  // Requires JWT token in query parameter ?token= for immediate authentication
+  server.on('upgrade', (request, socket, head) => {
+    const url = new URL(request.url!, `http://${request.headers.host}`);
+    const token = url.searchParams.get('token');
+
+    if (!token) {
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    try {
+      const decoded = jwt.verify(token, JWT_PUBLIC_KEY!, { algorithms: ['RS256'] }) as any;
+
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        (ws as any).userId = decoded.id;
+        (ws as any).username = decoded.username;
+        (ws as any).authenticated = true;
+        (ws as any).connectedAt = Date.now();
+        wss.emit('connection', ws, request);
+      });
+    } catch (err) {
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+    }
+  });
   
   // WebSocket Connection Handler
-  // Supports authenticated (message-based) and unauthenticated (notification-only) modes
+  // All connections are pre-authenticated during the upgrade phase (token verified in query param)
   wss.on('connection', (ws, req) => {
-    (ws as any).authenticated = false;
     (ws as any).isAlive = true;
-    (ws as any).connectedAt = Date.now();
     ws.on('pong', () => { (ws as any).isAlive = true; });
-
-    // Terminate unauthenticated connections after 30 seconds
-    const authTimeout = setTimeout(() => {
-      if (!(ws as any).authenticated) {
-        ws.close(4001, 'Authentication timeout');
-      }
-    }, 30000);
-
-    ws.on('message', (data) => {
-      try {
-        const msg = JSON.parse(data.toString());
-        if (msg.type === 'auth' && msg.token) {
-          const decoded = jwt.verify(msg.token, JWT_PUBLIC_KEY!, { algorithms: ['RS256'] }) as any;
-          (ws as any).userId = decoded.id;
-          (ws as any).username = decoded.username;
-          (ws as any).authenticated = true;
-          clearTimeout(authTimeout);
-          ws.send(JSON.stringify({ type: 'auth_ok' }));
-        }
-      } catch (err) {
-        // Auth failed — connection stays in unauthenticated mode (receives broadcasts only)
-      }
-    });
-
-    ws.on('close', () => {
-      clearTimeout(authTimeout);
-    });
   });
   
   wss.on('error', (err) => {
@@ -320,8 +316,8 @@ async function startServer() {
   app.use(cookieParser());
 
   // ─── Middleware Order (per API Audit spec) ─────────────────────────────────
-  // 1. Rate Limiter (per-user sliding window)
-  app.use(createRateLimiter());
+  // 1. Rate Limiter (per-user sliding window) - only on API routes
+  app.use('/api', createRateLimiter());
 
   // 2. Correlation ID Middleware for request tracing
   app.use(correlationIdMiddleware);

@@ -61,19 +61,21 @@ export const createSessionRoutes = (
     try {
       const result = await SessionService.refresh(refreshToken, JWT_SECRET, JWT_PRIVATE_KEY);
 
-      // Always use sameSite: 'none' and secure: true to support AI Studio iframe preview
+      // In production: sameSite: 'none' + secure: true (supports cross-origin/iframe)
+      // In development: sameSite: 'lax' + secure: false (works on HTTP localhost)
+      const isProduction = process.env.NODE_ENV === 'production';
       const cookieOptions: any = {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/'
       };
 
       // Refresh Token: Cookie-Only Storage
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/api/auth/refresh', // Restrict cookie path
         maxAge: result.rememberMe ? 30 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000 // 30 days or 8 hours in ms
       });
@@ -92,7 +94,8 @@ export const createSessionRoutes = (
       res.json({ success: true });
     } catch (error) {
       // Clear cookies with same options
-      const clearOptions: any = { httpOnly: true, secure: true, sameSite: 'none', path: '/' };
+      const isProduction = process.env.NODE_ENV === 'production';
+      const clearOptions: any = { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax', path: '/' };
       const refreshClearOptions: any = { ...clearOptions, path: '/api/auth/refresh' };
       res.clearCookie('refreshToken', refreshClearOptions);
       res.clearCookie('token', clearOptions);
@@ -110,7 +113,8 @@ export const createSessionRoutes = (
     }
 
     // Clear cookies with same options
-    const clearOptions: any = { httpOnly: true, secure: true, sameSite: 'none', path: '/' };
+    const isProduction = process.env.NODE_ENV === 'production';
+    const clearOptions: any = { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax', path: '/' };
     const refreshClearOptions: any = { ...clearOptions, path: '/api/auth/refresh' };
     res.clearCookie('refreshToken', refreshClearOptions);
     res.clearCookie('token', clearOptions);
@@ -125,6 +129,20 @@ export const createSessionRoutes = (
     await AuthService.logAudit((req as any).user.username, "Logout All", "Settings", "User invalidated all active sessions");
 
     res.json({ success: true });
+  }));
+
+  // WebSocket Token - issues a short-lived token for WebSocket connections
+  // Since the access token is in an httpOnly cookie (not accessible from JS),
+  // the frontend calls this endpoint to get a token it can pass as a query parameter.
+  router.get("/ws-token", authenticate, asyncHandler(async (req, res) => {
+    const user = (req as any).user;
+    const jwt = await import('jsonwebtoken');
+    const wsToken = jwt.default.sign(
+      { id: user.id, username: user.username, type: 'ws' },
+      JWT_PRIVATE_KEY,
+      { algorithm: 'RS256', expiresIn: '30s' }
+    );
+    res.json({ token: wsToken });
   }));
 
   return router;

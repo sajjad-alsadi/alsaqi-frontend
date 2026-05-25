@@ -4,6 +4,7 @@ import { AsyncLocalStorage } from "async_hooks";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { createSSLConfig, validateSSLConnection } from "./sslConfig.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,10 +99,24 @@ function createPgliteClient(isRetry = false) {
 }
 
 if (DATABASE_URL && !DATABASE_URL.startsWith('http')) {
+  // Build SSL config based on environment
+  const sslConfig = createSSLConfig(process.env);
   const isLocal = DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1') || DATABASE_URL.includes('0.0.0.0');
+
+  // Determine SSL option: production uses createSSLConfig, local dev disables SSL
+  let sslOption: pg.PoolConfig['ssl'];
+  if (sslConfig) {
+    sslOption = sslConfig.ssl;
+  } else if (isLocal) {
+    sslOption = false;
+  } else {
+    // Non-production, non-local: use permissive SSL (don't reject unauthorized)
+    sslOption = { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' };
+  }
+
   client = new pg.Pool({
     connectionString: DATABASE_URL,
-    ssl: isLocal ? false : { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' },
+    ssl: sslOption,
     connectionTimeoutMillis: 2000,
     max: 20,
     idleTimeoutMillis: 30000,
@@ -544,7 +559,18 @@ export const db = new DBWrapper(client, isExternal);
 export const initDb = async () => {
   if (DATABASE_URL && isExternal) {
     try {
-      await client.query('SELECT 1');
+      // In production, validate SSL connection — refuse to start if it fails
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          await validateSSLConnection(client);
+          console.log("[DB] Production SSL connection validated successfully.");
+        } catch (sslErr: any) {
+          console.error(`[DB] FATAL: ${sslErr.message}`);
+          process.exit(1);
+        }
+      } else {
+        await client.query('SELECT 1');
+      }
     } catch (err: any) {
       console.error("[DB] External PostgreSQL connection failed. Falling back to PGlite.", err.message);
       const pgliteClient = createPgliteClient();

@@ -138,4 +138,187 @@ export const versionedMigrations: Migration[] = [
       }
     },
   },
+
+  {
+    version: '003',
+    name: 'Add encrypted_files table for file encryption at rest',
+    type: 'schema',
+    up: async () => {
+      // Create encrypted_files table to store encryption metadata for uploaded files
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS encrypted_files (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          original_name TEXT NOT NULL,
+          mime_type TEXT NOT NULL,
+          original_size INTEGER NOT NULL,
+          encrypted_path TEXT NOT NULL,
+          iv TEXT NOT NULL,
+          auth_tag TEXT NOT NULL,
+          checksum_sha256 TEXT NOT NULL,
+          key_version INTEGER NOT NULL DEFAULT 1,
+          encrypted_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          uploaded_by TEXT NOT NULL,
+          module TEXT NOT NULL CHECK (module IN ('audit', 'fraud', 'coi', 'correspondence'))
+        )
+      `);
+
+      // Index on uploaded_by for querying files by user
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_encrypted_files_uploaded_by ON encrypted_files(uploaded_by)`);
+
+      // Index on module for filtering by application module
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_encrypted_files_module ON encrypted_files(module)`);
+
+      // Index on key_version for key rotation operations
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_encrypted_files_key_version ON encrypted_files(key_version)`);
+    },
+  },
+
+  {
+    version: '004',
+    name: 'Add backup_history table for backup scheduling',
+    type: 'schema',
+    up: async () => {
+      // Create backup_history table to track all backup operations
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS backup_history (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          completed_at TIMESTAMPTZ,
+          status TEXT NOT NULL CHECK (status IN ('running', 'success', 'partial', 'failed')),
+          type TEXT NOT NULL CHECK (type IN ('scheduled', 'manual')),
+          size_bytes BIGINT DEFAULT 0,
+          tables_count INTEGER DEFAULT 0,
+          file_path TEXT,
+          error_message TEXT,
+          verified BOOLEAN DEFAULT FALSE,
+          verified_at TIMESTAMPTZ
+        )
+      `);
+
+      // Index on started_at for querying recent backups
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_backup_history_started_at ON backup_history(started_at)`);
+    },
+  },
+
+  {
+    version: '005',
+    name: 'Add user_totp table and requires_2fa_setup column for 2FA',
+    type: 'schema',
+    up: async () => {
+      // Create user_totp table to store TOTP secrets and backup codes
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS user_totp (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id TEXT NOT NULL UNIQUE,
+          secret_encrypted TEXT NOT NULL,
+          secret_iv TEXT NOT NULL,
+          secret_tag TEXT NOT NULL,
+          is_enabled BOOLEAN DEFAULT FALSE,
+          enabled_at TIMESTAMPTZ,
+          backup_codes_hash TEXT NOT NULL,
+          last_used_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Index on user_id for fast lookups
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_user_totp_user_id ON user_totp(user_id)`);
+
+      // Add requires_2fa_setup column to users table
+      await db.exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS requires_2fa_setup BOOLEAN DEFAULT FALSE`);
+    },
+  },
+
+  {
+    version: '006',
+    name: 'Convert audit_trail to range-partitioned table by timestamp',
+    type: 'schema',
+    up: async () => {
+      // Partitioning only works with external PostgreSQL (not PGlite)
+      if (!db.isExternal) {
+        return;
+      }
+
+      // Check if already partitioned
+      const checkResult = await db.prepare(`
+        SELECT relkind FROM pg_class WHERE relname = 'audit_trail'
+      `).get();
+
+      if (checkResult?.relkind === 'p') {
+        // Already partitioned, skip
+        return;
+      }
+
+      // Step 1: Create the partitioned parent table
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS audit_trail_partitioned (
+          id UUID DEFAULT gen_random_uuid(),
+          "user" TEXT NOT NULL,
+          action TEXT NOT NULL,
+          module TEXT NOT NULL,
+          details TEXT,
+          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (id, timestamp)
+        ) PARTITION BY RANGE (timestamp)
+      `);
+
+      // Step 2: Create initial partitions (previous month, current, +3 future)
+      const now = new Date();
+      for (let i = -1; i <= 3; i++) {
+        const start = new Date(Date.UTC(now.getFullYear(), now.getMonth() + i, 1));
+        const end = new Date(Date.UTC(now.getFullYear(), now.getMonth() + i + 1, 1));
+        const partName = `audit_trail_y${start.getFullYear()}m${String(start.getMonth() + 1).padStart(2, '0')}`;
+
+        await db.exec(`
+          CREATE TABLE IF NOT EXISTS ${partName}
+          PARTITION OF audit_trail_partitioned
+          FOR VALUES FROM ('${start.toISOString()}') TO ('${end.toISOString()}')
+        `);
+      }
+
+      // Step 3: Check for existing data and create historical partitions if needed
+      const existingData = await db.prepare(
+        `SELECT COUNT(*) as count FROM audit_trail`
+      ).get();
+
+      if (existingData && parseInt(existingData.count) > 0) {
+        // Find the oldest record to create partitions for historical data
+        const oldestRow = await db.prepare(
+          `SELECT MIN(timestamp) as min_ts FROM audit_trail`
+        ).get();
+
+        if (oldestRow?.min_ts) {
+          const oldestDate = new Date(oldestRow.min_ts);
+          const currentPartStart = new Date(Date.UTC(now.getFullYear(), now.getMonth() - 1, 1));
+
+          // Create partitions for all months between oldest data and already-created partitions
+          let iterDate = new Date(Date.UTC(oldestDate.getFullYear(), oldestDate.getMonth(), 1));
+          while (iterDate < currentPartStart) {
+            const start = new Date(Date.UTC(iterDate.getFullYear(), iterDate.getMonth(), 1));
+            const end = new Date(Date.UTC(iterDate.getFullYear(), iterDate.getMonth() + 1, 1));
+            const partName = `audit_trail_y${start.getFullYear()}m${String(start.getMonth() + 1).padStart(2, '0')}`;
+
+            await db.exec(`
+              CREATE TABLE IF NOT EXISTS ${partName}
+              PARTITION OF audit_trail_partitioned
+              FOR VALUES FROM ('${start.toISOString()}') TO ('${end.toISOString()}')
+            `);
+
+            iterDate = new Date(Date.UTC(iterDate.getFullYear(), iterDate.getMonth() + 1, 1));
+          }
+        }
+
+        // Step 4: Migrate existing data from original table to partitioned table
+        await db.exec(`
+          INSERT INTO audit_trail_partitioned (id, "user", action, module, details, timestamp)
+          SELECT id, "user", action, module, details, timestamp
+          FROM audit_trail
+        `);
+      }
+
+      // Step 5: Swap table names (old → _old, partitioned → audit_trail)
+      await db.exec(`ALTER TABLE audit_trail RENAME TO audit_trail_old`);
+      await db.exec(`ALTER TABLE audit_trail_partitioned RENAME TO audit_trail`);
+    },
+  },
 ];

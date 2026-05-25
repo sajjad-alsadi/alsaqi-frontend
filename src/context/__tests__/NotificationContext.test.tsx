@@ -115,6 +115,9 @@ describe('NotificationContext', () => {
       if (url === '/notifications/unread-count') {
         return Promise.resolve({ data: { count: 0 } });
       }
+      if (url === '/auth/ws-token') {
+        return Promise.resolve({ data: { token: 'test-ws-token' } });
+      }
       return Promise.resolve({ data: null });
     });
   });
@@ -160,14 +163,21 @@ describe('NotificationContext', () => {
       expect(wsInstances.length).toBe(0);
     });
 
-    it('should send auth token on WebSocket open', async () => {
+    it('should pass token as query parameter in WebSocket URL', async () => {
       mockUserState.user = { id: '1', name: 'Test User', role: 'Admin' };
 
-      // Mock localStorage.getItem to return a token
-      const originalGetItem = localStorage.getItem;
-      (localStorage.getItem as any) = vi.fn((key: string) => {
-        if (key === 'token') return 'my-jwt-token';
-        return null;
+      // Mock the ws-token endpoint
+      mockGet.mockImplementation((url: string) => {
+        if (url === '/auth/ws-token') {
+          return Promise.resolve({ data: { token: 'my-ws-jwt-token' } });
+        }
+        if (url.startsWith('/notifications?')) {
+          return Promise.resolve({ data: [] });
+        }
+        if (url === '/notifications/unread-count') {
+          return Promise.resolve({ data: { count: 0 } });
+        }
+        return Promise.resolve({ data: null });
       });
 
       renderHook(() => useNotificationContext(), { wrapper: createWrapper() });
@@ -176,18 +186,11 @@ describe('NotificationContext', () => {
         expect(wsInstances.length).toBeGreaterThanOrEqual(1);
       });
 
-      // Simulate WebSocket open
+      // WebSocket URL should contain the token as a query parameter
       const ws = wsInstances[0];
-
-      await act(async () => {
-        ws.onopen?.({});
-      });
-
-      expect(ws.send).toHaveBeenCalledWith(
-        JSON.stringify({ type: 'auth', token: 'my-jwt-token' })
-      );
-
-      (localStorage.getItem as any) = originalGetItem;
+      expect(ws.url).toContain('?token=my-ws-jwt-token');
+      // Should NOT send auth message after connection
+      expect(ws.send).not.toHaveBeenCalled();
     });
 
     it('should fetch notifications and unread count on initialization', async () => {

@@ -1,0 +1,171 @@
+# =============================================================================
+# GitLab CI/CD Pipeline - نظام الساقي (AL-SAQI)
+# =============================================================================
+# خط أنابيب CI/CD المؤتمت لنظام إدارة التدقيق الداخلي
+# Automated CI/CD pipeline for the internal audit management system
+#
+# المراحل (Stages):
+#   1. validate - التحقق من جودة الكود (Lint, TypeCheck, Security Audit)
+#   2. test    - تشغيل الاختبارات مع تقرير التغطية (Unit Tests + Coverage)
+#   3. build   - بناء صورة Docker ووسمها (Docker Image Build & Tag)
+#   4. deploy  - النشر اليدوي لبيئة الإنتاج (Manual Production Deployment)
+#
+# ملاحظات:
+#   - يفشل الخط إذا فشلت مرحلة validate أو test
+#   - مرحلة build تعمل فقط على فرع main
+#   - مرحلة deploy تتطلب تشغيل يدوي (manual trigger)
+#   - يتم تخزين node_modules مؤقتاً لتسريع التنفيذ
+# =============================================================================
+
+# الصورة الأساسية - Node.js 20 Alpine لجميع المهام
+# Base image - Node.js 20 Alpine for all jobs
+image: node:20-alpine
+
+# تعريف المراحل بالترتيب
+# Define pipeline stages in order
+stages:
+  - validate
+  - test
+  - build
+  - deploy
+
+# =============================================================================
+# التخزين المؤقت (Caching)
+# تخزين node_modules بين عمليات التشغيل لتحسين الأداء
+# Cache node_modules between pipeline runs for performance optimization
+# المفتاح مبني على hash ملف package-lock.json لإعادة البناء عند تغيير التبعيات
+# Key is based on package-lock.json hash to rebuild when dependencies change
+# =============================================================================
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+  policy: pull-push
+
+# =============================================================================
+# متغيرات عامة (Global Variables)
+# =============================================================================
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+# تثبيت التبعيات قبل كل مهمة (إذا لم تكن مخزنة مؤقتاً)
+# Install dependencies before each job (if not cached)
+before_script:
+  - npm ci --prefer-offline
+
+# =============================================================================
+# مرحلة التحقق (Validate Stage)
+# التحقق من جودة الكود، الأنماط، والأمان
+# Code quality, formatting, and security validation
+# =============================================================================
+
+# مهمة الفحص (Lint Job)
+# تشغيل ESLint للتحقق من جودة الكود و Prettier للتحقق من التنسيق
+# Run ESLint for code quality and Prettier for formatting checks
+lint:
+  stage: validate
+  script:
+    - npm run lint
+    - npx prettier --check .
+  rules:
+    - when: always
+
+# مهمة فحص الأنواع (TypeCheck Job)
+# التحقق من صحة أنواع TypeScript بدون إنشاء ملفات الإخراج
+# Verify TypeScript types without emitting output files
+typecheck:
+  stage: validate
+  script:
+    - npx tsc --noEmit
+  rules:
+    - when: always
+
+# مهمة فحص الأمان (Security Audit Job)
+# فحص التبعيات بحثاً عن ثغرات أمنية معروفة
+# Scan dependencies for known security vulnerabilities
+# allow_failure: true — لا يوقف الخط لكن يُظهر تحذيراً
+# allow_failure: true — doesn't block pipeline but shows warning
+audit:
+  stage: validate
+  script:
+    - npm audit --audit-level=moderate
+  allow_failure: true
+  rules:
+    - when: always
+
+# =============================================================================
+# مرحلة الاختبار (Test Stage)
+# تشغيل مجموعة الاختبارات الكاملة مع تقرير التغطية
+# Run full test suite with coverage reporting
+# =============================================================================
+
+# مهمة الاختبار (Test Job)
+# تشغيل Vitest مع تغطية الكود وإنشاء تقرير Cobertura
+# Run Vitest with code coverage and generate Cobertura report
+test:
+  stage: test
+  script:
+    - npx vitest --run --coverage
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 7 days
+  rules:
+    - when: always
+
+# =============================================================================
+# مرحلة البناء (Build Stage)
+# بناء صورة Docker ووسمها بـ commit SHA و latest
+# Build Docker image and tag with commit SHA and latest
+# تعمل فقط على فرع main
+# Only runs on main branch
+# =============================================================================
+
+# مهمة بناء Docker (Docker Build Job)
+# استخدام Docker-in-Docker لبناء الصورة داخل الحاوية
+# Uses Docker-in-Docker (dind) service to build image inside container
+build:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script: []
+  script:
+    - docker build -t alsaqi:$CI_COMMIT_SHA .
+    - docker tag alsaqi:$CI_COMMIT_SHA alsaqi:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# =============================================================================
+# مرحلة النشر (Deploy Stage)
+# النشر اليدوي لبيئة الإنتاج — يتطلب تأكيد يدوي من المستخدم
+# Manual production deployment — requires manual user confirmation
+# تعمل فقط على فرع main
+# Only runs on main branch
+# =============================================================================
+
+# مهمة النشر (Deploy Job)
+# placeholder — يجب تخصيصه حسب بيئة النشر الفعلية
+# placeholder — customize based on actual deployment environment
+deploy:
+  stage: deploy
+  image: docker:24-dind
+  before_script: []
+  script:
+    - echo "Deploying alsaqi:$CI_COMMIT_SHA to production..."
+    - echo "TODO: Add actual deployment commands (docker push, kubectl apply, etc.)"
+  environment:
+    name: production
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

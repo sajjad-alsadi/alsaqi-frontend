@@ -125,12 +125,17 @@ const SystemErrorLogs: React.FC = () => {
     let reconnectAttempts = 0;
     let isComponentMounted = true;
 
-    const connect = () => {
+    const connect = async () => {
       if (!isComponentMounted) return;
       
       try {
+        // Fetch a short-lived WebSocket token from the server
+        const res = await api.get('/auth/ws-token');
+        const wsToken = res.data?.token;
+        if (!wsToken) return;
+
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        ws = new WebSocket(`${protocol}://${window.location.host}`);
+        ws = new WebSocket(`${protocol}://${window.location.host}?token=${wsToken}`);
         
         ws.onopen = () => {
           reconnectAttempts = 0;
@@ -160,7 +165,12 @@ const SystemErrorLogs: React.FC = () => {
           // Error handled by onclose
         };
       } catch (e) {
-        logger.error("Failed to initiate WebSocket:", e);
+        // Token fetch failed - retry with backoff
+        if (isComponentMounted) {
+          const delay = Math.min(5000 * Math.pow(2, reconnectAttempts), 30000);
+          reconnectTimeout = setTimeout(connect, delay);
+          reconnectAttempts++;
+        }
       }
     };
 

@@ -99,7 +99,7 @@ const NotificationBell: React.FC = () => {
     }
   };
 
-  const recentNotifications = notifications.slice(0, 5);
+  const recentNotifications = (Array.isArray(notifications) ? notifications : []).slice(0, 5);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -138,7 +138,7 @@ const NotificationBell: React.FC = () => {
             </div>
 
             <div className="max-h-[400px] overflow-y-auto">
-              {notifications.length === 0 ? (
+              {(!Array.isArray(notifications) || notifications.length === 0) ? (
                 <div className="p-8 text-center">
                   <div className="w-12 h-12 bg-[var(--color-bg-soft)] rounded-full flex items-center justify-center mx-auto mb-3 text-[var(--color-text-muted)]">
                     <Bell size={24} />

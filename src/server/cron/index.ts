@@ -3,8 +3,9 @@ import { db } from '../db/index';
 import logger from '../utils/logger';
 import { NotificationService } from '../services/NotificationService';
 import { UserRole } from '../../constants';
-import { createBackup } from '../utils/backup';
+import { backupScheduler } from '../utils/backup';
 import { updateCronLastRun } from '../routes/health';
+import { partitionManager } from '../services/PartitionManager';
 
 export const startAutomationJobs = () => {
   logger.info('[CRON] Starting automation jobs...');
@@ -20,15 +21,12 @@ export const startAutomationJobs = () => {
     }
   });
 
-  // Daily backup at 2:00 AM
-  cron.schedule('0 2 * * *', async () => {
-    logger.info('[CRON] Running daily backup...');
-    try {
-      await createBackup();
-    } catch (error) {
-      logger.error('[CRON] Error running backup:', error);
-    }
-  });
+  // Daily backup at 2:00 AM via BackupScheduler (default schedule: '0 2 * * *')
+  backupScheduler.start();
+
+  // Monthly partition maintenance (1st of each month at midnight)
+  // Creates future partitions (3 months ahead) and drops old ones based on retention policy
+  partitionManager.scheduleMaintenanceJob();
 
   // Run immediately on startup to catch up
   runDailyAutomations().catch(err => {

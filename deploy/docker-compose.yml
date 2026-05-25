@@ -1,0 +1,104 @@
+# =============================================================================
+# AL-SAQI Production Docker Compose
+# =============================================================================
+# Orchestrates Nginx (reverse proxy with TLS) + App (Express.js) services.
+#
+# Usage:
+#   1. Copy .env.example to .env and configure all required variables
+#   2. Place SSL certificates in ./ssl/ directory
+#   3. Copy nginx.conf.example to nginx/nginx.conf and adjust server_name
+#   4. Run: docker compose up -d
+#
+# Prerequisites:
+#   - Docker Engine 20.10+
+#   - Docker Compose v2
+#   - SSL certificates (self-signed for testing, Let's Encrypt for production)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Nginx Reverse Proxy
+  # ---------------------------------------------------------------------------
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: alsaqi-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf.example:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - certbot-webroot:/var/www/certbot:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - alsaqi-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # AL-SAQI Application
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: alsaqi-app
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - VITE_STORAGE_SECRET=${VITE_STORAGE_SECRET}
+      - VITE_NETWORK_SECRET=${VITE_NETWORK_SECRET}
+      - FILE_ENCRYPTION_KEY=${FILE_ENCRYPTION_KEY:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://your-domain.example.com}
+      - DB_SSL_REJECT_UNAUTHORIZED=${DB_SSL_REJECT_UNAUTHORIZED:-true}
+      - DB_SSL_CA_PATH=${DB_SSL_CA_PATH:-}
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-30}
+      - BACKUP_DIR=/app/backups
+      - ENCRYPT_BACKUPS=${ENCRYPT_BACKUPS:-true}
+      - AUDIT_TRAIL_RETENTION_MONTHS=${AUDIT_TRAIL_RETENTION_MONTHS:-24}
+    volumes:
+      - app-data:/app/data
+      - app-uploads:/app/uploads
+      - app-backups:/app/backups
+    networks:
+      - alsaqi-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  app-data:
+    driver: local
+  app-uploads:
+    driver: local
+  app-backups:
+    driver: local
+  certbot-webroot:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  alsaqi-network:
+    driver: bridge

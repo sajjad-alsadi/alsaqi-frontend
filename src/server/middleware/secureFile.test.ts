@@ -191,6 +191,9 @@ describe('secureFile middleware', () => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
         }
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
+        }
         return { get: vi.fn().mockResolvedValue({ '1': 1 }) };
       });
 
@@ -223,6 +226,9 @@ describe('secureFile middleware', () => {
       (db.prepare as any).mockImplementation((sql: string) => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
+        }
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
         }
         // Permission check returns a result (has permission)
         return { get: vi.fn().mockResolvedValue({ '1': 1 }) };
@@ -258,6 +264,9 @@ describe('secureFile middleware', () => {
       (db.prepare as any).mockImplementation((sql: string) => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: runMock };
+        }
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
         }
         return { get: vi.fn().mockResolvedValue({ '1': 1 }) };
       });
@@ -328,10 +337,15 @@ describe('secureFile middleware', () => {
       const user = { id: 'admin-1', role: 'Admin', username: 'admin', name: 'Admin', email: 'a@test.com' };
       const authenticate = createMockAuthenticate(true, user);
 
-      (db.prepare as any).mockImplementation(() => ({
-        run: vi.fn().mockResolvedValue({ changes: 1 }),
-        get: vi.fn().mockResolvedValue({ '1': 1 }),
-      }));
+      (db.prepare as any).mockImplementation((sql: string) => {
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
+        }
+        return {
+          run: vi.fn().mockResolvedValue({ changes: 1 }),
+          get: vi.fn().mockResolvedValue({ '1': 1 }),
+        };
+      });
 
       const middleware = createSecureFileMiddleware(authenticate, uploadDir, { auditAccess: false });
 
@@ -365,6 +379,9 @@ describe('secureFile middleware', () => {
       (db.prepare as any).mockImplementation((sql: string) => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
+        }
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
         }
         return { get: vi.fn().mockResolvedValue({ '1': 1 }) };
       });
@@ -421,6 +438,9 @@ describe('secureFile middleware', () => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
         }
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
+        }
         return { get: vi.fn().mockResolvedValue({ '1': 1 }) };
       });
 
@@ -455,6 +475,16 @@ describe('secureFile middleware', () => {
 
       (fs.existsSync as any).mockReturnValue(true);
       (fs.statSync as any).mockReturnValue({ isFile: () => true });
+
+      (db.prepare as any).mockImplementation((sql: string) => {
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
+        }
+        return {
+          run: vi.fn().mockResolvedValue({ changes: 1 }),
+          get: vi.fn().mockResolvedValue(null),
+        };
+      });
 
       const middleware = createSecureFileMiddleware(authenticate, uploadDir, { requireAuth: false });
 

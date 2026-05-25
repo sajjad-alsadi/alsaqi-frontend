@@ -5,6 +5,7 @@ import { SecureFileOptions } from '../types/middleware';
 import db from '../db/index';
 import logger from '../utils/logger';
 import { SecureFileService } from '../services/SecureFileService';
+import { FileEncryptionService } from '../services/FileEncryptionService';
 
 /**
  * Maps file path segments to permission module names.
@@ -191,8 +192,10 @@ export function createSecureFileMiddleware(
 
 /**
  * Serves a file from the upload directory with security checks on the path.
+ * If the file is encrypted (has a record in encrypted_files table or .enc extension),
+ * it will be decrypted transparently before streaming to the client.
  */
-function serveFile(req: Request, res: Response, uploadDir: string, filePath: string): void {
+async function serveFile(req: Request, res: Response, uploadDir: string, filePath: string): Promise<void> {
   // Prevent path traversal attacks
   const normalizedPath = path.normalize(filePath).replace(/^(\.\.(\/|\\|$))+/, '');
   const fullPath = path.join(uploadDir, normalizedPath);
@@ -202,14 +205,109 @@ function serveFile(req: Request, res: Response, uploadDir: string, filePath: str
   const resolvedFilePath = path.resolve(fullPath);
 
   if (!resolvedFilePath.startsWith(resolvedUploadDir)) {
-    return res.status(403).json({ error: 'Forbidden' });
+    res.status(403).json({ error: 'Forbidden' });
+    return;
   }
 
-  // Check if file exists
+  // Extract the file identifier from the path (e.g., "abc123.enc" -> "abc123")
+  const fileName = path.basename(normalizedPath);
+  const fileId = fileName.replace(/\.enc$/, '');
+
+  // Check if this file has encryption metadata in the database
+  const encryptedRecord = await lookupEncryptedFile(fileId);
+
+  if (encryptedRecord) {
+    // File is encrypted — decrypt and stream to client
+    await serveEncryptedFile(res, uploadDir, fileId, encryptedRecord);
+    return;
+  }
+
+  // Not encrypted — check if file exists and serve normally (backward compatibility)
   if (!fs.existsSync(resolvedFilePath) || !fs.statSync(resolvedFilePath).isFile()) {
-    return res.status(404).json({ error: 'File not found' });
+    // Also try without .enc extension in case the path already has it
+    res.status(404).json({ error: 'File not found' });
+    return;
   }
 
-  // Send the file
+  // Send the file as-is (non-encrypted)
   res.sendFile(resolvedFilePath);
+}
+
+/**
+ * Looks up encryption metadata for a file from the encrypted_files database table.
+ * Returns null if the file is not encrypted (no record found).
+ */
+async function lookupEncryptedFile(fileId: string): Promise<EncryptedFileRecord | null> {
+  try {
+    const result = await db.prepare(`
+      SELECT id, original_name, mime_type, original_size, encrypted_path,
+             iv, auth_tag, checksum_sha256, key_version
+      FROM encrypted_files
+      WHERE id = ?
+    `).get(fileId) as EncryptedFileRecord | undefined;
+
+    return result || null;
+  } catch (err) {
+    logger.error('[SecureFile] Failed to lookup encrypted file metadata', { fileId, error: err });
+    return null;
+  }
+}
+
+/**
+ * Decrypts an encrypted file and streams the plaintext to the client
+ * with appropriate response headers (Content-Type, Content-Disposition, Content-Length).
+ */
+async function serveEncryptedFile(
+  res: Response,
+  uploadDir: string,
+  fileId: string,
+  record: EncryptedFileRecord
+): Promise<void> {
+  try {
+    const encryptionService = new FileEncryptionService(uploadDir);
+
+    // Load the metadata into the service so decryptFile can find it
+    encryptionService.setMetadata(fileId, {
+      fileId,
+      originalName: record.original_name,
+      mimeType: record.mime_type,
+      size: record.original_size,
+      iv: record.iv,
+      authTag: record.auth_tag,
+      encryptedAt: '',
+      checksum: record.checksum_sha256,
+      keyVersion: record.key_version,
+    });
+
+    const { buffer } = await encryptionService.decryptFile(fileId);
+
+    // Set response headers for the decrypted file
+    res.setHeader('Content-Type', record.mime_type);
+    res.setHeader('Content-Length', buffer.length);
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${encodeURIComponent(record.original_name)}"`
+    );
+
+    // Stream the decrypted content to the client
+    res.send(buffer);
+  } catch (err) {
+    logger.error('[SecureFile] Failed to decrypt file', { fileId, error: err });
+    res.status(500).json({ error: 'Failed to retrieve file' });
+  }
+}
+
+/**
+ * Database record shape for encrypted_files table lookups.
+ */
+interface EncryptedFileRecord {
+  id: string;
+  original_name: string;
+  mime_type: string;
+  original_size: number;
+  encrypted_path: string;
+  iv: string;
+  auth_tag: string;
+  checksum_sha256: string;
+  key_version: number;
 }

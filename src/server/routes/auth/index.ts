@@ -2,6 +2,7 @@ import express from 'express';
 import { createLoginRoutes } from './login';
 import { createSessionRoutes } from './session';
 import { createPasswordRoutes } from './password';
+import { createTwoFactorRoutes } from './twoFactor';
 
 export const createAuthRoutes = (
   db: any,
@@ -18,6 +19,7 @@ export const createAuthRoutes = (
   router.use(createLoginRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, logError));
   router.use(createSessionRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authenticate, logError));
   router.use(createPasswordRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, authenticate, authorize, createNotification, logError));
+  router.use(createTwoFactorRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authenticate, logError));
 
   return router;
 };

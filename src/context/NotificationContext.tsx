@@ -44,16 +44,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       const targetPage = reset ? 1 : page;
       const res = await api.get(`/notifications?page=${targetPage}&pageSize=20`);
-      const data = res.data as Notification[];
+      // API returns { data: Notification[], pagination: {...} }
+      const items: Notification[] = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
       
       if (reset) {
-        setNotifications(data);
+        setNotifications(items);
         setPage(2);
       } else {
-        setNotifications(prev => [...prev, ...data]);
+        setNotifications(prev => [...prev, ...items]);
         setPage(prev => prev + 1);
       }
-      setHasMore(data.length === 20);
+      setHasMore(items.length === 20);
     } catch (err: any) {
       if (err.response?.status !== 401 && err.response?.status !== 403) {
         logger.error('Failed to fetch notifications:', err);
@@ -78,18 +79,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [hasMore, isLoading, fetchNotifications]);
 
   // WebSocket connection for real-time notifications
-  const connectWebSocket = useCallback(() => {
+  const connectWebSocket = useCallback(async () => {
     if (!user) return;
     try {
-      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = new WebSocket(`${protocol}://${window.location.host}`);
+      // Fetch a short-lived WebSocket token from the server
+      const res = await api.get('/auth/ws-token');
+      const wsToken = res.data?.token;
+      if (!wsToken) return;
 
-      ws.onopen = () => {
-        const token = localStorage.getItem('token');
-        if (token) {
-          ws.send(JSON.stringify({ type: 'auth', token }));
-        }
-      };
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const ws = new WebSocket(`${protocol}://${window.location.host}?token=${wsToken}`);
 
       ws.onmessage = (event) => {
         try {
@@ -124,7 +123,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       ws.onerror = () => { ws.close(); };
       wsRef.current = ws;
-    } catch { /* WebSocket not available */ }
+    } catch { /* WebSocket not available or token fetch failed */ }
   }, [user]);
 
   const playNotificationSound = () => {

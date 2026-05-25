@@ -8,3 +8,9 @@ coverage/
 !.env.example
 data/
 backups/
+
+# SSL certificates (never commit private keys)
+deploy/ssl/*.crt
+deploy/ssl/*.key
+deploy/ssl/*.pem
+!deploy/ssl/.gitkeep

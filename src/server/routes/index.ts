@@ -35,6 +35,7 @@ import { NotificationService } from "../services/NotificationService";
 import { logDuplicateRoutes, registerRoutes } from "../utils/routeRegistry";
 import { createHealthRouter } from "./health";
 import { createBulkRoutes } from "./bulk";
+import { createAdminBackupRoutes } from "./adminBackup";
 import { createIdempotencyMiddleware } from "../middleware/idempotency";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -176,6 +177,9 @@ export const setupRoutes = (
 
   // Bulk Operations
   v1Router.use("/bulk", createBulkRoutes(authenticate));
+
+  // Admin Routes
+  v1Router.use("/admin", createAdminBackupRoutes(authenticate, authorize));
 
   // Mount the v1 router under /api/v1
   app.use("/api/v1", v1Router);

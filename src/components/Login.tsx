@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { loginUser } from '../services/authService';
+import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { ResetStatus, Language } from '../constants';
@@ -32,6 +33,10 @@ const Login: React.FC = () => {
   const [resetStatus, setResetStatus] = useState<ResetStatus>(ResetStatus.NONE);
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [pendingUser, setPendingUser] = useState<any>(null);
+  const [show2FA, setShow2FA] = useState(false);
+  const [twoFACode, setTwoFACode] = useState('');
+  const [twoFATempToken, setTwoFATempToken] = useState<string | null>(null);
+  const [twoFAError, setTwoFAError] = useState('');
 
   React.useEffect(() => {
     try {
@@ -59,6 +64,16 @@ const Login: React.FC = () => {
     try {
       const result = await loginUser(username, password, rememberMe);
       
+      // Handle 2FA required response
+      if (result && result.requires2FA) {
+        setTwoFATempToken(result.tempToken);
+        setShow2FA(true);
+        setTwoFAError('');
+        setTwoFACode('');
+        setLoading(false);
+        return;
+      }
+
       if (result && result.user) {
         // Check if user needs to change password before granting access
         if (result.user.requires_password_change) {
@@ -83,6 +98,29 @@ const Login: React.FC = () => {
       } else {
         setError(message || t('auth.loginFailed'));
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handle2FASubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!twoFATempToken || !twoFACode) return;
+    setTwoFAError('');
+    setLoading(true);
+
+    try {
+      const response = await api.post('/auth/2fa/validate', {
+        tempToken: twoFATempToken,
+        token: twoFACode,
+      });
+      const result = response.data;
+      if (result && result.user) {
+        login(result.user, result.token || 'authenticated');
+      }
+    } catch (err: any) {
+      const message = err.response?.data?.error || err.message || t('auth.loginFailed');
+      setTwoFAError(typeof message === 'object' ? message.message : message);
     } finally {
       setLoading(false);
     }
@@ -196,6 +234,64 @@ const Login: React.FC = () => {
       </div>
 
       <LoginIllustration />
+
+      {/* 2FA Verification Modal */}
+      {show2FA && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[var(--color-card)] rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl border border-[var(--color-border-soft)]"
+            dir={language === Language.AR ? 'rtl' : 'ltr'}
+          >
+            <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2">
+              {t('auth.twoFactorTitle', 'Two-Factor Authentication')}
+            </h3>
+            <p className="text-sm text-[var(--color-text-muted)] mb-6">
+              {t('auth.twoFactorDescription', 'Enter the 6-digit code from your authenticator app')}
+            </p>
+            
+            {twoFAError && (
+              <div className="p-3 mb-4 bg-[var(--color-danger-light)] border border-[var(--color-danger)]/20 rounded-xl text-[var(--color-danger)] text-sm" role="alert">
+                {twoFAError}
+              </div>
+            )}
+
+            <form onSubmit={handle2FASubmit}>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                className="w-full px-4 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-mono text-center text-2xl tracking-[0.5em] text-[var(--color-text-main)]"
+                placeholder="000000"
+                value={twoFACode}
+                onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={loading || twoFACode.length !== 6}
+                className="w-full py-3.5 mt-4 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 uppercase tracking-widest text-sm"
+              >
+                {loading ? '...' : t('auth.verify', 'Verify')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShow2FA(false);
+                  setTwoFACode('');
+                  setTwoFATempToken(null);
+                  setTwoFAError('');
+                }}
+                className="w-full py-3 mt-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] font-medium transition-colors text-sm"
+              >
+                {t('common.cancel', 'Cancel')}
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       <ContactAdminModal 
         isOpen={showContactModal}

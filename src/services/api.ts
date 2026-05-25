@@ -36,10 +36,22 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Unwrap the response envelope if present
+    // Server wraps all responses in { success, data, meta } format
+    if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data && 'meta' in response.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   async (error) => {
     const { config, response, message } = error;
     const originalRequest = config;
+
+    // Unwrap error envelope if present
+    if (response?.data && typeof response.data === 'object' && 'success' in response.data && response.data.success === false && 'error' in response.data && 'meta' in response.data) {
+      response.data = response.data.error;
+    }
     
     // Don't log 401 on GET /profile or GET /auth/me as it's expected during initial session check
     const isSessionCheck = (response?.status === 401 || response?.status === 403) && config?.method === 'get' && (config?.url?.includes('/profile') || config?.url?.includes('/auth/me'));

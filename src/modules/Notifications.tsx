@@ -47,7 +47,7 @@ const Notifications: React.FC = () => {
 
   const isUnread = (n: any) => !n.is_read && n.status !== 'Read';
 
-  const filteredNotifications = notifications.filter(n => {
+  const filteredNotifications = (Array.isArray(notifications) ? notifications : []).filter(n => {
     const matchesFilter = filter === 'all' ? true : 
                           filter === 'unread' ? isUnread(n) : 
                           !isUnread(n);
