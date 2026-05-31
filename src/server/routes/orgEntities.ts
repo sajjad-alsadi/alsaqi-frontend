@@ -4,7 +4,6 @@ import { OrgService } from '../services/OrgService';
 import { AuthService } from '../services/AuthService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { ADMIN_ROLES } from '../../constants';
 
 const orgEntitySchema = z.object({
   entity_code: z.string().min(1).max(50),
@@ -18,7 +17,7 @@ const orgEntitySchema = z.object({
 export const createOrgEntitiesRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
@@ -28,7 +27,7 @@ export const createOrgEntitiesRoutes = (
     res.json(entities);
   }));
 
-  router.post("/org-entities", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post("/org-entities", authenticate, checkPermission('OrgStructure', 'Create'), asyncHandler(async (req, res) => {
     const validation = orgEntitySchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid org entity data", validation.error.format());
@@ -40,7 +39,7 @@ export const createOrgEntitiesRoutes = (
     res.json({ id: lastInsertRowid });
   }));
 
-  router.put("/org-entities/:id", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put("/org-entities/:id", authenticate, checkPermission('OrgStructure', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const validation = orgEntitySchema.partial().safeParse(req.body);
     if (!validation.success) {
@@ -53,7 +52,7 @@ export const createOrgEntitiesRoutes = (
     res.json({ success: true });
   }));
 
-  router.delete("/org-entities/:id", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.delete("/org-entities/:id", authenticate, checkPermission('OrgStructure', 'Delete'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     await OrgService.deleteOrgEntity(id);
     

@@ -117,6 +117,10 @@ vi.mock('./Chatbot', () => ({
   default: () => <div data-testid="chatbot">Chatbot</div>,
 }));
 
+vi.mock('./StalePermissionsIndicator', () => ({
+  default: () => null,
+}));
+
 // Mock lucide-react icons
 vi.mock('lucide-react', () => {
   const iconComponent = ({ size, className }: any) => <svg data-testid="icon" className={className} />;

@@ -35,6 +35,10 @@ import { createHelmetMiddleware } from "./src/server/middleware/helmet";
 import { createCompressionMiddleware } from "./src/server/middleware/compression";
 import { runSecretsValidation } from "./src/server/utils/secretsValidator";
 
+// Permission Module Registry - importing triggers module registration
+import "./src/permissions/modules";
+import { seedModules } from "./src/permissions/seeder";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -116,6 +120,15 @@ async function runDbMigrations() {
       logger.info("Migration versioning system initialized. Running versioned migrations...");
       await migrationRunner.run(versionedMigrations);
       logger.info("Versioned migrations completed.");
+
+      // Seed permission modules into the database (Req 2.1, 2.7)
+      // Runs after DB is ready but before marking the app as ready for requests
+      try {
+        const seedResult = await seedModules();
+        logger.info(`[Permissions] Seeder complete: ${seedResult.added.length} added, ${seedResult.skipped.length} skipped`);
+      } catch (seedError: any) {
+        logger.warn(`[Permissions] Seeder failed: ${seedError.message}. Application will continue with potentially incomplete permissions.`);
+      }
 
       isDbReady = true;
       logger.info("[SUCCESS] Database initialized and seeded successfully.");

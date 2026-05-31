@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { rateLimit } from 'express-rate-limit';
 import { UserRole } from '../../constants';
+import { PermissionService } from '../services/PermissionService';
+import { ModuleRegistry } from '../../permissions/registry';
+import { PermissionAction } from '../../permissions/types';
 
 // Simple in-memory cache to reduce DB load
 // In a distributed environment, use Redis. Since this often runs locally/embedded, memory is fine.
@@ -120,33 +123,86 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
     }
   };
 
-  const checkPermission = (module: string, action: string) => {
-    return async (req: any, res: any, next: any) => {
-      const user = req.user;
-      if (user.role === UserRole.ADMIN) return next();
+  /**
+   * Unified checkPermission middleware factory.
+   * Replaces both the old checkPermission() and authorize() functions.
+   *
+   * Validates the module at startup (dev mode throws, production returns 500).
+   * At runtime:
+   * - Returns 401 if req.user is not populated
+   * - Admin role bypasses without DB query
+   * - Uses PermissionService.hasPermission() for the actual check
+   * - Returns structured 403 on denial
+   * - Returns 500 on PermissionService errors (no internal details exposed)
+   *
+   * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 13.1, 13.6
+   */
+  const checkPermission = (module: string, action: PermissionAction) => {
+    // Validate module registration at middleware creation time (startup)
+    const moduleDef = ModuleRegistry.getModule(module);
+    const isDev = process.env.NODE_ENV !== 'production';
 
-      const cacheKey = `perm_${user.id}_${module}_${action}`;
-      const hasPermission = await getCachedOrDb(cacheKey, async () => {
-        const queryResult = await db.prepare(`
-          SELECT 1 FROM permissions p
-          JOIN role_permissions rp ON p.id = rp.permission_id
-          JOIN users u ON rp.role_id = u.role_id
-          WHERE u.id = ? AND p.module = ? AND p.action = ?
-          UNION
-          SELECT 1 FROM permissions p
-          JOIN user_permissions up ON p.id = up.permission_id
-          WHERE up.user_id = ? AND p.module = ? AND p.action = ? AND up.is_allowed = 1
-        `).get(user.id, module, action, user.id, module, action);
-        return !!queryResult;
-      });
-
-      if (!hasPermission) {
-        return res.status(403).json({ error: `Forbidden: Missing permission ${action} on ${module}` });
+    if (!moduleDef) {
+      if (isDev) {
+        throw new Error(
+          `checkPermission: Module '${module}' is not registered in ModuleRegistry. ` +
+          `Register it in src/permissions/modules.ts before using it in route middleware.`
+        );
       }
-      next();
+      // In production, return a middleware that always responds with 500
+      return (req: any, res: any, _next: any) => {
+        console.error(`checkPermission: Unregistered module '${module}' used in route middleware.`);
+        return res.status(500).json({
+          error: 'Internal authorization configuration error',
+        });
+      };
+    }
+
+    return async (req: any, res: any, next: any) => {
+      // Req 3.6, 3.8: Ensure authenticate() has populated req.user
+      if (!req.user) {
+        return res.status(401).json({
+          error: 'Authentication required. Please authenticate before accessing this resource.',
+        });
+      }
+
+      const user = req.user;
+
+      // Req 3.2: Admin bypass - Admin always has full access without DB query
+      if (user.role === UserRole.ADMIN) {
+        return next();
+      }
+
+      try {
+        // Req 3.1, 3.3: Query PermissionService for DB-based permission check
+        const allowed = await PermissionService.hasPermission(user.id, module, action);
+
+        if (allowed) {
+          return next();
+        }
+
+        // Req 3.4, 13.1: Structured 403 response on denial
+        return res.status(403).json({
+          error: `Forbidden: Missing permission '${action}' on module '${module}'`,
+          code: 'PERMISSION_DENIED',
+          module,
+          action,
+        });
+      } catch (err) {
+        // Req 3.7: Handle PermissionService errors - return 500 without exposing internals
+        console.error(`checkPermission error for user ${user.id}, module ${module}, action ${action}:`, err);
+        return res.status(500).json({
+          error: 'Internal authorization error. Please try again later.',
+        });
+      }
     };
   };
 
+  /**
+   * @deprecated Use checkPermission(module, action) instead.
+   * This function is kept temporarily for backward compatibility during migration.
+   * It will be removed once all routes are migrated to checkPermission().
+   */
   const authorize = (allowedRoles: readonly string[]) => {
     return (req: any, res: any, next: any) => {
       if (!allowedRoles.includes(req.user.role)) {

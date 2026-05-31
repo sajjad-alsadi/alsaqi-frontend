@@ -11,13 +11,13 @@ import logger from '../utils/logger';
  */
 export const createAdminBackupRoutes = (
   authenticate: any,
-  authorize: any
+  checkPermission: any
 ) => {
   const router = express.Router();
 
-  // All routes require authentication + Admin role
+  // All routes require authentication + Settings Edit permission
   router.use(authenticate);
-  router.use(authorize([UserRole.ADMIN]));
+  router.use(checkPermission('Settings', 'Edit'));
 
   /**
    * POST /api/admin/backup

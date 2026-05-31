@@ -33,17 +33,17 @@ export const createUserRoutes = (
 ) => {
   const router = express.Router();
 
-  router.get(`/init`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
+  router.get(`/init`, authenticate, checkPermission('UserManagement', 'View'), asyncHandler(async (req, res) => {
     const data = await UserService.getInitData();
     res.json(data);
   }));
 
-  router.get(`/`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
+  router.get(`/`, authenticate, checkPermission('UserManagement', 'View'), asyncHandler(async (req, res) => {
     const result = await UserService.getUsers(req.query);
     res.json(result);
   }));
 
-  router.get(`/summary`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
+  router.get(`/summary`, authenticate, checkPermission('UserManagement', 'View'), asyncHandler(async (req, res) => {
     const summary = await UserService.getUserSummary();
     res.json(summary);
   }));
@@ -53,14 +53,14 @@ export const createUserRoutes = (
     res.json(data);
   }));
 
-  router.get(`/:id`, authenticate, checkPermission('User', 'View'), asyncHandler(async (req, res) => {
+  router.get(`/:id`, authenticate, checkPermission('UserManagement', 'View'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const user = await UserService.getUserById(id);
     if (!user) throw new NotFoundError("User not found");
     res.json(user);
   }));
 
-  router.post(`/`, authenticate, checkPermission('User', 'Create'), validateSchema(userSchema), asyncHandler(async (req, res) => {
+  router.post(`/`, authenticate, checkPermission('UserManagement', 'Create'), validateSchema(userSchema), asyncHandler(async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
       throw new ValidationError("Username and password are required for new users");
@@ -73,7 +73,7 @@ export const createUserRoutes = (
     res.json(user);
   }));
 
-  router.put(`/:id`, authenticate, checkPermission('User', 'Edit'), validateSchema(userSchema), asyncHandler(async (req, res) => {
+  router.put(`/:id`, authenticate, checkPermission('UserManagement', 'Edit'), validateSchema(userSchema), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     
     const { oldUser } = await UserService.updateUser(id, req.body);
@@ -118,7 +118,7 @@ export const createUserRoutes = (
     res.json({ success: true });
   }));
 
-  router.post(`/:id/suspend`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
+  router.post(`/:id/suspend`, authenticate, checkPermission('UserManagement', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     if ((req as any).user.id === req.params.id || (req as any).user.id === id) {
       return res.status(403).json({ error: "Cannot perform this action on your own account" });
@@ -142,7 +142,7 @@ export const createUserRoutes = (
     res.json({ success: true, status: newStatus });
   }));
 
-  router.post(`/:id/archive`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
+  router.post(`/:id/archive`, authenticate, checkPermission('UserManagement', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     if ((req as any).user.id === req.params.id || (req as any).user.id === id) {
       return res.status(403).json({ error: "Cannot perform this action on your own account" });
@@ -162,7 +162,7 @@ export const createUserRoutes = (
     res.json({ success: true });
   }));
 
-  router.post(`/:id/activate`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
+  router.post(`/:id/activate`, authenticate, checkPermission('UserManagement', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.activateUser(id);
     invalidateUserCache(id);
@@ -170,7 +170,7 @@ export const createUserRoutes = (
     res.json({ success: true });
   }));
 
-  router.delete(`/:id`, authenticate, checkPermission('User', 'Delete'), asyncHandler(async (req, res) => {
+  router.delete(`/:id`, authenticate, checkPermission('UserManagement', 'Delete'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     if ((req as any).user.id === req.params.id || (req as any).user.id === id) {
       return res.status(403).json({ error: "Cannot perform this action on your own account" });
@@ -190,7 +190,7 @@ export const createUserRoutes = (
     res.json({ success: true });
   }));
 
-  router.post(`/:id/unlock`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
+  router.post(`/:id/unlock`, authenticate, checkPermission('UserManagement', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const username = await UserService.unlockUser(id);
     invalidateUserCache(id);
@@ -202,7 +202,7 @@ export const createUserRoutes = (
     newPassword: z.string().min(6).max(100)
   });
 
-  router.post(`/:id/reset-password`, authenticate, checkPermission('User', 'Edit'), asyncHandler(async (req, res) => {
+  router.post(`/:id/reset-password`, authenticate, checkPermission('UserManagement', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const validation = resetPasswordSchema.safeParse(req.body);
     if (!validation.success) {

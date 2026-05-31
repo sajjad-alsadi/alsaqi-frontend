@@ -321,4 +321,33 @@ export const versionedMigrations: Migration[] = [
       await db.exec(`ALTER TABLE audit_trail_partitioned RENAME TO audit_trail`);
     },
   },
+
+  {
+    version: '007',
+    name: 'Create permission_audit_logs table for permission change auditing',
+    type: 'schema',
+    up: async () => {
+      // Create permission_audit_logs table (Requirement 12.1-12.6)
+      // Append-only audit log for all permission changes
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS permission_audit_logs (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          event_type TEXT NOT NULL CHECK (event_type IN ('role_permission_change', 'user_override_change', 'custom_role_created', 'custom_role_deleted')),
+          actor_user_id TEXT NOT NULL,
+          target_role_id TEXT,
+          target_user_id TEXT,
+          old_state TEXT,
+          new_state TEXT,
+          timestamp TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Indexes for efficient filtering (Req 12.4)
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_perm_audit_actor ON permission_audit_logs(actor_user_id)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_perm_audit_target_role ON permission_audit_logs(target_role_id)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_perm_audit_target_user ON permission_audit_logs(target_user_id)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_perm_audit_event_type ON permission_audit_logs(event_type)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_perm_audit_timestamp ON permission_audit_logs(timestamp)`);
+    },
+  },
 ];

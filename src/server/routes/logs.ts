@@ -1,4 +1,3 @@
-import { ADMIN_ROLES } from '../../constants';
 import express from 'express';
 import { LogService } from '../services/LogService';
 import { asyncHandler } from '../utils/asyncHandler';
@@ -6,17 +5,17 @@ import { asyncHandler } from '../utils/asyncHandler';
 export const createLogRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
 
-  router.get(`/login-history`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get(`/login-history`, authenticate, checkPermission('SystemLogs', 'View'), asyncHandler(async (req, res) => {
     const result = await LogService.getLoginHistory(req.query);
     res.json(result);
   }));
 
-  router.get(`/audit-trail`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get(`/audit-trail`, authenticate, checkPermission('SystemLogs', 'View'), asyncHandler(async (req, res) => {
     const result = await LogService.getAuditTrail(req.query);
     res.json(result);
   }));
@@ -74,17 +73,17 @@ export const createLogRoutes = (
     res.json({ success: true });
   }));
 
-  router.get("/system-errors", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get("/system-errors", authenticate, checkPermission('SystemLogs', 'View'), asyncHandler(async (req, res) => {
     const result = await LogService.getSystemErrors(req.query);
     res.json(result);
   }));
 
-  router.delete("/system-errors", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.delete("/system-errors", authenticate, checkPermission('SystemLogs', 'View'), asyncHandler(async (req, res) => {
     await LogService.clearSystemErrors();
     res.json({ success: true });
   }));
 
-  router.get("/system-errors/export", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get("/system-errors/export", authenticate, checkPermission('SystemLogs', 'View'), asyncHandler(async (req, res) => {
     const logs = await LogService.getSystemErrorsForExport();
     
     const escapeCsv = (val: any) => {
@@ -117,7 +116,7 @@ export const createLogRoutes = (
     res.send(csv.join('\n'));
   }));
 
-  router.get("/system-errors/analytics", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get("/system-errors/analytics", authenticate, checkPermission('SystemLogs', 'View'), asyncHandler(async (req, res) => {
     const analytics = await LogService.getSystemErrorAnalytics();
     res.json(analytics);
   }));

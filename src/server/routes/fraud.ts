@@ -5,7 +5,7 @@ import { FraudService } from "../services/FraudService";
 import { AuthService } from "../services/AuthService";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ValidationError } from "../utils/errors";
-import { ADMIN_ROLES, UserRole } from "../../constants";
+import { UserRole } from "../../constants";
 
 const fraudRequestSchema = z.object({
   reason: z.string().min(5).max(1000),
@@ -19,7 +19,7 @@ const fraudRejectSchema = z.object({
   reason: z.string().min(5).max(1000),
 });
 
-export const createFraudRoutes = (db: any, authenticate: any, authorize: any, logError: any, createNotification: any) => {
+export const createFraudRoutes = (db: any, authenticate: any, checkPermission: any, logError: any, createNotification: any) => {
   const router = Router();
 
   router.post("/", authenticate, asyncHandler(async (req, res) => {
@@ -61,7 +61,7 @@ export const createFraudRoutes = (db: any, authenticate: any, authorize: any, lo
     res.json(status);
   }));
 
-  router.put("/:id/approve", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put("/:id/approve", authenticate, checkPermission('IntegrityManagement', 'Approve'), asyncHandler(async (req, res) => {
     const typedReq = req as unknown as AuthenticatedRequest;
     const id = req.params.id as string;
     const validation = fraudApproveSchema.safeParse(typedReq.body);
@@ -81,7 +81,7 @@ export const createFraudRoutes = (db: any, authenticate: any, authorize: any, lo
     res.json({ success: true });
   }));
 
-  router.put("/:id/reject", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put("/:id/reject", authenticate, checkPermission('IntegrityManagement', 'Approve'), asyncHandler(async (req, res) => {
     const typedReq = req as unknown as AuthenticatedRequest;
     const id = req.params.id as string;
     const validation = fraudRejectSchema.safeParse(typedReq.body);

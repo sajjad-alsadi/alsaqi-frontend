@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { SettingsService } from '../services/SettingsService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { ADMIN_ROLES } from '../../constants';
 
 const pdfSettingsSchema = z.object({
   arabic_font_name: z.string().min(1),
@@ -44,7 +43,7 @@ const appSettingsSchema = z.object({
 export const createAppSettingsRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
@@ -54,7 +53,7 @@ export const createAppSettingsRoutes = (
     res.json(settings);
   }));
 
-  router.put('/pdf-settings', authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put('/pdf-settings', authenticate, checkPermission('Settings', 'Edit'), asyncHandler(async (req, res) => {
     const validation = pdfSettingsSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid PDF settings", validation.error.format());
@@ -68,7 +67,7 @@ export const createAppSettingsRoutes = (
     res.json(settings);
   }));
 
-  router.put('/app-settings', authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put('/app-settings', authenticate, checkPermission('Settings', 'Edit'), asyncHandler(async (req, res) => {
     const validation = appSettingsSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid App settings", validation.error.format());

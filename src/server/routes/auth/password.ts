@@ -1,4 +1,3 @@
-import { ADMIN_ROLES } from '../../../constants';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
@@ -30,7 +29,7 @@ export const createPasswordRoutes = (
   JWT_PRIVATE_KEY: string,
   authLimiter: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   createNotification: any,
   logError: any
 ) => {
@@ -63,13 +62,13 @@ export const createPasswordRoutes = (
   }));
 
   // Admin: Get Reset Requests
-  router.get("/reset-requests", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get("/reset-requests", authenticate, checkPermission('UserManagement', 'Edit'), asyncHandler(async (req, res) => {
     const data = await PasswordService.getResetRequests();
     res.json(data);
   }));
 
   // Admin: Approve Reset Request
-  router.post("/approve-reset", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post("/approve-reset", authenticate, checkPermission('UserManagement', 'Edit'), asyncHandler(async (req, res) => {
     const validation = approveResetSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid request ID", validation.error.format());

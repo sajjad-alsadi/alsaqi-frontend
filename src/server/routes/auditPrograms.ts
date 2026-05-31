@@ -1,4 +1,3 @@
-import { ADMIN_ROLES } from '../../constants';
 import { Router } from "express";
 import { z } from "zod";
 import { AuthenticatedRequest } from "../types";
@@ -8,7 +7,7 @@ import { AuthService } from "../services/AuthService";
 import { ValidationError } from "../utils/errors";
 import { methodNotAllowed } from "../utils/routeRegistry";
 
-export const createAuditProgramRoutes = (db: any, authenticate: any, authorize: any, logError: any) => {
+export const createAuditProgramRoutes = (db: any, authenticate: any, checkPermission: any, logError: any) => {
   const router = Router();
 
   router.post("/:id/duplicate", authenticate, asyncHandler(async (req, res) => {
@@ -26,7 +25,7 @@ export const createAuditProgramRoutes = (db: any, authenticate: any, authorize: 
     res.json({ id: newId });
   }));
 
-  router.post("/:id/approve", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post("/:id/approve", authenticate, checkPermission('AuditProgramLibrary', 'Approve'), asyncHandler(async (req, res) => {
     const typedReq = req as unknown as AuthenticatedRequest;
     const id = req.params.id as string;
     if (!id || id === 'undefined') {

@@ -42,7 +42,32 @@ vi.mock('fs', async () => {
   };
 });
 
+// Mock the PermissionService
+vi.mock('../services/PermissionService', () => ({
+  PermissionService: {
+    hasPermission: vi.fn().mockResolvedValue(true),
+  },
+}));
+
+// Mock the ModuleRegistry
+vi.mock('../../permissions/registry', () => ({
+  ModuleRegistry: {
+    getModule: vi.fn((name: string) => {
+      // Return a module definition with fileScope: true for known modules
+      if (name === 'AuditPlans' || name === 'Fraud' || name === 'audit') {
+        return { name, actions: ['View', 'Create', 'Edit', 'Delete'], fileScope: true };
+      }
+      if (name === 'Dashboard') {
+        return { name, actions: ['View'], fileScope: false };
+      }
+      return undefined;
+    }),
+  },
+}));
+
 import db from '../db/index';
+import { PermissionService } from '../services/PermissionService';
+import { ModuleRegistry } from '../../permissions/registry';
 
 describe('secureFile middleware', () => {
   const uploadDir = '/test/uploads';
@@ -154,14 +179,22 @@ describe('secureFile middleware', () => {
       const user = { id: 'user-1', role: 'Viewer', username: 'viewer1', name: 'Viewer', email: 'v@test.com' };
       const authenticate = createMockAuthenticate(true, user);
 
-      // Mock permission check to return null (no permission)
+      // Mock: file record has module 'AuditPlans', but user lacks permission
       (db.prepare as any).mockImplementation((sql: string) => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
         }
-        // Permission check returns null (no permission)
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue({ module: 'AuditPlans' }) };
+        }
+        if (sql.includes('encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
+        }
         return { get: vi.fn().mockResolvedValue(null) };
       });
+
+      // PermissionService denies access
+      (PermissionService.hasPermission as any).mockResolvedValue(false);
 
       const middleware = createSecureFileMiddleware(authenticate, uploadDir);
 
@@ -180,7 +213,132 @@ describe('secureFile middleware', () => {
       await new Promise((resolve) => setTimeout(resolve, 20));
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res._json).toEqual({ error: 'Forbidden' });
+      expect(res._json).toEqual({
+        error: "Forbidden: Missing permission 'View' on module 'AuditPlans'",
+        code: 'PERMISSION_DENIED',
+        module: 'AuditPlans',
+        action: 'View',
+      });
+    });
+
+    it('should return 403 when file has no module field', async () => {
+      const user = { id: 'user-1', role: 'Viewer', username: 'viewer1', name: 'Viewer', email: 'v@test.com' };
+      const authenticate = createMockAuthenticate(true, user);
+
+      // Mock: file record has no module (null)
+      (db.prepare as any).mockImplementation((sql: string) => {
+        if (sql.includes('INSERT INTO file_access_logs')) {
+          return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
+        }
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue(null) };
+        }
+        return { get: vi.fn().mockResolvedValue(null) };
+      });
+
+      const middleware = createSecureFileMiddleware(authenticate, uploadDir);
+
+      const req = createMockRequest({
+        method: 'GET',
+        path: '/orphan-file.pdf',
+        url: '/orphan-file.pdf',
+        ip: '192.168.1.5',
+      });
+
+      const res = createMockResponse();
+      (res as any).sendFile = vi.fn();
+
+      middleware(req, res as any, vi.fn());
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res._json).toEqual({
+        error: 'Forbidden: File has no valid owning module',
+        code: 'PERMISSION_DENIED',
+        module: null,
+        action: 'View',
+      });
+    });
+
+    it('should return 403 when file module is not registered', async () => {
+      const user = { id: 'user-1', role: 'Viewer', username: 'viewer1', name: 'Viewer', email: 'v@test.com' };
+      const authenticate = createMockAuthenticate(true, user);
+
+      // Mock: file record has unregistered module
+      (db.prepare as any).mockImplementation((sql: string) => {
+        if (sql.includes('INSERT INTO file_access_logs')) {
+          return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
+        }
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue({ module: 'UnknownModule' }) };
+        }
+        return { get: vi.fn().mockResolvedValue(null) };
+      });
+
+      const middleware = createSecureFileMiddleware(authenticate, uploadDir);
+
+      const req = createMockRequest({
+        method: 'GET',
+        path: '/unknown-file.pdf',
+        url: '/unknown-file.pdf',
+        ip: '192.168.1.5',
+      });
+
+      const res = createMockResponse();
+      (res as any).sendFile = vi.fn();
+
+      middleware(req, res as any, vi.fn());
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res._json).toEqual({
+        error: "Forbidden: Missing permission 'View' on module 'UnknownModule'",
+        code: 'PERMISSION_DENIED',
+        module: 'UnknownModule',
+        action: 'View',
+      });
+    });
+
+    it('should return 403 when file module has fileScope: false', async () => {
+      const user = { id: 'user-1', role: 'Viewer', username: 'viewer1', name: 'Viewer', email: 'v@test.com' };
+      const authenticate = createMockAuthenticate(true, user);
+
+      // Mock: file record has module 'Dashboard' which has fileScope: false
+      (db.prepare as any).mockImplementation((sql: string) => {
+        if (sql.includes('INSERT INTO file_access_logs')) {
+          return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
+        }
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue({ module: 'Dashboard' }) };
+        }
+        return { get: vi.fn().mockResolvedValue(null) };
+      });
+
+      const middleware = createSecureFileMiddleware(authenticate, uploadDir);
+
+      const req = createMockRequest({
+        method: 'GET',
+        path: '/dashboard-file.pdf',
+        url: '/dashboard-file.pdf',
+        ip: '192.168.1.5',
+      });
+
+      const res = createMockResponse();
+      (res as any).sendFile = vi.fn();
+
+      middleware(req, res as any, vi.fn());
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res._json).toEqual({
+        error: "Forbidden: Missing permission 'View' on module 'Dashboard'",
+        code: 'PERMISSION_DENIED',
+        module: 'Dashboard',
+        action: 'View',
+      });
     });
 
     it('should allow Admin users without checking permissions', async () => {
@@ -227,12 +385,17 @@ describe('secureFile middleware', () => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: vi.fn().mockResolvedValue({ changes: 1 }) };
         }
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue({ module: 'AuditPlans' }) };
+        }
         if (sql.includes('encrypted_files')) {
           return { get: vi.fn().mockResolvedValue(null) };
         }
-        // Permission check returns a result (has permission)
         return { get: vi.fn().mockResolvedValue({ '1': 1 }) };
       });
+
+      // PermissionService grants access
+      (PermissionService.hasPermission as any).mockResolvedValue(true);
 
       const middleware = createSecureFileMiddleware(authenticate, uploadDir);
 
@@ -264,6 +427,9 @@ describe('secureFile middleware', () => {
       (db.prepare as any).mockImplementation((sql: string) => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: runMock };
+        }
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue({ module: 'AuditPlans' }) };
         }
         if (sql.includes('encrypted_files')) {
           return { get: vi.fn().mockResolvedValue(null) };
@@ -305,8 +471,14 @@ describe('secureFile middleware', () => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: runMock };
         }
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: vi.fn().mockResolvedValue({ module: 'AuditPlans' }) };
+        }
         return { get: vi.fn().mockResolvedValue(null) };
       });
+
+      // PermissionService denies access
+      (PermissionService.hasPermission as any).mockResolvedValue(false);
 
       const middleware = createSecureFileMiddleware(authenticate, uploadDir);
 

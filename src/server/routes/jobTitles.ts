@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { JobTitleService } from '../services/JobTitleService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { ADMIN_ROLES } from '../../constants';
 
 const jobTitleSchema = z.object({
   title_ar: z.string().min(1).max(255),
@@ -14,7 +13,7 @@ const jobTitleSchema = z.object({
 export const createJobTitleRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
@@ -24,7 +23,7 @@ export const createJobTitleRoutes = (
     res.json(data);
   }));
 
-  router.post(`/`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post(`/`, authenticate, checkPermission('OrgStructure', 'Create'), asyncHandler(async (req, res) => {
     const validation = jobTitleSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid job title data", validation.error.format());
@@ -33,7 +32,7 @@ export const createJobTitleRoutes = (
     res.json(result);
   }));
 
-  router.put(`/:id`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put(`/:id`, authenticate, checkPermission('OrgStructure', 'Edit'), asyncHandler(async (req, res) => {
     const validation = jobTitleSchema.partial().safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid job title data", validation.error.format());
@@ -42,7 +41,7 @@ export const createJobTitleRoutes = (
     res.json({ success: true });
   }));
 
-  router.delete(`/:id`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.delete(`/:id`, authenticate, checkPermission('OrgStructure', 'Delete'), asyncHandler(async (req, res) => {
     await JobTitleService.delete(req.params.id as string, (req as any).user.username);
     res.json({ success: true });
   }));

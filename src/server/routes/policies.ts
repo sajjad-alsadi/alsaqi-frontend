@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { PolicyService } from '../services/PolicyService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { COMPLIANCE_ROLES } from '../../constants';
 
 const policySchema = z.object({
   title: z.string().min(1).max(255),
@@ -17,7 +16,7 @@ const policySchema = z.object({
 export const createPoliciesRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
@@ -37,7 +36,7 @@ export const createPoliciesRoutes = (
     res.json(record);
   }));
 
-  router.post('/policies', authenticate, authorize(COMPLIANCE_ROLES), asyncHandler(async (req, res) => {
+  router.post('/policies', authenticate, checkPermission('Policies', 'Create'), asyncHandler(async (req, res) => {
     const validation = policySchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid policy data", validation.error.format());
@@ -46,7 +45,7 @@ export const createPoliciesRoutes = (
     res.status(201).json(result);
   }));
 
-  router.put('/policies/:id', authenticate, authorize(COMPLIANCE_ROLES), asyncHandler(async (req, res) => {
+  router.put('/policies/:id', authenticate, checkPermission('Policies', 'Edit'), asyncHandler(async (req, res) => {
     const validation = policySchema.partial().safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid policy data", validation.error.format());
@@ -55,7 +54,7 @@ export const createPoliciesRoutes = (
     res.json({ success: true });
   }));
 
-  router.delete('/policies/:id', authenticate, authorize(COMPLIANCE_ROLES), asyncHandler(async (req, res) => {
+  router.delete('/policies/:id', authenticate, checkPermission('Policies', 'Delete'), asyncHandler(async (req, res) => {
     await PolicyService.delete(req.params.id as string, (req as any).user.username);
     res.json({ success: true });
   }));

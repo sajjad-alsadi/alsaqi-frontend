@@ -256,17 +256,17 @@ export const createCrudRoutes = (
 
   generateRoutes("audit_plans", "audit-plans", "AuditPlans");
   generateRoutes("audit_tasks", "audit-tasks", "AuditTasks");
-  generateRoutes("audit_programs", "audit-programs", "AuditPrograms");
-  generateRoutes("audit_procedures", "audit-procedures", "AuditPrograms");
-  generateRoutes("audit_evidence", "audit-evidence", "AuditTasks");
+  generateRoutes("audit_programs", "audit-programs", "AuditProgramLibrary");
+  generateRoutes("audit_procedures", "audit-procedures", "AuditProgramLibrary");
+  generateRoutes("audit_evidence", "audit-evidence", "AuditEvidence");
   generateRoutes("risk_register", "risk-register", "RiskRegister");
-  generateRoutes("fraud_log", "fraud-log", "FraudLog");
-  generateRoutes("central_bank_instructions", "central-bank-instructions", "InternalPolicies");
-  generateRoutes("law_bank", "law-bank", "InternalPolicies");
-  generateRoutes("audit_reports", "audit-reports", "AuditReports");
+  generateRoutes("fraud_log", "fraud-log", "IntegrityManagement");
+  generateRoutes("central_bank_instructions", "central-bank-instructions", "Policies");
+  generateRoutes("law_bank", "law-bank", "Policies");
+  generateRoutes("audit_reports", "audit-reports", "Reports");
   generateRoutes("audit_findings", "audit-findings", "AuditFindings");
   generateRoutes("recommendations", "recommendations", "Recommendations");
-  generateRoutes("compliance_items", "compliance-items", "Compliance");
+  generateRoutes("compliance_items", "compliance-items", "ComplianceMatrix");
 
   return router;
 };

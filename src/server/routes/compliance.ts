@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { ComplianceService } from '../services/ComplianceService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { COMPLIANCE_ROLES, ADMIN_ROLES } from '../../constants';
 
 const itemSchema = z.object({
   ref_number:            z.string().min(1),
@@ -26,7 +25,7 @@ const itemSchema = z.object({
 });
 
 export const createComplianceRoutes = (
-  db: any, authenticate: any, authorize: any, logError: any, saveFile: any
+  db: any, authenticate: any, checkPermission: any, logError: any, saveFile: any
 ) => {
   const router = Router();
 
@@ -50,7 +49,7 @@ export const createComplianceRoutes = (
   }));
 
   // POST /compliance
-  router.post('/', authenticate, authorize([...COMPLIANCE_ROLES, ...ADMIN_ROLES]),
+  router.post('/', authenticate, checkPermission('ComplianceMatrix', 'Create'),
     asyncHandler(async (req: any, res: any) => {
       const body = { ...req.body };
       
@@ -68,7 +67,7 @@ export const createComplianceRoutes = (
   );
 
   // PUT /compliance/:id
-  router.put('/:id', authenticate, authorize([...COMPLIANCE_ROLES, ...ADMIN_ROLES]),
+  router.put('/:id', authenticate, checkPermission('ComplianceMatrix', 'Edit'),
     asyncHandler(async (req: any, res: any) => {
       const body = { ...req.body };
 
@@ -86,7 +85,7 @@ export const createComplianceRoutes = (
   );
 
   // PATCH /compliance/:id/status
-  router.patch('/:id/status', authenticate, authorize([...COMPLIANCE_ROLES, ...ADMIN_ROLES]),
+  router.patch('/:id/status', authenticate, checkPermission('ComplianceMatrix', 'Edit'),
     asyncHandler(async (req: any, res: any) => {
       const { compliance_status } = req.body;
       const allowed = ['compliant', 'partial', 'non_compliant', 'under_review'];
@@ -99,7 +98,7 @@ export const createComplianceRoutes = (
   );
 
   // DELETE /compliance/:id
-  router.delete('/:id', authenticate, authorize(ADMIN_ROLES),
+  router.delete('/:id', authenticate, checkPermission('ComplianceMatrix', 'Delete'),
     asyncHandler(async (req: any, res: any) => {
       await ComplianceService.softDelete(req.params.id);
       res.json({ success: true });

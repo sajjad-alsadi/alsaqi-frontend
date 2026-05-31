@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { SettingsService } from '../services/SettingsService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { ADMIN_ROLES } from '../../constants';
 
 const userManagementSettingsSchema = z.object({
   failed_login_threshold: z.coerce.number().int().min(1).max(20).optional(),
@@ -22,7 +21,7 @@ const userManagementSettingsSchema = z.object({
 export const createSettingsRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
@@ -33,12 +32,12 @@ export const createSettingsRoutes = (
     res.json({ session_timeout_minutes: settings.session_timeout_minutes || 30 });
   }));
 
-  router.get(`/user-management-settings`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.get(`/user-management-settings`, authenticate, checkPermission('Settings', 'View'), asyncHandler(async (req, res) => {
     const settings = await SettingsService.getUserManagementSettings();
     res.json(settings);
   }));
 
-  router.put(`/user-management-settings`, authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put(`/user-management-settings`, authenticate, checkPermission('Settings', 'Edit'), asyncHandler(async (req, res) => {
     const validation = userManagementSettingsSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid user management settings", validation.error.format());

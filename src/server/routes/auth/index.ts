@@ -10,7 +10,7 @@ export const createAuthRoutes = (
   JWT_PRIVATE_KEY: string,
   authLimiter: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   createNotification: any,
   logError: any
 ) => {
@@ -18,7 +18,7 @@ export const createAuthRoutes = (
 
   router.use(createLoginRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, logError));
   router.use(createSessionRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authenticate, logError));
-  router.use(createPasswordRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, authenticate, authorize, createNotification, logError));
+  router.use(createPasswordRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, authenticate, checkPermission, createNotification, logError));
   router.use(createTwoFactorRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authenticate, logError));
 
   return router;

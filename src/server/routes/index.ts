@@ -36,6 +36,7 @@ import { logDuplicateRoutes, registerRoutes } from "../utils/routeRegistry";
 import { createHealthRouter } from "./health";
 import { createBulkRoutes } from "./bulk";
 import { createAdminBackupRoutes } from "./adminBackup";
+import { createPermissionAdminRoutes } from "./permissionAdmin";
 import { createIdempotencyMiddleware } from "../middleware/idempotency";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -137,7 +138,7 @@ export const setupRoutes = (
   });
 
   // Auth Routes
-  v1Router.use("/auth", createAuthRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, authenticate, authorize, createNotification, logError));
+  v1Router.use("/auth", createAuthRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, authenticate, checkPermission, createNotification, logError));
   
   // Generic CRUD API Generator with Auth & Logging
   v1Router.use("/", createCrudRoutes(db, authenticate, checkPermission, logError, createNotification, saveFile));
@@ -149,37 +150,40 @@ export const setupRoutes = (
   v1Router.use("/comments", createCommentRoutes(db, authenticate, logError));
 
   // Modular Routes
-  v1Router.use("/job-titles", createJobTitleRoutes(db, authenticate, authorize, logError));
+  v1Router.use("/job-titles", createJobTitleRoutes(db, authenticate, checkPermission, logError));
   v1Router.use("/users", createUserRoutes(db, authenticate, authorize, checkPermission, logError));
   v1Router.use("/", createRoleRoutes(db, authenticate, authorize, checkPermission, logError));
-  v1Router.use("/user-sessions", createSessionRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/", createLogRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/", createSettingsRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/", createPdfTemplatesRoutes(db, authenticate, authorize, logError));
+  v1Router.use("/user-sessions", createSessionRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/", createLogRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/", createSettingsRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/", createPdfTemplatesRoutes(db, authenticate, checkPermission, logError));
   v1Router.use("/", createProfileRoutes(db, authenticate, authorize, logError));
   v1Router.use("/", createDashboardRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/correspondence", createCorrespondenceRoutes(db, authenticate, authorize, logError, saveFile));
-  v1Router.use("/", createOrgEntitiesRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/", createCoiRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/", createPoliciesRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/", createAppSettingsRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/", createExecutiveReportsRoutes(db, authenticate, authorize, logError));
-  v1Router.use("/departments", createDepartmentRoutes(db, authenticate, authorize, logError));
+  v1Router.use("/correspondence", createCorrespondenceRoutes(db, authenticate, checkPermission, logError, saveFile));
+  v1Router.use("/", createOrgEntitiesRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/", createCoiRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/", createPoliciesRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/", createAppSettingsRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/", createExecutiveReportsRoutes(db, authenticate, checkPermission, logError));
+  v1Router.use("/departments", createDepartmentRoutes(db, authenticate, checkPermission, logError));
   
   // Newly Extracted Routes
-  v1Router.use("/analytics", createAnalyticsRoutes(db, authenticate, authorize, logError));
+  v1Router.use("/analytics", createAnalyticsRoutes(db, authenticate, checkPermission, logError));
   v1Router.use("/", createIntegrityRoutes(authenticate));
-  v1Router.use("/audit-programs", createAuditProgramRoutes(db, authenticate, authorize, logError));
+  v1Router.use("/audit-programs", createAuditProgramRoutes(db, authenticate, checkPermission, logError));
   v1Router.use("/audit-tasks", createAuditTaskRoutes(db, authenticate, logError));
   v1Router.use("/recommendations", createRecommendationRoutes(db, authenticate, logError));
-  v1Router.use("/fraud-access-requests", createFraudRoutes(db, authenticate, authorize, logError, createNotification));
-  v1Router.use("/compliance", createComplianceRoutes(db, authenticate, authorize, logError, saveFile));
+  v1Router.use("/fraud-access-requests", createFraudRoutes(db, authenticate, checkPermission, logError, createNotification));
+  v1Router.use("/compliance", createComplianceRoutes(db, authenticate, checkPermission, logError, saveFile));
 
   // Bulk Operations
   v1Router.use("/bulk", createBulkRoutes(authenticate));
 
   // Admin Routes
-  v1Router.use("/admin", createAdminBackupRoutes(authenticate, authorize));
+  v1Router.use("/admin", createAdminBackupRoutes(authenticate, checkPermission));
+
+  // Permission Admin Routes (role management, permission matrix, user overrides, audit logs)
+  v1Router.use("/", createPermissionAdminRoutes(db, authenticate, checkPermission, logError));
 
   // Mount the v1 router under /api/v1
   app.use("/api/v1", v1Router);

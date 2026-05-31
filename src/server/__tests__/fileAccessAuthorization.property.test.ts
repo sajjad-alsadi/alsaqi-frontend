@@ -30,6 +30,13 @@ vi.mock('../db/index', () => {
         if (sql.includes('INSERT INTO file_access_logs')) {
           return { run: runMock };
         }
+        if (sql.includes('SELECT module FROM encrypted_files')) {
+          return { get: getMock };
+        }
+        // For the lookupEncryptedFile query (serving), return null (not encrypted)
+        if (sql.includes('SELECT id, original_name')) {
+          return { get: vi.fn().mockResolvedValue(null) };
+        }
         return { get: getMock };
       }),
       _runMock: runMock,
@@ -62,6 +69,24 @@ vi.mock('fs', async () => {
     statSync: vi.fn().mockReturnValue({ isFile: () => true }),
   };
 });
+
+// Mock the PermissionService
+const mockHasPermission = vi.fn().mockResolvedValue(true);
+vi.mock('../services/PermissionService', () => ({
+  PermissionService: {
+    hasPermission: (...args: any[]) => mockHasPermission(...args),
+  },
+}));
+
+// Mock the ModuleRegistry
+vi.mock('../../permissions/registry', () => ({
+  ModuleRegistry: {
+    getModule: vi.fn((name: string) => {
+      // Return a module definition with fileScope: true for known modules
+      return { name, actions: ['View', 'Create', 'Edit', 'Delete'], fileScope: true };
+    }),
+  },
+}));
 
 import db from '../db/index';
 
@@ -131,16 +156,20 @@ function createSucceedingAuthenticate(user: any) {
 
 /**
  * Sets up db mock for permission denied scenario.
+ * The file has a valid module, but PermissionService denies access.
  */
 function setupPermissionDenied() {
-  (db as any)._getMock.mockResolvedValue(null);
+  (db as any)._getMock.mockResolvedValue({ module: 'AuditPlans' });
+  mockHasPermission.mockResolvedValue(false);
 }
 
 /**
  * Sets up db mock for permission granted scenario.
+ * The file has a valid module, and PermissionService grants access.
  */
 function setupPermissionGranted() {
-  (db as any)._getMock.mockResolvedValue({ '1': 1 });
+  (db as any)._getMock.mockResolvedValue({ module: 'AuditPlans' });
+  mockHasPermission.mockResolvedValue(true);
 }
 
 /**
@@ -270,7 +299,8 @@ describe('Property 8: File Access Authorization Enforcement', () => {
 
           // Must return 403
           expect(res._statusCalled).toBe(403);
-          expect(res._jsonCalled).toEqual({ error: 'Forbidden' });
+          expect(res._jsonCalled).toHaveProperty('code', 'PERMISSION_DENIED');
+          expect(res._jsonCalled).toHaveProperty('action', 'View');
           // File must NOT be served
           expect(res._sendFileCalled).toBe(false);
         }),

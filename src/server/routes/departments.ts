@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { DepartmentService } from '../services/DepartmentService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { ADMIN_ROLES } from '../../constants';
 
 const departmentSchema = z.object({
   // Legacy field — maps to name_ar for backward compatibility
@@ -25,7 +24,7 @@ const departmentSchema = z.object({
 });
 
 export const createDepartmentRoutes = (
-  db: any, authenticate: any, authorize: any, logError: any
+  db: any, authenticate: any, checkPermission: any, logError: any
 ) => {
   const router = express.Router();
 
@@ -39,7 +38,7 @@ export const createDepartmentRoutes = (
     res.json(await DepartmentService.getTree());
   }));
 
-  router.post('/', authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.post('/', authenticate, checkPermission('Departments', 'Create'), asyncHandler(async (req, res) => {
     const parsed = departmentSchema.safeParse(req.body);
     if (!parsed.success) throw new ValidationError('Invalid data', parsed.error.format());
     const d = parsed.data;
@@ -58,7 +57,7 @@ export const createDepartmentRoutes = (
     res.json(result);
   }));
 
-  router.put('/:id', authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put('/:id', authenticate, checkPermission('Departments', 'Edit'), asyncHandler(async (req, res) => {
     const parsed = departmentSchema.partial().safeParse(req.body);
     if (!parsed.success) throw new ValidationError('Invalid data', parsed.error.format());
     const d = parsed.data;
@@ -76,7 +75,7 @@ export const createDepartmentRoutes = (
     res.json(result);
   }));
 
-  router.delete('/:id', authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.delete('/:id', authenticate, checkPermission('Departments', 'Delete'), asyncHandler(async (req, res) => {
     await DepartmentService.delete(String(req.params.id), (req as any).user.username);
     res.json({ success: true });
   }));

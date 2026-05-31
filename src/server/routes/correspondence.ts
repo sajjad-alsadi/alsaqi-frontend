@@ -5,7 +5,6 @@ import { CorrespondenceService } from '../services/CorrespondenceService';
 import { AuthService } from '../services/AuthService';
 import { ValidationError } from '../utils/errors';
 import { parsePaginationParams } from '../utils/paginationService';
-import { ADMIN_ROLES, STAFF_ROLES } from '../../constants';
 
 const incomingSchema = z.object({
   letter_number: z.string().min(1).max(100),
@@ -57,7 +56,7 @@ const statusUpdateSchema = z.object({
 export const createCorrespondenceRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any,
   saveFile: any
 ) => {
@@ -81,7 +80,7 @@ export const createCorrespondenceRoutes = (
     res.json(result);
   }));
 
-  router.put("/incoming/:id", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put("/incoming/:id", authenticate, checkPermission('Correspondence', 'Edit'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const validation = incomingSchema.partial().safeParse(req.body);
     if (!validation.success) {
@@ -93,7 +92,7 @@ export const createCorrespondenceRoutes = (
     res.json({ success: true });
   }));
 
-  router.delete("/incoming/:id", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.delete("/incoming/:id", authenticate, checkPermission('Correspondence', 'Delete'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     await CorrespondenceService.deleteIncoming(id);
     
@@ -197,7 +196,7 @@ export const createCorrespondenceRoutes = (
     res.json(result);
   }));
 
-  router.post("/outgoing", authenticate, authorize(STAFF_ROLES), asyncHandler(async (req, res) => {
+  router.post("/outgoing", authenticate, checkPermission('Correspondence', 'Create'), asyncHandler(async (req, res) => {
     const typedReq = req as unknown as any;
     const body = { ...typedReq.body };
     const userId = typedReq.user.id;
@@ -223,7 +222,7 @@ export const createCorrespondenceRoutes = (
     res.json(result);
   }));
 
-  router.put("/outgoing/:id", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.put("/outgoing/:id", authenticate, checkPermission('Correspondence', 'Edit'), asyncHandler(async (req, res) => {
     const typedReq = req as unknown as any;
     const id = typedReq.params.id as string;
     const body = { ...typedReq.body };
@@ -248,7 +247,7 @@ export const createCorrespondenceRoutes = (
     res.json({ success: true });
   }));
 
-  router.delete("/outgoing/:id", authenticate, authorize(ADMIN_ROLES), asyncHandler(async (req, res) => {
+  router.delete("/outgoing/:id", authenticate, checkPermission('Correspondence', 'Delete'), asyncHandler(async (req, res) => {
     const typedReq = req as unknown as any;
     const id = typedReq.params.id as string;
     const username = typedReq.user.username;

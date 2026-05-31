@@ -820,37 +820,133 @@ router.get('/files/:id', authenticate, async (req, res, next) => {
 
 ## Correctness Properties
 
-### Property 1: Registry Completeness
-∀ route R in the application, ∃ module M in ModuleRegistry such that R is protected by `checkPermission(M.name, action)`.
+*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-### Property 2: Single Authorization Path
-∀ protected route R, R uses exactly one authorization mechanism: `checkPermission()`. No route uses `authorize()` after migration.
+### Property 1: Registration Validation
+
+*For any* module definition, registration SHALL succeed if and only if the module name is unique PascalCase (1-50 chars), the actions array is non-empty and contains only valid PermissionAction values (View, Create, Edit, Delete, Approve), and default permission role references are valid system roles.
+
+**Validates: Requirements 1.2, 1.3, 1.4, 1.5, 1.7**
+
+### Property 2: Registry Retrieval Consistency
+
+*For any* set of registered modules, retrieving all modules SHALL return exactly the set of registered definitions, retrieving by name SHALL return the matching definition or undefined, and getModuleNames() SHALL return exactly the set of registered names.
+
+**Validates: Requirements 1.6**
 
 ### Property 3: Seeding Idempotency
-Running `seedModules()` N times produces the same DB state as running it once. `∀ n ≥ 1: state(seed^n) = state(seed^1)`.
 
-### Property 4: Permission Consistency
-For any user U with role R, `hasPermission(U, M, A) = true` iff:
-- `(R, M, A) ∈ role_permissions` AND no user override denies it, OR
-- `(U, M, A, is_allowed=1) ∈ user_permissions` (explicit grant)
+*For any* set of module definitions and any initial database state, running seedModules() N times (N ≥ 1) SHALL produce the same database state as running it once, and the sum of added + skipped in the result SHALL equal the total number of module-action pairs.
+
+**Validates: Requirements 2.4, 2.5, 2.6**
+
+### Property 4: Seeding Completeness
+
+*For any* module definition in the registry, after seeding completes, the permissions table SHALL contain a record for every (module, action) pair, and the role_permissions table SHALL contain entries matching the module's defaults configuration for each new permission.
+
+**Validates: Requirements 2.2, 2.3**
 
 ### Property 5: Admin Supremacy
-∀ module M, ∀ action A: `hasPermission(admin_user, M, A) = true` regardless of DB state.
 
-### Property 6: Frontend-Backend Consistency
-After successful API fetch, `usePermissions().hasPermission(M, A)` returns the same value as the backend `checkPermission(M, A)` would for the same user.
+*For any* module M and any action A, when the user has the Admin role, both the backend CheckPermission_Middleware and the frontend UsePermissions_Hook SHALL return true/allow without querying the database.
 
-### Property 7: Cache Coherence
-After `invalidateCache(userId)`, the next `hasPermission(userId, *, *)` call queries the DB (not cache).
+**Validates: Requirements 3.2, 4.5, 6.8**
 
-### Property 8: Module Name Uniqueness
-∀ M1, M2 in ModuleRegistry: M1.name ≠ M2.name (enforced at registration).
+### Property 6: Permission Resolution with Override Precedence
 
-### Property 9: Custom Role Safety
-Deleting a custom role is only possible when `count(users WHERE role_id = role.id) = 0`.
+*For any* user U, module M, and action A: if a user-level override exists with is_allowed=true, hasPermission SHALL return true regardless of role permissions; if a user-level override exists with is_allowed=false, hasPermission SHALL return false regardless of role permissions; if no override exists, hasPermission SHALL return the role-level permission value.
 
-### Property 10: Fallback Correctness
-When API is unavailable, frontend permissions match `DEFAULT_PERMISSIONS[user.role]` from the static matrix.
+**Validates: Requirements 4.2, 4.3, 4.4**
+
+### Property 7: Permission Enforcement Correctness
+
+*For any* non-Admin user and any module/action combination, the CheckPermission_Middleware SHALL allow the request if and only if the Permission_Service returns true for that user/module/action, and SHALL return HTTP 403 with structured error (code, module, action) otherwise.
+
+**Validates: Requirements 3.3, 3.4, 13.1**
+
+### Property 8: Cache Coherence
+
+*For any* user with cached permission entries, calling invalidateCache(userId) SHALL remove all cache entries for that user, and calling invalidateCache() without arguments SHALL remove all entries with the `perm_` prefix. After invalidation, the next permission check SHALL query the database.
+
+**Validates: Requirements 5.3, 5.4**
+
+### Property 9: Cache Hit Behavior
+
+*For any* permission check where a non-expired cached result exists, the Permission_Service SHALL return the cached result without querying the database.
+
+**Validates: Requirements 5.2**
+
+### Property 10: Cache Size Bound
+
+*For any* sequence of permission cache insertions, the Permission_Cache SHALL never exceed 1000 entries, evicting least-recently-used entries when the limit is reached.
+
+**Validates: Requirements 5.6**
+
+### Property 11: Frontend Fallback Correctness
+
+*For any* user role, when the permissions API is unavailable, the UsePermissions_Hook SHALL return permissions that exactly match the Static_Matrix (DEFAULT_PERMISSIONS) for that role.
+
+**Validates: Requirements 6.5**
+
+### Property 12: Frontend Helper Method Equivalence
+
+*For any* module M, canView(M) SHALL equal hasPermission(M, 'View'), canCreate(M) SHALL equal hasPermission(M, 'Create'), canEdit(M) SHALL equal hasPermission(M, 'Edit'), canDelete(M) SHALL equal hasPermission(M, 'Delete'), and canApprove(M) SHALL equal hasPermission(M, 'Approve').
+
+**Validates: Requirements 6.7**
+
+### Property 13: Frontend Cache Validity
+
+*For any* localStorage cache entry with a timestamp less than 5 minutes old, the UsePermissions_Hook SHALL use the cached permissions without making an API call.
+
+**Validates: Requirements 6.2**
+
+### Property 14: Custom Role Lifecycle Safety
+
+*For any* custom role, deletion SHALL succeed only when zero users are assigned to that role; deletion of built-in roles SHALL always be rejected; and modification of built-in roles SHALL always be rejected.
+
+**Validates: Requirements 7.5, 7.6, 7.7, 7.8**
+
+### Property 15: Role Name Validation
+
+*For any* role creation request, the name SHALL be accepted if and only if it is between 2-100 characters and does not conflict with any existing role name.
+
+**Validates: Requirements 7.2, 7.3**
+
+### Property 16: Permission Matrix Update with Cache Invalidation
+
+*For any* permission matrix update on a custom role, the Permission_Admin_API SHALL persist the new matrix and invalidate the cache for all users assigned to that role.
+
+**Validates: Requirements 8.2**
+
+### Property 17: Effective Permissions API Consistency
+
+*For any* authenticated user, the `/permissions/me` endpoint SHALL return permissions that match what hasPermission() would return for every registered module/action combination for that user.
+
+**Validates: Requirements 8.5**
+
+### Property 18: Override Validation
+
+*For any* user override request, the Permission_Admin_API SHALL accept the override if and only if the specified action is in the target module's supported actions list, and SHALL invalidate the cache for the affected user upon success.
+
+**Validates: Requirements 9.2, 9.3**
+
+### Property 19: File-Level Permission Scoping
+
+*For any* file access request, the permission check SHALL use the module stored in the file record's module field (not a hardcoded module), ensuring users can only access files belonging to modules they have View permission for.
+
+**Validates: Requirements 10.2**
+
+### Property 20: Bilingual Label Completeness
+
+*For any* registered module, the definition SHALL include both `en` and `ar` label strings, and all API responses and navigation configurations SHALL include both language labels.
+
+**Validates: Requirements 11.1, 11.2, 11.3**
+
+### Property 21: Audit Log Completeness
+
+*For any* permission mutation (role permission change, user override change, role creation/deletion), the system SHALL create an audit log entry containing the actor, target, old state, new state, and timestamp.
+
+**Validates: Requirements 12.1, 12.2, 12.3**
 
 ## Error Handling
 

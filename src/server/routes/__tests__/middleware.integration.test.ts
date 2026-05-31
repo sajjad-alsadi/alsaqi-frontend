@@ -62,6 +62,28 @@ vi.mock('express-rate-limit', () => ({
   }),
 }));
 
+// Mock ModuleRegistry to return module definitions for test modules
+vi.mock('../../../permissions/registry', () => ({
+  ModuleRegistry: {
+    getModule: vi.fn((name: string) => {
+      return {
+        name,
+        label: { en: name, ar: name },
+        actions: ['View', 'Create', 'Edit', 'Delete', 'Approve'],
+        defaults: {},
+      };
+    }),
+  },
+}));
+
+// Mock PermissionService
+const mockHasPermission = vi.fn();
+vi.mock('../../services/PermissionService', () => ({
+  PermissionService: {
+    hasPermission: (...args: any[]) => mockHasPermission(...args),
+  },
+}));
+
 const JWT_SECRET = 'test-secret';
 const JWT_PUBLIC_KEY = 'test-public-key';
 
@@ -272,7 +294,7 @@ describe('Middleware Integration Tests', () => {
         next();
       });
 
-      app.get('/api/test', middlewares.checkPermission(module, action), (req: any, res) => {
+      app.get('/api/test', middlewares.checkPermission(module, action as any), (req: any, res) => {
         res.json({ success: true });
       });
 
@@ -285,7 +307,7 @@ describe('Middleware Integration Tests', () => {
         req.user = { id: 'admin-1', role: UserRole.ADMIN };
         next();
       });
-      app.get('/api/test', middlewares.checkPermission('Audit', 'write'), (req: any, res) => {
+      app.get('/api/test', middlewares.checkPermission('Audit', 'Edit'), (req: any, res) => {
         res.json({ success: true });
       });
 
@@ -296,23 +318,22 @@ describe('Middleware Integration Tests', () => {
     });
 
     it('returns 403 with module and action in error message when permission is denied', async () => {
-      // Mock DB to return no permission
-      db.prepare.mockReturnValue({
-        get: vi.fn().mockResolvedValue(null),
-        all: vi.fn().mockResolvedValue([]),
-        run: vi.fn(),
-      });
+      // Mock PermissionService to deny permission
+      mockHasPermission.mockResolvedValue(false);
 
       middlewares = createAuthMiddlewares(db, JWT_SECRET, JWT_PUBLIC_KEY);
       middlewares.cache.clear();
 
-      const app = createAppWithPermission('Finding', 'delete');
+      const app = createAppWithPermission('Finding', 'Delete');
 
       const res = await request(app).get('/api/test');
 
       expect(res.status).toBe(403);
       expect(res.body.error).toContain('Finding');
-      expect(res.body.error).toContain('delete');
+      expect(res.body.error).toContain('Delete');
+      expect(res.body.code).toBe('PERMISSION_DENIED');
+      expect(res.body.module).toBe('Finding');
+      expect(res.body.action).toBe('Delete');
     });
   });
 

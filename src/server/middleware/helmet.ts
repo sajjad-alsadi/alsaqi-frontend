@@ -14,7 +14,7 @@ export function createHelmetMiddleware(env: string): RequestHandler {
 
   return helmet({
     // Content-Security-Policy configured for React SPA
-    contentSecurityPolicy: {
+    contentSecurityPolicy: isProduction ? {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
@@ -27,7 +27,7 @@ export function createHelmetMiddleware(env: string): RequestHandler {
         formAction: ["'self'"],
         objectSrc: ["'none'"],
       },
-    },
+    } : false,
 
     // Strict-Transport-Security: production only
     strictTransportSecurity: isProduction

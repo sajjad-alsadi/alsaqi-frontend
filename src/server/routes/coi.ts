@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { CoiService } from '../services/CoiService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
-import { COMPLIANCE_ROLES } from '../../constants';
 
 const coiCreateSchema = z.object({
   description: z.string().min(1).max(2000),
@@ -18,7 +17,7 @@ const coiUpdateSchema = z.object({
 export const createCoiRoutes = (
   db: any,
   authenticate: any,
-  authorize: any,
+  checkPermission: any,
   logError: any
 ) => {
   const router = express.Router();
@@ -37,7 +36,7 @@ export const createCoiRoutes = (
     res.status(201).json(result);
   }));
 
-  router.put('/coi/:id', authenticate, authorize(COMPLIANCE_ROLES), asyncHandler(async (req, res) => {
+  router.put('/coi/:id', authenticate, checkPermission('IntegrityManagement', 'Edit'), asyncHandler(async (req, res) => {
     const validation = coiUpdateSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid COI status update", validation.error.format());

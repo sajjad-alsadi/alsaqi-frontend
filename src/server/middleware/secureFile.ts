@@ -6,15 +6,9 @@ import db from '../db/index';
 import logger from '../utils/logger';
 import { SecureFileService } from '../services/SecureFileService';
 import { FileEncryptionService } from '../services/FileEncryptionService';
-
-/**
- * Maps file path segments to permission module names.
- * Files are stored flat in /uploads/, so we use a general 'Audit' module
- * for permission checking. In the future, if files are organized by module
- * subdirectories, this mapping can be extended.
- */
-const FILE_MODULE = 'Audit';
-const FILE_PERMISSION_ACTION = 'View';
+import { ModuleRegistry } from '../../permissions/registry';
+import { PermissionService } from '../services/PermissionService';
+import { UserRole } from '../../constants';
 
 /**
  * Logs a file access attempt to the file_access_logs table.
@@ -41,28 +35,55 @@ async function logFileAccess(
 }
 
 /**
- * Checks if a user has module-level permission to access files.
- * Admins are always allowed. Other users need the View permission on the file module.
+ * Checks if a user has module-level permission to access a file.
+ * Reads the file's owning module from the encrypted_files table and validates:
+ * 1. File has a module field (non-empty)
+ * 2. Module is registered in ModuleRegistry
+ * 3. Module has fileScope: true
+ * 4. User has View permission for that module
+ *
+ * Admins always have access. Returns { allowed, module } for structured error responses.
+ *
+ * Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6
  */
-async function hasFilePermission(userId: string, userRole: string): Promise<boolean> {
+async function checkFilePermission(
+  userId: string,
+  userRole: string,
+  filePath: string
+): Promise<{ allowed: boolean; module?: string; reason?: string }> {
   // Admins always have access
-  if (userRole === 'Admin') return true;
+  if (userRole === UserRole.ADMIN) return { allowed: true };
 
   try {
-    const result = await db.prepare(`
-      SELECT 1 FROM permissions p
-      JOIN role_permissions rp ON p.id = rp.permission_id
-      JOIN users u ON rp.role_id = u.role_id
-      WHERE u.id = ? AND p.module = ? AND p.action = ?
-      UNION
-      SELECT 1 FROM permissions p
-      JOIN user_permissions up ON p.id = up.permission_id
-      WHERE up.user_id = ? AND p.module = ? AND p.action = ? AND up.is_allowed = 1
-    `).get(userId, FILE_MODULE, FILE_PERMISSION_ACTION, userId, FILE_MODULE, FILE_PERMISSION_ACTION);
-    return !!result;
+    // Extract file ID from path to look up the file record's module
+    const fileName = path.basename(filePath).replace(/\.enc$/, '');
+    const fileRecord = await db.prepare(
+      `SELECT module FROM encrypted_files WHERE id = ?`
+    ).get(fileName) as { module: string } | undefined;
+
+    // Req 10.3: Deny if file has no module field or module is empty
+    const fileModule = fileRecord?.module;
+    if (!fileModule || fileModule.trim() === '') {
+      return { allowed: false, module: undefined, reason: 'File has no owning module' };
+    }
+
+    // Req 10.4: Deny if module is not registered in ModuleRegistry
+    const moduleDef = ModuleRegistry.getModule(fileModule);
+    if (!moduleDef) {
+      return { allowed: false, module: fileModule, reason: `Module '${fileModule}' is not registered` };
+    }
+
+    // Req 10.6: Deny if module has fileScope: false (or undefined/not set)
+    if (!moduleDef.fileScope) {
+      return { allowed: false, module: fileModule, reason: `Module '${fileModule}' does not support file scoping` };
+    }
+
+    // Req 10.2: Check user's View permission for the file's owning module
+    const allowed = await PermissionService.hasPermission(userId, fileModule, 'View');
+    return { allowed, module: fileModule };
   } catch (err) {
-    logger.error('Error checking file permission', { userId, error: err });
-    return false;
+    logger.error('Error checking file permission', { userId, filePath, error: err });
+    return { allowed: false, reason: 'Permission check failed' };
   }
 }
 
@@ -164,14 +185,21 @@ export function createSecureFileMiddleware(
 
         const user = (req as any).user;
 
-        // Step 2: Check module-level permission
+        // Step 2: Check module-level permission (file-level scoping)
         if (checkPermission) {
-          const permitted = await hasFilePermission(user.id, user.role);
-          if (!permitted) {
+          const permResult = await checkFilePermission(user.id, user.role, filePath);
+          if (!permResult.allowed) {
             if (auditAccess) {
               await logFileAccess(user.id, filePath, 'view', 'denied', ip);
             }
-            return res.status(403).json({ error: 'Forbidden' });
+            return res.status(403).json({
+              error: permResult.module
+                ? `Forbidden: Missing permission 'View' on module '${permResult.module}'`
+                : 'Forbidden: File has no valid owning module',
+              code: 'PERMISSION_DENIED',
+              module: permResult.module || null,
+              action: 'View',
+            });
           }
         }
 

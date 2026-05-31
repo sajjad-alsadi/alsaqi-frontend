@@ -3,11 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useUser } from '../context/UserContext';
 import { usePreferences } from '../context/PreferencesContext';
-import { useNotificationContext } from '../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
-import { usePermissions } from '../hooks/usePermissions';
-import { MODULES } from '../permissions';
+import { useNavigationItems } from '../hooks/useNavigationItems';
 import NotificationBell from './NotificationBell';
+import StalePermissionsIndicator from './StalePermissionsIndicator';
 import { motion, AnimatePresence } from 'motion/react';
 import InteractiveIcon from './InteractiveIcon';
 import Logo from './Logo';
@@ -15,43 +14,20 @@ import LanguageSwitcher from './LanguageSwitcher';
 import Chatbot from './Chatbot';
 import { useFormat } from '../services/formatService';
 import { 
-  LayoutDashboard, 
-  CalendarRange, 
-  ClipboardCheck, 
-  Library, 
-  FileSearch, 
-  TrendingUp, 
-  ShieldAlert, 
-  Building2, 
-  Building,
-  Scale, 
-  AlertCircle, 
-  AlertTriangle,
-  History, 
-  Settings, 
-  Users,
   LogOut,
-  Bell,
   Globe,
   User as UserIcon,
   ChevronRight,
   ChevronLeft,
-  Network,
-  FileText,
-  Briefcase,
   Moon,
   Sun,
-  BookOpen,
-  BarChart3,
-  Users2,
   Menu,
   X,
-  ShieldCheck,
-  Terminal,
   PanelTopClose,
   PanelTop
 } from 'lucide-react';
 import { Language } from '../constants';
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -61,10 +37,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { logout } = useAppContext();
   const { user } = useUser();
   const { language, setLanguage, theme, setTheme } = usePreferences();
-  const { unreadCount } = useNotificationContext();
   const { t, i18n } = useTranslation();
-  const { formatNumber, translateName } = useFormat();
-  const { canView } = usePermissions();
+  const { translateName } = useFormat();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(() => {
@@ -76,29 +50,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const activeTab = location.pathname.substring(1) || 'dashboard';
 
-  const allMenuItems = [
-    { id: 'dashboard', label: t('common.dashboard'), icon: LayoutDashboard, path: '/dashboard', module: MODULES.DASHBOARD },
-    { id: 'charter', label: t('common.auditCharter'), icon: BookOpen, path: '/charter', module: MODULES.AUDIT_CHARTER },
-    { id: 'plan', label: t('common.auditPlan'), icon: CalendarRange, path: '/plan', module: MODULES.AUDIT_PLANS },
-    { id: 'tasks', label: t('common.tasks'), icon: ClipboardCheck, path: '/tasks', module: MODULES.AUDIT_TASKS },
-    { id: 'library', label: t('common.library'), icon: Library, path: '/library', module: MODULES.AUDIT_PROGRAM_LIBRARY },
-    { id: 'findings', label: t('common.findings'), icon: FileSearch, path: '/findings', module: MODULES.AUDIT_FINDINGS },
-    { id: 'evidence', label: t('common.evidence'), icon: FileText, path: '/evidence', module: MODULES.AUDIT_EVIDENCE },
-    { id: 'recommendations', label: t('common.recommendations'), icon: TrendingUp, path: '/recommendations', module: MODULES.RECOMMENDATIONS },
-    { id: 'risks', label: t('common.risks'), icon: ShieldAlert, path: '/risks', module: MODULES.RISK_REGISTER },
-    { id: 'compliance-matrix', label: t('common.complianceMatrix'), icon: ShieldCheck, path: '/compliance-matrix', module: MODULES.COMPLIANCE_MATRIX },
-    { id: 'integrity', label: t('common.integrityManagement'), icon: Scale, path: '/integrity', module: MODULES.INTEGRITY_MANAGEMENT },
-    { id: 'departments', label: t('common.departments'), icon: Building, path: '/departments', module: MODULES.DEPARTMENTS },
-    { id: 'reports', label: t('common.reportsAndAnalytics'), icon: BarChart3, path: '/reports', module: MODULES.REPORTS },
-    { id: 'cms', label: t('common.cms'), icon: Network, path: '/cms', module: MODULES.CORRESPONDENCE },
-    { id: 'notifications', label: t('common.notifications'), icon: Bell, path: '/notifications', module: MODULES.NOTIFICATIONS, badge: unreadCount > 0 ? formatNumber(unreadCount) : undefined },
-    { id: 'users', label: t('common.users'), icon: Users, path: '/users', module: MODULES.USER_MANAGEMENT },
-    { id: 'system-logs', label: t('SystemLogsManagement'), icon: Terminal, path: '/system-logs', module: MODULES.SYSTEM_LOGS },
-    { id: 'settings', label: t('common.settings'), icon: Settings, path: '/settings', module: MODULES.SETTINGS },
-  ];
-
-  // Filter menu items based on user permissions
-  const menuItems = allMenuItems.filter(item => canView(item.module));
+  // Navigation items derived from ModuleRegistry with permission filtering and bilingual labels
+  const menuItems = useNavigationItems();
 
   return (
     <div className={`flex min-h-screen bg-[var(--color-bg-main)] transition-colors duration-300 ${isRTL ? 'font-sans' : ''} ${theme === 'dark' ? 'dark' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -241,6 +194,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
               {/* Right side (End) */}
               <div className="flex items-center gap-2 sm:gap-4">
+                <StalePermissionsIndicator />
                 <NotificationBell />
                 
                 <div className="h-8 w-px bg-[var(--color-border-soft)] mx-1 hidden sm:block"></div>
