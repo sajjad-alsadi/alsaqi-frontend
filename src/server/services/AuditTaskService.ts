@@ -80,7 +80,7 @@ export class AuditTaskService {
     const { page, pageSize, offset } = parsePaginationParams(params);
 
     let query = `
-      SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.assigned_to, t.priority,
+      SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.assigned_to,
              p.title as plan_title, u.name as assigned_name, e.name_en as audited_unit_name
       FROM audit_tasks t
       LEFT JOIN audit_plans p ON t.plan_id = p.id

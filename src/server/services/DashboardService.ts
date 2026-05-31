@@ -154,7 +154,7 @@ export class DashboardService {
   static async getMyTasks(userId: string | number, page: number = 1, pageSize: number = 10) {
     const offset = (page - 1) * pageSize;
     const query = `
-      SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.priority,
+      SELECT t.id, t.title, t.task_number, t.status, t.due_date,
              p.title as plan_title
       FROM audit_tasks t
       LEFT JOIN audit_plans p ON t.plan_id = p.id
