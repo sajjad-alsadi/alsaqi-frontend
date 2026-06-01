@@ -51,11 +51,7 @@ ModuleRegistry.register({
     [UserRole.RISK_OFFICER]: ['View'],
     [UserRole.VIEWER]: ['View'],
   },
-  navigation: {
-    icon: 'BarChart3',
-    path: '/analytics',
-    order: 2,
-  },
+  // Navigation removed - merged into Dashboard
 });
 
 // ─── Policies ────────────────────────────────────────────────────────────────
@@ -72,11 +68,7 @@ ModuleRegistry.register({
     [UserRole.RISK_OFFICER]: ['View'],
     [UserRole.VIEWER]: ['View'],
   },
-  navigation: {
-    icon: 'FileText',
-    path: '/policies',
-    order: 15,
-  },
+  // Navigation removed - merged into ComplianceMatrix
 });
 
 // ─── Audit Charter ───────────────────────────────────────────────────────────

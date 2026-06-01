@@ -342,8 +342,8 @@ describe('usePermissions', () => {
       });
 
       expect(result.current.hasPermission('AuditPlans', 'View')).toBe(true);
-      expect(result.current.hasPermission('AuditPlans', 'Create')).toBe(true);
-      expect(result.current.hasPermission('AuditPlans', 'Edit')).toBe(true);
+      expect(result.current.hasPermission('AuditProgramLibrary', 'Create')).toBe(true);
+      expect(result.current.hasPermission('AuditProgramLibrary', 'Edit')).toBe(true);
     });
 
     it('should return false for permissions the role does not have', async () => {
@@ -413,7 +413,7 @@ describe('usePermissions', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.canCreate('AuditPlans')).toBe(true);
+      expect(result.current.canCreate('AuditProgramLibrary')).toBe(true);
       expect(result.current.canCreate('ComplianceMatrix')).toBe(false);
     });
 

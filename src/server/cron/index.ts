@@ -19,6 +19,11 @@ export const startAutomationJobs = () => {
     } catch (error) {
       logger.error('[CRON] Error running daily automations:', error);
     }
+    try {
+      await checkUpcomingDeadlines();
+    } catch (error) {
+      logger.error('[CRON] Error running deadline checks:', error);
+    }
   });
 
   // Daily backup at 2:00 AM via BackupScheduler (default schedule: '0 2 * * *')
@@ -31,6 +36,11 @@ export const startAutomationJobs = () => {
   // Run immediately on startup to catch up
   runDailyAutomations().catch(err => {
     logger.error('[CRON] Error running initial automations:', err);
+  });
+
+  // Run deadline checks on startup (with once-per-day guard)
+  checkUpcomingDeadlines().catch(err => {
+    logger.error('[CRON] Error running initial deadline checks:', err);
   });
 };
 
@@ -272,3 +282,256 @@ const runDailyAutomations = async () => {
   logger.info('[CRON] Daily automations completed.');
   updateCronLastRun();
 };
+
+// ─── Deadline Notification Helpers (exported for testing) ────────────────────
+
+/** Track last run date to ensure once-per-day execution */
+let lastDeadlineCheckDate: string | null = null;
+
+/**
+ * Get Manager/Admin user IDs.
+ */
+export async function getManagerAdminIds(): Promise<string[]> {
+  const users = await db.prepare(
+    `SELECT id FROM users WHERE role IN ('${UserRole.ADMIN}', '${UserRole.MANAGER}') AND status = 'active'`
+  ).all() as any[];
+  return users.map((u: any) => u.id);
+}
+
+/**
+ * Determine which tasks are due tomorrow (today + 1 day) and not completed/approved.
+ * Returns the assigned user IDs for each task via task_assignments.
+ */
+export async function getTasksDueTomorrow(todayStr: string): Promise<Array<{ taskId: string; title: string; dueDate: string; assignedUserIds: string[] }>> {
+  const tomorrow = new Date(todayStr);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  const tasks = await db.prepare(`
+    SELECT t.id, t.title, t.due_date
+    FROM audit_tasks t
+    WHERE t.due_date = ?
+      AND t.status NOT IN ('completed', 'approved')
+      AND (t.deleted_at IS NULL)
+  `).all(tomorrowStr) as any[];
+
+  const results: Array<{ taskId: string; title: string; dueDate: string; assignedUserIds: string[] }> = [];
+
+  for (const task of tasks) {
+    const assignments = await db.prepare(
+      `SELECT user_id FROM task_assignments WHERE task_id = ?`
+    ).all(task.id) as any[];
+
+    const assignedUserIds = assignments.map((a: any) => a.user_id);
+    if (assignedUserIds.length > 0) {
+      results.push({
+        taskId: task.id,
+        title: task.title,
+        dueDate: task.due_date,
+        assignedUserIds,
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Determine which plans have start/end dates 3 days from today and are not archived.
+ * Returns plan info with lead_auditor (may be null).
+ */
+export async function getPlansDueIn3Days(todayStr: string): Promise<Array<{ planId: string; title: string; dateType: 'start' | 'end'; date: string; leadAuditor: string | null }>> {
+  const threeDaysLater = new Date(todayStr);
+  threeDaysLater.setDate(threeDaysLater.getDate() + 3);
+  const threeDaysStr = threeDaysLater.toISOString().split('T')[0];
+
+  const plans = await db.prepare(`
+    SELECT id, title, planned_start_date, planned_end_date, lead_auditor
+    FROM audit_plans
+    WHERE is_archived = false
+      AND (planned_start_date = ? OR planned_end_date = ?)
+  `).all(threeDaysStr, threeDaysStr) as any[];
+
+  const results: Array<{ planId: string; title: string; dateType: 'start' | 'end'; date: string; leadAuditor: string | null }> = [];
+
+  for (const plan of plans) {
+    if (plan.planned_start_date === threeDaysStr) {
+      results.push({
+        planId: plan.id,
+        title: plan.title,
+        dateType: 'start',
+        date: plan.planned_start_date,
+        leadAuditor: plan.lead_auditor || null,
+      });
+    }
+    if (plan.planned_end_date === threeDaysStr) {
+      results.push({
+        planId: plan.id,
+        title: plan.title,
+        dateType: 'end',
+        date: plan.planned_end_date,
+        leadAuditor: plan.lead_auditor || null,
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Check if unarchived plans exist for the current year (used for Dec 15 reminder).
+ */
+export async function getUnarchivedPlansForYear(year: number): Promise<Array<{ id: string; title: string }>> {
+  const plans = await db.prepare(
+    `SELECT id, title FROM audit_plans WHERE year = ? AND is_archived = false`
+  ).all(year) as any[];
+  return plans;
+}
+
+/**
+ * Resolve lead auditor name to user ID. Returns null if not found.
+ */
+export async function resolveLeadAuditorId(leadAuditor: string | null): Promise<string | null> {
+  if (!leadAuditor) return null;
+  const user = await db.prepare(
+    `SELECT id FROM users WHERE (name = ? OR username = ?) AND status = 'active'`
+  ).get(leadAuditor, leadAuditor) as any;
+  return user?.id || null;
+}
+
+/**
+ * Main deadline checking function. Runs once per calendar day.
+ * 
+ * 1. Task due date notifications: 1 day before → notify all assigned users (via task_assignments)
+ * 2. Plan date notifications: 3 days before start/end → notify Manager/Admin + lead auditor
+ * 3. Year-end reminder: December 15 → notify Manager/Admin if unarchived plan exists
+ */
+export async function checkUpcomingDeadlines(dateOverride?: string): Promise<void> {
+  const now = new Date();
+  const todayStr = dateOverride || now.toISOString().split('T')[0];
+
+  // Once-per-day guard: skip if already ran today
+  if (lastDeadlineCheckDate === todayStr) {
+    logger.info(`[CRON:Deadlines] Already ran for ${todayStr}, skipping.`);
+    return;
+  }
+
+  logger.info(`[CRON:Deadlines] Running deadline checks for ${todayStr}...`);
+
+  // 1. Task due date notifications (due_date = today + 1 day, status not completed/approved)
+  try {
+    const tasksDue = await getTasksDueTomorrow(todayStr);
+    if (tasksDue.length > 0) {
+      logger.info(`[CRON:Deadlines] Found ${tasksDue.length} tasks due tomorrow.`);
+      for (const task of tasksDue) {
+        await NotificationService.create(
+          task.assignedUserIds,
+          'task_status_changed',
+          JSON.stringify({ key: 'notifications.taskDueTomorrow', params: { title: task.title, dueDate: task.dueDate } }),
+          'AuditTasks',
+          '/tasks',
+          { entityId: task.taskId, entityType: 'audit_task' }
+        );
+      }
+    }
+  } catch (err) {
+    logger.error('[CRON:Deadlines] Error checking task deadlines:', err);
+  }
+
+  // 2. Plan date notifications (start/end date = today + 3 days, not archived)
+  try {
+    const plansDue = await getPlansDueIn3Days(todayStr);
+    if (plansDue.length > 0) {
+      logger.info(`[CRON:Deadlines] Found ${plansDue.length} plan date(s) in 3 days.`);
+      const managerAdminIds = await getManagerAdminIds();
+
+      for (const plan of plansDue) {
+        const recipientIds = [...managerAdminIds];
+        let missingLeadAuditor = false;
+
+        // Resolve lead auditor and add to recipients
+        const leadAuditorId = await resolveLeadAuditorId(plan.leadAuditor);
+        if (leadAuditorId) {
+          if (!recipientIds.includes(leadAuditorId)) {
+            recipientIds.push(leadAuditorId);
+          }
+        } else {
+          missingLeadAuditor = true;
+        }
+
+        const messageKey = plan.dateType === 'start'
+          ? 'notifications.planStartingSoon'
+          : 'notifications.planEndingSoon';
+
+        await NotificationService.create(
+          recipientIds,
+          'plan_status_changed',
+          JSON.stringify({
+            key: messageKey,
+            params: {
+              title: plan.title,
+              date: plan.date,
+              missingLeadAuditor,
+            },
+          }),
+          'AuditPlans',
+          '/plan',
+          { entityId: plan.planId, entityType: 'audit_plan' }
+        );
+      }
+    }
+  } catch (err) {
+    logger.error('[CRON:Deadlines] Error checking plan deadlines:', err);
+  }
+
+  // 3. Year-end reminder: December 15 → notify Manager/Admin if unarchived plan exists
+  try {
+    const month = now.getMonth(); // 0-indexed: 11 = December
+    const day = now.getDate();
+    const currentYear = now.getFullYear();
+
+    // Use dateOverride for testing if provided
+    const checkMonth = dateOverride ? new Date(dateOverride).getMonth() : month;
+    const checkDay = dateOverride ? new Date(dateOverride).getDate() : day;
+    const checkYear = dateOverride ? new Date(dateOverride).getFullYear() : currentYear;
+
+    if (checkMonth === 11 && checkDay === 15) { // December 15
+      const unarchivedPlans = await getUnarchivedPlansForYear(checkYear);
+      if (unarchivedPlans.length > 0) {
+        logger.info(`[CRON:Deadlines] Dec 15 reminder: ${unarchivedPlans.length} unarchived plan(s) for ${checkYear}.`);
+        const managerAdminIds = await getManagerAdminIds();
+
+        await NotificationService.create(
+          managerAdminIds,
+          'plan_status_changed',
+          JSON.stringify({
+            key: 'notifications.yearEndArchiveReminder',
+            params: {
+              year: checkYear,
+              planCount: unarchivedPlans.length,
+              planTitles: unarchivedPlans.map(p => p.title).join(', '),
+            },
+          }),
+          'AuditPlans',
+          '/plan'
+        );
+      }
+    }
+  } catch (err) {
+    logger.error('[CRON:Deadlines] Error checking year-end reminder:', err);
+  }
+
+  // Mark as completed for today
+  lastDeadlineCheckDate = todayStr;
+  logger.info(`[CRON:Deadlines] Deadline checks completed for ${todayStr}.`);
+}
+
+/** Reset the last deadline check date (for testing purposes) */
+export function resetDeadlineCheckDate(): void {
+  lastDeadlineCheckDate = null;
+}
+
+/** Get the last deadline check date (for testing purposes) */
+export function getLastDeadlineCheckDate(): string | null {
+  return lastDeadlineCheckDate;
+}

@@ -166,6 +166,17 @@ vi.mock('lucide-react', () => {
 // Mock constants
 vi.mock('../constants', () => ({
   Language: { EN: 'en', AR: 'ar' },
+  UserRole: {
+    ADMIN: 'Admin',
+    INTERNAL_AUDITOR: 'Internal Auditor',
+    COMPLIANCE_OFFICER: 'Compliance Officer',
+    RISK_OFFICER: 'Risk Officer',
+    MANAGER: 'Manager',
+    VIEWER: 'Viewer',
+  },
+  ADMIN_ROLES: ['Admin', 'Manager'],
+  COMPLIANCE_ROLES: ['Admin', 'Manager', 'Compliance Officer'],
+  STAFF_ROLES: ['Admin', 'Manager', 'Internal Auditor', 'Viewer'],
 }));
 
 // Mock permissions

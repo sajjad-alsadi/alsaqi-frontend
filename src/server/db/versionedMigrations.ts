@@ -350,4 +350,158 @@ export const versionedMigrations: Migration[] = [
       await db.exec(`CREATE INDEX IF NOT EXISTS idx_perm_audit_timestamp ON permission_audit_logs(timestamp)`);
     },
   },
+
+  {
+    version: '008',
+    name: 'Audit modules restructure - tables, columns, and indexes',
+    type: 'schema',
+    up: async () => {
+      // 1. audit_plans: Add year, quarter, is_archived, archived_at, archived_by columns
+      await db.exec(`ALTER TABLE audit_plans ADD COLUMN IF NOT EXISTS year INTEGER`);
+      await db.exec(`ALTER TABLE audit_plans ADD COLUMN IF NOT EXISTS quarter TEXT DEFAULT 'Annual'`);
+      await db.exec(`ALTER TABLE audit_plans ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT false`);
+      await db.exec(`ALTER TABLE audit_plans ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ`);
+      await db.exec(`ALTER TABLE audit_plans ADD COLUMN IF NOT EXISTS archived_by UUID REFERENCES users(id)`);
+
+      // 2. Create task_assignments table (many-to-many for multi-assignee tasks)
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS task_assignments (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          task_id UUID NOT NULL REFERENCES audit_tasks(id) ON DELETE CASCADE,
+          user_id UUID NOT NULL REFERENCES users(id),
+          assigned_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          assigned_by UUID REFERENCES users(id),
+          UNIQUE(task_id, user_id)
+        )
+      `);
+
+      // 3. Create program_risk_links table (link programs to risk_register)
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS program_risk_links (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          program_id UUID NOT NULL REFERENCES audit_programs(id) ON DELETE CASCADE,
+          risk_id UUID NOT NULL REFERENCES risk_register(id),
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(program_id, risk_id)
+        )
+      `);
+
+      // 4. Create program_compliance_links table (link programs to compliance_items)
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS program_compliance_links (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          program_id UUID NOT NULL REFERENCES audit_programs(id) ON DELETE CASCADE,
+          compliance_item_id UUID NOT NULL REFERENCES compliance_items(id),
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(program_id, compliance_item_id)
+        )
+      `);
+
+      // 5. audit_findings: Add finding_type, created_by, title columns
+      // finding_type and created_by may already exist from column migrations, use IF NOT EXISTS
+      await db.exec(`ALTER TABLE audit_findings ADD COLUMN IF NOT EXISTS finding_type TEXT DEFAULT 'control_design_deficiency'`);
+      await db.exec(`ALTER TABLE audit_findings ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES users(id)`);
+      // title already exists as NOT NULL in base schema, but ensure it's there
+      await db.exec(`ALTER TABLE audit_findings ADD COLUMN IF NOT EXISTS title TEXT`);
+      // Backfill any NULL titles before enforcing NOT NULL
+      await db.exec(`UPDATE audit_findings SET title = COALESCE(title, 'ملاحظة ' || COALESCE(finding_number, id::text)) WHERE title IS NULL`);
+      // Set NOT NULL constraint (may already be set from base schema)
+      try {
+        await db.exec(`ALTER TABLE audit_findings ALTER COLUMN title SET NOT NULL`);
+      } catch (_e) {
+        // Column may already be NOT NULL
+      }
+
+      // 6. recommendations: Add plan_id column
+      await db.exec(`ALTER TABLE recommendations ADD COLUMN IF NOT EXISTS plan_id UUID REFERENCES audit_plans(id)`);
+
+      // 6b. audit_evidence: Add evidence_number and file_path columns
+      await db.exec(`ALTER TABLE audit_evidence ADD COLUMN IF NOT EXISTS evidence_number TEXT`);
+      await db.exec(`ALTER TABLE audit_evidence ADD COLUMN IF NOT EXISTS file_path TEXT`);
+
+      // 6c. audit_programs: Add approved_by and approved_at columns
+      await db.exec(`ALTER TABLE audit_programs ADD COLUMN IF NOT EXISTS approved_by UUID REFERENCES users(id)`);
+      await db.exec(`ALTER TABLE audit_programs ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ`);
+
+      // 7. Create archive tables
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS archived_plans (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          original_plan_id UUID NOT NULL,
+          plan_data JSONB NOT NULL,
+          year INTEGER NOT NULL,
+          archived_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          archived_by UUID REFERENCES users(id)
+        )
+      `);
+
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS archived_tasks (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          original_task_id UUID NOT NULL,
+          plan_id UUID NOT NULL,
+          task_data JSONB NOT NULL,
+          archived_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS archived_findings (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          original_finding_id UUID NOT NULL,
+          plan_id UUID NOT NULL,
+          finding_data JSONB NOT NULL,
+          archived_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS archived_recommendations (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          original_recommendation_id UUID NOT NULL,
+          plan_id UUID NOT NULL,
+          recommendation_data JSONB NOT NULL,
+          archived_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS archived_evidence (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          original_evidence_id UUID NOT NULL,
+          plan_id UUID NOT NULL,
+          evidence_data JSONB NOT NULL,
+          archived_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // 7b. Create numbering_counters table for unified hierarchical numbering
+      // Composite primary key (scope_type, scope_id) determines counter scope:
+      //   - 'plan_year' + year  → plan sequence within year (001, 002, ...)
+      //   - 'task'  + plan_id   → task sequence within plan (T01, T02, ...)
+      //   - 'finding' + plan_id → finding sequence within plan (F01, F02, ...)
+      //   - 'rec'   + finding_id → recommendation sequence within finding (R01, R02, ...)
+      //   - 'evidence' + finding_id → evidence sequence within finding (E01, E02, ...)
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS numbering_counters (
+          scope_type TEXT NOT NULL,
+          scope_id TEXT NOT NULL,
+          last_value INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (scope_type, scope_id)
+        )
+      `);
+
+      // 8. Performance indexes
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_plans_year ON audit_plans(year)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_plans_quarter ON audit_plans(quarter)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_plans_is_archived ON audit_plans(is_archived)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_findings_plan_id ON audit_findings(audit_id)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_findings_created_by ON audit_findings(created_by)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_recommendations_plan_id ON recommendations(plan_id)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_task_assignments_task_id ON task_assignments(task_id)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_task_assignments_user_id ON task_assignments(user_id)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_archived_plans_year ON archived_plans(year)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_evidence_finding_id ON audit_evidence(finding_id)`);
+    },
+  },
 ];

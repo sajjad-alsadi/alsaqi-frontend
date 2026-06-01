@@ -61,11 +61,20 @@ function createComplianceTestApp(options?: {
     next();
   };
 
-  const authorize = (allowedRoles: readonly string[]) => (req: any, res: any, next: any) => {
-    if (!allowedRoles.includes(req.user?.role)) {
+  const authorize = (_module: string, action?: string) => (req: any, res: any, next: any) => {
+    // Simple permission check: Admin and Manager can do everything,
+    // Compliance Officer can Create/Edit compliance items but not Delete
+    const role = req.user?.role;
+    if (!role) {
       return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
     }
-    next();
+    if (['Admin', 'Manager'].includes(role)) {
+      return next();
+    }
+    if (role === 'Compliance Officer' && action && ['Create', 'Edit'].includes(action)) {
+      return next();
+    }
+    return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
   };
 
   const logError = vi.fn();

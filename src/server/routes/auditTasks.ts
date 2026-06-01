@@ -3,6 +3,7 @@ import { AuditTaskService } from '../services/AuditTaskService';
 import { NotificationService } from '../services/NotificationService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { methodNotAllowed } from '../utils/routeRegistry';
+import { UserRole } from '../../constants';
 
 export const createAuditTaskRoutes = (
   db: any,
@@ -57,6 +58,102 @@ export const createAuditTaskRoutes = (
     } catch (err: any) {
       logError(err, 'PATCH', req.originalUrl, req.ip, userId);
       res.status(400).json({ success: false, error: { message: err.message, code: err.code || 'BAD_REQUEST' } });
+    }
+  }));
+
+  // POST /api/v1/audit-tasks/:id/assign - Assign users to a task
+  // Requirements: 4.1, 4.3, 4.5
+  router.post('/:id/assign', authenticate, asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { userIds } = req.body;
+
+    const typedReq = req as any;
+    const userId = typedReq.user.id;
+    const userRole = typedReq.user.role;
+
+    // Role validation: only Manager or Admin can assign users
+    const allowedRoles = [UserRole.MANAGER, UserRole.ADMIN];
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          message: 'لا تملك صلاحية تعيين مستخدمين للمهام. يجب أن يكون دورك مدير أو مسؤول',
+          code: 'FORBIDDEN'
+        }
+      });
+    }
+
+    try {
+      const result = await AuditTaskService.assignUsers(String(id), userIds, userId);
+
+      // Send notification to each assigned user (Requirement 4.3: within 60 seconds)
+      try {
+        const task = await db.prepare("SELECT title, task_number FROM audit_tasks WHERE id = ?::uuid").get(id) as any;
+        if (task && result.assignments.length > 0) {
+          const assignedUserIds = result.assignments.map((a: any) => a.user_id);
+
+          await NotificationService.create(
+            assignedUserIds,
+            'task_assigned',
+            JSON.stringify({ key: 'notifications.taskAssigned', params: { title: task.title, taskNumber: task.task_number } }),
+            'AuditTasks',
+            '/tasks',
+            {
+              actorId: userId,
+              entityId: id,
+              entityType: 'audit_task',
+              title: JSON.stringify({ key: 'notifications.taskAssigned' }),
+              wss: (req.app as any).wss,
+              data: { task_id: id, task_number: task.task_number }
+            }
+          );
+        }
+      } catch (e) {
+        console.error("[AuditTasks] Assignment notification failed:", e);
+      }
+
+      res.status(201).json({ success: true, data: result });
+    } catch (err: any) {
+      logError(err, 'POST', req.originalUrl, req.ip, userId);
+      const statusCode = err.statusCode || 400;
+      res.status(statusCode).json({
+        success: false,
+        error: { message: err.message, code: err.errorCode || 'BAD_REQUEST', details: err.details }
+      });
+    }
+  }));
+
+  // DELETE /api/v1/audit-tasks/:id/assign/:userId - Unassign a user from a task
+  // Requirements: 4.4, 4.5
+  router.delete('/:id/assign/:userId', authenticate, asyncHandler(async (req, res) => {
+    const { id, userId: targetUserId } = req.params;
+
+    const typedReq = req as any;
+    const currentUserId = typedReq.user.id;
+    const userRole = typedReq.user.role;
+
+    // Role validation: only Manager or Admin can unassign users
+    const allowedRoles = [UserRole.MANAGER, UserRole.ADMIN];
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          message: 'لا تملك صلاحية إزالة تعيين المستخدمين من المهام. يجب أن يكون دورك مدير أو مسؤول',
+          code: 'FORBIDDEN'
+        }
+      });
+    }
+
+    try {
+      const result = await AuditTaskService.unassignUser(String(id), String(targetUserId), currentUserId);
+      res.json({ success: true, data: result });
+    } catch (err: any) {
+      logError(err, 'DELETE', req.originalUrl, req.ip, currentUserId);
+      const statusCode = err.statusCode || 400;
+      res.status(statusCode).json({
+        success: false,
+        error: { message: err.message, code: err.errorCode || 'BAD_REQUEST' }
+      });
     }
   }));
 

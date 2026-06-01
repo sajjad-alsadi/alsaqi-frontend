@@ -31,12 +31,15 @@ import { createNotificationRoutes } from "./notifications";
 import { createCommentRoutes } from "./comments";
 import { createAuditTaskRoutes } from "./auditTasks";
 import { createRecommendationRoutes } from "./recommendations";
+import { createAuditFindingRoutes } from "./auditFindings";
 import { NotificationService } from "../services/NotificationService";
 import { logDuplicateRoutes, registerRoutes } from "../utils/routeRegistry";
 import { createHealthRouter } from "./health";
 import { createBulkRoutes } from "./bulk";
 import { createAdminBackupRoutes } from "./adminBackup";
 import { createPermissionAdminRoutes } from "./permissionAdmin";
+import { createArchiveRoutes } from "./archive";
+import { createLookupRoutes } from "./lookups";
 import { createIdempotencyMiddleware } from "../middleware/idempotency";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -140,6 +143,10 @@ export const setupRoutes = (
   // Auth Routes
   v1Router.use("/auth", createAuthRoutes(db, JWT_SECRET, JWT_PRIVATE_KEY, authLimiter, authenticate, checkPermission, createNotification, logError));
   
+  // Lookup Routes (simplified data for dropdowns in forms)
+  // Must be registered BEFORE CRUD routes to prevent /:id pattern from matching "lookup"
+  v1Router.use("/", createLookupRoutes(db, authenticate, checkPermission, logError));
+
   // Generic CRUD API Generator with Auth & Logging
   v1Router.use("/", createCrudRoutes(db, authenticate, checkPermission, logError, createNotification, saveFile));
 
@@ -172,7 +179,12 @@ export const setupRoutes = (
   v1Router.use("/", createIntegrityRoutes(authenticate));
   v1Router.use("/audit-programs", createAuditProgramRoutes(db, authenticate, checkPermission, logError));
   v1Router.use("/audit-tasks", createAuditTaskRoutes(db, authenticate, logError));
+  v1Router.use("/audit-findings", createAuditFindingRoutes(db, authenticate, checkPermission, logError));
   v1Router.use("/recommendations", createRecommendationRoutes(db, authenticate, logError));
+
+  // Archive Routes (audit plan archiving and archived plan retrieval)
+  v1Router.use("/", createArchiveRoutes(db, authenticate, checkPermission, logError));
+
   v1Router.use("/fraud-access-requests", createFraudRoutes(db, authenticate, checkPermission, logError, createNotification));
   v1Router.use("/compliance", createComplianceRoutes(db, authenticate, checkPermission, logError, saveFile));
 
@@ -190,8 +202,12 @@ export const setupRoutes = (
 
   // Register custom routes in the route registry for duplicate detection
   registerRoutes(['POST'], '/api/v1/audit-programs', 'auditPrograms.ts');
+  registerRoutes(['GET', 'POST', 'PUT', 'DELETE'], '/api/v1/audit-findings', 'auditFindings.ts');
   registerRoutes(['GET', 'PATCH'], '/api/v1/audit-tasks', 'auditTasks.ts');
-  registerRoutes(['PATCH'], '/api/v1/recommendations', 'recommendations.ts');
+  registerRoutes(['POST'], '/api/v1/audit-tasks/:id/assign', 'auditTasks.ts');
+  registerRoutes(['DELETE'], '/api/v1/audit-tasks/:id/assign/:userId', 'auditTasks.ts');
+  registerRoutes(['POST', 'PATCH'], '/api/v1/recommendations', 'recommendations.ts');
+  registerRoutes(['POST', 'GET'], '/api/v1/audit-findings/:findingId/evidence', 'auditFindings.ts');
 
   // Detect and log duplicate route registrations at startup
   logDuplicateRoutes();

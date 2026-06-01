@@ -19,6 +19,7 @@ export const CRUD_EXCLUDED_ROUTES: string[] = [
   'audit-tasks',
   'audit-programs',
   'recommendations',
+  'audit-findings',
 ];
 
 export const createCrudRoutes = (

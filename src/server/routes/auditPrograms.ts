@@ -25,15 +25,17 @@ export const createAuditProgramRoutes = (db: any, authenticate: any, checkPermis
     res.json({ id: newId });
   }));
 
-  router.post("/:id/approve", authenticate, checkPermission('AuditProgramLibrary', 'Approve'), asyncHandler(async (req, res) => {
+  router.post("/:id/approve", authenticate, asyncHandler(async (req, res) => {
     const typedReq = req as unknown as AuthenticatedRequest;
     const id = req.params.id as string;
     if (!id || id === 'undefined') {
       throw new ValidationError("Invalid audit program ID");
     }
     const user = typedReq.user.username;
+    const userId = typedReq.user.id;
+    const userRole = typedReq.user.role;
     
-    await AuditProgramService.approve(id);
+    await AuditProgramService.approveProgram(id, userId, userRole);
     
     await AuthService.logAudit(user, "Approve", "Audit Program Library", `Approved program ID: ${id}`);
       

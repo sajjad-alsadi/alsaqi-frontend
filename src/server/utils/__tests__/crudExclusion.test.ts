@@ -14,7 +14,11 @@ describe('CRUD Generator Exclusion', () => {
     expect(CRUD_EXCLUDED_ROUTES).toContain('recommendations');
   });
 
-  it('contains exactly 3 excluded routes', () => {
-    expect(CRUD_EXCLUDED_ROUTES).toHaveLength(3);
+  it('excludes audit-findings from CRUD generation', () => {
+    expect(CRUD_EXCLUDED_ROUTES).toContain('audit-findings');
+  });
+
+  it('contains exactly 4 excluded routes', () => {
+    expect(CRUD_EXCLUDED_ROUTES).toHaveLength(4);
   });
 });

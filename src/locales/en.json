@@ -985,7 +985,7 @@
     "title": "Audit Findings",
     "professionalFramework": "Professional framework according to internal audit standards",
     "loadingFindings": "Loading findings...",
-    "findingNumber": "Finding #",
+    "findingNumber": "Finding Number",
     "viewRecommendations": "View Recommendations",
     "condition": "Condition",
     "criteria": "Criteria",
@@ -994,7 +994,11 @@
     "recommendation": "Recommendation",
     "riskLevel": "Risk Level",
     "editFinding": "Edit Finding",
-    "addFinding": "Add Finding"
+    "addFinding": "Add Finding",
+    "type": {
+      "control_design_deficiency": "Control Design Deficiency",
+      "operational_design_deficiency": "Operational Design Deficiency"
+    }
   },
   "reports": {
     "auditReport": "Audit Report",
@@ -2745,7 +2749,41 @@
     "fraudAccessApproved": "Your access request to Fraud Log has been approved.",
     "fraudAccessRejected": "Your access request to Fraud Log was rejected: {{reason}}",
     "passwordResetInvalidUser": "Password reset attempt for non-existent or inactive user: {{reason}}",
-    "passwordResetSubmitted": "Password reset request submitted for {{user}}"
+    "passwordResetSubmitted": "Password reset request submitted for {{user}}",
+    "yearEndArchiveReminder": "Reminder: Please archive the current year's audit plan before the fiscal year ends",
+    "findingStatusChanged": "Finding \"{{title}}\" status changed from {{oldStatus}} to {{newStatus}}",
+    "taskDueTomorrow": "Task \"{{title}}\" is due tomorrow",
+    "planDateApproaching": "Audit plan \"{{title}}\" date is approaching ({{date}})",
+    "programPendingApproval": "New audit program pending approval: {{title}}",
+    "commentOnYourFinding": "{{actor}} commented on your finding: {{title}}",
+    "replyToYourComment": "{{actor}} replied to your comment on finding: {{title}}"
+  },
+  "plans": {
+    "quarter": {
+      "Q1": "Q1 (Jan-Mar)",
+      "Q2": "Q2 (Apr-Jun)",
+      "Q3": "Q3 (Jul-Sep)",
+      "Q4": "Q4 (Oct-Dec)",
+      "Annual": "Annual"
+    },
+    "fiscalYear": "Fiscal Year",
+    "year": "Year"
+  },
+  "archive": {
+    "action": "Archive Plan",
+    "viewArchived": "View Archived Plans",
+    "success": "Plan archived successfully",
+    "confirmTitle": "Confirm Archive",
+    "openItemsError": "Cannot archive: {{count}} open items remaining",
+    "cannotCreateUntilArchived": "Cannot create a new plan until the previous year's plan is archived"
+  },
+  "status": {
+    "pendingApproval": "Pending Approval",
+    "archived": "Archived",
+    "planned": "Planned",
+    "fieldwork": "Fieldwork",
+    "reporting": "Reporting",
+    "closed": "Closed"
   },
   "accessibility": {
     "breadcrumb": "Breadcrumb",

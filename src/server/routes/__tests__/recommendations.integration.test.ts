@@ -66,6 +66,36 @@ describe('Recommendations Integration Tests', () => {
     mockDb = testApp.mockDb;
   });
 
+  // ─── POST /api/recommendations - BLOCKED ────────────────────────────────────
+
+  describe('POST /api/recommendations (blocked)', () => {
+    it('should return 403 ForbiddenError when attempting to create a recommendation manually', async () => {
+      const res = await request(app)
+        .post('/api/recommendations')
+        .set('Authorization', 'Bearer valid-token')
+        .send({
+          finding_id: 'some-finding-id',
+          department: 'IT',
+          responsible: 'John',
+          due_date: '2025-12-31',
+          status: 'Open',
+          risk_level: 'High',
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBeDefined();
+      expect(res.body.error.message).toContain('automatically derived');
+    });
+
+    it('should return 401 when not authenticated for POST', async () => {
+      const res = await request(app)
+        .post('/api/recommendations')
+        .send({ finding_id: 'some-id' });
+
+      expect(res.status).toBe(401);
+    });
+  });
+
   // ─── PATCH /api/recommendations/:id/resolve ────────────────────────────────
 
   describe('PATCH /api/recommendations/:id/resolve', () => {

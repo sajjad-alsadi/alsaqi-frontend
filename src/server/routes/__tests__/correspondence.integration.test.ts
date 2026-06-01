@@ -83,11 +83,20 @@ function createCorrespondenceTestApp(options?: {
     next();
   };
 
-  const authorize = (allowedRoles: readonly string[]) => (req: any, res: any, next: any) => {
-    if (!allowedRoles.includes(req.user?.role)) {
+  const authorize = (_module: string, action?: string) => (req: any, res: any, next: any) => {
+    const role = req.user?.role;
+    if (!role) {
       return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
     }
-    next();
+    // Admin and Manager can do everything
+    if (['Admin', 'Manager'].includes(role)) {
+      return next();
+    }
+    // Internal Auditor can Create and Edit but not Delete
+    if (role === 'Internal Auditor' && action && ['Create', 'Edit'].includes(action)) {
+      return next();
+    }
+    return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
   };
 
   const logError = vi.fn();

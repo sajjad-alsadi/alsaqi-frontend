@@ -3,9 +3,91 @@ import { NotFoundError, ValidationError } from '../utils/errors';
 import { NotificationService } from './NotificationService';
 import { N8nService } from '../utils/n8nService';
 
+export interface RecommendationFilters {
+  department?: string;
+  plan_id?: string;
+  status?: string;
+  page?: number | string;
+  pageSize?: number | string;
+}
+
 export class RecommendationService {
   static async getAll() {
     return await db.prepare("SELECT * FROM recommendations").all();
+  }
+
+  /**
+   * Returns paginated recommendations matching the given filters.
+   *
+   * Filters:
+   * - department: filter by department
+   * - plan_id: filter by plan_id
+   * - status: filter by status
+   * - page: page number (default 1)
+   * - pageSize: items per page (default 20, max 100)
+   *
+   * Excludes recommendations from archived plans (WHERE plan_id NOT IN archived plans).
+   *
+   * @param filters - The filter criteria
+   * @returns Paginated results with data and pagination metadata
+   */
+  static async getRecommendations(filters: RecommendationFilters = {}): Promise<{
+    data: any[];
+    pagination: { total: number; page: number; pageSize: number; totalPages: number };
+  }> {
+    const page = Math.max(1, parseInt(String(filters.page)) || 1);
+    let pageSize = parseInt(String(filters.pageSize)) || 20;
+    // Enforce max pageSize of 100
+    if (pageSize > 100) {
+      pageSize = 100;
+    }
+    if (pageSize < 1) {
+      pageSize = 20;
+    }
+    const offset = (page - 1) * pageSize;
+
+    const conditions: string[] = [];
+    const args: any[] = [];
+
+    // Exclude recommendations from archived plans
+    conditions.push("plan_id NOT IN (SELECT id FROM audit_plans WHERE is_archived = true)");
+
+    if (filters.department) {
+      conditions.push("department = ?");
+      args.push(filters.department);
+    }
+
+    if (filters.plan_id) {
+      conditions.push("plan_id = ?");
+      args.push(filters.plan_id);
+    }
+
+    if (filters.status) {
+      conditions.push("status = ?");
+      args.push(filters.status);
+    }
+
+    const whereClause = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
+
+    const countQuery = "SELECT COUNT(*) as total FROM recommendations" + whereClause;
+    const dataQuery = "SELECT * FROM recommendations" + whereClause + " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+
+    const [countRes, data] = await Promise.all([
+      db.prepare(countQuery).get(...args),
+      db.prepare(dataQuery).all(...args, pageSize, offset),
+    ]) as [any, any[]];
+
+    const total = countRes?.total || 0;
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
   }
 
   static async update(id: string | number, data: any, username: string) {

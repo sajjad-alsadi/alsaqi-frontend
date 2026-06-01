@@ -580,16 +580,10 @@ describe('CRUD Generator Integration Tests', () => {
       expect(res.body.title).toBe('تعليمات محدثة');
     });
 
-    it('POST /api/audit-findings should notify admins', async () => {
-      mockBaseService.create.mockResolvedValue({
-        id: 'finding-1',
-        finding_number: 'FND-001',
-        title: 'ملاحظة جديدة',
-      });
-
+    it('POST /api/audit-findings should return 404 (excluded from CRUD generator, handled by custom routes)', async () => {
       const testApp = createCrudTestApp();
       const req = createAuthenticatedRequest(testApp.app);
-      await req.post('/api/audit-findings').send({
+      const res = await req.post('/api/audit-findings').send({
         audit_id: 'audit-1',
         title: 'ملاحظة جديدة',
         description: 'وصف الملاحظة',
@@ -597,15 +591,7 @@ describe('CRUD Generator Integration Tests', () => {
         status: 'Open',
       });
 
-      // Should notify admin IDs
-      expect(testApp.createNotification).toHaveBeenCalledWith(
-        expect.arrayContaining(['admin-1', 'admin-2']),
-        'finding_added',
-        expect.any(String),
-        'audit-findings',
-        '/audit-findings',
-        expect.objectContaining({ entityType: 'audit_findings' })
-      );
+      expect(res.status).toBe(404);
     });
   });
 });

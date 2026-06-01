@@ -1,5 +1,5 @@
 import { db } from '../db/index';
-import { NotFoundError, ValidationError, ForbiddenError } from '../utils/errors';
+import { NotFoundError, ValidationError, ForbiddenError, ConflictError } from '../utils/errors';
 import { N8nService } from '../utils/n8nService';
 import { UserRole } from '../../constants';
 import { parsePaginationParams, computePaginationMeta } from '../utils/paginationService';
@@ -74,6 +74,161 @@ export class AuditTaskService {
     }).catch(e => console.error("n8n send error", e));
 
     return result;
+  }
+
+  /**
+   * Assigns multiple users to a task within a single transaction.
+   *
+   * Validates:
+   * - assignedBy user has Manager or Admin role
+   * - Task exists
+   * - userIds is non-empty and has at most 50 entries
+   * - All user IDs exist in the users table
+   * - No duplicate assignments (UNIQUE constraint on task_id, user_id)
+   *
+   * @param taskId - The task to assign users to
+   * @param userIds - Array of user IDs to assign (1-50)
+   * @param assignedBy - The user performing the assignment
+   * @returns Array of created assignment records
+   */
+  static async assignUsers(taskId: string, userIds: string[], assignedBy: string): Promise<{ assignments: any[] }> {
+    // Validate userIds is non-empty and within limit
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      throw new ValidationError('قائمة المستخدمين فارغة. يجب تحديد مستخدم واحد على الأقل', { field: 'userIds' });
+    }
+    if (userIds.length > 50) {
+      throw new ValidationError('لا يمكن تعيين أكثر من 50 مستخدماً لمهمة واحدة', { field: 'userIds', max: 50 });
+    }
+
+    // Validate assignedBy role is Manager or Admin
+    const assigner = await db.prepare(
+      "SELECT id, role FROM users WHERE id = ?"
+    ).get(assignedBy) as any;
+
+    if (!assigner) {
+      throw new ForbiddenError('المستخدم المُعيِّن غير موجود');
+    }
+
+    const allowedRoles = [UserRole.MANAGER, UserRole.ADMIN];
+    if (!allowedRoles.includes(assigner.role)) {
+      throw new ForbiddenError('لا تملك صلاحية تعيين مستخدمين للمهام. يجب أن يكون دورك مدير أو مسؤول');
+    }
+
+    // Validate task exists
+    const task = await db.prepare(
+      "SELECT id FROM audit_tasks WHERE id = ?"
+    ).get(taskId) as any;
+
+    if (!task) {
+      throw new NotFoundError('المهمة غير موجودة');
+    }
+
+    // Validate all user IDs exist
+    const uniqueUserIds = [...new Set(userIds)];
+    const placeholders = uniqueUserIds.map(() => '?').join(', ');
+    const existingUsers = await db.prepare(
+      `SELECT id FROM users WHERE id IN (${placeholders})`
+    ).all(...uniqueUserIds) as any[];
+
+    if (existingUsers.length !== uniqueUserIds.length) {
+      const existingIds = new Set(existingUsers.map((u: any) => u.id));
+      const missingIds = uniqueUserIds.filter(id => !existingIds.has(id));
+      throw new ValidationError(
+        'بعض معرّفات المستخدمين غير موجودة',
+        { missingUserIds: missingIds }
+      );
+    }
+
+    // Insert assignments within a single transaction
+    const doAssign = db.transaction(async () => {
+      const assignments: any[] = [];
+
+      for (const userId of uniqueUserIds) {
+        // Check for existing assignment (UNIQUE constraint)
+        const existing = await db.prepare(
+          "SELECT id FROM task_assignments WHERE task_id = ? AND user_id = ?"
+        ).get(taskId, userId) as any;
+
+        if (existing) {
+          throw new ConflictError(`المستخدم ${userId} معيّن مسبقاً لهذه المهمة`);
+        }
+
+        const result = await db.prepare(
+          `INSERT INTO task_assignments (task_id, user_id, assigned_by)
+           VALUES (?, ?, ?)
+           RETURNING id, task_id, user_id, assigned_at, assigned_by`
+        ).get(taskId, userId, assignedBy) as any;
+
+        assignments.push(result);
+      }
+
+      return assignments;
+    });
+
+    const assignments = await doAssign();
+    return { assignments };
+  }
+
+  /**
+   * Removes a user assignment from a task.
+   *
+   * Validates:
+   * - removedBy user has Manager or Admin role
+   * - The assignment exists
+   *
+   * @param taskId - The task to unassign from
+   * @param userId - The user to unassign
+   * @param removedBy - The user performing the removal
+   */
+  static async unassignUser(taskId: string, userId: string, removedBy: string): Promise<{ success: boolean }> {
+    // Validate removedBy role is Manager or Admin
+    const remover = await db.prepare(
+      "SELECT id, role FROM users WHERE id = ?"
+    ).get(removedBy) as any;
+
+    if (!remover) {
+      throw new ForbiddenError('المستخدم غير موجود');
+    }
+
+    const allowedRoles = [UserRole.MANAGER, UserRole.ADMIN];
+    if (!allowedRoles.includes(remover.role)) {
+      throw new ForbiddenError('لا تملك صلاحية إزالة تعيين المستخدمين من المهام. يجب أن يكون دورك مدير أو مسؤول');
+    }
+
+    // Check assignment exists
+    const assignment = await db.prepare(
+      "SELECT id FROM task_assignments WHERE task_id = ? AND user_id = ?"
+    ).get(taskId, userId) as any;
+
+    if (!assignment) {
+      throw new NotFoundError('التعيين غير موجود');
+    }
+
+    // Delete the assignment
+    await db.prepare(
+      "DELETE FROM task_assignments WHERE task_id = ? AND user_id = ?"
+    ).run(taskId, userId);
+
+    return { success: true };
+  }
+
+  /**
+   * Gets all users assigned to a specific task.
+   *
+   * @param taskId - The task ID to get assignments for
+   * @returns Array of assignment records with user details
+   */
+  static async getTaskAssignments(taskId: string): Promise<any[]> {
+    const assignments = await db.prepare(
+      `SELECT ta.id, ta.task_id, ta.user_id, ta.assigned_at, ta.assigned_by,
+              u.name as user_name, u.username as user_username
+       FROM task_assignments ta
+       LEFT JOIN users u ON ta.user_id = u.id
+       WHERE ta.task_id = ?
+       ORDER BY ta.assigned_at ASC`
+    ).all(taskId) as any[];
+
+    return assignments;
   }
 
   static async getTasks(params: any = {}) {

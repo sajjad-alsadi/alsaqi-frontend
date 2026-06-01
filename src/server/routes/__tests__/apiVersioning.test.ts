@@ -66,6 +66,13 @@ vi.mock('../../services/NotificationService', () => ({
 vi.mock('../../utils/routeRegistry', () => ({
   registerRoutes: vi.fn(),
   logDuplicateRoutes: vi.fn().mockReturnValue([]),
+  methodNotAllowed: (methods: string[]) => (req: any, res: any, next: any) => {
+    if (!methods.includes(req.method.toUpperCase())) {
+      res.status(405).json({ error: 'Method Not Allowed' });
+    } else {
+      next();
+    }
+  },
 }));
 
 // Mock all route creators to return simple routers
@@ -96,6 +103,23 @@ vi.mock('../comments', () => ({ createCommentRoutes: mockRouter('/comments') }))
 vi.mock('../auditTasks', () => ({ createAuditTaskRoutes: mockRouter('/audit-tasks') }));
 vi.mock('../recommendations', () => ({ createRecommendationRoutes: mockRouter('/recommendations') }));
 vi.mock('../../utils/crudGenerator', () => ({ createCrudRoutes: () => require('express').Router() }));
+vi.mock('../auditFindings', () => ({ createAuditFindingRoutes: () => require('express').Router() }));
+vi.mock('../health', () => ({
+  createHealthRouter: () => {
+    const expressModule = require('express');
+    const router = expressModule.Router();
+    router.get('/health', (req: any, res: any) => {
+      res.json({ status: 'healthy' });
+    });
+    return router;
+  },
+}));
+vi.mock('../bulk', () => ({ createBulkRoutes: () => require('express').Router() }));
+vi.mock('../adminBackup', () => ({ createAdminBackupRoutes: () => require('express').Router() }));
+vi.mock('../permissionAdmin', () => ({ createPermissionAdminRoutes: () => require('express').Router() }));
+vi.mock('../archive', () => ({ createArchiveRoutes: () => require('express').Router() }));
+vi.mock('../lookups', () => ({ createLookupRoutes: () => require('express').Router() }));
+vi.mock('../../middleware/idempotency', () => ({ createIdempotencyMiddleware: () => (req: any, res: any, next: any) => next() }));
 
 import { setupRoutes, CURRENT_API_VERSION, SUPPORTED_VERSIONS } from '../index';
 

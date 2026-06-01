@@ -985,7 +985,7 @@
     "title": "ملاحظات التدقيق",
     "professionalFramework": "الإطار المهني وفق معايير التدقيق الداخلي",
     "loadingFindings": "جاري تحميل الملاحظات...",
-    "findingNumber": "الملاحظة #",
+    "findingNumber": "رقم الملاحظة",
     "viewRecommendations": "عرض التوصيات",
     "condition": "الحالة (الواقع)",
     "criteria": "المعيار",
@@ -994,7 +994,11 @@
     "recommendation": "التوصية",
     "riskLevel": "مستوى الخطر",
     "editFinding": "تعديل الملاحظة",
-    "addFinding": "إضافة ملاحظة"
+    "addFinding": "إضافة ملاحظة",
+    "type": {
+      "control_design_deficiency": "قصور في تصميم الرقابة",
+      "operational_design_deficiency": "قصور في التصميم التشغيلي"
+    }
   },
   "reports": {
     "auditReport": "تقرير التدقيق",
@@ -2745,7 +2749,41 @@
     "fraudAccessApproved": "تمت الموافقة على طلب الوصول إلى سجل الاحتيال.",
     "fraudAccessRejected": "تم رفض طلب الوصول إلى سجل الاحتيال: {{reason}}",
     "passwordResetInvalidUser": "محاولة إعادة تعيين كلمة مرور لمستخدم غير موجود أو غير نشط: {{reason}}",
-    "passwordResetSubmitted": "تم إرسال طلب إعادة تعيين كلمة المرور للمستخدم {{user}}"
+    "passwordResetSubmitted": "تم إرسال طلب إعادة تعيين كلمة المرور للمستخدم {{user}}",
+    "yearEndArchiveReminder": "تذكير: يرجى أرشفة خطة التدقيق للسنة الحالية قبل نهاية السنة المالية",
+    "findingStatusChanged": "تغيرت حالة الملاحظة \"{{title}}\" من {{oldStatus}} إلى {{newStatus}}",
+    "taskDueTomorrow": "المهمة \"{{title}}\" تستحق غداً",
+    "planDateApproaching": "موعد خطة التدقيق \"{{title}}\" يقترب ({{date}})",
+    "programPendingApproval": "برنامج تدقيق جديد بانتظار الاعتماد: {{title}}",
+    "commentOnYourFinding": "{{actor}} علّق على ملاحظتك: {{title}}",
+    "replyToYourComment": "{{actor}} ردّ على تعليقك في الملاحظة: {{title}}"
+  },
+  "plans": {
+    "quarter": {
+      "Q1": "الربع الأول",
+      "Q2": "الربع الثاني",
+      "Q3": "الربع الثالث",
+      "Q4": "الربع الرابع",
+      "Annual": "سنوي"
+    },
+    "fiscalYear": "السنة المالية",
+    "year": "السنة"
+  },
+  "archive": {
+    "action": "أرشفة الخطة",
+    "viewArchived": "عرض الخطط المؤرشفة",
+    "success": "تمت أرشفة الخطة بنجاح",
+    "confirmTitle": "تأكيد الأرشفة",
+    "openItemsError": "لا يمكن الأرشفة: يوجد {{count}} عنصر غير مغلق",
+    "cannotCreateUntilArchived": "لا يمكن إنشاء خطة جديدة حتى تتم أرشفة خطة السنة السابقة"
+  },
+  "status": {
+    "pendingApproval": "بانتظار الموافقة",
+    "archived": "مؤرشف",
+    "planned": "مخطط",
+    "fieldwork": "تنفيذ ميداني",
+    "reporting": "إعداد التقارير",
+    "closed": "مغلق"
   },
   "accessibility": {
     "breadcrumb": "مسار التنقل",

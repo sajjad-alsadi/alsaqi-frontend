@@ -66,11 +66,16 @@ function createFraudTestApp(options?: {
     next();
   };
 
-  const authorize = (allowedRoles: readonly string[]) => (req: any, res: any, next: any) => {
-    if (!allowedRoles.includes(req.user?.role)) {
+  const authorize = (_module: string, _action?: string) => (req: any, res: any, next: any) => {
+    const role = req.user?.role;
+    if (!role) {
       return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
     }
-    next();
+    const adminRoles = ['Admin', 'Manager'];
+    if (adminRoles.includes(role)) {
+      return next();
+    }
+    return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
   };
 
   const mockDb = {

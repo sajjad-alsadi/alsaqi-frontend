@@ -22,7 +22,35 @@ i18n
     detection: {
       order: ['localStorage', 'cookie', 'navigator'],
       caches: ['localStorage', 'cookie']
-    }
+    },
+    parseMissingKeyHandler: (key: string) => {
+      // Fallback: try the other language, or show key ID with visual indicator
+      const currentLng = i18n.language || 'ar';
+      const otherLng = currentLng === 'ar' ? 'en' : 'ar';
+      const otherResources = i18n.getResourceBundle(otherLng, 'translation');
+      
+      // Try to resolve the key from the other language
+      const keys = key.split('.');
+      let value: unknown = otherResources;
+      for (const k of keys) {
+        if (value && typeof value === 'object' && k in (value as Record<string, unknown>)) {
+          value = (value as Record<string, unknown>)[k];
+        } else {
+          value = undefined;
+          break;
+        }
+      }
+      
+      if (typeof value === 'string' && value.length > 0) {
+        return `⚠️ ${value}`;
+      }
+      
+      // Show key ID with visual indicator if no translation found in either language
+      return `⚠️ [${key}]`;
+    },
+    saveMissing: false,
+    returnNull: false,
+    returnEmptyString: false,
   });
 
 // Set initial direction
