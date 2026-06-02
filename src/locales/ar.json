@@ -949,7 +949,10 @@
     "selectEvidence": "اختر الدليل",
     "previewNotAvailable": "المعاينة غير متاحة",
     "previewNotAvailableDesc": "المعاينة غير متاحة لهذا النوع من الملفات. يمكنك تحميله لعرضه.",
-    "downloadFile": "تحميل الملف"
+    "downloadFile": "تحميل الملف",
+    "assignUsers": "المكلّفون بالمهمة",
+    "selected": "محدد",
+    "multiAssignHint": "يمكنك تحديد أكثر من شخص لإسناد المهمة إليهم"
   },
   "auditTypes": {
     "operational": "تشغيلي",
@@ -2779,6 +2782,14 @@
     "confirmTitle": "تأكيد الأرشفة",
     "openItemsError": "لا يمكن الأرشفة: يوجد {{count}} عنصر غير مغلق",
     "cannotCreateUntilArchived": "لا يمكن إنشاء خطة جديدة حتى تتم أرشفة خطة السنة السابقة"
+  },
+  "filters": {
+    "filters": "تصفية",
+    "byPlan": "حسب الخطة",
+    "byDepartment": "حسب القسم",
+    "byStatus": "حسب الحالة",
+    "byYear": "حسب السنة",
+    "byQuarter": "حسب الربع"
   },
   "status": {
     "pendingApproval": "بانتظار الموافقة",

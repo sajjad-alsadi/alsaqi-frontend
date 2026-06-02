@@ -70,7 +70,23 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
         </div>
       </div>
 
-      <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+      <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        {/* عنوان الملاحظة */}
+        <div className="lg:col-span-4 space-y-3 bg-[var(--color-primary)]/5 p-6 rounded-xl border border-[var(--color-primary)]/20">
+          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.findingTitle')}</p>
+          <p className="text-base font-bold text-[var(--color-text-main)]">{(finding as any).title || '—'}</p>
+        </div>
+        {/* نوع الملاحظة */}
+        <div className="space-y-3">
+          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.findingType')}</p>
+          <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">
+            {(finding as any).finding_type === 'control_design_deficiency'
+              ? t('findings.type.control_design_deficiency')
+              : (finding as any).finding_type === 'operational_design_deficiency'
+              ? t('findings.type.operational_design_deficiency')
+              : (finding as any).finding_type || '—'}
+          </p>
+        </div>
         <div className="space-y-3">
           <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.condition')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.condition}</p>
@@ -80,14 +96,10 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.criteria}</p>
         </div>
         <div className="space-y-3">
-          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.cause')}</p>
-          <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.cause}</p>
-        </div>
-        <div className="space-y-3">
           <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.consequence')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.consequence}</p>
         </div>
-        <div className="space-y-3 bg-[var(--color-success)]/5 p-6 rounded-xl border border-[var(--color-success)]/20">
+        <div className="lg:col-span-4 space-y-3 bg-[var(--color-success)]/5 p-6 rounded-xl border border-[var(--color-success)]/20">
           <p className="text-[10px] text-[var(--color-success)] uppercase font-bold tracking-[0.2em]">{t('findings.recommendation')}</p>
           <p className="text-sm text-[var(--color-success)] leading-relaxed font-bold">{finding.recommendation}</p>
         </div>

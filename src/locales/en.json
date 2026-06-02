@@ -2780,6 +2780,14 @@
     "openItemsError": "Cannot archive: {{count}} open items remaining",
     "cannotCreateUntilArchived": "Cannot create a new plan until the previous year's plan is archived"
   },
+  "filters": {
+    "filters": "Filters",
+    "byPlan": "By Plan",
+    "byDepartment": "By Department",
+    "byStatus": "By Status",
+    "byYear": "By Year",
+    "byQuarter": "By Quarter"
+  },
   "status": {
     "pendingApproval": "Pending Approval",
     "archived": "Archived",

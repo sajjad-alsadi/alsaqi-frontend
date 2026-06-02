@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Save, FileText, List, Plus, Trash2, Shield, Target, CheckCircle } from 'lucide-react';
 import { AuditProgram, AuditProcedure } from '../../types';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../services/formatService';
 import { AuditStatus, AuditType, ControlTestType, UserRole } from '../../constants';
 import { useDepartments } from '../../hooks/useDepartments';
+import api from '../../services/api';
 
 interface AuditProgramEditorProps {
   program: Partial<AuditProgram>;
@@ -45,6 +46,20 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
   const isRTL = i18n.language === 'ar';
   const { formatNumber } = useFormat();
   const { departments } = useDepartments();
+
+  // Risk register entries for linking
+  const [risks, setRisks] = useState<any[]>([]);
+  // Compliance items for reference standard
+  const [complianceItems, setComplianceItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/risk-register', { params: { pageSize: 200 } })
+      .then(res => setRisks(Array.isArray(res.data) ? res.data : (res.data.data || [])))
+      .catch(() => setRisks([]));
+    api.get('/compliance-items', { params: { pageSize: 200 } })
+      .then(res => setComplianceItems(Array.isArray(res.data) ? res.data : (res.data.data || [])))
+      .catch(() => setComplianceItems([]));
+  }, []);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -235,59 +250,67 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
             </h3>
             
             <div className="space-y-4">
+              {/* Key Risks — pulled from Risk Register */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.keyRisks')}</label>
-                <textarea 
-                  className="input-field min-h-[100px]" 
-                  value={program.key_risks || ''} 
-                  onChange={e => onUpdateProgram({ key_risks: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.controlObjectives')}</label>
-                <textarea 
-                  className="input-field min-h-[100px]" 
-                  value={program.control_objectives || ''} 
-                  onChange={e => onUpdateProgram({ control_objectives: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.referenceStandard')}</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {(program.reference_standard ? program.reference_standard.split(',').filter(Boolean) : []).map((standard, index) => (
-                    <span key={index} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
-                      {standard}
-                      <button 
-                        onClick={() => {
-                          const standards = (program.reference_standard ? program.reference_standard.split(',').filter(Boolean) : []);
-                          onUpdateProgram({ reference_standard: standards.filter((_, i) => i !== index).join(',') });
-                        }}
-                        className="hover:text-[var(--color-primary)]/70"
-                      >
-                        <X size={12} />
-                      </button>
+                {/* Show selected risks as tags */}
+                <div className="flex flex-wrap gap-2 mb-2 min-h-[32px]">
+                  {(program.key_risks ? program.key_risks.split('||').filter(Boolean) : []).map((r, i) => (
+                    <span key={i} className="bg-rose-50 text-rose-600 border border-rose-200 px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                      {r}
+                      <button onClick={() => {
+                        const arr = (program.key_risks || '').split('||').filter(Boolean);
+                        onUpdateProgram({ key_risks: arr.filter((_, idx) => idx !== i).join('||') });
+                      }} className="hover:text-rose-800"><X size={11} /></button>
                     </span>
                   ))}
                 </div>
-                <select 
-                  className="input-field" 
-                  value=""
+                <select className="input-field" value=""
                   onChange={e => {
-                    const selectedValue = e.target.value;
-                    if (!selectedValue) return;
-                    const standards = (program.reference_standard ? program.reference_standard.split(',').filter(Boolean) : []);
-                    if (!standards.includes(selectedValue)) {
-                      onUpdateProgram({ reference_standard: [...standards, selectedValue].join(',') });
+                    if (!e.target.value) return;
+                    const arr = (program.key_risks || '').split('||').filter(Boolean);
+                    if (!arr.includes(e.target.value)) {
+                      onUpdateProgram({ key_risks: [...arr, e.target.value].join('||') });
                     }
-                  }}
-                >
-                  <option value="">{t('program.selectStandard')}</option>
-                  <optgroup label={t('program.centralBankInstructions')}>
-                    {Array.isArray(instructions) && instructions.map(i => <option key={i.id} value={i.title}>{i.title}</option>)}
-                  </optgroup>
-                  <optgroup label={t('program.lawsAndRegulations')}>
-                    {Array.isArray(laws) && laws.map(l => <option key={l.id} value={l.title}>{l.title}</option>)}
-                  </optgroup>
+                  }}>
+                  <option value="">{t('programs.linkRisks') || 'اختر خطراً من السجل'}</option>
+                  {risks.map(r => (
+                    <option key={r.id} value={r.risk_id ? `${r.risk_id}: ${r.description}` : r.description}>
+                      {r.risk_id ? `${r.risk_id} — ` : ''}{r.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Reference Standard — pulled from Compliance Matrix */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('program.referenceStandard')}</label>
+                <div className="flex flex-wrap gap-2 mb-2 min-h-[32px]">
+                  {(program.reference_standard ? program.reference_standard.split(',').filter(Boolean) : []).map((standard, index) => (
+                    <span key={index} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                      {standard}
+                      <button onClick={() => {
+                        const standards = (program.reference_standard || '').split(',').filter(Boolean);
+                        onUpdateProgram({ reference_standard: standards.filter((_, i) => i !== index).join(',') });
+                      }} className="hover:text-[var(--color-primary)]/70"><X size={12} /></button>
+                    </span>
+                  ))}
+                </div>
+                <select className="input-field" value=""
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (!val) return;
+                    const arr = (program.reference_standard || '').split(',').filter(Boolean);
+                    if (!arr.includes(val)) {
+                      onUpdateProgram({ reference_standard: [...arr, val].join(',') });
+                    }
+                  }}>
+                  <option value="">{t('programs.linkStandards') || 'اختر معياراً من مصفوفة الامتثال'}</option>
+                  {complianceItems.map(c => (
+                    <option key={c.id} value={c.ref_number ? `${c.ref_number}: ${c.title}` : c.title}>
+                      {c.ref_number ? `${c.ref_number} — ` : ''}{c.title}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
