@@ -7,6 +7,7 @@ import { AuditFinding, AuditPlan } from '../types';
 import { AuditStatus, RiskLevel } from '../constants';
 import CommentSection from './CommentSection';
 import api from '../services/api';
+import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
 import { FormField } from './ui/FormField';
@@ -14,9 +15,10 @@ import logger from '../utils/logger';
 
 const findingSchema = z.object({
   audit_id: z.string().min(1, 'Field is required'),
+  title: z.string().min(1, 'Field is required'),
+  finding_type: z.enum(['control_design_deficiency', 'operational_design_deficiency']),
   condition: z.string().min(1, 'Field is required'),
   criteria: z.string().min(1, 'Field is required'),
-  cause: z.string().min(1, 'Field is required'),
   consequence: z.string().min(1, 'Field is required'),
   recommendation: z.string().min(1, 'Field is required'),
   risk_level: z.nativeEnum(RiskLevel),
@@ -47,9 +49,10 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
     mode: 'onBlur',
     defaultValues: {
       audit_id: '',
+      title: '',
+      finding_type: 'control_design_deficiency' as const,
       condition: '',
       criteria: '',
-      cause: '',
       consequence: '',
       recommendation: '',
       risk_level: RiskLevel.MEDIUM,
@@ -58,7 +61,6 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
   });
 
   const condition = watch('condition');
-  const cause = watch('cause');
   const consequence = watch('consequence');
 
   useEffect(() => {
@@ -115,16 +117,23 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
           </Select>
         </FormField>
 
+        <FormField label={t('findings.findingTitle')} error={errors.title?.message} required className="md:col-span-2">
+          <Input {...register('title')} />
+        </FormField>
+
+        <FormField label={t('findings.findingType')} error={errors.finding_type?.message} required className="md:col-span-2">
+          <Select {...register('finding_type')}>
+            <option value="control_design_deficiency">{t('findings.type.control_design_deficiency')}</option>
+            <option value="operational_design_deficiency">{t('findings.type.operational_design_deficiency')}</option>
+          </Select>
+        </FormField>
+
         <FormField label={t('findings.condition')} error={errors.condition?.message} required className="md:col-span-2">
           <Textarea rows={3} {...register('condition')} />
         </FormField>
 
         <FormField label={t('findings.criteria')} error={errors.criteria?.message} required className="md:col-span-2">
           <Textarea rows={3} {...register('criteria')} />
-        </FormField>
-
-        <FormField label={t('findings.cause')} error={errors.cause?.message} required className="md:col-span-2">
-          <Textarea rows={3} {...register('cause')} />
         </FormField>
 
         <FormField label={t('findings.consequence')} error={errors.consequence?.message} required className="md:col-span-2">

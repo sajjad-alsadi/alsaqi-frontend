@@ -23,6 +23,8 @@ type AuditPlanFormValues = {
   status: AuditStatus;
   notes?: string;
   program_id?: string | number;
+  year: number;
+  quarter?: string;
 };
 
 interface AuditPlanFormProps {
@@ -45,6 +47,8 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
     status: z.nativeEnum(AuditStatus),
     notes: z.string().optional(),
     program_id: z.string().optional(),
+    year: z.coerce.number().min(2000).max(2100),
+    quarter: z.string().optional(),
   });
   
   const { departments } = useDepartments();
@@ -70,7 +74,9 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
       planned_end_date: '',
       lead_auditor: '',
       status: AuditStatus.PLANNED,
-      notes: ''
+      notes: '',
+      year: new Date().getFullYear(),
+      quarter: '',
     },
   });
 
@@ -223,6 +229,20 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
             {Object.values(AuditStatus).map((status) => (
               <option key={status} value={status}>{t(`plan.${status.toLowerCase()}`)}</option>
             ))}
+          </Select>
+        </FormField>
+
+        <FormField label={t('plans.year')} error={errors.year?.message} required>
+          <Input type="number" {...register('year')} />
+        </FormField>
+
+        <FormField label={t('plans.quarter')} error={errors.quarter?.message}>
+          <Select {...register('quarter')}>
+            <option value="">{t('plans.quarterOptions.Annual')}</option>
+            <option value="Q1">{t('plans.quarterOptions.Q1')}</option>
+            <option value="Q2">{t('plans.quarterOptions.Q2')}</option>
+            <option value="Q3">{t('plans.quarterOptions.Q3')}</option>
+            <option value="Q4">{t('plans.quarterOptions.Q4')}</option>
           </Select>
         </FormField>
       </div>

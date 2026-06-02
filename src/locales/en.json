@@ -834,6 +834,18 @@
     "overdue": "Overdue",
     "review": "In Review"
   },
+  "plans": {
+    "year": "Year",
+    "quarter": "Quarter",
+    "fiscalYear": "Fiscal Year",
+    "quarterOptions": {
+      "Q1": "Q1 (Jan-Mar)",
+      "Q2": "Q2 (Apr-Jun)",
+      "Q3": "Q3 (Jul-Sep)",
+      "Q4": "Q4 (Oct-Dec)",
+      "Annual": "Annual"
+    }
+  },
   "program": {
     "library": "Library",
     "manageAndStandardizeAuditPrograms": "Manage and standardize audit programs",
@@ -987,6 +999,8 @@
     "loadingFindings": "Loading findings...",
     "findingNumber": "Finding Number",
     "viewRecommendations": "View Recommendations",
+    "findingTitle": "Finding Title",
+    "findingType": "Finding Type",
     "condition": "Condition",
     "criteria": "Criteria",
     "cause": "Cause",
@@ -2757,17 +2771,6 @@
     "programPendingApproval": "New audit program pending approval: {{title}}",
     "commentOnYourFinding": "{{actor}} commented on your finding: {{title}}",
     "replyToYourComment": "{{actor}} replied to your comment on finding: {{title}}"
-  },
-  "plans": {
-    "quarter": {
-      "Q1": "Q1 (Jan-Mar)",
-      "Q2": "Q2 (Apr-Jun)",
-      "Q3": "Q3 (Jul-Sep)",
-      "Q4": "Q4 (Oct-Dec)",
-      "Annual": "Annual"
-    },
-    "fiscalYear": "Fiscal Year",
-    "year": "Year"
   },
   "archive": {
     "action": "Archive Plan",
