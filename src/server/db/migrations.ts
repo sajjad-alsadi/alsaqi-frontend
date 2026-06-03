@@ -1029,6 +1029,25 @@ export const runMigrations = async () => {
       )
     `).run();
 
+    // Ensure columns added in the expanded schema exist (handles case where
+    // the table was created from the older, minimal definition above)
+    const addColumnIfNotExists = [
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS source_type TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS category TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS effective_date TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS review_date TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS maturity_score INTEGER`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS gap_notes TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES org_entities(id)`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS description TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS keywords TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS version TEXT`,
+      `ALTER TABLE compliance_items ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`,
+    ];
+    for (const ddl of addColumnIfNotExists) {
+      try { await db.prepare(ddl).run(); } catch (_) { /* column already exists */ }
+    }
+
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS finding_compliance (
         finding_id     UUID NOT NULL REFERENCES audit_findings(id),
