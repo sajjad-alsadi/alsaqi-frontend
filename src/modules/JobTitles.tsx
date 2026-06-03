@@ -141,7 +141,7 @@ const JobTitles: React.FC = () => {
             <Briefcase size={24} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">{t('jobTitles')}</h3>
+            <h3 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">{t('common.jobTitles')}</h3>
             <p className="text-xs text-[var(--color-text-muted)] font-bold">{t('manageOrgRoles')}</p>
           </div>
         </div>
@@ -246,7 +246,7 @@ const JobTitles: React.FC = () => {
             <thead>
               <tr className="bg-[var(--color-bg-soft)]/50 border-b border-[var(--color-border-soft)]">
                 <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.id')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('jobTitles')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.jobTitles')}</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.departments')}</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('jobLevel')}</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('common.statusLabel')}</th>

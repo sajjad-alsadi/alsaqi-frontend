@@ -1241,9 +1241,20 @@
     "deleteConfirm": "Confirm Delete",
     "deleteMessage": "Are you sure you want to delete this recommendation? This action cannot be undone.",
     "noRecommendationTextFound": "No recommendation text found",
+    "noRecommendations": "No recommendations found",
     "save": "Save"
   },
-  "jobTitles": "Job Titles",
+  "jobTitles": {
+    "title": "Job Titles",
+    "executive": "Executive",
+    "manager": "Manager",
+    "officer": "Officer",
+    "staff": "Staff",
+    "active": "Active",
+    "inactive": "Inactive",
+    "failedToSaveJobTitle": "Failed to save job title",
+    "failedToDeleteJobTitle": "Failed to delete job title"
+  },
   "userManagement": {
     "title": "System User Management",
     "subtitle": "Manage employee access, assign roles, and control security settings",

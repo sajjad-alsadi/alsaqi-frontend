@@ -1244,9 +1244,20 @@
     "deleteConfirm": "تأكيد الحذف",
     "deleteMessage": "هل أنت متأكد من حذف هذه التوصية؟ لا يمكن التراجع عن هذا الإجراء.",
     "noRecommendationTextFound": "لم يتم العثور على نص التوصية",
+    "noRecommendations": "لا توجد توصيات",
     "save": "حفظ"
   },
-  "jobTitles": "المسميات الوظيفية",
+  "jobTitles": {
+    "title": "المسميات الوظيفية",
+    "executive": "تنفيذي",
+    "manager": "مدير",
+    "officer": "ضابط",
+    "staff": "موظف",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "failedToSaveJobTitle": "فشل في حفظ المسمى الوظيفي",
+    "failedToDeleteJobTitle": "فشل في حذف المسمى الوظيفي"
+  },
   "userManagement": {
     "title": "إدارة مستخدمي النظام",
     "subtitle": "إدارة وصول الموظفين وتعيين الأدوار والتحكم في إعدادات الأمان",
