@@ -907,6 +907,8 @@
     "selectStandard": "اختر المعيار",
     "centralBankInstructions": "تعليمات البنك المركزي",
     "lawsAndRegulations": "القوانين والأنظمة",
+    "linkRisks": "ربط خطر من سجل المخاطر",
+    "linkStandards": "ربط معيار من مصفوفة الامتثال",
     "programStatus": "حالة البرنامج",
     "compliance": "اختبار الامتثال",
     "substantive": "اختبار جوهري",
@@ -1012,6 +1014,8 @@
     "riskLevel": "مستوى الخطر",
     "editFinding": "تعديل الملاحظة",
     "addFinding": "إضافة ملاحظة",
+    "writtenBy": "كتبها",
+    "changeStatus": "تغيير الحالة",
     "type": {
       "control_design_deficiency": "قصور في تصميم الرقابة",
       "operational_design_deficiency": "قصور في التصميم التشغيلي"

@@ -43,17 +43,19 @@ export class AuditService {
     const pageSize = parseInt(params.pageSize) || 20;
     const offset = (page - 1) * pageSize;
 
-    let query = "SELECT * FROM audit_findings";
-    let countQuery = "SELECT COUNT(*) as total FROM audit_findings";
+    let query = `SELECT af.*, u.name as created_by_name 
+                 FROM audit_findings af
+                 LEFT JOIN users u ON af.created_by = u.id`;
+    let countQuery = "SELECT COUNT(*) as total FROM audit_findings af";
     const args: any[] = [];
     let whereClause = "";
 
     if (params.audit_id) {
-      whereClause = " WHERE audit_id = ?";
+      whereClause = " WHERE af.audit_id = ?";
       args.push(params.audit_id);
     }
 
-    query += whereClause + " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    query += whereClause + " ORDER BY af.created_at DESC LIMIT ? OFFSET ?";
     countQuery += whereClause;
 
     const [data, countRes] = await Promise.all([

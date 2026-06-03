@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { AlertTriangle, FileText } from 'lucide-react';
+import { AlertTriangle, FileText, ChevronDown, User } from 'lucide-react';
 import { AuditFinding } from '../types';
 import { RiskLevel } from '../constants';
 import Badge from './Badge';
 import InteractiveIcon from './InteractiveIcon';
 import { useFormat } from '../services/formatService';
+import api from '../services/api';
+import toast from 'react-hot-toast';
+import logger from '../utils/logger';
 
 interface FindingCardProps {
   finding: AuditFinding;
@@ -14,7 +17,16 @@ interface FindingCardProps {
   t: any;
   handleEdit: (finding: AuditFinding) => void;
   setActiveTab: (tab: string) => void;
+  onStatusChanged?: () => void;
 }
+
+// Allowed next statuses per current status
+const NEXT_STATUSES: Record<string, string[]> = {
+  'Open': ['In Progress'],
+  'In Progress': ['Pending Approval', 'Closed'],
+  'Pending Approval': ['Closed', 'In Progress'],
+  'Closed': [],
+};
 
 const FindingCard: React.FC<FindingCardProps> = React.memo(({ 
   finding, 
@@ -22,9 +34,37 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
   isRTL, 
   t, 
   handleEdit, 
-  setActiveTab 
+  setActiveTab,
+  onStatusChanged
 }) => {
   const { formatNumber } = useFormat();
+  const [changingStatus, setChangingStatus] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
+
+  const nextStatuses = NEXT_STATUSES[(finding as any).status] || [];
+
+  const handleStatusChange = async (newStatus: string) => {
+    setShowStatusMenu(false);
+    setChangingStatus(true);
+    try {
+      await api.patch(`/audit-findings/${finding.id}/status`, { status: newStatus });
+      toast.success(t('common.statusUpdated') || 'تم تحديث الحالة');
+      onStatusChanged?.();
+    } catch (err: any) {
+      logger.error('Status change failed', err);
+      const msg = err.response?.data?.error?.message || err.response?.data?.error || t('errorOccurred');
+      toast.error(typeof msg === 'string' ? msg : t('errorOccurred'));
+    } finally {
+      setChangingStatus(false);
+    }
+  };
+
+  const statusLabel = (s: string) => {
+    if (s === 'In Progress') return t('common.inProgress');
+    if (s === 'Pending Approval') return t('status.pendingApproval');
+    if (s === 'Closed') return t('common.closed');
+    return t('common.open');
+  };
 
   return (
     <motion.div 
@@ -49,9 +89,44 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
             <p className="text-xs text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
               {t('common.auditPlan')}: {finding.plan_code || formatNumber(finding.audit_id)} • {t('common.statusLabel')}: <Badge type="status" value={finding.status} className="ms-2" />
             </p>
+            {/* اسم المدقق الكاتب */}
+            {(finding as any).created_by_name && (
+              <div className="flex items-center gap-1 mt-1">
+                <User size={12} className="text-[var(--color-text-muted)]" />
+                <span className="text-[10px] text-[var(--color-text-muted)] font-bold">
+                  {t('findings.writtenBy') || 'كتبها'}: {(finding as any).created_by_name}
+                </span>
+              </div>
+            )}
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* زر تغيير الحالة */}
+          {nextStatuses.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowStatusMenu(v => !v)}
+                disabled={changingStatus}
+                className="flex items-center gap-2 px-4 py-2 bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/40 font-bold rounded-xl text-xs uppercase tracking-widest transition-all disabled:opacity-50"
+              >
+                {changingStatus ? t('common.loading') : (t('findings.changeStatus') || 'تغيير الحالة')}
+                <ChevronDown size={14} />
+              </button>
+              {showStatusMenu && (
+                <div className="absolute top-full mt-1 end-0 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-xl z-20 min-w-[160px] overflow-hidden">
+                  {nextStatuses.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => handleStatusChange(s)}
+                      className="w-full text-start px-4 py-3 text-sm font-bold text-[var(--color-text-main)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-colors"
+                    >
+                      {statusLabel(s)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <InteractiveIcon 
             icon={FileText}
             onClick={() => handleEdit(finding)}

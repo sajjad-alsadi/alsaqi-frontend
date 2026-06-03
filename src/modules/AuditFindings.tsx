@@ -97,6 +97,7 @@ const AuditFindings: React.FC = () => {
               t={t}
               handleEdit={handleEdit}
               setActiveTab={setActiveTab}
+              onStatusChanged={fetchFindings}
             />
           ))}
         </div>

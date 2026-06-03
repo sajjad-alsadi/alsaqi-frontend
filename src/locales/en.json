@@ -907,6 +907,8 @@
     "selectStandard": "Select Standard",
     "centralBankInstructions": "Central Bank Instructions",
     "lawsAndRegulations": "Laws and Regulations",
+    "linkRisks": "Link risk from Risk Register",
+    "linkStandards": "Link standard from Compliance Matrix",
     "programStatus": "Program Status",
     "compliance": "Compliance",
     "substantive": "Substantive",
@@ -1009,6 +1011,8 @@
     "riskLevel": "Risk Level",
     "editFinding": "Edit Finding",
     "addFinding": "Add Finding",
+    "writtenBy": "Written by",
+    "changeStatus": "Change Status",
     "type": {
       "control_design_deficiency": "Control Design Deficiency",
       "operational_design_deficiency": "Operational Design Deficiency"
