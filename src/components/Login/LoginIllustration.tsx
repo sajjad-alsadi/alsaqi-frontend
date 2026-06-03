@@ -45,13 +45,13 @@ const LoginIllustration: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute bottom-16 start-16 xl:start-24 flex gap-6"
+          className="absolute bottom-16 start-16 xl:start-24 flex gap-4 max-w-[calc(100%-4rem)] xl:max-w-[calc(100%-6rem)]"
         >
-          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-6 min-w-[200px] shadow-2xl border border-white/20">
+          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-5 min-w-[160px] flex-1 shadow-2xl border border-white/20">
             <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('auth.systemUptime')}</div>
             <div className="text-3xl font-bold text-[var(--color-text-main)]">99.98%</div>
           </div>
-          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-6 min-w-[200px] shadow-2xl border border-white/20">
+          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-5 min-w-[160px] flex-1 shadow-2xl border border-white/20">
             <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('auth.auditsToday')}</div>
             <div className="text-3xl font-bold text-[var(--color-text-main)]">1,240+</div>
           </div>

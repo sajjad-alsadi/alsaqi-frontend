@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`${isCollapsed ? 'w-24' : 'w-72'} ${isMobileMenuOpen ? 'fixed inset-y-0 start-0 z-50' : 'hidden md:flex'} bg-[var(--color-card)] border-e border-[var(--color-border-soft)] h-screen sticky top-0 flex-col p-6 overflow-y-auto transition-all duration-500 ease-in-out shadow-sm`} role="navigation" aria-label="Main navigation">
+      <aside className={`${isCollapsed ? 'w-24' : 'w-72'} ${isMobileMenuOpen ? 'fixed inset-y-0 start-0 z-50' : 'hidden md:flex'} bg-[var(--color-card)] border-e border-[var(--color-border-soft)] h-screen sticky top-0 flex-col p-6 overflow-y-auto overflow-x-hidden transition-all duration-500 ease-in-out shadow-sm`} role="navigation" aria-label="Main navigation">
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} mb-10 px-2`}>
           {!isCollapsed && (
             <motion.div 
