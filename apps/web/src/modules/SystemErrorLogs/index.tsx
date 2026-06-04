@@ -55,8 +55,8 @@ const SystemErrorLogs: React.FC = () => {
         setLogs(response.data.data);
         setPagination(prev => ({
           ...prev,
-          total: response.data.pagination.total,
-          totalPages: response.data.pagination.totalPages
+          total: response.data.pagination?.total ?? response.data.data.length,
+          totalPages: response.data.pagination?.totalPages ?? 1
         }));
       } else {
         setLogs(response.data);

@@ -66,8 +66,8 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
         setItems(response.data.data);
         setPagination(prev => ({
           ...prev,
-          total: response.data.pagination.total,
-          totalPages: response.data.pagination.totalPages
+          total: response.data.pagination?.total ?? response.data.data.length,
+          totalPages: response.data.pagination?.totalPages ?? 1
         }));
       } else {
         setItems(response.data);
