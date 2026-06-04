@@ -1,7 +1,16 @@
 # =============================================================================
 # AL-SAQI Nginx Reverse Proxy Configuration
 # =============================================================================
-# This is an example configuration for deploying AL-SAQI behind Nginx with:
+# This configuration routes requests to independent API and Web containers:
+# - /api/* and /ws → API container (packages/api)
+# - All other requests → Web container (apps/web static frontend)
+#
+# Independent deployment:
+# - If the web container is down, /api requests continue to work normally
+# - If the web container is unreachable, non-API requests return 502
+# - If the API container is down, the web shell still serves (client shows error)
+#
+# Features:
 # - TLS 1.2+ termination with strong cipher suites
 # - WebSocket proxy support for /ws path
 # - Brotli and gzip compression at proxy level
@@ -25,10 +34,15 @@ limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=5r/s;
 # --- Connection limiting ---
 limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
 
-# --- Upstream definition ---
-upstream app_backend {
-    server app:3000;
+# --- Upstream definitions (independent services) ---
+upstream api_backend {
+    server api:3000;
     keepalive 32;
+}
+
+upstream web_backend {
+    server web:8080;
+    keepalive 16;
 }
 
 # --- HTTP → HTTPS redirect ---
@@ -146,12 +160,12 @@ server {
     send_timeout 60s;
 
     # ==========================================================================
-    # Locations
+    # Locations - API routes → api_backend, all other → web_backend
     # ==========================================================================
 
-    # --- WebSocket endpoint ---
+    # --- WebSocket endpoint → API container ---
     location /ws {
-        proxy_pass http://app_backend;
+        proxy_pass http://api_backend;
         proxy_http_version 1.1;
 
         # WebSocket upgrade headers
@@ -172,12 +186,12 @@ server {
         proxy_buffering off;
     }
 
-    # --- Authentication endpoints (stricter rate limiting) ---
+    # --- Authentication endpoints → API container (stricter rate limiting) ---
     location /api/auth/ {
         limit_req zone=auth_limit burst=10 nodelay;
         limit_req_status 429;
 
-        proxy_pass http://app_backend;
+        proxy_pass http://api_backend;
         proxy_http_version 1.1;
 
         proxy_set_header Host $host;
@@ -187,12 +201,20 @@ server {
         proxy_set_header Connection "";
     }
 
-    # --- API endpoints (standard rate limiting) ---
+    # --- API health check → API container (no rate limiting) ---
+    location /api/health {
+        proxy_pass http://api_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        access_log off;
+    }
+
+    # --- API endpoints → API container (standard rate limiting) ---
     location /api/ {
         limit_req zone=api_limit burst=20 nodelay;
         limit_req_status 429;
 
-        proxy_pass http://app_backend;
+        proxy_pass http://api_backend;
         proxy_http_version 1.1;
 
         proxy_set_header Host $host;
@@ -202,9 +224,11 @@ server {
         proxy_set_header Connection "";
     }
 
-    # --- Main application (SPA) ---
+    # --- Web frontend (SPA) → Web container ---
+    # If web container is unreachable, nginx returns 502 automatically
+    # while /api routes continue working via the api_backend upstream
     location / {
-        proxy_pass http://app_backend;
+        proxy_pass http://web_backend;
         proxy_http_version 1.1;
 
         proxy_set_header Host $host;
@@ -213,20 +237,12 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Connection "";
 
-        # Cache static assets
+        # Cache static assets served by web container
         location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-            proxy_pass http://app_backend;
+            proxy_pass http://web_backend;
             proxy_cache_valid 200 7d;
             add_header Cache-Control "public, max-age=604800, immutable";
         }
-    }
-
-    # --- Health check (no rate limiting) ---
-    location /health {
-        proxy_pass http://app_backend;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        access_log off;
     }
 
     # --- Deny access to hidden files ---

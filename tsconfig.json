@@ -1,30 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "module": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "allowJs": true,
-    "jsx": "react-jsx",
-    "types": ["vite/client"],
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    },
-    "allowImportingTsExtensions": true,
-    "noEmit": true
-  },
-  "exclude": ["node_modules", "dist", "app", "scripts", "tmp"]
+  "files": [],
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/api" },
+    { "path": "apps/web" }
+  ]
 }

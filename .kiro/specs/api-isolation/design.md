@@ -601,37 +601,73 @@ export const CreateFindingSchema = z.object({
 
 ## Correctness Properties
 
+*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+
 ### Property 1: عزل الاستيرادات (Import Isolation)
 
-لا يوجد استيراد مباشر بين حزمة الـ API والواجهة الأمامية:
+*For any* file in `packages/api/`, none of its import statements reference `apps/web/`; and *for any* file in `apps/web/`, none of its import statements reference `packages/api/`. All shared type imports come exclusively from `packages/shared/`.
 
-∀ file ∈ packages/api: imports(file) ∩ paths("apps/web/") = ∅
-∀ file ∈ apps/web: imports(file) ∩ paths("packages/api/") = ∅
+**Validates: Requirements 5.1, 5.2, 5.3**
 
 ### Property 2: اكتمال العقود (Contract Completeness)
 
-كل نقطة نهاية مسجلة في الـ API لها تعريف مطابق في الحزمة المشتركة:
+*For any* registered API route endpoint in `packages/api/`, there exists a corresponding Zod validation schema in `packages/shared/src/validators/` that defines the expected input shape for that endpoint.
 
-∀ endpoint ∈ API_ROUTES: ∃ contract ∈ packages/shared such that contract.path = endpoint.path ∧ contract.method = endpoint.method
+**Validates: Requirements 2.2**
 
 ### Property 3: تطابق التحقق (Validation Symmetry)
 
-نفس مخطط التحقق يُنتج نفس النتيجة سواءً نُفذ في الخادم أو العميل:
+*For any* Zod validation schema defined in `packages/shared/validators/` and *for any* input value, executing `schema.safeParse(input)` produces identical `success` and `error` results regardless of whether execution occurs in the server (Node.js) or client (browser) environment.
 
-∀ schema ∈ packages/shared/validators, ∀ input: validate(schema, input) on server = validate(schema, input) on client
+**Validates: Requirements 2.5, 10.1, 10.2**
 
-### Property 4: التوافق العكسي (Backward Compatibility)
+### Property 4: تطابق غلاف الاستجابة (Response Envelope Conformance)
 
-جميع المسارات القديمة تُنتج نفس الاستجابة بعد الترحيل:
+*For any* successful API response, the response body conforms to `SuccessResponseSchema` with `success: true`, a typed `data` field, and a `meta` object containing `requestId`, `timestamp`, and `version`; and *for any* failed API response, the response body conforms to `ErrorResponseSchema` with `success: false`, `data: null`, and an `error` object containing `code`, `message`, and `traceId`. *For any* paginated response, `meta.pagination` includes `page`, `pageSize`, `total`, `totalPages`, `hasNext`, and `hasPrev`.
 
-∀ path ∈ existing_api_paths: response(new_api, path) ≡ response(old_api, path)
+**Validates: Requirements 3.1, 3.2, 3.3**
 
-### Property 5: استقلال النشر (Deployment Independence)
+### Property 5: التوافق العكسي (Backward Compatibility)
 
-يمكن نشر كل حزمة بشكل مستقل دون التأثير على الأخرى:
+*For any* existing API path and HTTP method combination that was functional before the migration, the new API_Package returns semantically equivalent responses with the same status codes, the same authentication requirements, and compatible response body structure.
 
-deploy(packages/api) does NOT require rebuild(apps/web)
-deploy(apps/web) does NOT require restart(packages/api)
+**Validates: Requirements 6.1, 6.2, 6.3**
+
+### Property 6: إرفاق الأمان التلقائي (Automatic Security Headers)
+
+*For any* HTTP request sent through API_Client, the request headers contain a valid CSRF token and a unique correlation ID (request ID), without requiring the caller to manually attach them.
+
+**Validates: Requirements 4.5**
+
+### Property 7: رفض CORS للمصادر غير المصرح بها (CORS Origin Rejection)
+
+*For any* HTTP request originating from a domain not in the configured `corsOrigins` list, the API_Package rejects the request and does not include CORS access-control headers in the response.
+
+**Validates: Requirements 8.1**
+
+### Property 8: رفض CSRF للطلبات المُعدِّلة (CSRF Enforcement on State-Changing Requests)
+
+*For any* state-changing request (POST, PUT, DELETE) that does not include a valid CSRF token matching the server-issued cookie, the API_Package rejects the request with an appropriate error response.
+
+**Validates: Requirements 8.2**
+
+### Property 9: اكتمال قيود المخططات (Schema Constraint Completeness)
+
+*For any* text field defined in a Validation_Schema in `packages/shared/`, the schema specifies both a minimum length and a maximum length constraint; and *for any* enum field, the schema specifies an explicit list of allowed values.
+
+**Validates: Requirements 10.3, 10.4**
+
+### Property 10: دورة أخطاء التحقق (Validation Error Round-Trip)
+
+*For any* invalid input sent to any API endpoint, the API_Package returns a 400 response containing field-level Zod error details; and when the API_Client receives this error response, it correctly parses and exposes individual field errors for UI consumption.
+
+**Validates: Requirements 10.5, 12.4**
+
+### Property 11: التحقق من الاستجابة في العميل (Client-Side Response Validation)
+
+*For any* API response received by API_Client, the response data is validated against the corresponding Zod schema from Shared_Package before being returned to the caller. If the response does not match the expected schema, a `ZodError` is thrown.
+
+**Validates: Requirements 4.2**
 
 ## Error Handling
 
