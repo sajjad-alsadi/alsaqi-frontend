@@ -63,12 +63,14 @@ export const createCorrespondenceRoutes = (
   const router = express.Router();
 
   // 1. Incoming Correspondence
-  router.get("/incoming", authenticate, asyncHandler(async (req, res) => {
-    const result = await CorrespondenceService.getIncoming(req.query);
+  router.get("/incoming", authenticate, checkPermission('Correspondence', 'View'), asyncHandler(async (req, res) => {
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    const result = await CorrespondenceService.getIncoming(req.query, userContext);
     res.json(result);
   }));
 
-  router.post("/incoming", authenticate, asyncHandler(async (req, res) => {
+  router.post("/incoming", authenticate, checkPermission('Correspondence', 'Create'), asyncHandler(async (req, res) => {
     const validation = incomingSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid incoming correspondence data", validation.error.format());
@@ -101,7 +103,7 @@ export const createCorrespondenceRoutes = (
   }));
 
   // 2. Status History and Updates
-  router.put("/status/:type/:id", authenticate, asyncHandler(async (req, res) => {
+  router.put("/status/:type/:id", authenticate, checkPermission('Correspondence', 'Edit'), asyncHandler(async (req, res) => {
     const type = req.params.type as string;
     const id = req.params.id as string;
     const validation = statusUpdateSchema.safeParse(req.body);
@@ -109,90 +111,108 @@ export const createCorrespondenceRoutes = (
       throw new ValidationError("Invalid status update data", validation.error.format());
     }
     const { new_status, notes } = validation.data;
-    const userId = (req as any).user.id;
+    const user = (req as any).user;
+    const userId = user.id;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
     
-    const result = await CorrespondenceService.updateStatus(type, id, new_status, notes || '', userId);
+    const result = await CorrespondenceService.updateStatus(type, id, new_status, notes || '', userId, userContext);
 
     await AuthService.logAudit((req as any).user.username, "UPDATE_STATUS", "Correspondence", `Changed ${type} ${id} status from ${result.oldStatus} to ${new_status}`);
     res.json({ success: true });
   }));
 
   // 4. Referrals
-  router.post("/refer", authenticate, asyncHandler(async (req, res) => {
+  router.post("/refer", authenticate, checkPermission('Correspondence', 'Edit'), asyncHandler(async (req, res) => {
     const validation = referSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid referral data", validation.error.format());
     }
-    const userId = (req as any).user.id;
-    await CorrespondenceService.refer(validation.data, userId);
+    const user = (req as any).user;
+    const userId = user.id;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    await CorrespondenceService.refer(validation.data, userId, userContext);
 
     await AuthService.logAudit((req as any).user.username, "REFER", "Correspondence", `Referred incoming letter ${validation.data.incoming_id} to dept ${validation.data.to_dept_id}`);
     res.json({ success: true });
   }));
 
   // 5. Linking
-  router.post("/link", authenticate, asyncHandler(async (req, res) => {
+  router.post("/link", authenticate, checkPermission('Correspondence', 'Edit'), asyncHandler(async (req, res) => {
     const validation = linkSchema.safeParse(req.body);
     if (!validation.success) {
       throw new ValidationError("Invalid link data", validation.error.format());
     }
-    const userId = (req as any).user.id;
-    await CorrespondenceService.link(validation.data, userId);
+    const user = (req as any).user;
+    const userId = user.id;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    await CorrespondenceService.link(validation.data, userId, userContext);
     
     await AuthService.logAudit((req as any).user.username, "LINK", "Correspondence", `Linked incoming ${validation.data.incoming_id} with outgoing ${validation.data.outgoing_id}`);
     res.json({ success: true });
   }));
 
   // 6. Archiving
-  router.put("/archive/:type/:id", authenticate, asyncHandler(async (req, res) => {
+  router.put("/archive/:type/:id", authenticate, checkPermission('Correspondence', 'Edit'), asyncHandler(async (req, res) => {
     const type = req.params.type as string;
     const id = req.params.id as string;
-    await CorrespondenceService.archive(type, id);
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    await CorrespondenceService.archive(type, id, userContext);
     
     await AuthService.logAudit((req as any).user.username, "ARCHIVE", "Correspondence", `Archived ${type} ${id}`);
     res.json({ success: true });
   }));
 
   // 6.1 Archive List (Unified & Paginated)
-  router.get("/archive", authenticate, asyncHandler(async (req, res) => {
-    const result = await CorrespondenceService.getArchive(req.query);
+  router.get("/archive", authenticate, checkPermission('Correspondence', 'View'), asyncHandler(async (req, res) => {
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    const result = await CorrespondenceService.getArchive(req.query, userContext);
     res.json(result);
   }));
 
   // 7. Attachments
-  router.get("/attachments/:type/:id", authenticate, asyncHandler(async (req, res) => {
+  router.get("/attachments/:type/:id", authenticate, checkPermission('Correspondence', 'View'), asyncHandler(async (req, res) => {
     const type = req.params.type as string;
     const id = req.params.id as string;
     const data = await CorrespondenceService.getAttachments(type, id);
     res.json(data);
   }));
 
-  router.post("/attachments", authenticate, asyncHandler(async (req, res) => {
-    const userId = (req as any).user.id;
-    await CorrespondenceService.addAttachment(req.body, userId);
+  router.post("/attachments", authenticate, checkPermission('Correspondence', 'Edit'), asyncHandler(async (req, res) => {
+    const user = (req as any).user;
+    const userId = user.id;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    await CorrespondenceService.addAttachment(req.body, userId, userContext);
     
     await AuthService.logAudit((req as any).user.username, "UPLOAD", "Correspondence", `Uploaded attachment for ${req.body.correspondence_type} ${req.body.correspondence_id}`);
     res.json({ success: true });
   }));
 
   // 8. Stats for Dashboard
-  router.get("/stats", authenticate, asyncHandler(async (req, res) => {
-    const stats = await CorrespondenceService.getStats();
+  router.get("/stats", authenticate, checkPermission('Correspondence', 'View'), asyncHandler(async (req, res) => {
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    const stats = await CorrespondenceService.getStats(userContext);
     res.json(stats);
   }));
 
   // 9. Details (Unified)
-  router.get("/details/:type/:id", authenticate, asyncHandler(async (req, res) => {
+  router.get("/details/:type/:id", authenticate, checkPermission('Correspondence', 'View'), asyncHandler(async (req, res) => {
     const type = req.params.type as string;
     const id = req.params.id as string;
-    const details = await CorrespondenceService.getDetails(type, id);
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    const details = await CorrespondenceService.getDetails(type, id, userContext);
     res.json(details);
   }));
 
   // Outgoing Letters Routes
-  router.get("/outgoing", authenticate, asyncHandler(async (req, res) => {
+  router.get("/outgoing", authenticate, checkPermission('Correspondence', 'View'), asyncHandler(async (req, res) => {
     const { page, pageSize } = parsePaginationParams(req.query as Record<string, any>);
-    const result = await CorrespondenceService.getOutgoing(page, pageSize);
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    const result = await CorrespondenceService.getOutgoing(page, pageSize, userContext);
     res.json(result);
   }));
 

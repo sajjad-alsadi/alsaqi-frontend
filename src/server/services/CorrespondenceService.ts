@@ -1,13 +1,55 @@
 import { db } from '../db/index';
-import { NotFoundError, ValidationError } from '../utils/errors';
+import { NotFoundError, ValidationError, ForbiddenError } from '../utils/errors';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { N8nService } from '../utils/n8nService';
 import { computePaginationMeta } from '../utils/paginationService';
+import { UserRole } from '../../constants';
+
+/**
+ * Represents the user context passed from the authenticated request.
+ * Used for row-level security (scope) checks in the service layer.
+ */
+export interface UserContext {
+  userId: string;
+  userRole: string;
+  departmentId: string | null;
+}
 
 export class CorrespondenceService {
   private static db = db;
 
-  static async getIncoming(filters: any) {
+  /**
+   * Centralized scope-checking logic for row-level security.
+   * Determines if a given correspondence record is within the user's authorized scope.
+   *
+   * - Admin: full access to all records (no filtering)
+   * - Manager: access limited to records assigned to their department
+   * - Regular users: access if assigned to their dept, assigned to them, or created by them
+   *
+   * @param record - The correspondence record to check (must have assigned_dept_id, assigned_user_id, created_by fields)
+   * @param userContext - The authenticated user's context (userId, userRole, departmentId)
+   * @returns true if the record is within the user's authorized scope
+   */
+  private static isWithinScope(record: any, userContext: UserContext): boolean {
+    // Admin users have full access — no row-level filtering
+    if (userContext.userRole === UserRole.ADMIN) {
+      return true;
+    }
+
+    // Manager users can access all records within their department
+    if (userContext.userRole === UserRole.MANAGER) {
+      return record.assigned_dept_id === userContext.departmentId;
+    }
+
+    // Regular users: access if record is in their department, assigned to them, or created by them
+    return (
+      record.assigned_dept_id === userContext.departmentId ||
+      record.assigned_user_id === userContext.userId ||
+      record.created_by === userContext.userId
+    );
+  }
+
+  static async getIncoming(filters: any, userContext?: UserContext) {
     const { archived, search, status, priority, dept_id, start_date, end_date, page = 1, pageSize = 10 } = filters;
     const isArchived = archived === 'true' ? 1 : 0;
     
@@ -25,6 +67,25 @@ export class CorrespondenceService {
       .whereIf(!!start_date, 'i.letter_date >= ?', start_date)
       .whereIf(!!end_date, 'i.letter_date <= ?', end_date);
     
+    // Department-scoped filtering for non-Admin users
+    if (userContext && userContext.userRole !== UserRole.ADMIN) {
+      if (userContext.departmentId) {
+        qb.where(
+          '(i.assigned_dept_id = ? OR i.assigned_user_id = ? OR i.created_by = ?)',
+          userContext.departmentId,
+          userContext.userId,
+          userContext.userId
+        );
+      } else {
+        // User has no department — can only see records assigned to them or created by them
+        qb.where(
+          '(i.assigned_user_id = ? OR i.created_by = ?)',
+          userContext.userId,
+          userContext.userId
+        );
+      }
+    }
+
     if (search) {
       const s = `%${search}%`;
       qb.where('(i.sequence_number LIKE ? OR i.letter_number LIKE ? OR i.subject LIKE ? OR i.sender_entity LIKE ?)', s, s, s, s);
@@ -94,9 +155,18 @@ export class CorrespondenceService {
     return { id: result.lastInsertRowid, sequence_number };
   }
 
-  static async updateStatus(type: string, id: string | number, newStatus: string, notes: string, userId: string | number) {
+  static async updateStatus(type: string, id: string | number, newStatus: string, notes: string, userId: string | number, userContext?: UserContext) {
     const table = this.db.validateIdentifier(type === 'Outgoing' ? 'outgoing_letters' : 'incoming_correspondence');
     
+    // Verify the record is within the user's authorized scope before modifying
+    if (userContext) {
+      const recordToCheck = await this.db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id);
+      if (!recordToCheck) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(recordToCheck, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     return await this.db.transaction(async () => {
       const oldRecord = await this.db.prepare(`SELECT status FROM ${table} WHERE id = ?`).get(id);
       if (!oldRecord) throw new NotFoundError("Record not found");
@@ -121,9 +191,18 @@ export class CorrespondenceService {
     })();
   }
 
-  static async refer(data: any, userId: string | number) {
+  static async refer(data: any, userId: string | number, userContext?: UserContext) {
     const { incoming_id, to_dept_id, to_user_id, notes } = data;
     
+    // Verify the incoming record is within the user's authorized scope
+    if (userContext) {
+      const incomingRecord = await this.db.prepare(`SELECT * FROM incoming_correspondence WHERE id = ?`).get(incoming_id);
+      if (!incomingRecord) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(incomingRecord, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     await this.db.transaction(async () => {
       await this.db.prepare(`
         INSERT INTO correspondence_referrals (incoming_id, from_user_id, to_dept_id, to_user_id, notes)
@@ -136,29 +215,71 @@ export class CorrespondenceService {
     })();
   }
 
-  static async link(data: any, userId: string | number) {
+  static async link(data: any, userId: string | number, userContext?: UserContext) {
     const { incoming_id, outgoing_id, link_type } = data;
+    
+    // Verify both records are within the user's authorized scope
+    if (userContext) {
+      const incomingRecord = await this.db.prepare(`SELECT * FROM incoming_correspondence WHERE id = ?`).get(incoming_id);
+      if (!incomingRecord) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(incomingRecord, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+
+      const outgoingRecord = await this.db.prepare(`SELECT * FROM outgoing_letters WHERE id = ?`).get(outgoing_id);
+      if (!outgoingRecord) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(outgoingRecord, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     await this.db.prepare("INSERT INTO correspondence_links (incoming_id, outgoing_id, link_type, linked_by) VALUES (?::uuid, ?::uuid, ?::text, ?::uuid)")
       .run(incoming_id, outgoing_id, link_type || 'Reply', userId);
   }
 
-  static async archive(type: string, id: string | number) {
+  static async archive(type: string, id: string | number, userContext?: UserContext) {
     const table = this.db.validateIdentifier(type === 'Incoming' ? 'incoming_correspondence' : 'outgoing_letters');
+    
+    // Verify the record is within the user's authorized scope before archiving
+    if (userContext) {
+      const record = await this.db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id);
+      if (!record) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(record, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     await this.db.prepare(`UPDATE ${table} SET is_archived = 1, status = 'Archived', updated_at = CURRENT_TIMESTAMP WHERE id = ?::uuid`).run(id);
   }
 
-  static async getArchive(filters: any) {
+  static async getArchive(filters: any, userContext?: UserContext) {
     const { search, type, page = 1, pageSize = 15 } = filters;
 
     let query = "";
     let countQuery = "";
     
-    // We instantiate generic QueryBuilders assuming filtering applies equally
-    // Since we handle combined differently, we conditionally build queries.
+    // Helper to build scope condition for non-Admin users
+    const isScoped = userContext && userContext.userRole !== UserRole.ADMIN;
 
     if (type === 'Incoming') {
       const qb = new QueryBuilder(`FROM incoming_correspondence`)
         .where("is_archived = 1");
+      if (isScoped) {
+        if (userContext!.departmentId) {
+          qb.where(
+            '(assigned_dept_id = ? OR assigned_user_id = ? OR created_by = ?)',
+            userContext!.departmentId,
+            userContext!.userId,
+            userContext!.userId
+          );
+        } else {
+          qb.where(
+            '(assigned_user_id = ? OR created_by = ?)',
+            userContext!.userId,
+            userContext!.userId
+          );
+        }
+      }
       if (search) {
         qb.where("(sequence_number LIKE ? OR subject LIKE ? OR sender_entity LIKE ?)", `%${search}%`, `%${search}%`, `%${search}%`);
       }
@@ -172,6 +293,17 @@ export class CorrespondenceService {
     } else if (type === 'Outgoing') {
       const qb = new QueryBuilder(`FROM outgoing_letters`)
         .where("is_archived = 1");
+      if (isScoped) {
+        if (userContext!.departmentId) {
+          qb.where(
+            '(created_by = ? OR created_by IN (SELECT id FROM users WHERE department_id = ?))',
+            userContext!.userId,
+            userContext!.departmentId
+          );
+        } else {
+          qb.where('created_by = ?', userContext!.userId);
+        }
+      }
       if (search) {
         qb.where("(sequence_number LIKE ? OR subject LIKE ? OR recipient_entity LIKE ?)", `%${search}%`, `%${search}%`, `%${search}%`);
       }
@@ -194,16 +326,36 @@ export class CorrespondenceService {
       const incWhere = whereBlock.replace('search_column', 'sender_entity');
       const outWhere = whereBlock.replace('search_column', 'recipient_entity');
 
-      const incQuery = `SELECT id, sequence_number, subject, sender_entity as entity, updated_at, 'Incoming' as type, is_archived FROM incoming_correspondence ${incWhere}`;
-      const outQuery = `SELECT id, sequence_number, subject, recipient_entity as entity, updated_at, 'Outgoing' as type, is_archived FROM outgoing_letters ${outWhere}`;
+      // Build scope conditions for combined query
+      let incScopeClause = '';
+      let outScopeClause = '';
+      const incScopeParams: any[] = [];
+      const outScopeParams: any[] = [];
+      
+      if (isScoped) {
+        if (userContext!.departmentId) {
+          incScopeClause = ' AND (assigned_dept_id = ? OR assigned_user_id = ? OR created_by = ?)';
+          incScopeParams.push(userContext!.departmentId, userContext!.userId, userContext!.userId);
+          outScopeClause = ' AND (created_by = ? OR created_by IN (SELECT id FROM users WHERE department_id = ?))';
+          outScopeParams.push(userContext!.userId, userContext!.departmentId);
+        } else {
+          incScopeClause = ' AND (assigned_user_id = ? OR created_by = ?)';
+          incScopeParams.push(userContext!.userId, userContext!.userId);
+          outScopeClause = ' AND created_by = ?';
+          outScopeParams.push(userContext!.userId);
+        }
+      }
+
+      const incQuery = `SELECT id, sequence_number, subject, sender_entity as entity, updated_at, 'Incoming' as type, is_archived FROM incoming_correspondence ${incWhere}${incScopeClause}`;
+      const outQuery = `SELECT id, sequence_number, subject, recipient_entity as entity, updated_at, 'Outgoing' as type, is_archived FROM outgoing_letters ${outWhere}${outScopeClause}`;
       
       query = `SELECT * FROM (${incQuery} UNION ALL ${outQuery}) as combined`;
       countQuery = `SELECT COUNT(*) as total FROM (${incQuery} UNION ALL ${outQuery}) as combined`;
       
-      const countRes = await this.db.prepare(countQuery).get(...qb.buildParams(), ...qb.buildParams()); // Apply to both halves
+      const allCountParams = [...qb.buildParams(), ...incScopeParams, ...qb.buildParams(), ...outScopeParams];
+      const countRes = await this.db.prepare(countQuery).get(...allCountParams);
       const pagination = qb.paginate(page, pageSize);
-      // We pass the parameters twice because of the UNION
-      const data = await this.db.prepare(`${query} ORDER BY updated_at DESC LIMIT ? OFFSET ?`).all(...qb.buildParams(), ...qb.buildParams(), pagination.limit, pagination.offset);
+      const data = await this.db.prepare(`${query} ORDER BY updated_at DESC LIMIT ? OFFSET ?`).all(...qb.buildParams(), ...incScopeParams, ...qb.buildParams(), ...outScopeParams, pagination.limit, pagination.offset);
       
       return {
         data,
@@ -217,25 +369,58 @@ export class CorrespondenceService {
       .all(type, id);
   }
 
-  static async addAttachment(data: any, userId: string | number) {
+  static async addAttachment(data: any, userId: string | number, userContext?: UserContext) {
     const { correspondence_id, correspondence_type, file_name, file_type, file_data, description } = data;
+    
+    // Verify the target correspondence record is within the user's authorized scope
+    if (userContext) {
+      const table = correspondence_type === 'Outgoing' || correspondence_type === 'outgoing' 
+        ? 'outgoing_letters' 
+        : 'incoming_correspondence';
+      const record = await this.db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(correspondence_id);
+      if (!record) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(record, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     await this.db.prepare(`
       INSERT INTO correspondence_attachments (correspondence_id, correspondence_type, file_name, file_type, file_data, description, uploaded_by)
       VALUES (?::uuid, ?::text, ?::text, ?::text, ?::text, ?::text, ?::uuid)
     `).run(correspondence_id, correspondence_type, file_name, file_type, file_data, description, userId);
   }
 
-  static async getStats() {
+  static async getStats(userContext?: UserContext) {
+    // Department-scoped filtering for non-Admin users
+    let incomingWhere = '';
+    let outgoingWhere = '';
+    const incomingParams: any[] = [];
+    const outgoingParams: any[] = [];
+    
+    if (userContext && userContext.userRole !== UserRole.ADMIN) {
+      if (userContext.departmentId) {
+        incomingWhere = ' AND (assigned_dept_id = ? OR assigned_user_id = ? OR created_by = ?)';
+        incomingParams.push(userContext.departmentId, userContext.userId, userContext.userId);
+        outgoingWhere = ' WHERE (created_by = ? OR created_by IN (SELECT id FROM users WHERE department_id = ?))';
+        outgoingParams.push(userContext.userId, userContext.departmentId);
+      } else {
+        incomingWhere = ' AND (assigned_user_id = ? OR created_by = ?)';
+        incomingParams.push(userContext.userId, userContext.userId);
+        outgoingWhere = ' WHERE created_by = ?';
+        outgoingParams.push(userContext.userId);
+      }
+    }
+
     return {
-      total_incoming: (await this.db.prepare("SELECT COUNT(*) as count FROM incoming_correspondence WHERE is_archived = 0").get() as any).count,
-      total_outgoing: (await this.db.prepare("SELECT COUNT(*) as count FROM outgoing_letters").get() as any).count,
-      pending_response: (await this.db.prepare("SELECT COUNT(*) as count FROM incoming_correspondence WHERE response_required = 1 AND status != 'Closed' AND is_archived = 0").get() as any).count,
-      follow_up: (await this.db.prepare("SELECT COUNT(*) as count FROM incoming_correspondence WHERE follow_up_required = 1 AND is_archived = 0").get() as any).count,
-      archived: (await this.db.prepare("SELECT COUNT(*) as count FROM incoming_correspondence WHERE is_archived = 1").get() as any).count
+      total_incoming: (await this.db.prepare(`SELECT COUNT(*) as count FROM incoming_correspondence WHERE is_archived = 0${incomingWhere}`).get(...incomingParams) as any).count,
+      total_outgoing: (await this.db.prepare(`SELECT COUNT(*) as count FROM outgoing_letters${outgoingWhere}`).get(...outgoingParams) as any).count,
+      pending_response: (await this.db.prepare(`SELECT COUNT(*) as count FROM incoming_correspondence WHERE response_required = 1 AND status != 'Closed' AND is_archived = 0${incomingWhere}`).get(...incomingParams) as any).count,
+      follow_up: (await this.db.prepare(`SELECT COUNT(*) as count FROM incoming_correspondence WHERE follow_up_required = 1 AND is_archived = 0${incomingWhere}`).get(...incomingParams) as any).count,
+      archived: (await this.db.prepare(`SELECT COUNT(*) as count FROM incoming_correspondence WHERE is_archived = 1${incomingWhere}`).get(...incomingParams) as any).count
     };
   }
 
-  static async getDetails(type: string, id: string | number) {
+  static async getDetails(type: string, id: string | number, userContext?: UserContext) {
     const table = this.db.validateIdentifier(type === 'outgoing' ? 'outgoing_letters' : 'incoming_correspondence');
     
     let record;
@@ -259,6 +444,11 @@ export class CorrespondenceService {
 
     if (!record) throw new NotFoundError("Record not found");
 
+    // Verify the record is within the user's authorized scope
+    if (userContext && !this.isWithinScope(record, userContext)) {
+      throw new ForbiddenError('Access denied to this record');
+    }
+
     const attachments = await this.db.prepare("SELECT id, file_name, file_type, uploaded_at, description FROM correspondence_attachments WHERE correspondence_type = ? AND correspondence_id = ?").all(type, id);
     const history = await this.db.prepare("SELECT h.*, u.name as user_name FROM correspondence_status_history h LEFT JOIN users u ON h.changed_by = u.id WHERE correspondence_type = ? AND correspondence_id = ? ORDER BY h.change_date DESC").all(type, id);
     
@@ -280,12 +470,27 @@ export class CorrespondenceService {
     return { main: record, attachments, history, links, referrals };
   }
 
-  static async getOutgoing(page = 1, pageSize = 10) {
+  static async getOutgoing(page = 1, pageSize = 10, userContext?: UserContext) {
     const offset = (page - 1) * pageSize;
-    const countRes = await this.db.prepare(`SELECT COUNT(*) as total FROM outgoing_letters`).get();
+    
+    // Department-scoped filtering for non-Admin users
+    let whereClause = '';
+    const params: any[] = [];
+    
+    if (userContext && userContext.userRole !== UserRole.ADMIN) {
+      if (userContext.departmentId) {
+        whereClause = 'WHERE (created_by = ? OR created_by IN (SELECT id FROM users WHERE department_id = ?))';
+        params.push(userContext.userId, userContext.departmentId);
+      } else {
+        whereClause = 'WHERE created_by = ?';
+        params.push(userContext.userId);
+      }
+    }
+    
+    const countRes = await this.db.prepare(`SELECT COUNT(*) as total FROM outgoing_letters ${whereClause}`).get(...params);
     const total = countRes?.total || 0;
 
-    const data = await this.db.prepare("SELECT id, sequence_number, letter_date, recipient_entity, subject, classification, sending_method, status, is_archived, created_at, updated_at, created_by FROM outgoing_letters ORDER BY created_at DESC LIMIT ? OFFSET ?").all(pageSize, offset);
+    const data = await this.db.prepare(`SELECT id, sequence_number, letter_date, recipient_entity, subject, classification, sending_method, status, is_archived, created_at, updated_at, created_by FROM outgoing_letters ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`).all(...params, pageSize, offset);
     
     return {
       data,

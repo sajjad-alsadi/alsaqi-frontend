@@ -77,7 +77,12 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
       const decodedToken = jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'] }) as any;
       
       const user = await getCachedOrDb(`user_${decodedToken.id}_${decodedToken.session_version}`, async () => {
-        return await db.prepare("SELECT id, role, status, username, name, email, session_version, requires_password_change FROM users WHERE id = ?").get(decodedToken.id) as any;
+        return await db.prepare(`
+          SELECT u.id, u.role, u.status, u.username, u.name, u.email, u.session_version, u.requires_password_change, o.id as department_id
+          FROM users u
+          LEFT JOIN org_entities o ON (u.department = o.name_ar OR u.department = o.name_en)
+          WHERE u.id = ?
+        `).get(decodedToken.id) as any;
       });
       
       if (!user) {
@@ -98,6 +103,7 @@ export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KE
         username: user.username, 
         name: user.name, 
         email: user.email,
+        department_id: user.department_id || null,
         requires_password_change: !!user.requires_password_change 
       };
 

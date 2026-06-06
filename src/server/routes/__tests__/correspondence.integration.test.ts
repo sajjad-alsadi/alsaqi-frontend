@@ -319,7 +319,8 @@ describe('Correspondence Integration Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(mockCorrespondenceService.updateStatus).toHaveBeenCalledWith(
-        'incoming', 'inc-1', 'In Progress', '', 'test-user-id'
+        'incoming', 'inc-1', 'In Progress', '', 'test-user-id',
+        { userId: 'test-user-id', userRole: 'Admin', departmentId: null }
       );
     });
 
@@ -349,7 +350,8 @@ describe('Correspondence Integration Tests', () => {
 
       expect(res.status).toBe(200);
       expect(mockCorrespondenceService.updateStatus).toHaveBeenCalledWith(
-        'outgoing', 'out-1', 'Sent', 'Sent via official mail', 'test-user-id'
+        'outgoing', 'out-1', 'Sent', 'Sent via official mail', 'test-user-id',
+        { userId: 'test-user-id', userRole: 'Admin', departmentId: null }
       );
     });
   });
@@ -370,7 +372,8 @@ describe('Correspondence Integration Tests', () => {
       expect(res.body.success).toBe(true);
       expect(mockCorrespondenceService.refer).toHaveBeenCalledWith(
         expect.objectContaining(validReferral),
-        'test-user-id'
+        'test-user-id',
+        { userId: 'test-user-id', userRole: 'Admin', departmentId: null }
       );
     });
 
@@ -427,7 +430,8 @@ describe('Correspondence Integration Tests', () => {
       expect(res.body.success).toBe(true);
       expect(mockCorrespondenceService.link).toHaveBeenCalledWith(
         expect.objectContaining({ ...validLink, link_type: 'Reply' }),
-        'test-user-id'
+        'test-user-id',
+        { userId: 'test-user-id', userRole: 'Admin', departmentId: null }
       );
     });
 
@@ -458,7 +462,8 @@ describe('Correspondence Integration Tests', () => {
       expect(res.status).toBe(200);
       expect(mockCorrespondenceService.link).toHaveBeenCalledWith(
         expect.objectContaining({ link_type: 'Follow-up' }),
-        'test-user-id'
+        'test-user-id',
+        { userId: 'test-user-id', userRole: 'Admin', departmentId: null }
       );
     });
   });
@@ -471,7 +476,10 @@ describe('Correspondence Integration Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(mockCorrespondenceService.archive).toHaveBeenCalledWith('incoming', 'inc-1');
+      expect(mockCorrespondenceService.archive).toHaveBeenCalledWith(
+        'incoming', 'inc-1',
+        { userId: 'test-user-id', userRole: 'Admin', departmentId: null }
+      );
       expect(mockAuthService.logAudit).toHaveBeenCalledWith(
         'testuser', 'ARCHIVE', 'Correspondence', expect.stringContaining('incoming')
       );
@@ -483,7 +491,10 @@ describe('Correspondence Integration Tests', () => {
         .set('Authorization', 'Bearer valid-token');
 
       expect(res.status).toBe(200);
-      expect(mockCorrespondenceService.archive).toHaveBeenCalledWith('outgoing', 'out-1');
+      expect(mockCorrespondenceService.archive).toHaveBeenCalledWith(
+        'outgoing', 'out-1',
+        { userId: 'test-user-id', userRole: 'Admin', departmentId: null }
+      );
     });
   });
 
@@ -509,7 +520,7 @@ describe('Correspondence Integration Tests', () => {
         .set('Authorization', 'Bearer valid-token');
 
       expect(res.status).toBe(200);
-      expect(mockCorrespondenceService.getOutgoing).toHaveBeenCalledWith(2, 20);
+      expect(mockCorrespondenceService.getOutgoing).toHaveBeenCalledWith(2, 20, { userId: 'test-user-id', userRole: 'Admin', departmentId: null });
     });
   });
 
