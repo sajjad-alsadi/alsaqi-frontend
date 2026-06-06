@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   ShieldCheck, Search, Filter, Plus, Edit2, Trash2, Eye, 
   Download, FileText, CheckCircle, AlertTriangle, XCircle, AlertCircle,
@@ -76,6 +76,9 @@ export default function ComplianceMatrix() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Stable close handler to prevent unnecessary re-renders cascading through Modal → FocusTrap
+  const handleModalClose = useCallback(() => { setIsModalOpen(false); }, []);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ComplianceItem | null>(null);
   const [formData, setFormData] = useState<Partial<ComplianceItem>>({ compliance_status: 'under_review' });
@@ -669,7 +672,7 @@ export default function ComplianceMatrix() {
       </motion.div>
 
       {/* Write/Edit Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedItem ? t('complianceMatrix.editRecord') : t('complianceMatrix.addRecord')}>
+      <Modal isOpen={isModalOpen} onClose={handleModalClose} title={selectedItem ? t('complianceMatrix.editRecord') : t('complianceMatrix.addRecord')}>
         <form onSubmit={handleSave} className="space-y-8 p-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">

@@ -68,7 +68,10 @@ export function csrfMiddleware(options: CsrfOptions): RequestHandler {
     }
 
     // Skip exempt paths (login, refresh token, register)
-    const requestPath = req.path;
+    // Use req.originalUrl for matching because when middleware is mounted
+    // on a path prefix (e.g. app.use('/api', ...)), req.path is relative
+    // to the mount point (e.g. '/auth/login' instead of '/api/auth/login').
+    const requestPath = req.originalUrl.split('?')[0]; // strip query params
     if (exemptPaths.some(path => requestPath === path || requestPath.startsWith(path + '/'))) {
       next();
       return;

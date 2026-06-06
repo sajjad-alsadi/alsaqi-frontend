@@ -88,6 +88,52 @@ services:
       start_period: 15s
 
   # ---------------------------------------------------------------------------
+  # MinIO Object Storage (S3-compatible)
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: alsaqi-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"    # S3 API
+      - "9001:9001"    # Console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - alsaqi-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Redis (Message Broker for BullMQ)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: alsaqi-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispass}
+    volumes:
+      - redis-data:/data
+    networks:
+      - alsaqi-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redispass}", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
   # AL-SAQI Web Frontend (apps/web)
   # ---------------------------------------------------------------------------
   web:
@@ -120,6 +166,10 @@ volumes:
   app-backups:
     driver: local
   certbot-webroot:
+    driver: local
+  minio-data:
+    driver: local
+  redis-data:
     driver: local
 
 # =============================================================================

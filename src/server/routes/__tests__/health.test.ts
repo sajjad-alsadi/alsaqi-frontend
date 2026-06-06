@@ -59,8 +59,14 @@ vi.mock('fs', async (importOriginal) => {
 });
 
 import { createHealthRouter, updateCronLastRun, getCronLastRun } from '../health';
+import { QueueService, type QueueHealth } from '../../services/queue.service.js';
 
-function createTestApp(withWss = true) {
+// Mock the queue.service module
+vi.mock('../../services/queue.service.js', () => ({
+  QueueService: vi.fn(),
+}));
+
+function createTestApp(withWss = true, queueService?: QueueService) {
   const app = express();
   app.use(express.json());
 
@@ -74,7 +80,7 @@ function createTestApp(withWss = true) {
     };
   }
 
-  app.use('/', createHealthRouter());
+  app.use('/', createHealthRouter(queueService));
   return app;
 }
 
@@ -270,6 +276,90 @@ describe('Enhanced Health Check Endpoint (Task 17.1)', () => {
       expect(res.body.checks.memory.details.heapUsedMB).toBeTypeOf('number');
       expect(res.body.checks.memory.details.heapTotalMB).toBeTypeOf('number');
       expect(res.body.checks.memory.details.usagePercent).toBeTypeOf('number');
+    });
+  });
+
+  describe('Queue Health Endpoint (Task 9.6)', () => {
+    it('should return 200 with connected=false when no QueueService is provided', async () => {
+      const app = createTestApp(true, undefined);
+      const res = await request(app).get('/health/queue');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        connected: false,
+        waiting: 0,
+        active: 0,
+        completed: 0,
+        failed: 0,
+        delayed: 0,
+        workers: 0,
+      });
+    });
+
+    it('should return 200 with queue metrics when QueueService is healthy', async () => {
+      const mockHealth: QueueHealth = {
+        connected: true,
+        waiting: 5,
+        active: 2,
+        completed: 100,
+        failed: 3,
+        delayed: 1,
+        workers: 4,
+      };
+      const mockQueueService = {
+        getQueueHealth: vi.fn().mockResolvedValue(mockHealth),
+      } as unknown as QueueService;
+
+      const app = createTestApp(true, mockQueueService);
+      const res = await request(app).get('/health/queue');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(mockHealth);
+      expect(mockQueueService.getQueueHealth).toHaveBeenCalledOnce();
+    });
+
+    it('should return 200 with connected=false when getQueueHealth throws', async () => {
+      const mockQueueService = {
+        getQueueHealth: vi.fn().mockRejectedValue(new Error('Redis connection lost')),
+      } as unknown as QueueService;
+
+      const app = createTestApp(true, mockQueueService);
+      const res = await request(app).get('/health/queue');
+
+      expect(res.status).toBe(200);
+      expect(res.body.connected).toBe(false);
+      expect(res.body.waiting).toBe(0);
+      expect(res.body.active).toBe(0);
+      expect(res.body.completed).toBe(0);
+      expect(res.body.failed).toBe(0);
+      expect(res.body.delayed).toBe(0);
+      expect(res.body.workers).toBe(0);
+    });
+
+    it('should return all required fields in the QueueHealth response', async () => {
+      const mockQueueService = {
+        getQueueHealth: vi.fn().mockResolvedValue({
+          connected: true,
+          waiting: 0,
+          active: 0,
+          completed: 0,
+          failed: 0,
+          delayed: 0,
+          workers: 1,
+        }),
+      } as unknown as QueueService;
+
+      const app = createTestApp(true, mockQueueService);
+      const res = await request(app).get('/health/queue');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('connected');
+      expect(res.body).toHaveProperty('waiting');
+      expect(res.body).toHaveProperty('active');
+      expect(res.body).toHaveProperty('completed');
+      expect(res.body).toHaveProperty('failed');
+      expect(res.body).toHaveProperty('delayed');
+      expect(res.body).toHaveProperty('workers');
     });
   });
 });

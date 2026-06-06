@@ -41,6 +41,9 @@ import { createPermissionAdminRoutes } from "./permissionAdmin";
 import { createArchiveRoutes } from "./archive";
 import { createLookupRoutes } from "./lookups";
 import { createIdempotencyMiddleware } from "../middleware/idempotency";
+import { createJobRoutes } from "./jobs.routes";
+import { getQueueService, isInfrastructureReady } from "../services/infrastructure";
+import type { QueueService } from "../services/queue.service";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -196,6 +199,27 @@ export const setupRoutes = (
 
   // Permission Admin Routes (role management, permission matrix, user overrides, audit logs)
   v1Router.use("/", createPermissionAdminRoutes(db, authenticate, checkPermission, logError));
+
+  // Job Status Routes (background job status polling)
+  // Uses lazy resolution: getQueueService() is called at request time (not registration time)
+  // because infrastructure is initialized after routes are registered.
+  const lazyQueueService = new Proxy({} as QueueService, {
+    get(_target, prop) {
+      if (!isInfrastructureReady()) {
+        if (prop === 'getJobStatus') {
+          return async () => null;
+        }
+        if (prop === 'getQueueHealth') {
+          return async () => ({ connected: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0, workers: 0 });
+        }
+        return () => { throw new Error('Infrastructure not yet initialized'); };
+      }
+      const service = getQueueService();
+      const value = (service as any)[prop];
+      return typeof value === 'function' ? value.bind(service) : value;
+    },
+  });
+  v1Router.use("/jobs", createJobRoutes(authenticate, lazyQueueService));
 
   // Mount the v1 router under /api/v1
   app.use("/api/v1", v1Router);

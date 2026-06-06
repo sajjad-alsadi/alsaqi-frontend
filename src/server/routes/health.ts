@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { db } from '../db/index';
 import { HealthStatus, SubsystemCheck } from '../types/api';
+import { QueueService, type QueueHealth } from '../services/queue.service.js';
 
 /**
  * Cron status tracker.
@@ -245,9 +246,49 @@ function deriveOverallStatus(checks: HealthStatus['checks']): HealthStatus['stat
 
 /**
  * Creates the enhanced health check router.
+ * Optionally accepts a QueueService instance for the /health/queue endpoint.
  */
-export function createHealthRouter(): Router {
+export function createHealthRouter(queueService?: QueueService): Router {
   const router = Router();
+
+  /**
+   * GET /health/queue
+   * Returns queue health metrics: connected, waiting, active, completed, failed, delayed, workers.
+   * Always returns 200 — monitoring tools can check the `connected` field to detect issues.
+   * Requirements: 8.1
+   */
+  router.get('/health/queue', async (_req: Request, res: Response) => {
+    if (!queueService) {
+      // QueueService not yet wired — return a disconnected response
+      const health: QueueHealth = {
+        connected: false,
+        waiting: 0,
+        active: 0,
+        completed: 0,
+        failed: 0,
+        delayed: 0,
+        workers: 0,
+      };
+      return res.status(200).json(health);
+    }
+
+    try {
+      const health = await queueService.getQueueHealth();
+      return res.status(200).json(health);
+    } catch {
+      // If Redis is unreachable or an error occurs, still return 200 with connected=false
+      const health: QueueHealth = {
+        connected: false,
+        waiting: 0,
+        active: 0,
+        completed: 0,
+        failed: 0,
+        delayed: 0,
+        workers: 0,
+      };
+      return res.status(200).json(health);
+    }
+  });
 
   router.get('/health', async (req: Request, res: Response) => {
     // Overall timeout: respond within 3 seconds regardless

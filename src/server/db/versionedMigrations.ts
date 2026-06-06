@@ -504,4 +504,73 @@ export const versionedMigrations: Migration[] = [
       await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_evidence_finding_id ON audit_evidence(finding_id)`);
     },
   },
+
+  {
+    version: '009',
+    name: 'Create files table for object storage file records',
+    type: 'schema',
+    up: async () => {
+      // Create files table for tracking file metadata stored in MinIO
+      // Requirements: 1.5, 1.7
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS files (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          original_name VARCHAR(255) NOT NULL,
+          storage_key TEXT NOT NULL,
+          bucket TEXT NOT NULL CHECK (bucket IN ('evidence', 'reports', 'temp', 'backups')),
+          content_type TEXT NOT NULL,
+          size BIGINT NOT NULL CHECK (size > 0),
+          checksum CHAR(64) NOT NULL CHECK (checksum ~ '^[0-9a-f]{64}$'),
+          encryption_key_id UUID,
+          uploaded_by UUID NOT NULL,
+          associated_entity TEXT,
+          associated_entity_type TEXT CHECK (associated_entity_type IS NULL OR associated_entity_type IN ('audit', 'finding', 'recommendation', 'report')),
+          status TEXT NOT NULL DEFAULT 'uploading' CHECK (status IN ('uploading', 'processing', 'ready', 'failed', 'deleted')),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Indexes for common query patterns
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_files_uploaded_by ON files(uploaded_by)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_files_status ON files(status)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_files_bucket ON files(bucket)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_files_associated_entity ON files(associated_entity, associated_entity_type)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_files_storage_key ON files(storage_key)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_files_checksum ON files(checksum)`);
+    },
+  },
+
+  {
+    version: '010',
+    name: 'Create job_records table for background job status tracking',
+    type: 'schema',
+    up: async () => {
+      // Create job_records table for tracking BullMQ job state in PostgreSQL
+      // Requirements: 2.7, 5.6
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS job_records (
+          id TEXT PRIMARY KEY,
+          type TEXT NOT NULL CHECK (type IN ('process-file', 'generate-pdf', 'send-notification', 'cleanup-temp')),
+          status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'processing', 'completed', 'failed', 'cancelled')),
+          data JSONB NOT NULL DEFAULT '{}',
+          result JSONB,
+          error TEXT,
+          progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+          attempts INTEGER NOT NULL DEFAULT 0,
+          max_attempts INTEGER NOT NULL DEFAULT 3,
+          created_by TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          started_at TIMESTAMPTZ,
+          completed_at TIMESTAMPTZ
+        )
+      `);
+
+      // Indexes for common query patterns
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_job_records_type ON job_records(type)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_job_records_status ON job_records(status)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_job_records_created_by ON job_records(created_by)`);
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_job_records_created_at ON job_records(created_at)`);
+    },
+  },
 ];

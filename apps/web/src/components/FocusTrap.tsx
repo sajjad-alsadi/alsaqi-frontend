@@ -9,22 +9,25 @@ interface FocusTrapProps {
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]):not([tabindex="-1"]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-/**
- * FocusTrap traps keyboard focus within its children when active.
- * Pressing Escape calls onEscape to close the containing dialog.
- * Tab and Shift+Tab cycle through focusable elements within the trap.
- */
 export const FocusTrap: React.FC<FocusTrapProps> = ({ active, onEscape, children }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const isActivatedRef = useRef<boolean>(false);
+  const onEscapeRef = useRef(onEscape);
 
+  // Keep onEscapeRef current
+  useEffect(() => {
+    onEscapeRef.current = onEscape;
+  }, [onEscape]);
+
+  // Stable handleKeyDown - no longer depends on onEscape
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!active || !containerRef.current) return;
 
       if (e.key === 'Escape') {
         e.preventDefault();
-        onEscape();
+        onEscapeRef.current();
         return;
       }
 
@@ -48,33 +51,36 @@ export const FocusTrap: React.FC<FocusTrapProps> = ({ active, onEscape, children
         }
       }
     },
-    [active, onEscape]
+    [active]
   );
 
-  // Save and restore focus, attach keydown listener
+  // Effect 1: Initial focus (only on first activation)
   useEffect(() => {
-    if (active) {
+    if (active && !isActivatedRef.current) {
+      isActivatedRef.current = true;
       previousFocusRef.current = document.activeElement as HTMLElement;
-      document.addEventListener('keydown', handleKeyDown);
-
-      // Focus the first focusable element after a short delay (for animations)
       const timer = setTimeout(() => {
         if (containerRef.current) {
           const firstFocusable = containerRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
           firstFocusable?.focus();
         }
       }, 50);
-
-      return () => {
-        clearTimeout(timer);
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    } else {
-      // Restore focus when deactivated
+      return () => clearTimeout(timer);
+    }
+    if (!active) {
+      isActivatedRef.current = false;
       if (previousFocusRef.current) {
         previousFocusRef.current.focus();
         previousFocusRef.current = null;
       }
+    }
+  }, [active]);
+
+  // Effect 2: Keydown listener (can re-attach without stealing focus)
+  useEffect(() => {
+    if (active) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
     }
   }, [active, handleKeyDown]);
 

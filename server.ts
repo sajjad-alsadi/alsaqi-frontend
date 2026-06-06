@@ -19,6 +19,7 @@ import { MigrationRunner } from "./src/server/db/migrationRunner";
 import { versionedMigrations } from "./src/server/db/versionedMigrations";
 import { setupRoutes } from "./src/server/routes/index";
 import { startAutomationJobs } from "./src/server/cron/index";
+import { initializeInfrastructure, shutdownInfrastructure } from "./src/server/services/infrastructure";
 import { ALLOWED_EXTENSIONS, MIME_TO_EXT, createSaveFile, createLogError, createEncryptedSaveFile } from "./src/server/utils/serverUtils";
 import { SecurityService } from "./src/server/services/SecurityService";
 import { globalErrorHandler, notFoundHandler } from "./src/server/middleware/error";
@@ -135,6 +136,13 @@ async function runDbMigrations() {
       
       // Start automation jobs after DB is ready
       startAutomationJobs();
+
+      // Initialize infrastructure services (MinIO, Redis/BullMQ, Workers, TLS)
+      try {
+        await initializeInfrastructure();
+      } catch (infraError: any) {
+        logger.error('[Infrastructure] Failed to initialize infrastructure services. Application will continue without storage/queue capabilities.', infraError.message);
+      }
       break; 
     } catch (error: any) {
       logger.error(`Database initialization attempt ${attempts} failed:`, error.message);
@@ -394,16 +402,22 @@ async function startServer() {
   // Graceful Shutdown
   const shutdown = (signal: string) => {
     logger.info(`[${signal}] received, shutting down gracefully...`);
-    server.close(() => {
-      logger.info('Closed out remaining connections.');
-      process.exit(0);
+
+    // Shutdown infrastructure services (workers, queues, cert watchers)
+    shutdownInfrastructure().catch(err => {
+      logger.error('Error during infrastructure shutdown:', err);
+    }).finally(() => {
+      server.close(() => {
+        logger.info('Closed out remaining connections.');
+        process.exit(0);
+      });
+
+      // Force shutdown after 10s
+      setTimeout(() => {
+        logger.error('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+      }, 10000);
     });
-    
-    // Force shutdown after 10s
-    setTimeout(() => {
-      logger.error('Could not close connections in time, forcefully shutting down');
-      process.exit(1);
-    }, 10000);
   };
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
