@@ -1,6 +1,8 @@
 import React from 'react';
 import { Library, Plus, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useUser } from '../../context/UserContext';
+import { UserRole } from '../../constants';
 
 interface AuditProgramHeaderProps {
   searchTerm: string;
@@ -20,6 +22,10 @@ const AuditProgramHeader: React.FC<AuditProgramHeaderProps> = ({
   onAdd
 }) => {
   const { t } = useTranslation();
+  const { user } = useUser();
+  
+  // Only Internal Auditor can add programs (Manager/Admin can only approve)
+  const canAdd = user?.role === UserRole.INTERNAL_AUDITOR || user?.role === UserRole.ADMIN;
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -54,6 +60,8 @@ const AuditProgramHeader: React.FC<AuditProgramHeaderProps> = ({
           <button 
             onClick={onAdd} 
             className="btn-primary flex items-center gap-2 whitespace-nowrap"
+            disabled={!canAdd}
+            style={{ display: canAdd ? 'flex' : 'none' }}
           >
             <Plus size={20} />
             {t('program.add')}

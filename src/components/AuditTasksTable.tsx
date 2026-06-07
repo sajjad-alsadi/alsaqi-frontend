@@ -66,9 +66,17 @@ const AuditTasksTable: React.FC<AuditTasksTableProps> = ({
               </td>
               <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-muted)]">{getPlanTitle(task.plan_id || task.audit_id as any)}</td>
               <td className="px-6 py-4">
-                <span className="bg-[var(--color-bg-main)] text-[var(--color-text-muted)] px-2 py-1 rounded-md text-xs font-bold whitespace-nowrap">
-                  {task.assigned_to || task.responsible || '-'}
-                </span>
+                {(task as any).assigned_name ? (
+                  <span className="bg-[var(--color-bg-main)] text-[var(--color-text-muted)] px-2 py-1 rounded-md text-xs font-bold whitespace-nowrap">
+                    {(task as any).assigned_name}
+                  </span>
+                ) : task.assigned_to || task.responsible ? (
+                  <span className="bg-[var(--color-bg-main)] text-[var(--color-text-muted)] px-2 py-1 rounded-md text-xs font-bold whitespace-nowrap">
+                    {task.assigned_to || task.responsible}
+                  </span>
+                ) : (
+                  <span className="text-[var(--color-text-muted)] text-xs">-</span>
+                )}
               </td>
               <td className="px-6 py-4">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
