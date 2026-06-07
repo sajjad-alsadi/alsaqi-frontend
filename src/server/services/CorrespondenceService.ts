@@ -364,7 +364,17 @@ export class CorrespondenceService {
     }
   }
 
-  static async getAttachments(type: string, id: string | number) {
+  static async getAttachments(type: string, id: string | number, userContext?: UserContext) {
+    if (userContext) {
+      const table = type === 'Outgoing' || type === 'outgoing' 
+        ? 'outgoing_letters' 
+        : 'incoming_correspondence';
+      const record = await this.db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id);
+      if (!record) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(record, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
     return await this.db.prepare("SELECT id, file_name, file_type, uploaded_at, description FROM correspondence_attachments WHERE correspondence_type = ? AND correspondence_id = ?")
       .all(type, id);
   }
@@ -528,7 +538,15 @@ export class CorrespondenceService {
     return { id: result.lastInsertRowid, sequence_number };
   }
 
-  static async updateOutgoing(id: string | number, data: any) {
+  static async updateOutgoing(id: string | number, data: any, userContext?: UserContext) {
+    if (userContext) {
+      const record = await this.db.prepare(`SELECT * FROM outgoing_letters WHERE id = ?`).get(id);
+      if (!record) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(record, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     const { letter_date, recipient_entity, subject, classification, sending_method, attachment_file } = data;
     
     if (attachment_file !== undefined) {
@@ -552,7 +570,15 @@ export class CorrespondenceService {
     });
   }
 
-  static async deleteOutgoing(id: string | number) {
+  static async deleteOutgoing(id: string | number, userContext?: UserContext) {
+    if (userContext) {
+      const record = await this.db.prepare(`SELECT * FROM outgoing_letters WHERE id = ?`).get(id);
+      if (!record) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(record, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     await this.db.prepare("DELETE FROM outgoing_letters WHERE id = ?").run(id);
 
     // --- AUTOMATION: Send event to n8n ---
@@ -561,7 +587,15 @@ export class CorrespondenceService {
     });
   }
 
-  static async updateIncoming(id: string | number, data: any) {
+  static async updateIncoming(id: string | number, data: any, userContext?: UserContext) {
+    if (userContext) {
+      const record = await this.db.prepare(`SELECT * FROM incoming_correspondence WHERE id = ?`).get(id);
+      if (!record) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(record, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     const { 
       letter_number, sender_entity, sender_entity_type, subject, letter_date, 
       receipt_date, classification, priority, method, receiving_dept_id, 
@@ -592,7 +626,15 @@ export class CorrespondenceService {
     });
   }
 
-  static async deleteIncoming(id: string | number) {
+  static async deleteIncoming(id: string | number, userContext?: UserContext) {
+    if (userContext) {
+      const record = await this.db.prepare(`SELECT * FROM incoming_correspondence WHERE id = ?`).get(id);
+      if (!record) throw new NotFoundError("Record not found");
+      if (!this.isWithinScope(record, userContext)) {
+        throw new ForbiddenError('Access denied to this record');
+      }
+    }
+
     // Cleanup related records first
     await this.db.transaction(async () => {
       await this.db.prepare("DELETE FROM correspondence_attachments WHERE correspondence_type = 'Incoming' AND correspondence_id = ?").run(id);

@@ -88,7 +88,9 @@ export const createCorrespondenceRoutes = (
     if (!validation.success) {
       throw new ValidationError("Invalid incoming correspondence data", validation.error.format());
     }
-    await CorrespondenceService.updateIncoming(id, validation.data);
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    await CorrespondenceService.updateIncoming(id, validation.data, userContext);
     
     await AuthService.logAudit((req as any).user.username, "UPDATE", "Correspondence", `Updated incoming letter ID: ${id}`);
     res.json({ success: true });
@@ -96,7 +98,9 @@ export const createCorrespondenceRoutes = (
 
   router.delete("/incoming/:id", authenticate, checkPermission('Correspondence', 'Delete'), asyncHandler(async (req, res) => {
     const id = req.params.id as string;
-    await CorrespondenceService.deleteIncoming(id);
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    await CorrespondenceService.deleteIncoming(id, userContext);
     
     await AuthService.logAudit((req as any).user.username, "DELETE", "Correspondence", `Deleted incoming letter ID: ${id}`);
     res.json({ success: true });
@@ -175,7 +179,9 @@ export const createCorrespondenceRoutes = (
   router.get("/attachments/:type/:id", authenticate, checkPermission('Correspondence', 'View'), asyncHandler(async (req, res) => {
     const type = req.params.type as string;
     const id = req.params.id as string;
-    const data = await CorrespondenceService.getAttachments(type, id);
+    const user = (req as any).user;
+    const userContext = { userId: user.id, userRole: user.role, departmentId: user.department_id || null };
+    const data = await CorrespondenceService.getAttachments(type, id, userContext);
     res.json(data);
   }));
 
@@ -247,6 +253,7 @@ export const createCorrespondenceRoutes = (
     const id = typedReq.params.id as string;
     const body = { ...typedReq.body };
     const username = typedReq.user.username;
+    const userContext = { userId: typedReq.user.id, userRole: typedReq.user.role, departmentId: typedReq.user.department_id || null };
     
     const files = typedReq.files;
     if (files && files.attachment_file) {
@@ -260,7 +267,7 @@ export const createCorrespondenceRoutes = (
       throw new ValidationError("Invalid outgoing correspondence data", validation.error.format());
     }
     
-    await CorrespondenceService.updateOutgoing(id, validation.data);
+    await CorrespondenceService.updateOutgoing(id, validation.data, userContext);
     
     await AuthService.logAudit(username, "Update", "Outgoing Letters", `Updated letter ID: ${id}`);
         
@@ -271,8 +278,9 @@ export const createCorrespondenceRoutes = (
     const typedReq = req as unknown as any;
     const id = typedReq.params.id as string;
     const username = typedReq.user.username;
+    const userContext = { userId: typedReq.user.id, userRole: typedReq.user.role, departmentId: typedReq.user.department_id || null };
     
-    await CorrespondenceService.deleteOutgoing(id);
+    await CorrespondenceService.deleteOutgoing(id, userContext);
     
     await AuthService.logAudit(username, "Delete", "Outgoing Letters", `Deleted letter ID: ${id}`);
         
