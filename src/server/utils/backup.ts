@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import cron, { ScheduledTask } from 'node-cron';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { db } from '../db/index';
 import logger from './logger';
 
@@ -87,9 +88,9 @@ export class BackupScheduler {
     this.task = cron.schedule(this.config.schedule, async () => {
       logger.info('[BACKUP] Scheduled backup triggered.');
       try {
-        await this.executeBackup('scheduled');
+        await this.runWithRetry('scheduled');
       } catch (error) {
-        logger.error('[BACKUP] Scheduled backup failed:', error);
+        logger.error('[BACKUP] Scheduled backup failed after retry:', error);
       }
     });
 
@@ -114,7 +115,7 @@ export class BackupScheduler {
    */
   async runNow(): Promise<BackupResult> {
     logger.info('[BACKUP] Manual backup triggered.');
-    return this.executeBackup('manual');
+    return this.runWithRetry('manual');
   }
 
   /**
@@ -140,6 +141,53 @@ export class BackupScheduler {
    */
   isRunning(): boolean {
     return this.running;
+  }
+
+  /**
+   * Runs a backup with retry logic: retries once after a 5-minute delay on failure.
+   */
+  async runWithRetry(type: 'scheduled' | 'manual'): Promise<BackupResult> {
+    try {
+      return await this.executeBackup(type);
+    } catch (error) {
+      logger.error('[BACKUP] Backup failed, retrying in 5 minutes', { error: String(error) });
+      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
+      return await this.executeBackup(type); // Second attempt — no further retry
+    }
+  }
+
+  /**
+   * Uploads a file to MinIO object storage in the 'backups' bucket.
+   */
+  private async uploadToMinIO(filePath: string, objectKey: string): Promise<void> {
+    const endpoint = process.env.MINIO_ENDPOINT;
+    const port = process.env.MINIO_PORT;
+    const accessKeyId = process.env.MINIO_ROOT_USER;
+    const secretAccessKey = process.env.MINIO_ROOT_PASSWORD;
+
+    if (!endpoint || !port || !accessKeyId || !secretAccessKey) {
+      logger.warn('[BACKUP] MinIO configuration incomplete, skipping upload');
+      return;
+    }
+
+    const s3 = new S3Client({
+      endpoint: `http://${endpoint}:${port}`,
+      region: process.env.MINIO_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+      forcePathStyle: true,
+    });
+
+    const fileStream = fs.createReadStream(filePath);
+    await s3.send(new PutObjectCommand({
+      Bucket: 'backups',
+      Key: objectKey,
+      Body: fileStream,
+    }));
+
+    logger.info(`[BACKUP] Uploaded backup to MinIO: backups/${objectKey}`);
   }
 
   /**
@@ -236,6 +284,20 @@ export class BackupScheduler {
     // Apply retention policy
     await this.applyRetentionPolicy();
 
+    // Upload to MinIO after successful local storage
+    if (status === 'success' && filePath) {
+      try {
+        const objectKey = path.basename(filePath);
+        await this.uploadToMinIO(filePath, objectKey);
+      } catch (uploadError) {
+        // MinIO upload failure does not fail the backup — still stored locally
+        logger.error('[BACKUP] MinIO upload failed, backup still stored locally', {
+          error: String(uploadError),
+          filePath,
+        });
+      }
+    }
+
     // Notify admins on failure
     if (status === 'failed' && this.config.notifyOnFailure) {
       await this.notifyAdminsOnFailure(backupId, errors);
@@ -250,7 +312,19 @@ export class BackupScheduler {
       ...(errors.length > 0 && { errors }),
     };
 
-    logger.info(`[BACKUP] Backup ${backupId} completed with status: ${status} (${duration}ms, ${sizeBytes} bytes)`);
+    if (status === 'success' || status === 'partial') {
+      logger.info('[BACKUP] Backup completed successfully', {
+        filename: path.basename(filePath),
+        size_bytes: sizeBytes,
+        duration_ms: duration,
+      });
+    } else {
+      logger.error(`[BACKUP] Backup ${backupId} completed with status: ${status}`, {
+        duration_ms: duration,
+        errors,
+      });
+    }
+
     return result;
   }
 

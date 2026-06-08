@@ -1,0 +1,1712 @@
+[
+  {
+    "id": "TC001",
+    "title": "Sign in and reach the dashboard",
+    "description": "This verifies that a user can sign in with valid credentials and land on the dashboard.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard content is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Create a new audit plan",
+    "description": "This verifies that an auditor can create an audit plan and see it added to the plan list.",
+    "category": "Audit Plans",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /plan"
+      },
+      {
+        "type": "action",
+        "description": "Create a new audit plan with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Save the audit plan"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new audit plan appears in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Complete two-step authentication after sign-in",
+    "description": "This verifies that a user who is prompted for a verification code can complete login and reach the dashboard.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Enter a valid 2FA code when prompted"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the authenticated session is established"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Create a new user account",
+    "description": "An administrator can create a new user and see the account appear in the user list.",
+    "category": "User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /users"
+      },
+      {
+        "type": "action",
+        "description": "Create a new user with valid details and permissions"
+      },
+      {
+        "type": "action",
+        "description": "Save the new user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new user appears in the user list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Edit an existing audit plan",
+    "description": "This verifies that a user can open an audit plan, update its details, and see the changes saved in the list.",
+    "category": "Audit Plans",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /plan"
+      },
+      {
+        "type": "action",
+        "description": "Open an audit plan for editing"
+      },
+      {
+        "type": "action",
+        "description": "Update the audit plan details"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated audit plan is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Complete a required password change during sign-in",
+    "description": "This verifies that a user who is prompted to change their password can finish the login flow and reach the dashboard.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Change the password when prompted"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the password change flow completes successfully"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Create a new audit finding",
+    "description": "Verifies that a user can create a finding and see it appear in the findings list.",
+    "category": "Audit Findings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /findings"
+      },
+      {
+        "type": "action",
+        "description": "Create a new finding with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Save the finding"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new finding appears in the findings list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Edit an existing user",
+    "description": "An administrator can open a user record, update details and permissions, and see the saved changes reflected in the list.",
+    "category": "User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /users"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing user record"
+      },
+      {
+        "type": "action",
+        "description": "Update the user details and permissions"
+      },
+      {
+        "type": "action",
+        "description": "Save the user changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated user information is shown"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Edit an existing audit finding",
+    "description": "Verifies that a user can open an existing finding, change its details, and see the updated record.",
+    "category": "Audit Findings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /findings"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing finding"
+      },
+      {
+        "type": "action",
+        "description": "Edit the finding details with valid changes"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated finding is shown in the findings list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Generate and download a report",
+    "description": "This test verifies that an audit manager can configure a report, generate it, and download the output.",
+    "category": "Reports",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /reports"
+      },
+      {
+        "type": "action",
+        "description": "Select a report type"
+      },
+      {
+        "type": "action",
+        "description": "Configure the report parameters"
+      },
+      {
+        "type": "action",
+        "description": "Generate the report"
+      },
+      {
+        "type": "action",
+        "description": "Download the report output"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the generated report is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the download action is available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Create a new department",
+    "description": "A manager can add a department and see it appear in the department hierarchy.",
+    "category": "Department Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /departments"
+      },
+      {
+        "type": "action",
+        "description": "Create a new department with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Save the department"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new department appears in the hierarchy"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Switch login language before signing in",
+    "description": "This verifies that changing the login page language still allows the user to continue signing in successfully.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Switch the interface language"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the next authentication step or dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the login flow continues successfully"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Create a new risk item",
+    "description": "Verifies that a user can add a risk to the register and see it appear in the table.",
+    "category": "Risk Register",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /risks"
+      },
+      {
+        "type": "action",
+        "description": "Add a new risk item with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Save the risk"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new risk appears in the risk register table"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Add a compliance item",
+    "description": "This test verifies that a signed-in user can add a new compliance item and see it appear in the matrix.",
+    "category": "Compliance Matrix",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /compliance-matrix"
+      },
+      {
+        "type": "action",
+        "description": "Start adding a compliance item"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the required compliance item details"
+      },
+      {
+        "type": "action",
+        "description": "Save the compliance item"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new compliance item appears in the matrix"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Generate and export a report",
+    "description": "This test verifies that an audit manager can configure a report, generate it, and export it in an available format.",
+    "category": "Reports",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /reports"
+      },
+      {
+        "type": "action",
+        "description": "Select a report type"
+      },
+      {
+        "type": "action",
+        "description": "Configure the report parameters"
+      },
+      {
+        "type": "action",
+        "description": "Generate the report"
+      },
+      {
+        "type": "action",
+        "description": "Export the report"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the generated report is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the export option is available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "Sign in with remember me enabled",
+    "description": "This verifies that a user can choose to stay signed in while completing the login flow successfully.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Enable remember me"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the session entry completes successfully"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC017",
+    "title": "Create incoming correspondence",
+    "description": "Verifies that a user can create an incoming correspondence item and see it appear in the list.",
+    "category": "Correspondence Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /cms"
+      },
+      {
+        "type": "action",
+        "description": "Create a new incoming correspondence item with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Save the correspondence"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the incoming correspondence appears in the correspondence list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC018",
+    "title": "View notifications and open a related item",
+    "description": "A user can review notifications and open one to continue to the related audit record.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /notifications"
+      },
+      {
+        "type": "action",
+        "description": "Open a notification"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the related item is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC019",
+    "title": "Create outgoing correspondence",
+    "description": "Verifies that a user can create an outgoing correspondence item and see it appear in the list.",
+    "category": "Correspondence Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /cms"
+      },
+      {
+        "type": "action",
+        "description": "Create a new outgoing correspondence item with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Save the correspondence"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the outgoing correspondence appears in the correspondence list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC020",
+    "title": "View dashboard analytics and navigate onward",
+    "description": "This verifies that the dashboard shows overview information and provides navigation into another module.",
+    "category": "Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link or control to open a related module from the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard analytics are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the related module opens"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC021",
+    "title": "Edit a compliance status",
+    "description": "This test verifies that a signed-in user can change a compliance status and see the updated value in the matrix.",
+    "category": "Compliance Matrix",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /compliance-matrix"
+      },
+      {
+        "type": "action",
+        "description": "Select an existing compliance item to edit"
+      },
+      {
+        "type": "action",
+        "description": "Update the compliance status"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated compliance status is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC022",
+    "title": "Filter audit findings by status or risk level",
+    "description": "Verifies that a user can narrow the findings list using status or risk filters and review only matching results.",
+    "category": "Audit Findings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /findings"
+      },
+      {
+        "type": "action",
+        "description": "Apply a status or risk level filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the findings list shows only matching results"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC023",
+    "title": "Filter users by role or status",
+    "description": "An administrator can narrow the user list by role or status and review the matching users.",
+    "category": "User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /users"
+      },
+      {
+        "type": "action",
+        "description": "Apply a role or status filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user list shows only matching users"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC024",
+    "title": "Filter audit plans by status or department",
+    "description": "This verifies that a user can narrow the audit plan list and see only matching results.",
+    "category": "Audit Plans",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /plan"
+      },
+      {
+        "type": "action",
+        "description": "Apply a status or department filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify matching audit plans are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC025",
+    "title": "Edit an existing risk item",
+    "description": "Verifies that a user can update a risk item and see the saved changes reflected in the register.",
+    "category": "Risk Register",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /risks"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing risk item"
+      },
+      {
+        "type": "action",
+        "description": "Edit the risk details with valid changes"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated risk is shown in the risk register table"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC026",
+    "title": "Edit a department",
+    "description": "A manager can open a department, update its details, and see the updated department in the structure.",
+    "category": "Department Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /departments"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing department"
+      },
+      {
+        "type": "action",
+        "description": "Update the department details"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated department information is shown"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC027",
+    "title": "Link a compliance item to an audit plan",
+    "description": "This test verifies that a signed-in user can link a compliance item to an audit plan and see the relationship reflected in the matrix.",
+    "category": "Compliance Matrix",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /compliance-matrix"
+      },
+      {
+        "type": "action",
+        "description": "Select a compliance item to link"
+      },
+      {
+        "type": "action",
+        "description": "Choose an audit plan to associate"
+      },
+      {
+        "type": "action",
+        "description": "Save the relationship"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the linked audit plan is shown for the compliance item"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC028",
+    "title": "Delete an audit finding",
+    "description": "Verifies that a user can delete a finding and see it removed from the findings list.",
+    "category": "Audit Findings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /findings"
+      },
+      {
+        "type": "action",
+        "description": "Delete an existing finding"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the finding is removed from the list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC029",
+    "title": "Mark a notification as read",
+    "description": "A user can mark a notification as read and see the list update accordingly.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /notifications"
+      },
+      {
+        "type": "action",
+        "description": "Mark a notification as read"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the notification is shown as read in the list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC030",
+    "title": "Delete an audit plan from the list",
+    "description": "This verifies that a user can remove an audit plan and confirm it no longer appears in the list.",
+    "category": "Audit Plans",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /plan"
+      },
+      {
+        "type": "action",
+        "description": "Create a new audit plan with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Delete the newly created audit plan"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the audit plan is removed from the list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC031",
+    "title": "Edit an existing correspondence item",
+    "description": "Verifies that a user can update correspondence details and see the saved record reflected in the list.",
+    "category": "Correspondence Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /cms"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing correspondence item"
+      },
+      {
+        "type": "action",
+        "description": "Edit the correspondence details with valid changes"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated correspondence is shown in the correspondence list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC032",
+    "title": "Disable and re-enable a user account",
+    "description": "An administrator can disable a user and later enable the same account, with the status changing accordingly in the list.",
+    "category": "User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /users"
+      },
+      {
+        "type": "action",
+        "description": "Disable an existing user account"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user's status changes to disabled"
+      },
+      {
+        "type": "action",
+        "description": "Enable the same user account"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user's status changes back to enabled"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC033",
+    "title": "Update the interface theme",
+    "description": "This test verifies that a signed-in user can switch between light and dark theme in settings and see the interface update accordingly.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings"
+      },
+      {
+        "type": "action",
+        "description": "Toggle the theme preference"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the interface theme updates"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the preference remains selected"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC034",
+    "title": "Filter risk register entries",
+    "description": "Verifies that a user can filter risks by status or rating and review the matching items.",
+    "category": "Risk Register",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /risks"
+      },
+      {
+        "type": "action",
+        "description": "Apply a status or rating filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the risk register shows only matching risks"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC035",
+    "title": "Switch the interface language",
+    "description": "This test verifies that a signed-in user can change the app language between Arabic and English from settings and see the interface language update.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings"
+      },
+      {
+        "type": "action",
+        "description": "Change the language preference"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the interface language updates"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected language preference is shown"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC036",
+    "title": "Filter correspondence by type or status",
+    "description": "Verifies that a user can filter correspondence and review only matching items.",
+    "category": "Correspondence Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /cms"
+      },
+      {
+        "type": "action",
+        "description": "Apply a type, status, or classification filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the correspondence list shows only matching items"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC037",
+    "title": "Delete a user account",
+    "description": "An administrator can delete a user and confirm the account is removed from the list.",
+    "category": "User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /users"
+      },
+      {
+        "type": "action",
+        "description": "Delete an existing user account"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the deleted user is removed from the user list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC038",
+    "title": "Save display preferences",
+    "description": "This test verifies that a signed-in user can update display preferences in settings and keep the changes after saving.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings"
+      },
+      {
+        "type": "action",
+        "description": "Update a display preference"
+      },
+      {
+        "type": "action",
+        "description": "Save the settings"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated settings are shown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC039",
+    "title": "Delete a department",
+    "description": "A manager can delete a department and confirm it no longer appears in the list or hierarchy.",
+    "category": "Department Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /departments"
+      },
+      {
+        "type": "action",
+        "description": "Delete an existing department"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the deleted department is removed from the hierarchy"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC040",
+    "title": "View the compliance matrix grid",
+    "description": "This test verifies that a signed-in user can open the compliance matrix and view the compliance tracking grid.",
+    "category": "Compliance Matrix",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /compliance-matrix"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the compliance matrix grid is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify existing compliance items are visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC041",
+    "title": "Use the compliance matrix after generating a report",
+    "description": "This test verifies that a signed-in user can cross-check compliance items in the matrix after navigating from reporting-related work.",
+    "category": "Reports",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /reports"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /compliance-matrix"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the compliance matrix grid is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify compliance items are visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC042",
+    "title": "See an invalid credentials message",
+    "description": "This verifies that the login screen shows an error when the user submits incorrect credentials.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username or email field with invalid-user"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with invalid-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid credentials message is visible"
+      }
+    ],
+    "priority": "Low"
+  }
+]

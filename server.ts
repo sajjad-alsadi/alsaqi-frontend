@@ -35,6 +35,7 @@ import { createAuthMiddlewares } from "./src/server/middleware/auth";
 import { createHelmetMiddleware } from "./src/server/middleware/helmet";
 import { createCompressionMiddleware } from "./src/server/middleware/compression";
 import { runSecretsValidation } from "./src/server/utils/secretsValidator";
+import { validateRequiredEnv } from "./src/server/utils/envValidator";
 
 // Permission Module Registry - importing triggers module registration
 import "./src/permissions/modules";
@@ -42,6 +43,12 @@ import { seedModules } from "./src/permissions/seeder";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// ─── Environment Variable Validation (MUST run before any other initialization) ─
+// In production: exits with code 1 if required Docker env vars are missing or too short
+if (process.env.NODE_ENV === 'production') {
+  validateRequiredEnv();
+}
 
 // ─── Secrets Validation (MUST run before any other initialization) ────────────
 // In production: exits with code 1 if critical secrets are weak/missing

@@ -1,0 +1,342 @@
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - React 19
+  - Vite
+  - TailwindCSS
+  - TanStack React Query
+  - React Router DOM
+  - React Hook Form + Zod validation
+  - Axios
+  - Framer Motion
+  - i18next (Arabic/English)
+routes:
+  - path: /login
+    file: src/components/Login.tsx
+    auth_required: false
+    description: User login page with username/password, 2FA support, and forced password change
+  - path: /dashboard
+    file: src/modules/Dashboard/index.tsx
+    auth_required: true
+    description: Main dashboard with analytics and overview widgets
+  - path: /charter
+    file: src/modules/AuditCharter.tsx
+    auth_required: true
+    description: Audit charter management
+  - path: /plan
+    file: src/modules/AuditPlan.tsx
+    auth_required: true
+    description: Audit plan creation and management (CRUD)
+  - path: /tasks
+    file: src/modules/AuditTasks.tsx
+    auth_required: true
+    description: Audit task tracking and assignment
+  - path: /library
+    file: src/modules/AuditProgramLibrary.tsx
+    auth_required: true
+    description: Audit program library with reusable templates
+  - path: /findings
+    file: src/modules/AuditFindings.tsx
+    auth_required: true
+    description: Audit findings CRUD with risk levels
+  - path: /evidence
+    file: src/modules/AuditEvidence.tsx
+    auth_required: true
+    description: Audit evidence upload and management
+  - path: /recommendations
+    file: src/modules/Recommendations.tsx
+    auth_required: true
+    description: Audit recommendations tracking
+  - path: /risks
+    file: src/modules/RiskRegister.tsx
+    auth_required: true
+    description: Risk register with scoring and mitigation tracking
+  - path: /org-structure
+    file: src/modules/OrgStructure/index.tsx
+    auth_required: true
+    description: Organization structure tree view
+  - path: /cms
+    file: src/modules/Correspondence/CorrespondenceSystem.tsx
+    auth_required: true
+    description: Correspondence management (incoming/outgoing letters)
+  - path: /reports
+    file: src/modules/Reports/index.tsx
+    auth_required: true
+    description: Report generation and export
+  - path: /integrity
+    file: src/modules/IntegrityManagement.tsx
+    auth_required: true
+    description: Integrity management (fraud logs, conflict of interest)
+  - path: /compliance-matrix
+    file: src/modules/ComplianceMatrix/index.tsx
+    auth_required: true
+    description: Compliance matrix tracking
+  - path: /notifications
+    file: src/modules/Notifications.tsx
+    auth_required: true
+    description: User notifications list
+  - path: /departments
+    file: src/modules/DepartmentManagement.tsx
+    auth_required: true
+    description: Department and job title management
+  - path: /users
+    file: src/modules/UserManagement/index.tsx
+    auth_required: true
+    description: User management (admin only, permission-gated)
+  - path: /system-logs
+    file: src/modules/SystemLogsManagement.tsx
+    auth_required: true
+    description: System logs viewing (permission-gated)
+  - path: /error-logs
+    file: src/modules/SystemErrorLogs/index.tsx
+    auth_required: true
+    description: System error logs (permission-gated)
+  - path: /trail
+    file: src/modules/AuditTrail.tsx
+    auth_required: true
+    description: Audit trail log (permission-gated)
+  - path: /settings
+    file: src/modules/Settings/index.tsx
+    auth_required: true
+    description: User settings (theme, language, preferences)
+features:
+  - name: User Login
+    description: Login with username/email and password. Supports 2FA verification, forced password change on first login, remember me, and bilingual (AR/EN) interface.
+    files:
+      - src/components/Login.tsx
+      - src/components/Login/LoginForm.tsx
+      - src/components/Login/LoginHeader.tsx
+      - src/components/Login/LoginFooter.tsx
+      - src/components/Login/LoginIllustration.tsx
+      - src/components/auth/ChangePasswordModal.tsx
+      - src/components/auth/ContactAdminModal.tsx
+      - src/api/compat/authService.ts
+      - src/context/AuthContext.tsx
+    entry_route: /login
+    user_interactions:
+      - Fill username/email input field
+      - Fill password input field
+      - Toggle show/hide password
+      - Toggle remember me checkbox
+      - Click Login button to submit
+      - See error message on invalid credentials
+      - Enter 2FA code if prompted
+      - Change password if forced
+      - Switch language between Arabic and English
+    api_calls:
+      - method: POST
+        endpoint: /api/auth/login
+      - method: POST
+        endpoint: /api/auth/2fa/validate
+      - method: POST
+        endpoint: /api/auth/change-password
+    auth_required: false
+  - name: Dashboard
+    description: Main dashboard with audit analytics, recent activities, and overview widgets showing audit status distribution.
+    files:
+      - src/modules/Dashboard/index.tsx
+    entry_route: /dashboard
+    user_interactions:
+      - View audit statistics cards
+      - View charts and graphs
+      - Navigate to other modules from dashboard
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/audit-plans
+      - method: GET
+        endpoint: /api/v1/findings
+    auth_required: true
+  - name: Audit Plans
+    description: CRUD management of audit plans with status tracking, risk rating, department assignment, and date management.
+    files:
+      - src/modules/AuditPlan.tsx
+      - src/api/modules/audit-plans.ts
+    entry_route: /plan
+    user_interactions:
+      - View list of audit plans
+      - Create a new audit plan
+      - Edit an existing audit plan
+      - Delete an audit plan
+      - Filter by status or department
+      - View audit plan details
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/audit-plans
+      - method: POST
+        endpoint: /api/v1/audit-plans
+      - method: PUT
+        endpoint: /api/v1/audit-plans/:id
+      - method: DELETE
+        endpoint: /api/v1/audit-plans/:id
+    auth_required: true
+  - name: Audit Findings
+    description: Track and manage audit findings with risk levels, link findings to audit plans, and monitor resolution status.
+    files:
+      - src/modules/AuditFindings.tsx
+      - src/api/modules/findings.ts
+    entry_route: /findings
+    user_interactions:
+      - View list of findings
+      - Create a new finding
+      - Edit a finding
+      - Delete a finding
+      - Filter by status or risk level
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/findings
+      - method: POST
+        endpoint: /api/v1/findings
+      - method: PUT
+        endpoint: /api/v1/findings/:id
+      - method: DELETE
+        endpoint: /api/v1/findings/:id
+    auth_required: true
+  - name: Risk Register
+    description: Manage organizational risks with likelihood/impact scoring, mitigation strategies, and residual risk tracking.
+    files:
+      - src/modules/RiskRegister.tsx
+      - src/api/modules/risk-register.ts
+    entry_route: /risks
+    user_interactions:
+      - View risk register table
+      - Add a new risk item
+      - Edit a risk item
+      - Delete a risk item
+      - Filter by status or rating
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/risk-register
+      - method: POST
+        endpoint: /api/v1/risk-register
+      - method: PUT
+        endpoint: /api/v1/risk-register/:id
+      - method: DELETE
+        endpoint: /api/v1/risk-register/:id
+    auth_required: true
+  - name: Correspondence Management
+    description: Manage incoming and outgoing official correspondence with letter tracking, classification, and follow-up management.
+    files:
+      - src/modules/Correspondence/CorrespondenceSystem.tsx
+      - src/api/modules/correspondence.ts
+    entry_route: /cms
+    user_interactions:
+      - View correspondence list
+      - Create incoming correspondence
+      - Create outgoing correspondence
+      - Edit correspondence details
+      - Delete correspondence
+      - Filter by type, status, or classification
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/correspondence
+      - method: POST
+        endpoint: /api/v1/correspondence/incoming
+      - method: POST
+        endpoint: /api/v1/correspondence/outgoing
+      - method: PUT
+        endpoint: /api/v1/correspondence/incoming/:id
+      - method: PUT
+        endpoint: /api/v1/correspondence/outgoing/:id
+      - method: DELETE
+        endpoint: /api/v1/correspondence/:id
+    auth_required: true
+  - name: User Management
+    description: Admin-only user CRUD with role assignment, permission management, and status control.
+    files:
+      - src/modules/UserManagement/index.tsx
+      - src/api/modules/users.ts
+    entry_route: /users
+    user_interactions:
+      - View user list
+      - Create a new user
+      - Edit user details and permissions
+      - Disable/enable a user
+      - Delete a user
+      - Filter by role or status
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/users
+      - method: POST
+        endpoint: /api/v1/users
+      - method: PUT
+        endpoint: /api/v1/users/:id
+      - method: DELETE
+        endpoint: /api/v1/users/:id
+    auth_required: true
+  - name: Department Management
+    description: Manage organizational departments with hierarchical structure, job titles, and unit assignments.
+    files:
+      - src/modules/DepartmentManagement.tsx
+      - src/api/modules/departments.ts
+    entry_route: /departments
+    user_interactions:
+      - View department tree/list
+      - Create a new department
+      - Edit department details
+      - Delete a department
+      - Manage job titles within departments
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/departments
+      - method: POST
+        endpoint: /api/v1/departments
+      - method: PUT
+        endpoint: /api/v1/departments/:id
+      - method: DELETE
+        endpoint: /api/v1/departments/:id
+    auth_required: true
+  - name: Notifications
+    description: View and manage user notifications with real-time updates.
+    files:
+      - src/modules/Notifications.tsx
+      - src/api/modules/notifications.ts
+      - src/context/NotificationContext.tsx
+    entry_route: /notifications
+    user_interactions:
+      - View notification list
+      - Mark notifications as read
+      - Click notification to navigate to related item
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/notifications
+      - method: PUT
+        endpoint: /api/v1/notifications/:id/read
+    auth_required: true
+  - name: Settings
+    description: User preferences including theme (light/dark), language (Arabic/English), and display options.
+    files:
+      - src/modules/Settings/index.tsx
+      - src/context/PreferencesContext.tsx
+    entry_route: /settings
+    user_interactions:
+      - Toggle dark/light theme
+      - Switch language between Arabic and English
+      - Update display preferences
+    api_calls: []
+    auth_required: true
+  - name: Compliance Matrix
+    description: Compliance tracking matrix linking regulatory requirements to audit activities.
+    files:
+      - src/modules/ComplianceMatrix/index.tsx
+    entry_route: /compliance-matrix
+    user_interactions:
+      - View compliance matrix grid
+      - Add compliance items
+      - Edit compliance status
+      - Link to audit plans
+    api_calls: []
+    auth_required: true
+  - name: Reports
+    description: Generate and export audit reports in various formats.
+    files:
+      - src/modules/Reports/index.tsx
+    entry_route: /reports
+    user_interactions:
+      - Select report type
+      - Configure report parameters
+      - Generate report
+      - Download/export report
+    api_calls: []
+    auth_required: true
+known_limitations: []

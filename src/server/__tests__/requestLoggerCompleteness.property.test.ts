@@ -46,7 +46,7 @@ vi.mock('../utils/logger', () => ({
 }));
 
 import db from '../db/index';
-import logger from '../utils/logger';
+import logger, { requestContext } from '../utils/logger';
 
 // ─── Custom Arbitraries ──────────────────────────────────────────────────────
 
@@ -123,7 +123,7 @@ describe('Property 14: Request Logger Completeness', () => {
   });
 
   describe('log entry contains all required fields for any non-excluded request', () => {
-    it('every log entry contains method, path, statusCode, duration, userId, ip, and userAgent', { timeout: 15000 }, () => {
+    it('every log entry contains method, path, statusCode, responseTimeMs via requestContext', { timeout: 15000 }, () => {
       fc.assert(
         fc.property(requestScenarioArb, (scenario) => {
           vi.clearAllMocks();
@@ -161,30 +161,31 @@ describe('Property 14: Request Logger Completeness', () => {
             }
           }
 
-          // Verify logger.info was called with all required fields
-          expect(logger.info).toHaveBeenCalledTimes(1);
-          const logCall = (logger.info as any).mock.calls[0];
-          const logData = logCall[1];
+          // Verify requestContext.run was called with required HTTP metadata
+          expect(requestContext.run).toHaveBeenCalledTimes(1);
+          const contextStore = (requestContext.run as any).mock.calls[0][0];
 
-          // All required fields must be present
-          expect(logData).toHaveProperty('requestId');
-          expect(logData).toHaveProperty('method');
-          expect(logData).toHaveProperty('path');
-          expect(logData).toHaveProperty('statusCode');
-          expect(logData).toHaveProperty('duration');
-          expect(logData).toHaveProperty('userId');
-          expect(logData).toHaveProperty('ip');
-          expect(logData).toHaveProperty('userAgent');
+          // All required fields must be present in the context store
+          expect(contextStore).toHaveProperty('correlationId');
+          expect(contextStore).toHaveProperty('method');
+          expect(contextStore).toHaveProperty('path');
+          expect(contextStore).toHaveProperty('statusCode');
+          expect(contextStore).toHaveProperty('responseTimeMs');
 
           // Verify field values match the request
-          expect(logData.method).toBe(scenario.method);
-          expect(logData.path).toBe(scenario.path);
-          expect(logData.statusCode).toBe(scenario.statusCode);
-          expect(typeof logData.duration).toBe('number');
-          expect(logData.duration).toBeGreaterThanOrEqual(0);
-          expect(logData.userId).toBe(scenario.userId);
-          expect(logData.ip).toBe(scenario.ip);
-          expect(logData.userAgent).toBe(scenario.userAgent);
+          expect(contextStore.correlationId).toBe(scenario.correlationId);
+          expect(contextStore.method).toBe(scenario.method);
+          expect(contextStore.path).toBe(scenario.path);
+          expect(contextStore.statusCode).toBe(scenario.statusCode);
+          expect(typeof contextStore.responseTimeMs).toBe('number');
+          expect(contextStore.responseTimeMs).toBeGreaterThanOrEqual(0);
+
+          // Verify logger.info was called with formatted message
+          expect(logger.info).toHaveBeenCalledTimes(1);
+          const logMessage = (logger.info as any).mock.calls[0][0];
+          expect(logMessage).toContain(scenario.method);
+          expect(logMessage).toContain(scenario.path);
+          expect(logMessage).toContain(String(scenario.statusCode));
         }),
         { numRuns: 300 }
       );
@@ -231,17 +232,16 @@ describe('Property 14: Request Logger Completeness', () => {
             }
           }
 
-          // Verify the requestId in the log matches the X-Request-Id header
-          expect(logger.info).toHaveBeenCalledTimes(1);
-          const logCall = (logger.info as any).mock.calls[0];
-          const logData = logCall[1];
+          // Verify the correlationId in requestContext.run matches X-Request-Id header
+          expect(requestContext.run).toHaveBeenCalledTimes(1);
+          const contextStore = (requestContext.run as any).mock.calls[0][0];
 
-          // The requestId in the log must match the correlation ID
-          expect(logData.requestId).toBe(scenario.correlationId);
+          // The correlationId in the context must match the correlation ID
+          expect(contextStore.correlationId).toBe(scenario.correlationId);
 
           // The X-Request-Id response header must also match
           const xRequestIdHeader = res._headers['x-request-id'];
-          expect(logData.requestId).toBe(xRequestIdHeader);
+          expect(contextStore.correlationId).toBe(xRequestIdHeader);
         }),
         { numRuns: 300 }
       );

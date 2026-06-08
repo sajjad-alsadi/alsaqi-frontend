@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { RequestLoggerOptions } from '../types/middleware';
 import db from '../db/index';
-import logger from '../utils/logger';
+import logger, { requestContext } from '../utils/logger';
 
 /**
  * Determines if a request path should be excluded from logging.
@@ -89,11 +89,11 @@ export function createRequestLogger(options: RequestLoggerOptions = {}) {
 
     // Capture the response finish event to log after response is sent
     res.on('finish', () => {
-      const duration = Date.now() - startTime;
+      const responseTimeMs = Date.now() - startTime;
       const correlationId = (req as any).correlationId || 'unknown';
       const userId = (req as any).user?.id || null;
       const method = req.method;
-      const path = req.originalUrl || req.path;
+      const reqPath = req.originalUrl || req.path;
       const statusCode = res.statusCode;
       const ip = req.ip || req.socket?.remoteAddress || 'unknown';
       const userAgent = req.get('user-agent') || '';
@@ -101,37 +101,30 @@ export function createRequestLogger(options: RequestLoggerOptions = {}) {
       // Determine if there's an error message (for 5xx responses)
       const errorMessage = statusCode >= 500 ? (res as any)._errorMessage || null : null;
 
-      // Emit info-level log for every request
-      logger.info('Request completed', {
-        requestId: correlationId,
-        method,
-        path,
-        statusCode,
-        duration,
-        userId,
-        ip,
-        userAgent,
-      });
+      // Use requestContext.run() to inject HTTP metadata into the logger's
+      // AsyncLocalStorage context, so the addMetadata format automatically
+      // includes correlationId, method, path, statusCode, responseTimeMs
+      requestContext.run(
+        { correlationId, userId, method, path: reqPath, statusCode, responseTimeMs },
+        () => {
+          // Emit info-level log for every request
+          logger.info(`${method} ${reqPath} ${statusCode} ${responseTimeMs}ms`);
 
-      // Emit warning-level log for slow requests
-      if (duration > slowThreshold) {
-        logger.warn(`Slow request detected: ${method} ${path} took ${duration}ms (threshold: ${slowThreshold}ms)`, {
-          requestId: correlationId,
-          method,
-          path,
-          duration,
-          slowThreshold,
-        });
-      }
+          // Emit warning-level log for slow requests
+          if (responseTimeMs > slowThreshold) {
+            logger.warn(`Slow request detected: ${method} ${reqPath} took ${responseTimeMs}ms (threshold: ${slowThreshold}ms)`);
+          }
+        }
+      );
 
       // Persist to database asynchronously (fire-and-forget)
       persistLogEntry({
         requestId: correlationId,
         userId,
         method,
-        path,
+        path: reqPath,
         statusCode,
-        durationMs: duration,
+        durationMs: responseTimeMs,
         ipAddress: ip,
         userAgent,
         errorMessage,

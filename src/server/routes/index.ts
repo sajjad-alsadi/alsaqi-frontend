@@ -43,6 +43,7 @@ import { createLookupRoutes } from "./lookups";
 import { createIdempotencyMiddleware } from "../middleware/idempotency";
 import { createJobRoutes } from "./jobs.routes";
 import { getQueueService, isInfrastructureReady } from "../services/infrastructure";
+import { createSystemErrorsRoutes } from "./systemErrors";
 import type { QueueService } from "../services/queue.service";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -130,6 +131,9 @@ export const setupRoutes = (
 
   // Health Check (enhanced - checks all subsystems)
   v1Router.use("/", createHealthRouter());
+
+  // System Error Reporting (no auth — fire-and-forget from client ErrorBoundary)
+  v1Router.use("/system-errors", createSystemErrorsRoutes());
 
   // OpenAPI Specification
   v1Router.get("/docs", (req, res) => {

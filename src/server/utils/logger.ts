@@ -1,62 +1,89 @@
 import winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
 import { AsyncLocalStorage } from 'async_hooks';
+import os from 'os';
 
-const { combine, timestamp, printf, colorize, json } = winston.format;
+const { combine, timestamp, colorize, json } = winston.format;
 
-// Correlation ID storage for request tracing
-export const requestContext = new AsyncLocalStorage<{ correlationId: string; userId?: string }>();
+// Request context storage for correlation ID and HTTP metadata
+export const requestContext = new AsyncLocalStorage<{
+  correlationId: string;
+  userId?: string;
+  method?: string;
+  path?: string;
+  statusCode?: number;
+  responseTimeMs?: number;
+}>();
 
-const addCorrelationId = winston.format((info) => {
+// Custom format that injects pid, hostname, service, and correlationId into every log entry
+const addMetadata = winston.format((info) => {
+  info.pid = process.pid;
+  info.hostname = os.hostname();
+  info.service = 'alsaqi-api';
+
   const store = requestContext.getStore();
   if (store) {
     info.correlationId = store.correlationId;
-    if (store.userId) {
-      info.userId = store.userId;
-    }
+    if (store.userId) info.userId = store.userId;
+    if (store.method) info.method = store.method;
+    if (store.path) info.path = store.path;
+    if (store.statusCode) info.statusCode = store.statusCode;
+    if (store.responseTimeMs) info.responseTimeMs = store.responseTimeMs;
   }
+
   return info;
 });
 
-const logFormat = printf(({ level, message, timestamp, correlationId, ...metadata }) => {
-  const corrId = correlationId ? `[${correlationId}]` : '';
-  let msg = `${timestamp} [${level}]${corrId}: ${message}`;
-  if (Object.keys(metadata).length > 0 && metadata.service === undefined) {
-    try {
-      const filtered = { ...metadata };
-      delete filtered.service;
-      if (Object.keys(filtered).length > 0) {
-        msg += ` ${JSON.stringify(filtered)}`;
-      }
-    } catch (e) {
-      msg += ` [Metadata contains circular references or is not stringifiable]`;
-    }
-  }
-  return msg;
-});
+// Build file transports for production
+const fileTransports: winston.transport[] = [];
+
+if (process.env.NODE_ENV === 'production') {
+  // Combined log — daily rotation, 14-day retention
+  fileTransports.push(
+    new DailyRotateFile({
+      filename: '/app/logs/combined-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '14d',
+      format: combine(
+        timestamp(),
+        addMetadata(),
+        json()
+      ),
+    })
+  );
+
+  // Error log — size-based rotation, max 5 files
+  fileTransports.push(
+    new winston.transports.File({
+      filename: '/app/logs/error.log',
+      level: 'error',
+      maxsize: 20 * 1024 * 1024, // 20 MB
+      maxFiles: 5,
+      format: combine(
+        timestamp(),
+        addMetadata(),
+        json()
+      ),
+    })
+  );
+}
 
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    addCorrelationId(),
-    process.env.NODE_ENV === 'production' ? json() : combine(json())
+    addMetadata(),
+    json()
   ),
-  defaultMeta: { service: 'alsaqi-audit-backend' },
+  defaultMeta: { service: 'alsaqi-api' },
   transports: [
     new winston.transports.Console({
       format: process.env.NODE_ENV === 'production'
-        ? combine(
-            timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-            addCorrelationId(),
-            json()
-          )
-        : combine(
-            colorize(),
-            timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-            addCorrelationId(),
-            logFormat
-          ),
+        ? combine(timestamp(), addMetadata(), json())
+        : combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), winston.format.simple()),
     }),
+    ...fileTransports,
   ],
 });
 

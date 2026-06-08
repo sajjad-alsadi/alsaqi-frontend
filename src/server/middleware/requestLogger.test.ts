@@ -140,17 +140,21 @@ describe('requestLogger middleware', () => {
     // Wait for async persist
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    expect(logger.info).toHaveBeenCalledWith(
-      'Request completed',
+    // Verify requestContext.run was called with the HTTP metadata
+    const { requestContext } = await import('../utils/logger');
+    expect(requestContext.run).toHaveBeenCalledWith(
       expect.objectContaining({
-        requestId: 'corr-id-123',
+        correlationId: 'corr-id-123',
         method: 'POST',
         path: '/api/v1/audit-tasks',
         statusCode: 201,
-        userId: 'user-001',
-        ip: '192.168.1.1',
-        userAgent: 'TestAgent/1.0',
-      })
+      }),
+      expect.any(Function)
+    );
+
+    // Verify logger.info was called with the formatted message
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringMatching(/^POST \/api\/v1\/audit-tasks 201 \d+ms$/)
     );
 
     expect(db.prepare).toHaveBeenCalledWith(
@@ -191,12 +195,7 @@ describe('requestLogger middleware', () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
 
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Slow request detected'),
-      expect.objectContaining({
-        requestId: 'slow-req-id',
-        method: 'GET',
-        path: '/api/v1/reports',
-      })
+      expect.stringContaining('Slow request detected')
     );
   });
 
@@ -261,11 +260,14 @@ describe('requestLogger middleware', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    expect(logger.info).toHaveBeenCalledWith(
-      'Request completed',
+    // Verify requestContext.run was called with null userId
+    const { requestContext } = await import('../utils/logger');
+    expect(requestContext.run).toHaveBeenCalledWith(
       expect.objectContaining({
+        correlationId: 'anon-req-id',
         userId: null,
-      })
+      }),
+      expect.any(Function)
     );
   });
 
@@ -341,11 +343,13 @@ describe('requestLogger middleware', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    expect(logger.info).toHaveBeenCalledWith(
-      'Request completed',
+    // Verify requestContext.run was called with the correlation ID
+    const { requestContext } = await import('../utils/logger');
+    expect(requestContext.run).toHaveBeenCalledWith(
       expect.objectContaining({
-        requestId: 'specific-correlation-id-456',
-      })
+        correlationId: 'specific-correlation-id-456',
+      }),
+      expect.any(Function)
     );
   });
 
@@ -399,11 +403,18 @@ describe('requestLogger middleware', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    expect(logger.info).toHaveBeenCalledWith(
-      'Request completed',
+    // Verify requestContext.run was called with the originalUrl as path
+    const { requestContext } = await import('../utils/logger');
+    expect(requestContext.run).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/api/v1/items?page=1',
-      })
+      }),
+      expect.any(Function)
+    );
+
+    // Verify formatted log message includes the originalUrl
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/items?page=1')
     );
   });
 });

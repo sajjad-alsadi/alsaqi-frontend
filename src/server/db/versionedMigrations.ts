@@ -573,4 +573,38 @@ export const versionedMigrations: Migration[] = [
       await db.exec(`CREATE INDEX IF NOT EXISTS idx_job_records_created_at ON job_records(created_at)`);
     },
   },
+
+  {
+    version: '011',
+    name: 'Create system_errors table for frontend error tracking',
+    type: 'schema',
+    up: async () => {
+      // Create system_errors table (Requirements 8.5, 8.6)
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS system_errors (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          signature VARCHAR(64) NOT NULL,
+          message TEXT NOT NULL,
+          stack TEXT,
+          component_stack TEXT,
+          count INTEGER DEFAULT 1,
+          first_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          is_recurring BOOLEAN DEFAULT FALSE,
+          app_version VARCHAR(32),
+          session_id VARCHAR(64),
+          user_agent TEXT,
+          route_path VARCHAR(255),
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+
+      // Index on signature for upsert lookups
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_system_errors_signature ON system_errors(signature)`);
+      // Index on last_seen for recent error queries
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_system_errors_last_seen ON system_errors(last_seen DESC)`);
+      // Partial index on recurring errors
+      await db.exec(`CREATE INDEX IF NOT EXISTS idx_system_errors_recurring ON system_errors(is_recurring) WHERE is_recurring = TRUE`);
+    },
+  },
 ];

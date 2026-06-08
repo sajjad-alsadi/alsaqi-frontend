@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173/C:\\Users\\sajjad.abdulbaqi\\Documents\\GitHub\\alsaqi\\vitest.config.ts",
+  "loginUser": "admin",
+  "loginPassword": "admin",
+  "executionArgs": {
+    "projectName": "alsaqi",
+    "projectPath": "c:\\Users\\sajjad.abdulbaqi\\Documents\\GitHub\\alsaqi",
+    "testIds": [],
+    "additionalInstruction": "",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-fMJC6i7dFfa_OUA4V1wvG20Xk4NdXjV_Sg7qFP0gLmn9mMfi6BZFLUAk32j83ADERnK2SZ1Sr2JKNaCH7vt1X2iCTFcwvB9KH5LbqEumTd-Ad0LtmQncj6o4FCGni2NekUM"
+    }
+  },
+  "serverPort": 59131
+}
