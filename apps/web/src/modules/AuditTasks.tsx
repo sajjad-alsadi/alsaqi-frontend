@@ -112,12 +112,12 @@ const AuditTasksModule: React.FC = () => {
   };
 
   const getPlanTitle = (id: string | number) => {
-    return plans.find(p => String(p.id) === String(id))?.title || `${t('common.auditPlan')} #${formatNumber(id)}`;
+    return plans.find((p: any) => String(p.id) === String(id))?.title || `${t('common.auditPlan')} #${formatNumber(id)}`;
   };
 
   const getEvidence = (id?: string | number) => {
     if (!id) return null;
-    return evidenceList.find(e => String(e.id) === String(id));
+    return evidenceList.find((e: any) => String(e.id) === String(id));
   };
 
   const filteredTasks = tasks;
@@ -223,7 +223,7 @@ const AuditTasksModule: React.FC = () => {
         >
           <div className="h-[70vh] flex flex-col bg-[var(--color-bg-main)] rounded-2xl overflow-hidden">
             {previewItem.file_data?.startsWith('data:application/pdf') || /\.(pdf)$/i.test(previewItem.file_data || '') || (previewItem.file_data && !previewItem.file_data.startsWith('data:') && !previewItem.file_data.startsWith('http') && !previewItem.file_data.startsWith('/') && previewItem.file_data.length > 100) ? (
-              <PdfViewer url={previewItem.file_data} />
+              <PdfViewer url={previewItem.file_data || ''} />
             ) : previewItem.file_data?.startsWith('data:image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(previewItem.file_data || '') ? (
               <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
                 <img src={previewItem.file_data} alt={previewItem.file_name} className="max-w-full max-h-full object-contain shadow-xl rounded-xl" />

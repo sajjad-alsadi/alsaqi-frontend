@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
 import { db } from '../db/index.js';
 import logger from '../utils/logger.js';
 
@@ -80,7 +80,7 @@ export function parsePartitionName(name: string): Date | null {
 
 export class PartitionManager {
   private config: PartitionConfig;
-  private cronJob: cron.ScheduledTask | null = null;
+  private cronJob: ScheduledTask | null = null;
 
   constructor(config?: Partial<PartitionConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };

@@ -96,7 +96,7 @@ export class ObjectGuard {
                     throw new Error('Object modification blocked');
                 }
 
-                return originalDefineProperty.call(this, obj, prop, descriptor);
+                return originalDefineProperty.call(this, obj, prop, descriptor) as T;
             };
 
             // إخفاء التغيير (لكنه لا يزال قابلاً للكشف)

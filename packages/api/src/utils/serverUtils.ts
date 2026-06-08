@@ -105,7 +105,7 @@ export const createSaveFile = (uploadDir: string) => async (file: any): Promise<
   return `/uploads/${fileName}`;
 };
 
-export const createLogError = (db: any) => async (err: any, module: string = "Backend") => {
+export const createLogError = (db: any) => async (err: any, module = "Backend") => {
   let errorMessage = "";
   let errorStack = null;
 

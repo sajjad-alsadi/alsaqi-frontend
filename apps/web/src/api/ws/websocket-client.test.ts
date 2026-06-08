@@ -12,6 +12,7 @@ import {
   type WebSocketClientConfig,
   type ConnectionState,
 } from './websocket-client';
+import type { Notification } from '@alsaqi/shared';
 
 // ─── Mock WebSocket ───────────────────────────────────────────────────────────
 
@@ -69,8 +70,8 @@ let mockWsInstances: MockWebSocket[] = [];
 
 describe('WebSocketClient', () => {
   let config: WebSocketClientConfig;
-  let onNotification: ReturnType<typeof vi.fn>;
-  let onStateChange: ReturnType<typeof vi.fn>;
+  let onNotification: ((notification: Notification, sequenceId: number) => void) | undefined;
+  let onStateChange: any;
 
   beforeEach(() => {
     vi.useFakeTimers();

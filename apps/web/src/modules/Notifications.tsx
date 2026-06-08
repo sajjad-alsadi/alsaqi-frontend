@@ -17,7 +17,7 @@ const Notifications: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [notificationToDelete, setNotificationToDelete] = useState<number | null>(null);
+  const [notificationToDelete, setNotificationToDelete] = useState<string | number | null>(null);
 
   const handleNotificationClick = (notification: any) => {
     if (!notification.is_read && notification.status !== 'Read') {

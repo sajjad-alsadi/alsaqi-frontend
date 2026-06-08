@@ -31,7 +31,7 @@ function createMiscTestApp() {
   // OpenAPI Specification
   app.get('/api/docs', (req, res) => {
     try {
-      const specPath = path.resolve(__dirname, '../../../../docs/openapi.yaml');
+      const specPath = path.resolve(__dirname, '../../../../../docs/openapi.yaml');
       const spec = fs.readFileSync(specPath, 'utf-8');
       res.setHeader('Content-Type', 'text/yaml; charset=utf-8');
       res.send(spec);

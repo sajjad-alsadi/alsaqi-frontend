@@ -15,7 +15,9 @@ import * as path from 'path';
  */
 describe('Property 1: Migration DDL uses IF NOT EXISTS', () => {
   // Read the migrations source file to extract all SQL statements
-  const migrationsFilePath = path.resolve(__dirname, '..', 'migrations.ts');
+  const tsPath = path.resolve(__dirname, '..', 'migrations.ts');
+  const jsPath = path.resolve(__dirname, '..', 'migrations.js');
+  const migrationsFilePath = fs.existsSync(tsPath) ? tsPath : jsPath;
   const migrationsSource = fs.readFileSync(migrationsFilePath, 'utf-8');
 
   // Extract all CREATE TABLE statements from the source
@@ -127,7 +129,9 @@ describe('Property 2: Migration idempotence preserves data', () => {
   let pglite: any;
 
   // Extract the actual DDL for the three settings tables from migrations source
-  const migrationsFilePath = path.resolve(__dirname, '..', 'migrations.ts');
+  const tsPath2 = path.resolve(__dirname, '..', 'migrations.ts');
+  const jsPath2 = path.resolve(__dirname, '..', 'migrations.js');
+  const migrationsFilePath = fs.existsSync(tsPath2) ? tsPath2 : jsPath2;
   const migrationsSource = fs.readFileSync(migrationsFilePath, 'utf-8');
 
   // Extract full CREATE TABLE statements for our target tables

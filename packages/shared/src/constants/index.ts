@@ -91,3 +91,21 @@ export const COMPLIANCE_ROLES = [UserRole.ADMIN, UserRole.MANAGER, UserRole.COMP
 
 /** Roles considered as staff (not just viewers) */
 export const STAFF_ROLES = [UserRole.ADMIN, UserRole.MANAGER, UserRole.INTERNAL_AUDITOR, UserRole.VIEWER] as const;
+
+/**
+ * Maps frontend module names to their corresponding DB module names.
+ * Frontend may use different naming conventions (e.g. 'UserManagement')
+ * while the DB stores shorter names (e.g. 'User').
+ */
+export const PERMISSION_MODULE_MAP: Record<string, string> = {
+  UserManagement: 'User',
+  Settings: 'Settings',
+  AuditPlans: 'Audit',
+  RiskRegister: 'Risk',
+  FraudLog: 'Fraud',
+  Dashboard: 'Audit',
+  Correspondence: 'Correspondence',
+  Notifications: 'Notifications',
+  Departments: 'Departments',
+  Recommendations: 'Recommendations',
+};

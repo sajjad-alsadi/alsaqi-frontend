@@ -14,8 +14,8 @@ import { createApiClient, type ApiClientConfig, type ApiClientError } from './cl
 
 describe('createApiClient', () => {
   let mockAdapter: MockAdapter;
-  let onUnauthorized: ReturnType<typeof vi.fn>;
-  let onError: ReturnType<typeof vi.fn>;
+  let onUnauthorized: (() => void) | undefined;
+  let onError: ((error: ApiClientError) => void) | undefined;
   let config: ApiClientConfig;
 
   beforeEach(() => {

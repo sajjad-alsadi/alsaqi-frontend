@@ -19,8 +19,9 @@ import request from 'supertest';
 const { mockRouter } = vi.hoisted(() => {
   // We need a minimal express import for the mock router
   return {
-    mockRouter: (routePath: string, method: string = 'get') => {
+    mockRouter: (routePath: string, method = 'get') => {
       return (..._args: any[]) => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const expressModule = require('express');
         const router = expressModule.Router();
         router[method]('/', (req: any, res: any) => {

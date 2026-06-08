@@ -43,7 +43,7 @@ const DashboardRiskOverview: React.FC<DashboardRiskOverviewProps> = React.memo((
                 ))}
               </Pie>
               <Tooltip 
-                formatter={(value: any, name: string) => [formatNumber(value), t((name || '').toLowerCase())]}
+                formatter={(value: any, name: any) => [formatNumber(value), t((name || '').toString().toLowerCase())]}
                 contentStyle={{ 
                   borderRadius: '1rem', 
                   border: '1px solid var(--color-border-soft)', 

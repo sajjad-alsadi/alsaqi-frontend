@@ -4,57 +4,44 @@ import { UserRole } from '../../constants';
 import { PermissionService } from '../services/PermissionService';
 import { ModuleRegistry } from '../../permissions/registry';
 import { PermissionAction } from '../../permissions/types';
+import { createSessionCache, RedisSessionCache, type SessionCacheAdapter } from '../cache/SessionCacheAdapter';
 
-// Simple in-memory cache to reduce DB load
-// In a distributed environment, use Redis. Since this often runs locally/embedded, memory is fine.
-// TODO: For multi-instance deployments, replace with Redis:
-//   import Redis from 'ioredis';
-//   const redis = new Redis(process.env.REDIS_URL);
-const cache = new Map<string, { data: any, expires: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const MAX_CACHE_SIZE = 1000; // Prevent unbounded memory growth
+
+/**
+ * Session cache adapter — uses Redis when REDIS_URL is defined (multi-instance),
+ * falls back to in-memory Map for single-instance/dev mode.
+ */
+const sessionCache: SessionCacheAdapter = createSessionCache();
+
+// Expose the underlying cache map for backward-compat tests that inspect `cache` directly
+// (the adapter wraps its own store; this shim lets callers treat it as a Map-like)
+export const cache = sessionCache;
 
 // Invalidate all cache entries for a specific user (call after role/permission/status changes)
 export const invalidateUserCache = (userId: string) => {
-  for (const key of cache.keys()) {
-    if (key.includes(userId)) {
-      cache.delete(key);
+  // Fire-and-forget — callers are synchronous so we don't await
+  cache.keys().then(keys => {
+    for (const key of keys) {
+      if (key.includes(userId)) {
+        cache.delete(key);
+      }
     }
-  }
+  }).catch(() => {});
 };
 
 // Clear all permission cache entries (call after role permission changes)
 export const clearPermissionCache = () => {
-  for (const key of cache.keys()) {
-    if (key.startsWith('perm_')) {
-      cache.delete(key);
-    }
-  }
+  cache.clear('perm_').catch(() => {});
 };
 
 export const createAuthMiddlewares = (db: any, JWT_SECRET: string, JWT_PUBLIC_KEY: string) => {
-  const getCachedOrDb = async (key: string, fetcher: () => Promise<any>) => {
-    const cached = cache.get(key);
-    if (cached && cached.expires > Date.now()) return cached.data;
-    
-    // Evict expired entries and enforce max size
-    if (cache.size >= MAX_CACHE_SIZE) {
-      const now = Date.now();
-      for (const [k, v] of cache) {
-        if (v.expires < now) cache.delete(k);
-      }
-      // If still too large, clear oldest 20%
-      if (cache.size >= MAX_CACHE_SIZE) {
-        const entries = [...cache.entries()].sort((a, b) => a[1].expires - b[1].expires);
-        const toRemove = Math.ceil(entries.length * 0.2);
-        for (let i = 0; i < toRemove; i++) {
-          cache.delete(entries[i][0]);
-        }
-      }
-    }
-    
+  const getCachedOrDb = async (key: string, fetcher: () => Promise<unknown>) => {
+    const cached = await sessionCache.get(key);
+    if (cached) return cached.data;
+
     const data = await fetcher();
-    cache.set(key, { data, expires: Date.now() + CACHE_TTL });
+    await sessionCache.set(key, { data, expires: Date.now() + CACHE_TTL });
     return data;
   };
 

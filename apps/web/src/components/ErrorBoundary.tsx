@@ -84,4 +84,4 @@ class ErrorBoundaryBase extends Component<Props, State> {
   }
 }
 
-export const ErrorBoundary = withTranslation()(ErrorBoundaryBase);
+export const ErrorBoundary: React.ComponentType<any> = withTranslation()(ErrorBoundaryBase);

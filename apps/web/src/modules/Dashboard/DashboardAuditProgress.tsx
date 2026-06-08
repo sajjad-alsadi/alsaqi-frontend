@@ -67,7 +67,7 @@ const DashboardAuditProgress: React.FC<DashboardAuditProgressProps> = React.memo
                 tickFormatter={(value) => formatNumber(value)}
               />
               <Tooltip 
-                formatter={(value: any, name: string) => [formatNumber(value), t((name || '').toString())]}
+                formatter={(value: any, name: any) => [formatNumber(value), t((name || '').toString())]}
                 contentStyle={{ 
                   borderRadius: '1rem', 
                   border: '1px solid var(--color-border-soft)', 

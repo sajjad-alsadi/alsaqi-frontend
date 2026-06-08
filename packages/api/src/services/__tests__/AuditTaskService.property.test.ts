@@ -23,7 +23,7 @@ vi.mock('../../db/index', () => {
   return {
     db: {
       prepare: mockPrepare,
-      transaction: vi.fn((fn: Function) => fn),
+      transaction: vi.fn(async (fn: Function) => fn()),
     },
   };
 });
@@ -124,7 +124,7 @@ describe('Property 9: Multiple task assignments', () => {
           });
 
           // Mock transaction to just execute the function
-          mockDb.transaction.mockImplementation((fn: Function) => fn);
+          mockDb.transaction.mockImplementation(async (fn: Function) => fn());
 
           const result = await AuditTaskService.assignUsers(taskId, userIds, assignedById);
 
@@ -191,7 +191,7 @@ describe('Property 9: Multiple task assignments', () => {
             return { get: vi.fn(), all: vi.fn().mockResolvedValue([]) };
           });
 
-          mockDb.transaction.mockImplementation((fn: Function) => fn);
+          mockDb.transaction.mockImplementation(async (fn: Function) => fn());
 
           const result = await AuditTaskService.assignUsers(taskId, userIdsWithDups, assignedById);
 
@@ -246,7 +246,7 @@ describe('Property 9: Multiple task assignments', () => {
             return { get: vi.fn(), all: vi.fn().mockResolvedValue([]) };
           });
 
-          mockDb.transaction.mockImplementation((fn: Function) => fn);
+          mockDb.transaction.mockImplementation(async (fn: Function) => fn());
 
           // Must throw ConflictError
           await expect(

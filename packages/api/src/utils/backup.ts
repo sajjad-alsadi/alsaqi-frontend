@@ -120,7 +120,7 @@ export class BackupScheduler {
   /**
    * Queries the backup_history table and returns recent backup records.
    */
-  async getHistory(limit: number = 20): Promise<BackupRecord[]> {
+  async getHistory(limit = 20): Promise<BackupRecord[]> {
     try {
       const rows = await db.prepare(
         `SELECT id, started_at, completed_at, status, type, size_bytes, tables_count, file_path, error_message, verified, verified_at

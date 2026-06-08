@@ -89,12 +89,10 @@ export class PasswordService {
 
     const hashed = bcrypt.hashSync(newPassword, 12);
     
-    const transaction = db.transaction(async () => {
+    await db.transaction(async () => {
       await db.prepare("INSERT INTO password_history (user_id, password_hash) VALUES (?::uuid, ?::text)").run(user.id, user.password);
       await db.prepare("UPDATE users SET password = ?::text, password_last_changed = CURRENT_TIMESTAMP, requires_password_change = 0, session_version = session_version + 1 WHERE id = ?::uuid").run(hashed, user.id);
     });
-    
-    await transaction();
     
     // Invalidate cached user data so middleware picks up new session_version
     invalidateUserCache(user.id);
@@ -129,12 +127,10 @@ export class PasswordService {
 
     const hashed = bcrypt.hashSync(newPassword, 12);
     
-    const transaction = db.transaction(async () => {
+    await db.transaction(async () => {
       await db.prepare("INSERT INTO password_history (user_id, password_hash) VALUES (?::uuid, ?::text)").run(user.id, user.password);
       await db.prepare("UPDATE users SET password = ?::text, password_last_changed = CURRENT_TIMESTAMP, requires_password_change = 0, session_version = session_version + 1 WHERE id = ?::uuid").run(hashed, user.id);
     });
-    
-    await transaction();
     
     // Invalidate cached user data so middleware picks up new session_version
     invalidateUserCache(user.id);

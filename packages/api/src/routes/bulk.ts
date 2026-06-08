@@ -23,7 +23,7 @@ export const createBulkRoutes = (authenticate: any) => {
 
   router.post('/:resource', authenticate, asyncHandler(async (req, res) => {
     const typedReq = req as unknown as AuthenticatedRequest;
-    const resource = typedReq.params.resource;
+    const resource = String(typedReq.params.resource);
     const { operation, items } = typedReq.body;
 
     // Validate operation type

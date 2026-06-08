@@ -234,7 +234,7 @@ export class ArchiveService {
       await db.prepare(
         "UPDATE audit_plans SET is_archived = true, archived_at = CURRENT_TIMESTAMP, archived_by = ?, status = 'Archived' WHERE id = ?"
       ).run(userId, planId);
-    })();
+    });
 
     // 10. Send automation event (outside transaction - archive stays even if this fails)
     await this.sendArchiveEventWithRetry(planId, userId);

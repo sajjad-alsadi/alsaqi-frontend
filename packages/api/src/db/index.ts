@@ -148,8 +148,8 @@ const als = new AsyncLocalStorage<any>();
 export class ReadWriteLock {
   private _readers = 0;
   private _writing = false;
-  private _writeQueue: Array<{ resolve: (release: () => void) => void; reject: (err: Error) => void }> = [];
-  private _readQueue: Array<{ resolve: (release: () => void) => void; reject: (err: Error) => void }> = [];
+  private _writeQueue: Array<{ resolve: (release: (() => void) | PromiseLike<() => void>) => void; reject: (err: Error) => void }> = [];
+  private _readQueue: Array<{ resolve: (release: (() => void) | PromiseLike<() => void>) => void; reject: (err: Error) => void }> = [];
 
   static readonly LOCK_TIMEOUT_MS = 5000;
 
@@ -191,7 +191,7 @@ export class ReadWriteLock {
   }
 
   private _enqueueWithTimeout(
-    queue: Array<{ resolve: (release: () => void) => void; reject: (err: Error) => void }>,
+    queue: Array<{ resolve: (release: (() => void) | PromiseLike<() => void>) => void; reject: (err: Error) => void }>,
     type: 'read' | 'write'
   ): Promise<() => void> {
     return new Promise<() => void>((resolve, reject) => {
@@ -213,7 +213,7 @@ export class ReadWriteLock {
 
       // Wrap the resolve to clear the timeout
       const originalResolve = entry.resolve;
-      entry.resolve = (release: () => void) => {
+      entry.resolve = (release) => {
         clearTimeout(timer);
         originalResolve(release);
       };
@@ -271,11 +271,26 @@ export function isReadQuery(sql: string): boolean {
   return false;
 }
 
-class DBWrapper {
+/** Public interface for the database wrapper */
+export interface IDBWrapper {
+  readonly client: any;
+  readonly isExternal: boolean;
+  validateIdentifier(id: string): string;
+  prepare(sql: string): {
+    get(...params: any[]): Promise<any>;
+    all(...params: any[]): Promise<any[]>;
+    run(...params: any[]): Promise<{ lastInsertRowid: number; changes: number }>;
+  };
+  transaction: <T>(fn: () => Promise<T>) => Promise<T>;
+  exec(sql: string): Promise<void>;
+  updateClient(client: any, isExternal: boolean): void;
+}
+
+export class DBWrapper {
   private _client: any;
   private _isExternal: boolean;
-  private _isReconnecting: boolean = false;
-  private _reconnectAttempts: number = 0;
+  private _isReconnecting = false;
+  private _reconnectAttempts = 0;
   private readonly MAX_RECONNECT_ATTEMPTS = 3;
 
   constructor(client: any, isExternal: boolean) {
@@ -379,9 +394,9 @@ class DBWrapper {
 
   prepare(sql: string) {
     let counter = 1;
-    let pgSql = sql.replace(/\?/g, () => `$${counter++}`);
+    const pgSql = sql.replace(/\?/g, () => `$${counter++}`);
     
-    let convertedSql = pgSql
+    const convertedSql = pgSql
       .replace(/\(user, action, module, details\)/gi, '("user", action, module, details)')
       .replace(/id, user, action, module/gi, 'id, "user", action, module');
       
@@ -466,8 +481,7 @@ class DBWrapper {
     };
   }
 
-  transaction(fn: Function) {
-    return async (...args: any[]) => {
+  async transaction<T>(fn: () => Promise<T>): Promise<T> {
       const unlock = this.isExternal ? () => {} : await dbLock.acquireWrite();
       try {
         await this.ensureReady();
@@ -503,7 +517,7 @@ class DBWrapper {
         return await als.run(connection, async () => {
           try {
             await executeWithRetry('BEGIN');
-            const result = await fn(...args);
+            const result = await fn();
             await executeWithRetry('COMMIT');
             return result;
           } catch (e) {
@@ -516,7 +530,6 @@ class DBWrapper {
       } finally {
         unlock();
       }
-    };
   }
 
   async exec(sql: string) {
@@ -554,7 +567,7 @@ class DBWrapper {
   }
 }
 
-export const db = new DBWrapper(client, isExternal);
+export const db: IDBWrapper = new DBWrapper(client, isExternal);
 
 export const initDb = async () => {
   if (DATABASE_URL && isExternal) {

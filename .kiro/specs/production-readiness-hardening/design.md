@@ -1,10 +1,123 @@
-# وثيقة التصميم: تقوية جاهزية الإنتاج (Production Readiness Hardening)
+# وثيقة التصميم: تقوية جاهزية الإنتاج (Production Readiness Hardening) Bugfix Design
 
 ## Overview
 
-تهدف هذه الوثيقة إلى تصميم الحلول التقنية لسد الثغرات الحرجة التي تمنع نشر نظام الساقي (AL-SAQI) في بيئة الإنتاج. يغطي هذا التصميم: تقوية الأسرار (Secrets Hardening)، التشفير أثناء السكون (Encryption at Rest) للملفات المرفوعة، جدولة النسخ الاحتياطي، إصلاح مصادقة WebSocket، خط أنابيب CI/CD، فرض SSL لقاعدة البيانات، المصادقة الثنائية (2FA/TOTP)، استبدال رؤوس الأمان اليدوية بـ Helmet.js، ضغط الاستجابات (Compression)، تقسيم جدول audit_trail، نموذج إعداد Reverse Proxy، وتنظيف README.
+يوثّق هذا التصميم إصلاح العيوب الحرجة في جودة الكود التي تمنع نشر نظام الساقي (AL-SAQI) في بيئة الإنتاج، إلى جانب تصميم الحلول التقنية لسد الثغرات الأمنية والتشغيلية المتبقية. تشمل العيوب الأساسية: فشل فحص TypeScript مع مئات الأخطاء، 29,392 مشكلة ESLint، 40 اختبار فاشل عبر 17 ملف، واستخدام ذاكرة مؤقتة محلية بدلاً من Redis للجلسات في بيئة متعددة الخوادم.
+
+يغطي هذا التصميم أيضاً: تقوية الأسرار (Secrets Hardening)، التشفير أثناء السكون (Encryption at Rest) للملفات المرفوعة، جدولة النسخ الاحتياطي، إصلاح مصادقة WebSocket، خط أنابيب CI/CD، فرض SSL لقاعدة البيانات، المصادقة الثنائية (2FA/TOTP)، استبدال رؤوس الأمان اليدوية بـ Helmet.js، ضغط الاستجابات (Compression)، تقسيم جدول audit_trail، نموذج إعداد Reverse Proxy، وتنظيف README.
 
 يركز هذا التصميم على العناصر **غير المغطاة** في المواصفات الموجودة (`comprehensive-testing`, `dynamic-system-health`, `permission-matrix-fix`, `technical-debt-remediation`).
+
+## Glossary
+
+- **Bug_Condition (C)**: الشرط الذي يُظهر العيوب — فشل البناء، فشل الاختبارات، فشل lint، وفقدان الجلسات عند توجيه الطلبات بين الخوادم
+- **Property (P)**: السلوك المطلوب — بناء ناجح بصفر أخطاء، جميع الاختبارات ناجحة، ESLint بصفر أخطاء، ومشاركة الجلسات عبر Redis
+- **Preservation**: السلوكيات الموجودة التي يجب أن تبقى دون تغيير — strict mode في TypeScript، قواعد ESLint، الاختبارات الناجحة (2,390)، fallback إلى ذاكرة محلية في التطوير، واجهات API لإدارة الكاش
+- **tsc --build**: أمر بناء TypeScript للـ monorepo بالكامل (packages/shared, packages/api, apps/web)
+- **ESLint**: أداة تحليل ثابت للكشف عن مشاكل الكود (أنماط، أخطاء نوعية، أمان)
+- **PermissionService.property.test.ts**: ملف الاختبار الأكثر أهمية — يفشل بسبب خطأ في mock لـ `ModuleRegistry.getModule`
+- **In-memory session cache**: خريطة `Map` في `src/server/middleware/auth.ts` تُخزن الجلسات محلياً ولا تُشارك بين الخوادم
+- **Redis**: مخزن بيانات مشترك (مُعد مسبقاً في `deploy/docker-compose.yml` على المنفذ 6379)
+- **SecretsValidator**: خدمة التحقق من قوة المتغيرات البيئية عند بدء التشغيل
+- **FileEncryptionService**: خدمة تشفير الملفات المرفوعة باستخدام AES-256-GCM
+- **TOTPService**: خدمة المصادقة الثنائية (Time-based One-Time Password)
+
+## Bug Details
+
+### Bug Condition
+
+العيوب تتظاهر في خمسة سيناريوهات مترابطة تمنع النشر في بيئة الإنتاج. فشل البناء TypeScript يمنع إنتاج JavaScript صالح، أخطاء ESLint تشير إلى مشاكل أمنية وجودة خطيرة في الكود، الاختبارات الفاشلة تدل على عدم صحة سلوك النظام، والذاكرة المؤقتة المحلية تُسبب فقدان الجلسات في بيئة متعددة الخوادم.
+
+**Formal Specification:**
+```
+FUNCTION isBugCondition(input)
+  INPUT: input of type BuildOrRuntimeEvent
+  OUTPUT: boolean
+  
+  RETURN (input.type == 'tsc_build' AND input.exitCode != 0)
+         OR (input.type == 'eslint' AND input.errorCount > 0)
+         OR (input.type == 'vitest' AND input.failedTests > 0)
+         OR (input.type == 'session_lookup' 
+             AND input.deploymentMode == 'multi-instance'
+             AND input.targetInstance != input.authInstance
+             AND input.cacheStore == 'in-memory-map')
+END FUNCTION
+```
+
+### Examples
+
+- **فشل البناء**: تشغيل `tsc --build` يُنتج أخطاء مثل `implicitly has an 'any' type` و `Cannot find module` — المتوقع: بناء ناجح بصفر أخطاء
+- **أخطاء ESLint**: تشغيل `eslint` يُبلغ عن 29,392 مشكلة (~10,000 خطأ صريح) من `any` غير مُحدد النوع و `console.log` — المتوقع: صفر أخطاء
+- **فشل اختبار الصلاحيات**: `PermissionService.property.test.ts` يفشل بـ `TypeError: ModuleRegistry.getModule.mockReturnValue is not a function` — المتوقع: الاختبار يُمرر بنجاح مع mock صحيح
+- **فقدان الجلسة**: مستخدم يُصادق على instance A ثم طلبه التالي يُوجه إلى instance B فيفقد الكاش — المتوقع: Redis يُشارك الجلسات بين جميع الخوادم
+
+## Expected Behavior
+
+### Preservation Requirements
+
+**Unchanged Behaviors:**
+- وضع `strict: true` في `tsconfig.base.json` يجب أن يبقى مُفعلاً — الإصلاحات لا تُعطل strict checking أو تستخدم `// @ts-ignore`
+- قواعد ESLint الحالية يجب أن تبقى مُفعلة — الإصلاحات لا تُعطل القواعد أو تُضيف `eslint-disable` شامل
+- الاختبارات الناجحة (2,390 اختبار) يجب أن تبقى ناجحة بدون تعديل
+- في بيئة التطوير (instance واحد بدون `REDIS_URL`)، النظام يعود تلقائياً إلى الذاكرة المحلية
+- واجهات API لإدارة الكاش (`invalidateUserCache`, `clearPermissionCache`) تبقى بنفس التوقيع
+- سلوك وقت التشغيل لجميع endpoints يبقى متطابقاً — إصلاحات TypeScript هي compile-time فقط
+- عند استبدال `console.log` بـ structured logger، نفس المعلومات الدلالية تُسجل بمستويات severity مناسبة
+
+**Scope:**
+جميع المدخلات التي لا تتعلق بالعيوب الخمسة (بناء TypeScript، lint، اختبارات فاشلة، مشاركة الجلسات) يجب أن تبقى غير متأثرة تماماً. هذا يشمل:
+- طلبات API العادية وردودها
+- سلوك المصادقة والتفويض
+- عمليات قاعدة البيانات
+- واجهة المستخدم الأمامية
+
+## Hypothesized Root Cause
+
+بناءً على تحليل العيوب، الأسباب الجذرية الأكثر احتمالاً هي:
+
+1. **أخطاء TypeScript — أنواع مفقودة أو غير صحيحة**: الكود يستخدم `any` ضمنياً في أماكن كثيرة، وبعض الوحدات تفتقر إلى تعريفات أنواع صحيحة. مع تفعيل `strict: true`، هذه الأنماط تُنتج أخطاء بناء. أيضاً `spread arguments` بدون tuple types وعدم وجود module declarations لبعض الحزم.
+
+2. **أخطاء ESLint — ممارسات تطوير غير منضبطة**: تراكم `console.log` في كود الإنتاج، استخدام مفرط لـ `any` بدلاً من أنواع محددة، واستخدام non-null assertion (`!`) في أماكن غير آمنة. هذه مشاكل تراكمية من التطوير السريع بدون فرض lint في CI.
+
+3. **فشل الاختبارات — mock غير مطابق لبنية الوحدة الفعلية**: `PermissionService.property.test.ts` يفشل لأن الـ mock يفترض أن `ModuleRegistry.getModule` هو method يمكن عمل `mockReturnValue` عليه، بينما البنية الفعلية في `src/permissions/registry.ts` مختلفة (قد يكون export كـ function أو property مع بنية مختلفة).
+
+4. **فقدان الجلسات — تصميم cache لبيئة خادم واحد فقط**: `src/server/middleware/auth.ts` يستخدم `Map` محلية للكاش (5 دقائق). في بيئة multi-instance خلف load balancer، كل instance لديه كاش منفصل. عند توجيه الطلب لـ instance مختلف، الكاش فارغ ويُعاد الاستعلام من قاعدة البيانات.
+
+5. **عدم وجود CI/CD يفرض الجودة**: غياب خط أنابيب يمنع merge عند فشل البناء أو الاختبارات أو lint سمح بتراكم هذه العيوب.
+
+## Fix Implementation
+
+### Changes Required
+
+بناءً على تحليل الأسباب الجذرية:
+
+**ملفات متعددة**: إصلاح أخطاء TypeScript
+
+**Specific Changes**:
+1. **إضافة تعريفات أنواع**: إضافة type annotations صريحة لجميع المتغيرات والدوال التي تُنتج `implicitly has an 'any' type` — تشمل parameters، return types، و generic type arguments
+2. **إصلاح spread arguments**: تحويل spread arguments إلى tuple types أو استخدام rest parameters بشكل صحيح
+3. **إضافة module declarations**: إنشاء `.d.ts` files للحزم الخارجية التي تفتقر إلى تعريفات أنواع
+
+**ملفات متعددة**: إصلاح أخطاء ESLint
+
+**Specific Changes**:
+4. **تشغيل `eslint --fix`**: إصلاح المشاكل القابلة للإصلاح التلقائي (تنسيق، imports غير مستخدمة)
+5. **استبدال `console.log` بـ structured logger**: استخدام `winston` (موجود في المشروع) بدلاً من console.log مع severity levels مناسبة
+6. **إزالة `any` غير الآمن**: استبدال بأنواع محددة أو `unknown` مع type guards
+
+**ملف**: `src/permissions/registry.ts` + ملفات الاختبار
+
+**Specific Changes**:
+7. **إصلاح mock setup في PermissionService.property.test.ts**: تعديل الـ mock ليطابق البنية الفعلية لـ `ModuleRegistry.getModule` export — إما `vi.spyOn` إذا كان method، أو `vi.mock` مع factory إذا كان module-level function
+8. **إصلاح بقية الاختبارات الفاشلة (40 اختبار)**: تحليل كل اختبار فاشل وإصلاح السبب (mock خاطئ، assertion outdated، أو dependency مفقودة)
+
+**ملف**: `src/server/middleware/auth.ts`
+
+**Specific Changes**:
+9. **استبدال in-memory Map بـ Redis adapter**: إنشاء `SessionCacheAdapter` interface مع implementations لـ Redis و in-memory (fallback)
+10. **إضافة Redis connection**: استخدام Redis المُعد في `deploy/docker-compose.yml` (port 6379) كـ shared cache store
+11. **Fallback logic**: إذا `REDIS_URL` غير محدد → استخدام in-memory Map (للتطوير)
+12. **الحفاظ على واجهة API**: `invalidateUserCache` و `clearPermissionCache` تبقى بنفس التوقيع ولكن تعمل على Redis
 
 ## Architecture
 
@@ -973,61 +1086,73 @@ build:
 
 ## Correctness Properties
 
-### Property 1: انعكاسية التشفير (Encryption Roundtrip)
+Property 1: Bug Condition - فشل البناء والاختبارات وجودة الكود ومشاركة الجلسات
 
-_لأي_ ملف `f` بحجم ≤ 30MB ومفتاح تشفير `k` بطول 32 bytes:
+_For any_ input where the bug condition holds (isBugCondition returns true) — أي تشغيل `tsc --build` أو `eslint` أو `vitest --run` أو طلب جلسة في بيئة multi-instance — الكود المُصلح SHALL يُنتج: بناء TypeScript ناجح بصفر أخطاء، ESLint بصفر أخطاء، جميع 2,430 اختبار ناجحة، واسترجاع الجلسة من Redis بنجاح بغض النظر عن الـ instance المُستهدف.
+
+**Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
+
+Property 2: Preservation - السلوكيات الموجودة غير المتأثرة
+
+_For any_ input where the bug condition does NOT hold (isBugCondition returns false) — أي طلبات API عادية، عمليات قاعدة البيانات، سلوك المصادقة، واجهات إدارة الكاش — الكود المُصلح SHALL يُنتج نفس النتيجة كالكود الأصلي تماماً، مع الحفاظ على: strict mode في TypeScript، قواعد ESLint المُفعلة، الاختبارات الناجحة (2,390)، fallback إلى ذاكرة محلية بدون `REDIS_URL`، وتوقيعات API لإدارة الكاش.
+
+**Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7**
+
+Property 3: انعكاسية التشفير (Encryption Roundtrip)
+
+_For any_ ملف `f` بحجم ≤ 30MB ومفتاح تشفير `k` بطول 32 bytes:
 `decrypt(encrypt(f, k), k) === f`
 
 يجب أن يكون فك التشفير معكوساً تماماً للتشفير — لا فقدان بيانات.
 
-**Validates: Requirements 2.1, 2.4, 2.5**
+**Validates: Requirements 2.4, 2.5**
 
-### Property 2: رفض الأسرار الضعيفة (Reject Weak Secrets)
+Property 4: رفض الأسرار الضعيفة (Reject Weak Secrets)
 
-_لأي_ قيمة `s` حيث `s ∈ WEAK_DEFAULTS` أو `length(s) < minLength`:
+_For any_ قيمة `s` حيث `s ∈ WEAK_DEFAULTS` أو `length(s) < minLength`:
 `validateProductionSecrets({...env, JWT_SECRET: s}).isValid === false`
 
 لا يجب أن يبدأ الخادم في الإنتاج بأسرار ضعيفة أو افتراضية.
 
 **Validates: Requirements 1.1, 1.2, 1.3, 1.4**
 
-### Property 3: رفض WebSocket بدون مصادقة (Reject Unauthenticated WebSocket)
+Property 5: رفض WebSocket بدون مصادقة (Reject Unauthenticated WebSocket)
 
-_لأي_ طلب upgrade بدون token أو بـ token منتهي الصلاحية:
+_For any_ طلب upgrade بدون token أو بـ token منتهي الصلاحية:
 `connection.readyState === WebSocket.CLOSED` خلال < 100ms
 
 لا يوجد اتصال WebSocket مفتوح بدون مصادقة صالحة.
 
 **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
 
-### Property 4: صحة TOTP ضمن النافذة الزمنية (TOTP Window Validity)
+Property 6: صحة TOTP ضمن النافذة الزمنية (TOTP Window Validity)
 
-_لأي_ secret `s` و timestamp `t`:
+_For any_ secret `s` و timestamp `t`:
 - `verifyTOTP(s, generateTOTP(s, t), window=1) === true` عندما `|now - t| ≤ 30s`
 - `verifyTOTP(s, generateTOTP(s, t), window=1) === false` عندما `|now - t| > 60s`
 
 **Validates: Requirements 5.6, 5.7**
 
-### Property 5: سلامة النسخ الاحتياطي (Backup Integrity)
+Property 7: سلامة النسخ الاحتياطي (Backup Integrity)
 
-_لأي_ نسخة احتياطية ناجحة `b`:
+_For any_ نسخة احتياطية ناجحة `b`:
 - `verifyBackup(b.id).isValid === true`
 - `restore(b.id)` يُنتج قاعدة بيانات مطابقة للحالة عند `b.timestamp`
 
 **Validates: Requirements 3.4, 3.7**
 
-### Property 6: شفافية التقسيم (Partition Transparency)
+Property 8: شفافية التقسيم (Partition Transparency)
 
-_لأي_ استعلام `q` على `audit_trail`:
+_For any_ استعلام `q` على `audit_trail`:
 - `result(q, partitioned_table) === result(q, original_table)`
 
 التقسيم لا يغير نتائج الاستعلامات — شفافية كاملة.
 
 **Validates: Requirements 10.5, 10.6**
 
-### Property 7: فرض SSL في الإنتاج (Production SSL Enforcement)
+Property 9: فرض SSL في الإنتاج (Production SSL Enforcement)
 
-_لأي_ بيئة إنتاج حيث `NODE_ENV === 'production'`:
+_For any_ بيئة إنتاج حيث `NODE_ENV === 'production'`:
 - `dbConnection.ssl.rejectUnauthorized === true`
 - إذا فشل اتصال SSL → الخادم لا يبدأ
 
@@ -1073,26 +1198,118 @@ _لأي_ بيئة إنتاج حيث `NODE_ENV === 'production'`:
 
 ## Testing Strategy
 
-### اختبارات الوحدة (Unit Testing)
+### Validation Approach
 
-| المكون | الاختبارات |
-|--------|-----------|
-| SecretsValidator | التحقق من رفض الأسرار الضعيفة، قبول الأسرار القوية، حساب entropy |
-| FileEncryptionService | تشفير/فك تشفير roundtrip، رفض مفاتيح غير صالحة، التحقق من checksum |
-| TOTPService | توليد secret، التحقق من رمز صالح/منتهي، backup codes |
-| WebSocket Auth | رفض بدون token، رفض token منتهي، قبول token صالح |
-| BackupScheduler | تطبيق سياسة الاحتفاظ، تسجيل النتائج |
-| PartitionManager | إنشاء أقسام، حذف أقسام قديمة |
-| DB SSL Config | فرض SSL في الإنتاج، تجاهل في التطوير |
+تتبع استراتيجية الاختبار نهجاً من مرحلتين: أولاً، إظهار أمثلة مضادة تُثبت وجود العيوب على الكود غير المُصلح، ثم التحقق من أن الإصلاح يعمل بشكل صحيح ويحافظ على السلوك الموجود.
 
-### اختبارات Property-Based (باستخدام fast-check)
+### Exploratory Bug Condition Checking
+
+**Goal**: إظهار أمثلة مضادة تُثبت وجود العيوب قبل تنفيذ الإصلاح. تأكيد أو دحض تحليل الأسباب الجذرية.
+
+**Test Plan**: تشغيل أوامر البناء والـ lint والاختبارات على الكود غير المُصلح لملاحظة الفشل وفهم الأسباب الجذرية.
+
+**Test Cases**:
+1. **TypeScript Build Test**: تشغيل `tsc --build` — يفشل مع مئات الأخطاء (will fail on unfixed code)
+2. **ESLint Errors Test**: تشغيل `eslint .` — يُبلغ عن ~10,000 خطأ (will fail on unfixed code)
+3. **Vitest Failures Test**: تشغيل `vitest --run` — 40 اختبار يفشل (will fail on unfixed code)
+4. **Session Sharing Test**: محاكاة طلب من instance مختلف عن instance المصادقة — الكاش فارغ (will fail on unfixed code)
+5. **PermissionService Mock Test**: تشغيل `PermissionService.property.test.ts` — يفشل بـ TypeError (will fail on unfixed code)
+
+**Expected Counterexamples**:
+- `tsc --build` يُنتج أخطاء: `implicitly has an 'any' type`, `Cannot find module`, `spread argument must have tuple type`
+- ESLint يُبلغ عن: `@typescript-eslint/no-explicit-any`, `no-console`, `@typescript-eslint/no-non-null-assertion`
+- `PermissionService.property.test.ts` يفشل بـ: `TypeError: ModuleRegistry.getModule.mockReturnValue is not a function`
+- Possible causes: mock لا يطابق بنية export الفعلية، أنواع مفقودة، ذاكرة محلية غير مشتركة
+
+### Fix Checking
+
+**Goal**: التحقق من أن لجميع المدخلات حيث شرط العيب مُتحقق، الدالة المُصلحة تُنتج السلوك المتوقع.
+
+**Pseudocode:**
+```
+FOR ALL input WHERE isBugCondition(input) DO
+  result := executeOnFixedCode(input)
+  ASSERT expectedBehavior(result)
+END FOR
+```
+
+**Concrete Checks:**
+- `tsc --build` → exit code 0, صفر أخطاء
+- `eslint .` → صفر errors (warnings مقبولة)
+- `vitest --run` → 2,430 اختبار ناجح، صفر فشل
+- Session lookup from different instance → Redis returns cached session data
+
+### Preservation Checking
+
+**Goal**: التحقق من أن لجميع المدخلات حيث شرط العيب غير مُتحقق، الدالة المُصلحة تُنتج نفس نتيجة الدالة الأصلية.
+
+**Pseudocode:**
+```
+FOR ALL input WHERE NOT isBugCondition(input) DO
+  ASSERT originalFunction(input) = fixedFunction(input)
+END FOR
+```
+
+**Testing Approach**: Property-based testing مُوصى به لـ preservation checking لأنه:
+- يُولد حالات اختبار كثيرة تلقائياً عبر مجال المدخلات
+- يكشف حالات حدّية قد تفوتها الاختبارات اليدوية
+- يُوفر ضمانات قوية بأن السلوك لم يتغير لجميع المدخلات غير المعيبة
+
+**Test Plan**: مراقبة سلوك الكود غير المُصلح أولاً لـ API responses وعمليات التصادق، ثم كتابة property-based tests تلتقط ذلك السلوك.
+
+**Test Cases**:
+1. **Strict Mode Preservation**: التحقق من أن `tsconfig.base.json` يبقى `strict: true` ولا يوجد `@ts-ignore` في الكود المُصلح
+2. **ESLint Rules Preservation**: التحقق من أن `.eslintrc` لم يُضف قواعد `off` جديدة أو `eslint-disable` شامل
+3. **Passing Tests Preservation**: التحقق من أن الـ 2,390 اختبار الناجحة تبقى ناجحة بدون تعديل
+4. **Fallback Behavior Preservation**: التحقق من أن النظام يعود لـ in-memory cache عند عدم وجود `REDIS_URL`
+5. **Cache API Preservation**: التحقق من أن `invalidateUserCache` و `clearPermissionCache` تعملان بنفس التوقيع
+
+### Unit Tests
+
+- اختبار TypeScript compilation لكل package منفصل
+- اختبار mock setup لـ `ModuleRegistry.getModule` يطابق البنية الفعلية
+- اختبار Redis adapter مع connection/disconnection/fallback
+- اختبار SecretsValidator: رفض الأسرار الضعيفة، قبول الأسرار القوية، حساب entropy
+- اختبار FileEncryptionService: تشفير/فك تشفير roundtrip، رفض مفاتيح غير صالحة
+- اختبار TOTPService: توليد secret، التحقق من رمز صالح/منتهي، backup codes
+- اختبار WebSocket Auth: رفض بدون token، رفض token منتهي، قبول token صالح
+
+### Property-Based Tests
 
 **مكتبة الاختبار**: `fast-check` (موجودة في devDependencies)
 
 ```typescript
 import fc from 'fast-check';
 
-// Property 1: Encryption roundtrip
+// Property 1: Bug fix - session data shared across instances
+fc.assert(
+  fc.property(
+    fc.record({ userId: fc.uuid(), sessionData: fc.object() }),
+    fc.integer({ min: 1, max: 10 }), // instance number
+    (session, instanceId) => {
+      // Write to Redis from any instance
+      redisCache.set(session.userId, session.sessionData);
+      // Read from different instance should succeed
+      const result = redisCache.get(session.userId);
+      return deepEqual(result, session.sessionData);
+    }
+  )
+);
+
+// Property 2: Preservation - fallback to in-memory without REDIS_URL
+fc.assert(
+  fc.property(
+    fc.record({ userId: fc.uuid(), sessionData: fc.object() }),
+    (session) => {
+      // Without REDIS_URL, should use in-memory map
+      const cache = createSessionCache(undefined); // no REDIS_URL
+      cache.set(session.userId, session.sessionData);
+      return deepEqual(cache.get(session.userId), session.sessionData);
+    }
+  )
+);
+
+// Property 3: Encryption roundtrip
 fc.assert(
   fc.property(
     fc.uint8Array({ minLength: 1, maxLength: 1024 * 1024 }),
@@ -1107,7 +1324,7 @@ fc.assert(
   )
 );
 
-// Property 2: Secrets validation rejects all weak defaults
+// Property 4: Secrets validation rejects all weak defaults
 fc.assert(
   fc.property(
     fc.constantFrom(...WEAK_DEFAULTS),
@@ -1121,7 +1338,7 @@ fc.assert(
   )
 );
 
-// Property 3: TOTP verification within window
+// Property 5: TOTP verification within window
 fc.assert(
   fc.property(
     fc.integer({ min: 0, max: 1 }),  // window offset
@@ -1134,10 +1351,11 @@ fc.assert(
 );
 ```
 
-### اختبارات التكامل (Integration Testing)
+### Integration Tests
 
 | السيناريو | الوصف |
 |-----------|-------|
+| Multi-instance session sharing | authenticate on instance A → request on instance B → session found in Redis |
 | تسجيل دخول كامل مع 2FA | login → 2fa_pending → verify → tokens |
 | رفع ملف مشفر + تحميله | upload → encrypt → download → decrypt → verify |
 | WebSocket مع مصادقة | connect with token → receive messages |

@@ -79,7 +79,7 @@ vi.mock('../../hooks/useUserManagement', () => ({
 
 const mockUseDebounce = vi.fn((value: string) => value);
 vi.mock('../../hooks/useDebounce', () => ({
-  useDebounce: (...args: any[]) => mockUseDebounce(...args),
+  useDebounce: (...args: [string]) => mockUseDebounce(...args),
 }));
 
 // Mock lucide-react icons

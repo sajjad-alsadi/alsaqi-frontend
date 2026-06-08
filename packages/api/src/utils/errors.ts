@@ -33,19 +33,19 @@ export class ValidationError extends AppError {
 }
 
 export class AuthError extends AppError {
-  constructor(message: string = 'Unauthorized access') {
+  constructor(message = 'Unauthorized access') {
     super(message, 401, ErrorCode.UNAUTHORIZED);
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Permission denied') {
+  constructor(message = 'Permission denied') {
     super(message, 403, ErrorCode.FORBIDDEN);
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Resource not found') {
+  constructor(message = 'Resource not found') {
     super(message, 404, ErrorCode.NOT_FOUND);
   }
 }
@@ -57,7 +57,7 @@ export class ConflictError extends AppError {
 }
 
 export class DatabaseError extends AppError {
-  constructor(message: string = 'Database operation failed') {
+  constructor(message = 'Database operation failed') {
     super(message, 500, ErrorCode.DATABASE_ERROR, false);
   }
 }

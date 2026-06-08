@@ -2,9 +2,9 @@ export class QueryBuilder {
   private baseQuery: string;
   private whereClauses: string[] = [];
   private params: any[] = [];
-  private orderByClause: string = '';
-  private limitClause: string = '';
-  private offsetClause: string = '';
+  private orderByClause = '';
+  private limitClause = '';
+  private offsetClause = '';
 
   constructor(baseQuery: string) {
     this.baseQuery = baseQuery;

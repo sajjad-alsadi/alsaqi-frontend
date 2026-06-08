@@ -155,27 +155,26 @@ export const createPermissionAdminRoutes = (
 
       // Insert the new custom role and log audit entry in a transaction (Req 12.3, 12.6)
       let result: any;
-      const transaction = db.transaction(async () => {
-        result = await db
-          .prepare(
-            `INSERT INTO roles (name, description, is_custom, created_at, updated_at)
-             VALUES (?, ?, true, NOW(), NOW())
-             RETURNING id, name, description, is_custom, created_at`
-          )
-          .get(name, description);
-
-        // Audit log: custom role created (Req 12.3)
-        await PermissionAuditService.logPermissionChange({
-          eventType: 'custom_role_created',
-          actorUserId: req.user.id,
-          targetRoleId: result.id,
-          oldState: null,
-          newState: { name, description },
-        });
-      });
 
       try {
-        await transaction();
+        await db.transaction(async () => {
+          result = await db
+            .prepare(
+              `INSERT INTO roles (name, description, is_custom, created_at, updated_at)
+               VALUES (?, ?, true, NOW(), NOW())
+               RETURNING id, name, description, is_custom, created_at`
+            )
+            .get(name, description);
+
+          // Audit log: custom role created (Req 12.3)
+          await PermissionAuditService.logPermissionChange({
+            eventType: 'custom_role_created',
+            actorUserId: req.user.id,
+            targetRoleId: result.id,
+            oldState: null,
+            newState: { name, description },
+          });
+        });
       } catch (err: any) {
         // If audit log write fails, the transaction rolls back (Req 12.6)
         logError?.(err);
@@ -338,26 +337,24 @@ export const createPermissionAdminRoutes = (
       }
 
       // Delete role and log audit entry in a transaction (Req 12.3, 12.6)
-      const transaction = db.transaction(async () => {
-        await db
-          .prepare('DELETE FROM role_permissions WHERE role_id = ?::uuid')
-          .run(id);
-        await db
-          .prepare('DELETE FROM roles WHERE id = ?::uuid')
-          .run(id);
-
-        // Audit log: custom role deleted (Req 12.3)
-        await PermissionAuditService.logPermissionChange({
-          eventType: 'custom_role_deleted',
-          actorUserId: req.user.id,
-          targetRoleId: id,
-          oldState: { name: role.name, description: role.description || '' },
-          newState: null,
-        });
-      });
-
       try {
-        await transaction();
+        await db.transaction(async () => {
+          await db
+            .prepare('DELETE FROM role_permissions WHERE role_id = ?::uuid')
+            .run(id);
+          await db
+            .prepare('DELETE FROM roles WHERE id = ?::uuid')
+            .run(id);
+
+          // Audit log: custom role deleted (Req 12.3)
+          await PermissionAuditService.logPermissionChange({
+            eventType: 'custom_role_deleted',
+            actorUserId: req.user.id,
+            targetRoleId: id,
+            oldState: { name: role.name, description: role.description || '' },
+            newState: null,
+          });
+        });
       } catch (err: any) {
         logError?.(err);
         return res.status(500).json({
@@ -535,7 +532,7 @@ export const createPermissionAdminRoutes = (
         try {
           const rollbackPermissions: PermissionUpdate[] = permissions.map((p) => ({
             module: p.module,
-            action: p.action,
+            action: p.action as PermissionAction,
             granted: !p.granted, // reverse the change
           }));
           await PermissionService.updateRolePermissions(id, rollbackPermissions);
@@ -716,40 +713,38 @@ export const createPermissionAdminRoutes = (
       }));
 
       // Replace all overrides and log audit entry in a transaction (Req 9.2, 9.6, 12.2, 12.6)
-      const transaction = db.transaction(async () => {
-        // Delete all existing overrides for this user
-        await db
-          .prepare('DELETE FROM user_permissions WHERE user_id = ?::uuid')
-          .run(id);
-
-        // Insert new overrides (empty array = remove all, which is valid per Req 9.6)
-        for (const override of overrides) {
-          const permRecord = await db
-            .prepare('SELECT id FROM permissions WHERE module = ? AND action = ?')
-            .get(override.module, override.action);
-
-          if (permRecord) {
-            const isAllowed = override.isAllowed ? 1 : 0;
-            await db
-              .prepare(
-                'INSERT INTO user_permissions (user_id, permission_id, is_allowed) VALUES (?::uuid, ?::uuid, ?)'
-              )
-              .run(id, permRecord.id, isAllowed);
-          }
-        }
-
-        // Audit log: user override change (Req 12.2)
-        await PermissionAuditService.logPermissionChange({
-          eventType: 'user_override_change',
-          actorUserId: req.user.id,
-          targetUserId: id,
-          oldState: oldState,
-          newState: overrides,
-        });
-      });
-
       try {
-        await transaction();
+        await db.transaction(async () => {
+          // Delete all existing overrides for this user
+          await db
+            .prepare('DELETE FROM user_permissions WHERE user_id = ?::uuid')
+            .run(id);
+
+          // Insert new overrides (empty array = remove all, which is valid per Req 9.6)
+          for (const override of overrides) {
+            const permRecord = await db
+              .prepare('SELECT id FROM permissions WHERE module = ? AND action = ?')
+              .get(override.module, override.action);
+
+            if (permRecord) {
+              const isAllowed = override.isAllowed ? 1 : 0;
+              await db
+                .prepare(
+                  'INSERT INTO user_permissions (user_id, permission_id, is_allowed) VALUES (?::uuid, ?::uuid, ?)'
+                )
+                .run(id, permRecord.id, isAllowed);
+            }
+          }
+
+          // Audit log: user override change (Req 12.2)
+          await PermissionAuditService.logPermissionChange({
+            eventType: 'user_override_change',
+            actorUserId: req.user.id,
+            targetUserId: id,
+            oldState: oldState,
+            newState: overrides,
+          });
+        });
       } catch (err: any) {
         logError?.(err);
         return res.status(500).json({

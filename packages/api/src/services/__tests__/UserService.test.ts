@@ -77,9 +77,7 @@ describe('UserService', () => {
 
     beforeEach(() => {
       // Setup transaction mock to execute the callback immediately
-      mockTransaction.mockImplementation((fn: Function) => {
-        return async () => fn();
-      });
+      mockTransaction.mockImplementation(async (fn: Function) => fn());
     });
 
     it('hashes the password before storing', async () => {
@@ -188,9 +186,7 @@ describe('UserService', () => {
     };
 
     beforeEach(() => {
-      mockTransaction.mockImplementation((fn: Function) => {
-        return async () => fn();
-      });
+      mockTransaction.mockImplementation(async (fn: Function) => fn());
     });
 
     it('returns oldUser for comparison (to detect role/status changes)', async () => {
@@ -239,9 +235,7 @@ describe('UserService', () => {
 
   describe('setStatus', () => {
     beforeEach(() => {
-      mockTransaction.mockImplementation((fn: Function) => {
-        return async () => fn();
-      });
+      mockTransaction.mockImplementation(async (fn: Function) => fn());
     });
 
     it('updates user status and returns username', async () => {
@@ -263,9 +257,7 @@ describe('UserService', () => {
       for (const status of statuses) {
         vi.clearAllMocks();
         mockPrepare.mockReturnValue({ get: mockGet, all: mockAll, run: mockRun });
-        mockTransaction.mockImplementation((fn: Function) => {
-          return async () => fn();
-        });
+        mockTransaction.mockImplementation(async (fn: Function) => fn());
         mockGet.mockResolvedValueOnce({ username: 'testuser' });
         mockRun.mockResolvedValueOnce({ changes: 1 });
 
@@ -343,9 +335,7 @@ describe('UserService', () => {
 
   describe('deleteUser', () => {
     beforeEach(() => {
-      mockTransaction.mockImplementation((fn: Function) => {
-        return async () => fn();
-      });
+      mockTransaction.mockImplementation(async (fn: Function) => fn());
     });
 
     it('deletes the user and returns username', async () => {

@@ -56,7 +56,7 @@ vi.mock('../../hooks/useAuditPlans', () => ({
 
 const mockUseDebounce = vi.fn((value: string) => value);
 vi.mock('../../hooks/useDebounce', () => ({
-  useDebounce: (...args: any[]) => mockUseDebounce(...args),
+  useDebounce: (...args: [string]) => mockUseDebounce(...args),
 }));
 
 // Mock sub-components that may cause rendering issues

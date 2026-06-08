@@ -63,7 +63,7 @@ export interface DeadLetterEntry {
 export class CircuitBreaker {
   private _state: CircuitState = CircuitState.CLOSED;
   private _failures: number[] = []; // timestamps of consecutive failures
-  private _consecutiveFailures: number = 0;
+  private _consecutiveFailures = 0;
   private _healthProbeTimer: ReturnType<typeof setInterval> | null = null;
   private _config: CircuitBreakerConfig;
   private _serviceUrl: string | null;
@@ -109,7 +109,7 @@ export class CircuitBreaker {
     }
 
     // Attempt the call with retries
-    let lastError: string = '';
+    let lastError = '';
     for (let attempt = 1; attempt <= this._config.maxRetries; attempt++) {
       try {
         await this.executeRequest(eventType, payload);

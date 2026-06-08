@@ -175,7 +175,7 @@ export class AuditProgramService {
       }
 
       return { programId };
-    })();
+    });
   }
 
   static async duplicate(id: string | number, username: string) {
@@ -212,7 +212,7 @@ export class AuditProgramService {
       `).run(newId, id);
       
       return newId;
-    })();
+    });
   }
 
   /**

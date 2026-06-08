@@ -34,7 +34,7 @@ vi.mock('../../db/index', () => {
         all: mockAll,
         run: mockRun,
       }),
-      transaction: vi.fn((fn: Function) => async (...args: any[]) => fn(...args)),
+      transaction: vi.fn(async (fn: Function) => fn()),
       validateIdentifier: vi.fn((name: string) => name),
       exec: vi.fn().mockResolvedValue(undefined),
     },
@@ -44,7 +44,7 @@ vi.mock('../../db/index', () => {
         all: mockAll,
         run: mockRun,
       }),
-      transaction: vi.fn((fn: Function) => async (...args: any[]) => fn(...args)),
+      transaction: vi.fn(async (fn: Function) => fn()),
       validateIdentifier: vi.fn((name: string) => name),
       exec: vi.fn().mockResolvedValue(undefined),
     },
@@ -262,7 +262,7 @@ describe('Full Request Lifecycle Integration Tests', () => {
       expect(res.body.meta).toBeDefined();
       expect(res.body.meta.requestId).toBeDefined();
       expect(res.body.meta.timestamp).toBeDefined();
-      expect(res.body.meta.version).toBe('1.0');
+      expect(res.body.meta.version).toBe('1.0.0');
 
       // Verify requestId is a valid UUID
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -379,7 +379,7 @@ describe('Full Request Lifecycle Integration Tests', () => {
       expect(res.body.meta).toBeDefined();
       expect(res.body.meta.requestId).toBeDefined();
       expect(res.body.meta.timestamp).toBeDefined();
-      expect(res.body.meta.version).toBe('1.0');
+      expect(res.body.meta.version).toBe('1.0.0');
     });
 
     it('returns 401 when no auth token is provided', async () => {
@@ -597,7 +597,7 @@ describe('Full Request Lifecycle Integration Tests', () => {
       // (rate limiter is first in the chain), so the response is NOT wrapped
       // in the standard envelope. It contains the raw rate limiter error.
       expect(res.body.error).toBeDefined();
-      expect(res.body.error).toContain('Too many requests');
+      expect(res.body.error.message).toContain('Too many requests');
     });
   });
 });

@@ -91,9 +91,9 @@ describe('Helmet middleware', () => {
       expect(res.headers['x-frame-options']).toBe('DENY');
     });
 
-    it('still sets Content-Security-Policy in development', async () => {
+    it('does NOT set Content-Security-Policy in development (avoids HMR/dev tool conflicts)', async () => {
       const res = await request(app).get('/test');
-      expect(res.headers['content-security-policy']).toBeDefined();
+      expect(res.headers['content-security-policy']).toBeUndefined();
     });
 
     it('still removes X-Powered-By in development', async () => {

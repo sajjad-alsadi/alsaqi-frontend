@@ -9,34 +9,23 @@ vi.mock('../Portal', () => ({
 }));
 
 // Mock FocusTrap to expose onEscape behavior for testing
+function MockFocusTrap({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) {
+  React.useEffect(() => {
+    if (!active) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onEscape();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [active, onEscape]);
+  return <>{children}</>;
+}
+
 vi.mock('../FocusTrap', () => ({
-  FocusTrap: ({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) => {
-    // Attach a keydown listener to simulate Escape handling
-    React.useEffect(() => {
-      if (!active) return;
-      const handler = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          onEscape();
-        }
-      };
-      document.addEventListener('keydown', handler);
-      return () => document.removeEventListener('keydown', handler);
-    }, [active, onEscape]);
-    return <>{children}</>;
-  },
-  default: ({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) => {
-    React.useEffect(() => {
-      if (!active) return;
-      const handler = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          onEscape();
-        }
-      };
-      document.addEventListener('keydown', handler);
-      return () => document.removeEventListener('keydown', handler);
-    }, [active, onEscape]);
-    return <>{children}</>;
-  },
+  FocusTrap: MockFocusTrap,
+  default: MockFocusTrap,
 }));
 
 // Mock lucide-react

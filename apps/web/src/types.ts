@@ -103,6 +103,7 @@ export interface AuditFinding {
   audit_id: number | string;
   finding_number?: string;
   plan_code?: string;
+  title?: string;
   condition: string;
   criteria: string;
   cause: string;
@@ -127,6 +128,8 @@ export interface AuditEvidence {
 export interface Recommendation {
   id?: number;
   finding_id: number;
+  plan_id?: number | string;
+  rec_number?: string;
   department: string;
   responsible: string;
   due_date: string;

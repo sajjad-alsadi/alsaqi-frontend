@@ -44,18 +44,16 @@ function createPgliteDBWrapper(pglite: any) {
     async exec(sql: string): Promise<void> {
       await pglite.query(sql);
     },
-    transaction(fn: Function) {
-      return async (...args: any[]) => {
-        await pglite.query('BEGIN');
-        try {
-          const result = await fn(...args);
-          await pglite.query('COMMIT');
-          return result;
-        } catch (e) {
-          await pglite.query('ROLLBACK');
-          throw e;
-        }
-      };
+    async transaction(fn: Function) {
+      await pglite.query('BEGIN');
+      try {
+        const result = await fn();
+        await pglite.query('COMMIT');
+        return result;
+      } catch (e) {
+        await pglite.query('ROLLBACK');
+        throw e;
+      }
     },
   };
 }

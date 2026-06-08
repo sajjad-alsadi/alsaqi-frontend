@@ -1,3 +1,4 @@
+import { IDBWrapper } from './index';
 import logger from '../utils/logger';
 
 /**
@@ -21,26 +22,12 @@ export interface MigrationRecord {
 }
 
 /**
- * DBWrapper interface matching the project's database wrapper from src/server/db/index.ts.
- * Uses the subset of methods needed by MigrationRunner.
- */
-interface DBWrapper {
-  prepare(sql: string): {
-    get(...params: any[]): Promise<any>;
-    all(...params: any[]): Promise<any[]>;
-    run(...params: any[]): Promise<{ lastInsertRowid: number; changes: number }>;
-  };
-  exec(sql: string): Promise<void>;
-  transaction(fn: Function): (...args: any[]) => Promise<any>;
-}
-
-/**
  * MigrationRunner manages database schema versioning.
  * It tracks applied migrations in a `schema_migrations` table and ensures
  * each migration runs exactly once, in sequential version order.
  */
 export class MigrationRunner {
-  constructor(private db: DBWrapper) {}
+  constructor(private db: IDBWrapper) {}
 
   /**
    * Creates the schema_migrations table if it does not already exist.
@@ -100,18 +87,16 @@ export class MigrationRunner {
     for (const migration of pending) {
       logger.info(`Running migration ${migration.version}: ${migration.name} (${migration.type})`);
 
-      const executeMigration = this.db.transaction(async () => {
-        // Execute the migration's up function
-        await migration.up();
-
-        // Record the migration in schema_migrations
-        await this.db.prepare(
-          'INSERT INTO schema_migrations (version, name, type) VALUES (?, ?, ?)'
-        ).run(migration.version, migration.name, migration.type);
-      });
-
       try {
-        await executeMigration();
+        await this.db.transaction(async () => {
+          // Execute the migration's up function
+          await migration.up();
+
+          // Record the migration in schema_migrations
+          await this.db.prepare(
+            'INSERT INTO schema_migrations (version, name, type) VALUES (?, ?, ?)'
+          ).run(migration.version, migration.name, migration.type);
+        });
         logger.info(`Migration ${migration.version} applied successfully`);
       } catch (error: any) {
         logger.error(`Migration ${migration.version} failed: ${error.message}`, {

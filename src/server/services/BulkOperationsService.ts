@@ -139,15 +139,16 @@ export class BulkOperationsService extends BaseService {
       }
 
       switch (operation) {
-        case 'create':
+        case 'create': {
           // For create, item must have at least one field (excluding id)
           const createFields = Object.keys(item).filter(k => k !== 'id');
           if (createFields.length === 0) {
             itemErrors.push('Item must have at least one field for creation');
           }
           break;
+        }
 
-        case 'update':
+        case 'update': {
           // For update, item must have an id and at least one other field
           if (!item.id) {
             itemErrors.push('Item must have an "id" field for update operations');
@@ -157,6 +158,7 @@ export class BulkOperationsService extends BaseService {
             itemErrors.push('Item must have at least one field to update besides "id"');
           }
           break;
+        }
 
         case 'delete':
           // For delete, item must have an id

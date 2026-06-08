@@ -24,7 +24,7 @@ vi.mock('../FocusTrap', () => ({
     }, [active, onEscape]);
     return <>{children}</>;
   },
-  default: ({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) => {
+  default: function DefaultFocusTrap({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) {
     React.useEffect(() => {
       if (!active) return;
       const handler = (e: KeyboardEvent) => {

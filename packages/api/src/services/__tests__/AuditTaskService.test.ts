@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Mock the db module
 vi.mock('../../db/index', () => {
   const mockPrepare = vi.fn();
-  const mockTransaction = vi.fn((fn: Function) => fn);
+  const mockTransaction = vi.fn(async (fn: Function) => fn());
   return {
     db: {
       prepare: mockPrepare,

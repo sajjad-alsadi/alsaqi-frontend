@@ -7,7 +7,7 @@ vi.mock('../../db/index', () => {
   return {
     db: {
       prepare: mockPrepare,
-      transaction: vi.fn((fn: Function) => fn),
+      transaction: vi.fn(async (fn: Function) => fn()),
       validateIdentifier: vi.fn((id: string) => id),
     },
   };

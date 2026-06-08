@@ -190,7 +190,7 @@ export class BaseService {
       }).catch((e) => console.error("N8n send event failed", e));
 
       return { id: info.lastInsertRowid, ...body };
-    })();
+    });
   }
 
   static async update(tableName: string, id: string | number, data: any) {
@@ -230,7 +230,7 @@ export class BaseService {
       }).catch((e) => console.error("N8n send event failed", e));
 
       return { id, ...body };
-    })();
+    });
   }
 
   static async delete(tableName: string, id: string | number) {

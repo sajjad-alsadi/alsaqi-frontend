@@ -1,10 +1,11 @@
 import React from 'react';
 import { Languages } from 'lucide-react';
+import { Language } from '../../constants';
 import Logo from '../Logo';
 
 interface LoginHeaderProps {
   language: string;
-  setLanguage: (lang: string) => void;
+  setLanguage: (lang: Language) => void;
   t: any;
 }
 
@@ -13,7 +14,7 @@ const LoginHeader: React.FC<LoginHeaderProps> = ({ language, setLanguage, t }) =
     <>
       <div className="flex justify-end mb-8">
         <button 
-          onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+          onClick={() => setLanguage(language === 'en' ? Language.AR : Language.EN)}
           className="p-2.5 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] rounded-xl hover:bg-[var(--color-bg-main)] transition-all border border-[var(--color-border-soft)]"
           title={t('common.language')}
         >

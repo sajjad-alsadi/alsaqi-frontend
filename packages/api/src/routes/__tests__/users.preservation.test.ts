@@ -72,7 +72,7 @@ function createTestApp(options: {
   };
 
   // Simulate authorize middleware (mirrors auth.ts behavior)
-  const authorize = (allowedRoles: string[]) => {
+  const authorize = (allowedRoles: readonly string[]) => {
     return (req: any, res: any, next: any) => {
       if (!allowedRoles.includes(req.user.role)) {
         return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });

@@ -68,10 +68,8 @@ describe('BulkOperationsService', () => {
       run: mockRun,
     });
 
-    // Default transaction mock: execute the function immediately
-    mockTransaction.mockImplementation((fn: Function) => {
-      return async (...args: any[]) => fn(...args);
-    });
+    // Default transaction mock: execute the function immediately and return its result
+    mockTransaction.mockImplementation(async (fn: Function) => fn());
   });
 
   describe('validateBatchSize', () => {

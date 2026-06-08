@@ -40,7 +40,7 @@ function buildPermissionSet(userId: string, role: string): UserPermissionSet {
     role,
     roleId: 'role-1',
     isCustomRole: false,
-    permissions,
+    permissions: permissions as Record<string, import('../../permissions/types').PermissionAction[]>,
     overrides: [],
   };
 }

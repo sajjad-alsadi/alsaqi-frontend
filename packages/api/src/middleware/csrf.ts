@@ -27,7 +27,7 @@ export interface CsrfOptions {
  * Generates a cryptographically random CSRF token.
  * Uses crypto.randomBytes with the specified byte length (default 32 bytes = 64 hex chars).
  */
-export function generateCsrfToken(byteLength: number = 32): string {
+export function generateCsrfToken(byteLength = 32): string {
   return crypto.randomBytes(byteLength).toString('hex');
 }
 

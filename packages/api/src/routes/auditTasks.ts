@@ -14,7 +14,7 @@ export const createAuditTaskRoutes = (
 
   // Custom route for status transitions
   router.patch('/:id/status', authenticate, asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { status } = req.body;
     
     const typedReq = req as any;
@@ -64,7 +64,7 @@ export const createAuditTaskRoutes = (
   // POST /api/v1/audit-tasks/:id/assign - Assign users to a task
   // Requirements: 4.1, 4.3, 4.5
   router.post('/:id/assign', authenticate, asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { userIds } = req.body;
 
     const typedReq = req as any;

@@ -76,7 +76,7 @@ export class SoftDeleteService extends BaseService {
         tableName,
         `Soft deleted record ID: ${id}`
       );
-    })();
+    });
   }
 
   /**
@@ -174,8 +174,8 @@ export class SoftDeleteService extends BaseService {
    */
   static async getDeleted(
     tableName: string,
-    page: number = 1,
-    pageSize: number = 20
+    page = 1,
+    pageSize = 20
   ): Promise<SoftDeletedListResult> {
     const validatedTable = this.db.validateIdentifier(tableName);
     const offset = (page - 1) * pageSize;

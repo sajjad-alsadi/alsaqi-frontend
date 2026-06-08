@@ -1,7 +1,7 @@
-import {StrictMode, Suspense} from 'react';
-import {createRoot} from 'react-dom/client';
+import { StrictMode, Suspense } from 'react';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import App from './App.tsx';
+import App from './App';
 import api from './api/httpClient';
 import './index.css';
 import './i18n'; // Import i18n
@@ -16,8 +16,8 @@ initNoiseFilter();
 window.addEventListener('error', (event) => {
   const msg = (event.message || '').toLowerCase();
   const isAuthError = (event.error as any)?.response?.status === 401;
-  const isViteNoise = (msg.includes('vite') || msg.includes('hmr')) && 
-                     (msg.includes('websocket') || msg.includes('connection failed') || msg.includes('closed without opened'));
+  const isViteNoise = (msg.includes('vite') || msg.includes('hmr')) &&
+    (msg.includes('websocket') || msg.includes('connection failed') || msg.includes('closed without opened'));
 
   if (
     isViteNoise ||
@@ -35,8 +35,8 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   const msg = (event.reason?.message || String(event.reason) || '').toLowerCase();
   const isAuthError = event.reason?.response?.status === 401;
-  const isViteNoise = (msg.includes('vite') || msg.includes('hmr')) && 
-                     (msg.includes('websocket') || msg.includes('connection failed') || msg.includes('closed without opened'));
+  const isViteNoise = (msg.includes('vite') || msg.includes('hmr')) &&
+    (msg.includes('websocket') || msg.includes('connection failed') || msg.includes('closed without opened'));
 
   if (
     isViteNoise ||

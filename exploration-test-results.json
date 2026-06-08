@@ -1,0 +1,24 @@
+{
+  "tsc": {
+    "pass": false,
+    "exitCode": 2,
+    "errors": [
+      "apps/web/src/api/compat/regulatoryService.ts(2,40): error TS2307: Cannot find module '../types' or its corresponding type declarations.\r",
+      "apps/web/src/api/ws/websocket-client.test.ts(528,7): error TS18048: 'onStateChange' is possibly 'undefined'.\r",
+      "apps/web/src/api/ws/websocket-client.test.ts(528,21): error TS2339: Property 'mockClear' does not exist on type '(state: ConnectionState) => void'.\r",
+      "apps/web/src/components/__tests__/Accessibility.test.tsx(16,61): error TS2503: Cannot find namespace 'ReactMod'.\r",
+      "apps/web/src/components/__tests__/Accessibility.test.tsx(65,84): error TS2503: Cannot find namespace 'ReactMod'.\r"
+    ]
+  },
+  "eslint": {
+    "pass": false,
+    "errorCount": 1
+  },
+  "permTest": {
+    "pass": true
+  },
+  "session": {
+    "pass": true,
+    "cacheStore": "redis"
+  }
+}

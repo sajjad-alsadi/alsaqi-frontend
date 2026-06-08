@@ -11,7 +11,7 @@ export class CorrespondenceService {
     const { archived, search, status, priority, dept_id, start_date, end_date, page = 1, pageSize = 10 } = filters;
     const isArchived = archived === 'true' ? 1 : 0;
     
-    let baseQueryString = `
+    const baseQueryString = `
       FROM incoming_correspondence i
       LEFT JOIN org_entities d ON i.assigned_dept_id = d.id
       LEFT JOIN users u ON i.assigned_user_id = u.id
@@ -118,7 +118,7 @@ export class CorrespondenceService {
       });
 
       return { oldStatus: oldRecord.status };
-    })();
+    });
   }
 
   static async refer(data: any, userId: string | number) {
@@ -133,7 +133,7 @@ export class CorrespondenceService {
       // Update incoming status to 'Referred'
       await this.db.prepare("UPDATE incoming_correspondence SET status = 'Referred', assigned_dept_id = ?::uuid, assigned_user_id = ?::uuid, updated_at = CURRENT_TIMESTAMP WHERE id = ?::uuid")
         .run(to_dept_id, to_user_id, incoming_id);
-    })();
+    });
   }
 
   static async link(data: any, userId: string | number) {
@@ -262,8 +262,8 @@ export class CorrespondenceService {
     const attachments = await this.db.prepare("SELECT id, file_name, file_type, uploaded_at, description FROM correspondence_attachments WHERE correspondence_type = ? AND correspondence_id = ?").all(type, id);
     const history = await this.db.prepare("SELECT h.*, u.name as user_name FROM correspondence_status_history h LEFT JOIN users u ON h.changed_by = u.id WHERE correspondence_type = ? AND correspondence_id = ? ORDER BY h.change_date DESC").all(type, id);
     
-    let links = [];
-    let referrals = [];
+    const links: Record<string, unknown>[] = [];
+    let referrals: Record<string, unknown>[] = [];
 
     if (type !== 'outgoing') {
       referrals = await this.db.prepare(`
@@ -396,7 +396,7 @@ export class CorrespondenceService {
       await this.db.prepare("DELETE FROM correspondence_status_history WHERE correspondence_type = 'Incoming' AND correspondence_id = ?").run(id);
       
       await this.db.prepare("DELETE FROM incoming_correspondence WHERE id = ?").run(id);
-    })();
+    });
 
     // --- AUTOMATION: Send event to n8n ---
     await N8nService.sendEvent('incoming_correspondence.deleted', {

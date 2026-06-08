@@ -134,7 +134,7 @@ const UserManagement: React.FC = () => {
   const handleSavePermissions = async (modifiedRoles: any[]) => {
     try {
       const promises = modifiedRoles.map(modifiedRole => {
-        const newPermIds = [...new Set((modifiedRole.permissions || []).map((p: any) => p.id))];
+        const newPermIds = [...new Set((modifiedRole.permissions || []).map((p: any) => p.id))] as string[];
         return userService.updateRolePermissions(modifiedRole.id, { permissionIds: newPermIds });
       });
 
@@ -171,12 +171,12 @@ const UserManagement: React.FC = () => {
 
   const handleExportUsers = () => {
     const headers = [t('common.id'), t('common.username'), t('common.name'), t('common.email'), t('common.role'), t('common.department'), t('common.statusLabel'), t('common.lastLogin')];
-    const rows = users.map(u => [
+    const rows = users.map((u: any) => [
       u.id, u.username, translateName(u.name), u.email, getRoleLabel(u.role), u.department, translateStatus(u.status), u.last_login ? formatDateTime(u.last_login) : t('common.never')
     ]);
     const csvContent = "data:text/csv;charset=utf-8," 
       + headers.join(",") + "\n"
-      + rows.map(e => e.join(",")).join("\n");
+      + rows.map((e: any) => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -319,7 +319,7 @@ const UserManagement: React.FC = () => {
 
   const handleApproveReset = async (requestId: string | number) => {
     try {
-      await userService.approveReset({ requestId });
+      await userService.approveReset({ requestId: String(requestId), action: 'approve' });
       refreshAll();
     } catch (err) { logger.error('Operation failed', err); }
   };

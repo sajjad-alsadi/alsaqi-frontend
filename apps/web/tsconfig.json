@@ -4,16 +4,35 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "jsx": "react-jsx",
     "noEmit": true,
     "paths": {
-      "@alsaqi/shared": ["../../packages/shared/src/index.ts"],
-      "@alsaqi/shared/*": ["../../packages/shared/src/*"]
+      "@alsaqi/shared": [
+        "../../packages/shared/src/index.ts"
+      ],
+      "@alsaqi/shared/*": [
+        "../../packages/shared/src/*"
+      ]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.json"
+  ],
+  "exclude": [
+    "src/permissions/seeder.ts",
+    "src/permissions/__tests__/seeder.property.test.ts",
+    "src/components/FindingCard.test.tsx"
+  ],
   "references": [
-    { "path": "../../packages/shared" }
+    {
+      "path": "../../packages/shared"
+    }
   ]
 }

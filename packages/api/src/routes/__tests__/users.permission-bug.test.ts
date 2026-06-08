@@ -368,7 +368,7 @@ describe('Bug Condition Exploration: Permission Matrix Split-Brain and Missing G
       /**
        * **Validates: Requirements 1.5**
        */
-      const dbModules = ['Audit', 'Finding', 'Risk', 'Recommendation', 'Correspondence', 'User', 'Setting'];
+      const dbModules = ['Audit', 'Finding', 'Risk', 'Recommendation', 'Correspondence', 'User', 'Setting', 'Settings', 'Fraud'];
 
       fc.assert(
         fc.property(

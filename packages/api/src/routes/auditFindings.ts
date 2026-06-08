@@ -17,7 +17,7 @@ export const createAuditFindingRoutes = (
   // GET /audit-findings/by-plan/:planId - Get findings for a specific plan
   // Must be registered BEFORE /:id to prevent "by-plan" from matching as an id
   router.get('/by-plan/:planId', authenticate, checkPermission('AuditFindings', 'View'), asyncHandler(async (req, res) => {
-    const { planId } = req.params;
+    const planId = String(req.params.planId);
     const findings = await AuditService.getFindingsByPlan(planId);
     res.json({ success: true, data: findings });
   }));
@@ -30,7 +30,7 @@ export const createAuditFindingRoutes = (
 
   // GET /audit-findings/:id - Get single finding
   router.get('/:id', authenticate, checkPermission('AuditFindings', 'View'), asyncHandler(async (req, res) => {
-    const id = req.params.id;
+    const id = String(req.params.id);
     const result = await BaseService.findById('audit_findings', id);
     if (!result) throw new NotFoundError('Finding not found');
     res.json(result);
@@ -64,7 +64,7 @@ export const createAuditFindingRoutes = (
   // PUT /audit-findings/:id - Update finding
   router.put('/:id', authenticate, checkPermission('AuditFindings', 'Edit'), asyncHandler(async (req, res) => {
     const typedReq = req as any;
-    const id = req.params.id;
+    const id = String(req.params.id);
     const userId = typedReq.user.id;
 
     await AuditService.updateFinding(id, req.body, userId);
@@ -74,7 +74,7 @@ export const createAuditFindingRoutes = (
   // PATCH /audit-findings/:id/status - Change finding status
   router.patch('/:id/status', authenticate, checkPermission('AuditFindings', 'Edit'), asyncHandler(async (req, res) => {
     const typedReq = req as any;
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { status } = req.body;
     const userId = typedReq.user.id;
     const userRole = typedReq.user.role;
@@ -89,7 +89,7 @@ export const createAuditFindingRoutes = (
 
   // DELETE /audit-findings/:id - Delete finding
   router.delete('/:id', authenticate, checkPermission('AuditFindings', 'Delete'), asyncHandler(async (req, res) => {
-    const id = req.params.id;
+    const id = String(req.params.id);
     await AuditService.deleteFinding(id);
     res.json({ success: true });
   }));
@@ -98,7 +98,7 @@ export const createAuditFindingRoutes = (
   // Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7
   router.post('/:findingId/evidence', authenticate, checkPermission('AuditFindings', 'Edit'), asyncHandler(async (req, res) => {
     const typedReq = req as any;
-    const { findingId } = req.params;
+    const findingId = String(req.params.findingId);
     const userId = typedReq.user.id;
 
     // Validate file is present
@@ -144,7 +144,7 @@ export const createAuditFindingRoutes = (
   // GET /audit-findings/:findingId/evidence - Get all evidence for a finding
   // Requirements: 8.1, 8.4
   router.get('/:findingId/evidence', authenticate, checkPermission('AuditFindings', 'View'), asyncHandler(async (req, res) => {
-    const { findingId } = req.params;
+    const findingId = String(req.params.findingId);
 
     // Verify finding exists
     const finding = await BaseService.findById('audit_findings', findingId);

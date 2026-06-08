@@ -41,7 +41,7 @@ describe('Preservation: Fallback Code Generation and Other Entity Behavior Uncha
    * - resolveDepartmentCode returns the provided deptCode
    * - The LIKE query for latest record returns null (no existing records)
    */
-  function setupDbMock(deptCode: string = 'IA') {
+  function setupDbMock(deptCode = 'IA') {
     const mockGet = vi.fn();
     (db.prepare as any).mockImplementation((sql: string) => {
       return {

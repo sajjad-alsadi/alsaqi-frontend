@@ -20,9 +20,7 @@ describe('MigrationRunner', () => {
         all: vi.fn().mockResolvedValue([]),
         run: vi.fn().mockResolvedValue({ lastInsertRowid: 0, changes: 1 }),
       }),
-      transaction: vi.fn((fn: Function) => {
-        return async (...args: any[]) => fn(...args);
-      }),
+      transaction: vi.fn(async (fn: Function) => fn()),
     };
 
     runner = new MigrationRunner(mockDb);
@@ -230,9 +228,7 @@ describe('MigrationRunner', () => {
       });
 
       // Make the transaction rethrow errors
-      mockDb.transaction.mockImplementation((fn: Function) => {
-        return async (...args: any[]) => fn(...args);
-      });
+      mockDb.transaction.mockImplementation(async (fn: Function) => fn());
 
       const available: Migration[] = [
         { version: '001', name: 'first', type: 'schema', up: async () => { executionOrder.push('001'); } },

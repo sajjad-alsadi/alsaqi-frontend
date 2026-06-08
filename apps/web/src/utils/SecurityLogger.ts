@@ -59,10 +59,10 @@ export class SecurityLogger {
     log(eventType: string, details: any, severity: 'info' | 'warn' | 'error' | 'alert' = 'info') {
         // التحقق مما إذا كان التفاصيل كائن خطأ وتحويله ليكون قابلاً للتسلسل
         const processedDetails = details instanceof Error ? {
+            ...details,
             message: details.message,
             stack: details.stack,
-            name: details.name,
-            ...details
+            name: details.name
         } : details;
 
         const entry = {

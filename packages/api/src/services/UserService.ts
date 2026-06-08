@@ -132,11 +132,14 @@ export class UserService {
       }
       const employee_id = `${deptCode}-${nextNum}`;
 
+      // Require 2FA setup for sensitive roles (Admin, Manager/Audit Manager) per Req 5.9
+      const ROLES_REQUIRING_2FA = ['Admin', 'Manager'];
+      const requires2faSetup = ROLES_REQUIRING_2FA.includes(role) ? 1 : 0;
 
       const result = await db.prepare(`
-        INSERT INTO users (username, password, name, email, department, job_title_id, role, unit, reporting_manager_id, access_scope, phone_number, notes, role_id, status, created_at, requires_password_change, employee_id)
-        VALUES (?::text, ?::text, ?::text, ?::text, ?::text, ?::uuid, ?::text, ?::text, ?::uuid, ?::text, ?::text, ?::text, ?::uuid, 'Active', CURRENT_TIMESTAMP, 1, ?::text)
-      `).run(username, hashedPassword, name, email, department || null, job_title_id || null, role, unit || null, reporting_manager_id || null, access_scope || null, phone_number || null, notes || null, role_id, employee_id);
+        INSERT INTO users (username, password, name, email, department, job_title_id, role, unit, reporting_manager_id, access_scope, phone_number, notes, role_id, status, created_at, requires_password_change, employee_id, requires_2fa_setup)
+        VALUES (?::text, ?::text, ?::text, ?::text, ?::text, ?::uuid, ?::text, ?::text, ?::uuid, ?::text, ?::text, ?::text, ?::uuid, 'Active', CURRENT_TIMESTAMP, 1, ?::text, ?::boolean)
+      `).run(username, hashedPassword, name, email, department || null, job_title_id || null, role, unit || null, reporting_manager_id || null, access_scope || null, phone_number || null, notes || null, role_id, employee_id, requires2faSetup);
       
       // --- AUTOMATION: Send event to n8n ---
       await N8nService.sendEvent('user.created', {
@@ -150,7 +153,7 @@ export class UserService {
       });
 
       return { id: result.lastInsertRowid, username, name, email, department, job_title_id, role, status: 'Active', employee_id };
-    })();
+    });
   }
 
   static async updateUser(id: string, userData: any) {
@@ -183,7 +186,7 @@ export class UserService {
       });
 
       return { oldUser, role_id };
-    })();
+    });
   }
 
   static async setStatus(id: string, status: string) {
@@ -200,7 +203,7 @@ export class UserService {
       });
 
       return user.username;
-    })();
+    });
   }
 
   static async deleteUser(id: string) {
@@ -220,7 +223,7 @@ export class UserService {
       });
 
       return user.username;
-    })();
+    });
   }
 
   static async unlockUser(id: string) {

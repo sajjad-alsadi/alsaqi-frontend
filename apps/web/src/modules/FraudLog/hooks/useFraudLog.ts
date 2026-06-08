@@ -56,8 +56,8 @@ export const useFraudLog = (isManager: boolean) => {
     }
   };
 
-  const savePolicy = async (content: string) => {
-    if (!token) return;
+  const savePolicy = async (content: string): Promise<boolean> => {
+    if (!token) return false;
     try {
       await api.put('/policies/fraud_policy', { content });
       setPolicyContent(content);

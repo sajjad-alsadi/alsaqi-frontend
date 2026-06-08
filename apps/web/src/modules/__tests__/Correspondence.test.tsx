@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { Language } from '../../constants';
 
 // Mock dependencies
 vi.mock('../../utils/formatService', () => ({
@@ -118,7 +119,7 @@ describe('Correspondence Module', () => {
   it('renders the correspondence system title', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     expect(screen.getByText('correspondence.systemTitle')).toBeInTheDocument();
     expect(screen.getByText('correspondence.systemDesc')).toBeInTheDocument();
@@ -127,7 +128,7 @@ describe('Correspondence Module', () => {
   it('renders tab buttons for incoming, outgoing, and archive', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     expect(screen.getByText('correspondence.incomingRegister')).toBeInTheDocument();
     expect(screen.getByText('correspondence.outgoingRegister')).toBeInTheDocument();
@@ -140,7 +141,7 @@ describe('Correspondence Module', () => {
   it('renders stat cards with correct values on dashboard tab', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     expect(screen.getByText('correspondence.totalIncoming')).toBeInTheDocument();
     expect(screen.getByText('45')).toBeInTheDocument();
@@ -158,7 +159,7 @@ describe('Correspondence Module', () => {
   it('switches to incoming register tab when clicked', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     fireEvent.click(screen.getByText('correspondence.incomingRegister'));
 
@@ -168,7 +169,7 @@ describe('Correspondence Module', () => {
   it('switches to outgoing register tab when clicked', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     fireEvent.click(screen.getByText('correspondence.outgoingRegister'));
 
@@ -178,7 +179,7 @@ describe('Correspondence Module', () => {
   it('switches to archive tab when clicked', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     // Click the tab button (not the stat card)
     const archiveButtons = screen.getAllByText('correspondence.archive');
@@ -205,7 +206,7 @@ describe('Correspondence Module', () => {
       refreshAll: vi.fn(),
     });
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     // The component shows a loading spinner div
     const spinner = document.querySelector('.animate-spin');
@@ -215,7 +216,7 @@ describe('Correspondence Module', () => {
   it('renders recent incoming letters on dashboard', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     expect(screen.getByText('correspondence.recentIncomingLetters')).toBeInTheDocument();
     expect(screen.getByText('Incoming Letter 1')).toBeInTheDocument();
@@ -225,7 +226,7 @@ describe('Correspondence Module', () => {
   it('shows empty state when no incoming correspondence', () => {
     setupMock({ incoming: [] });
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     expect(screen.getByText('correspondence.noIncomingCorrespondence')).toBeInTheDocument();
   });
@@ -233,7 +234,7 @@ describe('Correspondence Module', () => {
   it('renders register buttons for incoming and outgoing', () => {
     setupMock();
 
-    render(<CorrespondenceSystem language="en" userRole="Admin" />);
+    render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
     expect(screen.getByText('correspondence.registerIncoming')).toBeInTheDocument();
     expect(screen.getByText('correspondence.registerOutgoing')).toBeInTheDocument();

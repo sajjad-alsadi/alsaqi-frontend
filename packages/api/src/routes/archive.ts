@@ -25,7 +25,7 @@ export const createArchiveRoutes = (
     checkPermission('AuditPlans', 'Approve'),
     asyncHandler(async (req, res) => {
       const typedReq = req as unknown as AuthenticatedRequest;
-      const { id } = req.params;
+      const id = String(req.params.id);
       const userId = typedReq.user.id;
       const userRole = typedReq.user.role;
 
@@ -98,7 +98,7 @@ export const createArchiveRoutes = (
     checkPermission('AuditPlans', 'View'),
     asyncHandler(async (req, res) => {
       const yearParam = req.params.year;
-      const year = parseInt(yearParam, 10);
+      const year = parseInt(String(yearParam), 10);
 
       if (isNaN(year) || year < 2000 || year > 2100) {
         throw new ValidationError('year must be an integer between 2000 and 2100');

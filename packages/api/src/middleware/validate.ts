@@ -251,7 +251,7 @@ export const validateSchema = validateBody;
 /**
  * Validates that a path parameter is either a valid integer or UUID.
  */
-export const validateIdParam = (paramName: string = 'id') => {
+export const validateIdParam = (paramName = 'id') => {
   return (req: Request, res: Response, next: NextFunction) => {
     const rawValue = req.params[paramName];
     const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;

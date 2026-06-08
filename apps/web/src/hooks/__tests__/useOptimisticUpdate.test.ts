@@ -16,7 +16,7 @@ describe('useOptimisticUpdate', () => {
     { id: 3, name: 'Item 3', status: 'in_progress' },
   ];
 
-  let setItems: ReturnType<typeof vi.fn>;
+  let setItems: (items: TestItem[]) => void;
 
   beforeEach(() => {
     setItems = vi.fn();

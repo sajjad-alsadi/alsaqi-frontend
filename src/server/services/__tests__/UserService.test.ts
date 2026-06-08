@@ -109,7 +109,8 @@ describe('UserService', () => {
         null,
         null,
         'role-1',
-        'IT-1001'
+        'IT-1001',
+        0
       );
     });
 

@@ -140,8 +140,8 @@ export class AuditTaskService {
     }
 
     // Insert assignments within a single transaction
-    const doAssign = db.transaction(async () => {
-      const assignments: any[] = [];
+    const assignments = await db.transaction(async () => {
+      const results: any[] = [];
 
       for (const userId of uniqueUserIds) {
         // Check for existing assignment (UNIQUE constraint)
@@ -159,13 +159,12 @@ export class AuditTaskService {
            RETURNING id, task_id, user_id, assigned_at, assigned_by`
         ).get(taskId, userId, assignedBy) as any;
 
-        assignments.push(result);
+        results.push(result);
       }
 
-      return assignments;
+      return results;
     });
 
-    const assignments = await doAssign();
     return { assignments };
   }
 

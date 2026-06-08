@@ -21,7 +21,7 @@ export class PermissionCache {
    * @param maxEntries Maximum number of entries before LRU eviction (default: 1000)
    * @param ttlMinutes Time-to-live in minutes for each entry (default: 5)
    */
-  constructor(maxEntries: number = 1000, ttlMinutes: number = 5) {
+  constructor(maxEntries = 1000, ttlMinutes = 5) {
     this.store = new Map();
     this.maxEntries = maxEntries;
     this.ttlMs = ttlMinutes * 60 * 1000;

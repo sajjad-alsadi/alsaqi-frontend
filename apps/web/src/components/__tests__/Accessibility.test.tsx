@@ -9,72 +9,74 @@ vi.mock('../Portal', () => ({
 }));
 
 // Mock FocusTrap with real focus management behavior
-vi.mock('../FocusTrap', () => ({
-  FocusTrap: ({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) => {
-    const React = require('react');
-    const containerRef = React.useRef<HTMLDivElement>(null);
+vi.mock('../FocusTrap', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const ReactMod = require('react') as typeof import('react');
+  return {
+    FocusTrap: ({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) => {
+      const containerRef = ReactMod.useRef<HTMLDivElement>(null);
 
-    React.useEffect(() => {
-      if (!active) return;
-      const handler = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          onEscape();
-          return;
-        }
-        if (e.key === 'Tab' && containerRef.current) {
-          const focusable = containerRef.current.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-          );
-          if (focusable.length === 0) return;
-          const first = focusable[0];
-          const last = focusable[focusable.length - 1];
-          if (e.shiftKey) {
-            if (document.activeElement === first) {
-              e.preventDefault();
-              last.focus();
-            }
-          } else {
-            if (document.activeElement === last) {
-              e.preventDefault();
-              first.focus();
+      ReactMod.useEffect(() => {
+        if (!active) return;
+        const handler = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            onEscape();
+            return;
+          }
+          if (e.key === 'Tab' && containerRef.current) {
+            const focusable = containerRef.current.querySelectorAll<HTMLElement>(
+              'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey) {
+              if (document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+              }
+            } else {
+              if (document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+              }
             }
           }
-        }
-      };
-      document.addEventListener('keydown', handler);
-      // Auto-focus first focusable element
-      const timer = setTimeout(() => {
-        if (containerRef.current) {
-          const firstFocusable = containerRef.current.querySelector<HTMLElement>(
-            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-          );
-          firstFocusable?.focus();
-        }
-      }, 0);
-      return () => {
-        clearTimeout(timer);
-        document.removeEventListener('keydown', handler);
-      };
-    }, [active, onEscape]);
+        };
+        document.addEventListener('keydown', handler);
+        // Auto-focus first focusable element
+        const timer = setTimeout(() => {
+          if (containerRef.current) {
+            const firstFocusable = containerRef.current.querySelector<HTMLElement>(
+              'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            );
+            firstFocusable?.focus();
+          }
+        }, 0);
+        return () => {
+          clearTimeout(timer);
+          document.removeEventListener('keydown', handler);
+        };
+      }, [active, onEscape]);
 
-    return React.createElement('div', { ref: containerRef }, children);
-  },
-  default: ({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) => {
-    const React = require('react');
-    React.useEffect(() => {
-      if (!active) return;
-      const handler = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          onEscape();
-        }
-      };
-      document.addEventListener('keydown', handler);
-      return () => document.removeEventListener('keydown', handler);
-    }, [active, onEscape]);
-    return React.createElement('div', null, children);
-  },
-}));
+      return ReactMod.createElement('div', { ref: containerRef }, children);
+    },
+    default: function DefaultFocusTrap({ children, onEscape, active }: { children: React.ReactNode; onEscape: () => void; active: boolean }) {
+      ReactMod.useEffect(() => {
+        if (!active) return;
+        const handler = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') {
+            onEscape();
+          }
+        };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+      }, [active, onEscape]);
+      return ReactMod.createElement('div', null, children);
+    },
+  };
+});
 
 // Mock lucide-react
 vi.mock('lucide-react', () => ({

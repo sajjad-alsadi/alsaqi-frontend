@@ -350,7 +350,7 @@ async function startServer() {
   // Validates CSRF tokens on state-changing requests (POST, PUT, PATCH, DELETE)
   // Must be after cookieParser (reads csrf-token cookie) and before routes
   app.use(csrfMiddleware({
-    exemptPaths: ['/api/auth/login', '/api/auth/refresh', '/api/system-errors', '/api/log-error', '/api/security/events', '/health'],
+    exemptPaths: ['/api/auth/login', '/api/auth/refresh', '/api/auth/2fa/validate', '/api/auth/2fa/backup', '/api/system-errors', '/api/log-error', '/api/security/events', '/health'],
     tokenHeader: 'x-csrf-token',
     cookieName: 'csrf-token',
     tokenByteLength: 32,

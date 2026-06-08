@@ -100,7 +100,7 @@ export class PermissionService {
          JOIN user_permissions up ON p.id = up.permission_id
          WHERE up.user_id = ?`
       )
-      .all(userId)) as Array<{ module: string; action: string; is_allowed: number }>;
+      .all(userId)) as Array<{ module: string; action: string; is_allowed: number | boolean }>;
 
     // Build effective permissions map
     const permissions: Record<string, PermissionAction[]> = {};
@@ -202,7 +202,7 @@ export class PermissionService {
     roleId: string,
     permissions: PermissionUpdate[]
   ): Promise<void> {
-    const transaction = db.transaction(async () => {
+    await db.transaction(async () => {
       for (const perm of permissions) {
         // Get the permission record ID
         const permRecord = (await db
@@ -230,8 +230,6 @@ export class PermissionService {
         }
       }
     });
-
-    await transaction();
 
     // Invalidate cache for all users with this role
     await this.invalidateCacheForRole(roleId);

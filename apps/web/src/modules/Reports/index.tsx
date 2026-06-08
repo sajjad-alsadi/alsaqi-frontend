@@ -196,7 +196,7 @@ const Reports: React.FC = () => {
                               ))}
                             </Pie>
                             <Tooltip 
-                              formatter={(value: any, name: string) => [formatNumber(value), t(`plan.${name.toLowerCase()}`)]}
+                              formatter={(value: any, name: any) => [formatNumber(value), t(`plan.${(name || '').toString().toLowerCase()}`)]}
                               contentStyle={{ 
                                 borderRadius: '1rem', 
                                 border: '1px solid var(--color-border-soft)', 

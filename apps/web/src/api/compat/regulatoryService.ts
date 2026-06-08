@@ -1,5 +1,5 @@
 import api from '../httpClient';
-import { CentralBankInstruction } from '../types';
+import { CentralBankInstruction } from '../../types';
 
 const API_URL = '/central-bank-instructions';
 

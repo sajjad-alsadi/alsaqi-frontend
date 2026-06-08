@@ -143,7 +143,7 @@ export class AuthService {
         token,
         refreshToken
       };
-    })();
+    });
   }
 
   static async logAudit(username: string, action: string, module: string, details: string) {

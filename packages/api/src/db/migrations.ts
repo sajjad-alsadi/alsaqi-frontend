@@ -1142,7 +1142,7 @@ export const runMigrations = async () => {
           ).run(module, action, `${action} permission for ${module}`);
           
           if (res && res.lastInsertRowid) {
-            permissionMap[`${module}:${action}`] = res.lastInsertRowid;
+            permissionMap[`${module}:${action}`] = String(res.lastInsertRowid);
           }
         }
       }

@@ -63,7 +63,7 @@ vi.mock('express-rate-limit', () => ({
 }));
 
 // Mock ModuleRegistry to return module definitions for test modules
-vi.mock('../../../permissions/registry', () => ({
+vi.mock('../../permissions/registry', () => ({
   ModuleRegistry: {
     getModule: vi.fn((name: string) => {
       return {

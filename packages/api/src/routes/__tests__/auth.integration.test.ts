@@ -342,7 +342,8 @@ describe('Auth Integration Tests', () => {
       expect(res.status).toBe(200);
       const cookies = res.headers['set-cookie'];
       expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.includes('token='))).toBe(true);
+      const cookieArr = Array.isArray(cookies) ? cookies : [cookies];
+      expect(cookieArr.some((c: string) => c.includes('token='))).toBe(true);
     });
   });
 
@@ -471,7 +472,8 @@ describe('Auth Integration Tests', () => {
       expect(res.status).toBe(200);
       const cookies = res.headers['set-cookie'];
       expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.includes('token='))).toBe(true);
+      const cookieArr = Array.isArray(cookies) ? cookies : [cookies];
+      expect(cookieArr.some((c: string) => c.includes('token='))).toBe(true);
     });
 
     it('should return 400 when newPassword is too short (less than 8 chars)', async () => {

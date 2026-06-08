@@ -25,8 +25,8 @@ vi.mock('../../db/index', () => {
     run: vi.fn().mockResolvedValue(undefined),
   });
   return {
-    db: { prepare: mockPrepare, transaction: vi.fn((fn: any) => fn) },
-    default: { prepare: mockPrepare, transaction: vi.fn((fn: any) => fn) },
+    db: { prepare: mockPrepare, transaction: vi.fn(async (fn: any) => fn()) },
+    default: { prepare: mockPrepare, transaction: vi.fn(async (fn: any) => fn()) },
   };
 });
 
@@ -48,7 +48,7 @@ vi.mock('../../services/PermissionService', () => ({
 // Mock ModuleRegistry
 const getModuleMock = vi.fn();
 const getAllModulesMock = vi.fn().mockReturnValue([]);
-vi.mock('../../../permissions/registry', () => ({
+vi.mock('../../permissions/registry', () => ({
   ModuleRegistry: {
     getModule: (...args: any[]) => getModuleMock(...args),
     getAllModules: (...args: any[]) => getAllModulesMock(...args),
@@ -135,7 +135,7 @@ function createMockDb(handlers: Record<string, any> = {}) {
     };
   });
 
-  const transactionFn = vi.fn().mockImplementation((fn: any) => fn);
+  const transactionFn = vi.fn().mockImplementation(async (fn: any) => fn());
 
   return { prepare: prepareFn, transaction: transactionFn };
 }
@@ -494,7 +494,7 @@ describe('Property 18: Override Validation', () => {
               all: vi.fn().mockResolvedValue([]),
             },
           });
-          mockDb.transaction.mockImplementation((fn: any) => fn);
+          mockDb.transaction.mockImplementation(async (fn: any) => fn());
 
           // All modules registered with all valid actions
           getModuleMock.mockImplementation((name: string) => ({

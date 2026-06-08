@@ -41,13 +41,12 @@ export class RoleService {
   static async updateRolePermissions(roleId: string | number, permissionIds: (string | number)[]) {
     const uniquePermissionIds = Array.isArray(permissionIds) ? [...new Set(permissionIds)] : [];
     
-    const transaction = db.transaction(async () => {
+    await db.transaction(async () => {
       await db.prepare("DELETE FROM role_permissions WHERE role_id = ?::uuid").run(roleId);
       for (const pid of uniquePermissionIds) {
         await db.prepare("INSERT INTO role_permissions (role_id, permission_id) VALUES (?::uuid, ?::uuid) ON CONFLICT DO NOTHING").run(roleId, pid);
       }
     });
-    await transaction();
     return true;
   }
 

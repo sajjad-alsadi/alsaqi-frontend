@@ -39,7 +39,7 @@ vi.mock('../PermissionCache', () => {
 });
 
 // Mock the ModuleRegistry
-vi.mock('../../../permissions/registry', () => {
+vi.mock('../../permissions/registry', () => {
   const getModuleMock = vi.fn();
   const getAllModulesMock = vi.fn().mockReturnValue([]);
   const getModuleNamesMock = vi.fn().mockReturnValue([]);
@@ -49,6 +49,7 @@ vi.mock('../../../permissions/registry', () => {
       getAllModules: getAllModulesMock,
       getModuleNames: getModuleNamesMock,
     },
+    ModuleRegistryImpl: vi.fn(),
   };
 });
 

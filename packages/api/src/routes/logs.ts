@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { LogService } from '../services/LogService';
 import { asyncHandler } from '../utils/asyncHandler';
 
@@ -32,9 +33,6 @@ export const createLogRoutes = (
 
     if (token) {
       try {
-        const jwt = require('jsonwebtoken');
-        // We use process.env.JWT_PUBLIC_KEY in the main auth file, but usually JWT_SECRET fallback. Let's see what they had.
-        // Wait, they had process.env.JWT_SECRET || 'fallback_secret'
         const decodedToken = jwt.verify(token, process.env.JWT_PUBLIC_KEY as string, { algorithms: ['RS256'] }) as any;
         req.user = { id: decodedToken.id };
       } catch (err: any) {

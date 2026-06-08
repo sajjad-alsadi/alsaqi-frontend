@@ -9,12 +9,13 @@ export default tseslint.config(
   // Global ignores
   {
     ignores: [
-      "dist/**",
-      "node_modules/**",
+      "**/dist/**",
+      "**/node_modules/**",
       "coverage/**",
       "*.cjs",
       "scripts/**",
       "tmp/**",
+      "count_eslint.js",
     ],
   },
 
