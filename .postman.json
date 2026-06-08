@@ -10,6 +10,19 @@
   "baseUrl": "http://localhost:3000",
   "totalTests": 20,
   "createdAt": "2026-05-11",
+  "lastTestRun": "2026-06-08",
+  "lastTestResults": {
+    "total": 20,
+    "passed": 20,
+    "failed": 0,
+    "successRate": "100%"
+  },
+  "notes": {
+    "loginField": "usernameOrEmail (not username)",
+    "defaultPassword": "admin",
+    "authScheme": "Bearer token via RS256 JWT",
+    "versionRouting": "All routes under /api/v1/ — /api/ auto-rewrites to /api/v1/"
+  },
   "tests": [
     "Health Check",
     "Login - Valid Credentials",
@@ -31,5 +44,27 @@
     "Security - No Token Access",
     "Security - Invalid Token",
     "API 404 - Non-existent Endpoint"
-  ]
+  ],
+  "testEndpoints": {
+    "Health Check": "GET /api/v1/health",
+    "Login - Valid Credentials": "POST /api/v1/auth/login",
+    "Login - Invalid Credentials": "POST /api/v1/auth/login",
+    "Login - Empty Body (Validation)": "POST /api/v1/auth/login",
+    "Get All Users": "GET /api/v1/users",
+    "Get Users Init Data": "GET /api/v1/users/init",
+    "Get Users Summary": "GET /api/v1/users/summary",
+    "Get Active Users List": "GET /api/v1/users?status=active",
+    "Get User - Not Found": "GET /api/v1/users/00000000-0000-0000-0000-000000000000",
+    "Get Dashboard Stats": "GET /api/v1/dashboard-stats",
+    "Get Notifications": "GET /api/v1/notifications",
+    "Get Audit Programs": "GET /api/v1/audit-plans",
+    "Get Audit Tasks": "GET /api/v1/audit-tasks",
+    "Get Correspondence": "GET /api/v1/correspondence/incoming",
+    "Get Departments": "GET /api/v1/departments",
+    "Get Compliance Items": "GET /api/v1/compliance",
+    "Get Recommendations": "GET /api/v1/recommendations",
+    "Security - No Token Access": "GET /api/v1/users (no auth header)",
+    "Security - Invalid Token": "GET /api/v1/users (invalid Bearer token)",
+    "API 404 - Non-existent Endpoint": "GET /api/v1/nonexistent-xyz"
+  }
 }

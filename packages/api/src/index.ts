@@ -174,21 +174,7 @@ export function createApiServer(config: ApiServerConfig): ApiServer {
 
   // ─── Versioned Routes (v1) ──────────────────────────────────────────────────
   // Route registration is deferred to start() where DB and middleware are initialized.
-  // Once task 3.4 is complete, the following pattern will be used:
-  //
-  //   const db = await initDatabase(config.databaseUrl);
-  //   const { authenticate, authorize, checkPermission, authLimiter } = createAuthMiddlewares(db, config.jwtSecret, config.jwtPublicKey);
-  //   const v1Router = createV1Router({ db, authenticate, authorize, ... });
-  //   app.use('/api/v1', v1Router);
-
-  // ─── Not Found Handler ──────────────────────────────────────────────────────
-  // Handles any /api/ request that did not match a route.
-  // MUST be registered AFTER all API routes.
-  app.use('/api', notFoundHandler);
-
-  // ─── Global Error Handler ───────────────────────────────────────────────────
-  // Must be last middleware (4 params = error handler)
-  app.use(globalErrorHandler);
+  // The not-found and error handlers are also deferred so they appear AFTER routes.
 
   // ─── start() ────────────────────────────────────────────────────────────────
 
@@ -206,6 +192,70 @@ export function createApiServer(config: ApiServerConfig): ApiServer {
     const runner = new MigrationRunner(db);
     await runner.initialize();
     await runner.run(versionedMigrations);
+
+    // ─── Auto-generate RSA keys if not provided ─────────────────────────────────
+    // In development, generate keys on startup; in production, use KeyStore for
+    // persistent encrypted storage.
+    let jwtPrivateKey = config.jwtPrivateKey;
+    let jwtPublicKey = config.jwtPublicKey;
+
+    if (!jwtPrivateKey || !jwtPublicKey || !jwtPrivateKey.includes('-----BEGIN') || !jwtPublicKey.includes('-----BEGIN')) {
+      const { KeyStore } = await import('./utils/keyStore.js');
+      const keyStore = new KeyStore({
+        dataDir: process.env.DATA_DIR || './data',
+        encryptionSecret: config.jwtSecret,
+      });
+      const keys = await keyStore.getOrCreate();
+      jwtPrivateKey = keys.privateKey;
+      jwtPublicKey = keys.publicKey;
+    }
+
+    // ─── Mount Versioned Routes (v1) ──────────────────────────────────────────
+    // Routes are registered AFTER DB initialization since they need the db instance
+    // and auth middleware (which depends on DB for user/permission lookups).
+    const { createAuthMiddlewares } = await import('./middleware/auth.js');
+    const { createIdempotencyMiddleware } = await import('./middleware/idempotency.js');
+    const { NotificationService } = await import('./services/NotificationService.js');
+    const { createCrudRoutes } = await import('./utils/crudGenerator.js');
+    const { createSaveFile, createLogError } = await import('./utils/serverUtils.js');
+
+    // Side-effect import: registers all permission modules in ModuleRegistry
+    // Must be imported BEFORE createAuthMiddlewares is used (checkPermission validates modules)
+    await import('./permissions/modules.js');
+
+    const { authenticate, authorize, checkPermission, authLimiter } = createAuthMiddlewares(
+      db,
+      config.jwtSecret,
+      jwtPublicKey
+    );
+
+    const saveFile = createSaveFile(config.uploadDir);
+    const logError = createLogError(db);
+    const createNotification = NotificationService.create.bind(NotificationService);
+
+    const v1Router = createV1Router({
+      db,
+      authenticate,
+      authorize,
+      checkPermission,
+      authLimiter,
+      createNotification,
+      createCrudRoutes,
+      saveFile,
+      logError,
+      config: { ...config, jwtPrivateKey, jwtPublicKey },
+      idempotencyMiddleware: createIdempotencyMiddleware(),
+    });
+
+    app.use('/api/v1', v1Router);
+
+    // ─── Not Found Handler ──────────────────────────────────────────────────────
+    // MUST be registered AFTER all API routes.
+    app.use('/api', notFoundHandler);
+
+    // ─── Global Error Handler ───────────────────────────────────────────────────
+    // Must be last middleware (4 params = error handler)
+    app.use(globalErrorHandler);
 
     return new Promise<void>((resolve, reject) => {
       // Handle port-in-use and other listen errors
