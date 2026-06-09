@@ -1,8 +1,0 @@
-node_modules
-dist
-*.md
-*.log
-*.map
-**/*.test.*
-coverage
-.env
