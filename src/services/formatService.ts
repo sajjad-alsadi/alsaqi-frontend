@@ -121,9 +121,21 @@ export const useFormat = () => {
    */
   const translateModule = (module: string | undefined) => {
     if (!module) return '';
-    const key = `common.modules.${module.toLowerCase()}`;
-    const translated = t(key);
-    return translated === key ? module : translated;
+    const lower = module.toLowerCase().trim();
+    
+    // Try exact match first
+    const key = `common.modules.${lower}`;
+    if (i18n.exists(key)) return t(key);
+    
+    // Try with underscores replaced by spaces
+    const withSpaces = `common.modules.${lower.replace(/_/g, ' ')}`;
+    if (i18n.exists(withSpaces)) return t(withSpaces);
+    
+    // Try with spaces replaced by underscores
+    const withUnderscores = `common.modules.${lower.replace(/ /g, '_')}`;
+    if (i18n.exists(withUnderscores)) return t(withUnderscores);
+    
+    return module;
   };
 
   /**
@@ -135,8 +147,7 @@ export const useFormat = () => {
     // Exact match trial (lowercase)
     const lowerAction = action.trim().toLowerCase();
     const exactKey = `common.${lowerAction}`;
-    const translated = t(exactKey);
-    if (translated !== exactKey) return translated;
+    if (i18n.exists(exactKey)) return t(exactKey);
 
     // Handle "Created [TableName]"
     if (lowerAction.startsWith('created ')) {

@@ -229,9 +229,9 @@ export const setupRoutes = (
   app.use("/api/v1", v1Router);
 
   // Register custom routes in the route registry for duplicate detection
-  registerRoutes(['POST'], '/api/v1/audit-programs', 'auditPrograms.ts');
+  registerRoutes(['GET', 'POST', 'PUT', 'DELETE'], '/api/v1/audit-programs', 'auditPrograms.ts');
   registerRoutes(['GET', 'POST', 'PUT', 'DELETE'], '/api/v1/audit-findings', 'auditFindings.ts');
-  registerRoutes(['GET', 'PATCH'], '/api/v1/audit-tasks', 'auditTasks.ts');
+  registerRoutes(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/api/v1/audit-tasks', 'auditTasks.ts');
   registerRoutes(['POST'], '/api/v1/audit-tasks/:id/assign', 'auditTasks.ts');
   registerRoutes(['DELETE'], '/api/v1/audit-tasks/:id/assign/:userId', 'auditTasks.ts');
   registerRoutes(['POST', 'PATCH'], '/api/v1/recommendations', 'recommendations.ts');

@@ -34,8 +34,9 @@ const previewRateLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: any) => {
     // Key by authenticated user ID for per-user limiting
-    return req.user?.id || req.ip || 'anonymous';
+    return req.user?.id || 'anonymous';
   },
+  validate: { ipAddress: false },
 });
 
 export const createPdfTemplatesRoutes = (

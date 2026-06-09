@@ -88,7 +88,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (!wsToken) return;
 
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = new WebSocket(`${protocol}://${window.location.host}?token=${wsToken}`);
+      const wsBaseUrl = import.meta.env.VITE_WS_URL || `${protocol}://${window.location.host}`;
+      const ws = new WebSocket(`${wsBaseUrl}?token=${wsToken}`);
 
       ws.onmessage = (event) => {
         try {

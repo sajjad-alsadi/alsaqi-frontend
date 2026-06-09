@@ -53,7 +53,7 @@ const AuditTasksModule: React.FC = () => {
   const { data: plans = [] } = useQuery({
     queryKey: ['audit-plans'],
     queryFn: async () => {
-      const res = await api.get('/audit-plans');
+      const res = await api.get('/audit-plans', { params: { pageSize: 200 } });
       return Array.isArray(res.data) ? res.data : (res.data.data || []);
     }
   });

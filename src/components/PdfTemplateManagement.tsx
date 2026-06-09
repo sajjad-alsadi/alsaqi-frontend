@@ -190,7 +190,7 @@ export const PdfTemplateManagement: React.FC = () => {
                       template.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' : 
                       template.status === 'Draft' ? 'bg-amber-100 text-amber-700' : 'bg-[var(--color-bg-main)] text-[var(--color-text-main)]'
                     }`}>
-                      {template.status === 'Approved' ? t('status.approved') : template.status === 'Draft' ? t('status.draft') : template.status}
+                      {template.status === 'Approved' ? t('planStatuses.approved') : template.status === 'Draft' ? t('planStatuses.draft') : template.status}
                     </span>
                     {template.is_default === 1 && (
                       <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1 rounded-full">
@@ -261,9 +261,9 @@ export const PdfTemplateManagement: React.FC = () => {
                         value={formData.status}
                         onChange={(e) => setFormData({...formData, status: e.target.value})}
                       >
-                        <option value="Draft">{t('status.draft')}</option>
-                        <option value="Approved">{t('status.approved')}</option>
-                        <option value="Archived">{t('status.archived')}</option>
+                        <option value="Draft">{t('planStatuses.draft')}</option>
+                        <option value="Approved">{t('planStatuses.approved')}</option>
+                        <option value="Archived">{t('planStatuses.archived')}</option>
                       </select>
                     </div>
                     <div className="flex items-end pb-3">

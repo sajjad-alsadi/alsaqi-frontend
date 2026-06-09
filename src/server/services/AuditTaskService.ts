@@ -236,7 +236,10 @@ export class AuditTaskService {
 
     let query = `
       SELECT t.id, t.title, t.task_number, t.status, t.due_date, t.assigned_to,
-             p.title as plan_title, u.name as assigned_name, e.name_en as audited_unit_name
+             t.audit_type, t.planned_hours, t.period_from, t.period_to,
+             t.plan_id, t.audited_unit_id,
+             p.title as plan_title, u.name as assigned_name, 
+             e.name_en as audited_unit_name, e.name_ar as audited_unit_name_ar
       FROM audit_tasks t
       LEFT JOIN audit_plans p ON t.plan_id = p.id
       LEFT JOIN users u ON t.assigned_to = u.id

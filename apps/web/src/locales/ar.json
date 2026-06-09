@@ -402,6 +402,9 @@
       "audit_programs": "برامج التدقيق",
       "audit_procedures": "إجراءات التدقيق",
       "audit_evidence": "أدلة التدقيق",
+      "evidence": "أدلة التدقيق",
+      "tasks": "مهام التدقيق",
+      "findings": "ملاحظات التدقيق",
       "risk_register": "سجل المخاطر",
       "fraud_log": "سجل الاحتيال",
       "central_bank_instructions": "تعليمات البنك المركزي",
@@ -943,6 +946,9 @@
     "statusUpdateSuccess": "تم تحديث الحالة بنجاح",
     "responsibleRequired": "يجب تحديد شخص مسؤول واحد على الأقل",
     "failedToSaveTask": "فشل في حفظ المهمة",
+    "taskType": "نوع المهمة",
+    "auditPlanTask": "مهمة خطة تدقيق",
+    "routineTask": "مهمة روتينية",
     "selectAuditPlan": "اختر خطة التدقيق",
     "procedure": "الإجراء",
     "responsible": "المسؤول",
@@ -963,6 +969,10 @@
     "it": "تقنية معلومات",
     "aml": "غسل أموال",
     "governance": "الحوكمة"
+  },
+  "programs": {
+    "linkRisks": "ربط المخاطر",
+    "linkStandards": "ربط المعايير"
   },
   "evidence": {
     "title": "أدلة التدقيق",
@@ -2806,13 +2816,15 @@
     "byYear": "حسب السنة",
     "byQuarter": "حسب الربع"
   },
-  "status": {
+  "planStatuses": {
     "pendingApproval": "بانتظار الموافقة",
     "archived": "مؤرشف",
     "planned": "مخطط",
     "fieldwork": "تنفيذ ميداني",
     "reporting": "إعداد التقارير",
-    "closed": "مغلق"
+    "closed": "مغلق",
+    "approved": "معتمد",
+    "draft": "مسودة"
   },
   "accessibility": {
     "breadcrumb": "مسار التنقل",

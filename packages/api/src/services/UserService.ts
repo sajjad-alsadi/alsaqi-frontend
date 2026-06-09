@@ -134,7 +134,7 @@ export class UserService {
 
       // Require 2FA setup for sensitive roles (Admin, Manager/Audit Manager) per Req 5.9
       const ROLES_REQUIRING_2FA = ['Admin', 'Manager'];
-      const requires2faSetup = ROLES_REQUIRING_2FA.includes(role) ? 1 : 0;
+      const requires2faSetup = ROLES_REQUIRING_2FA.includes(role);
 
       const result = await db.prepare(`
         INSERT INTO users (username, password, name, email, department, job_title_id, role, unit, reporting_manager_id, access_scope, phone_number, notes, role_id, status, created_at, requires_password_change, employee_id, requires_2fa_setup)

@@ -355,9 +355,9 @@ const PdfTemplateEditor: React.FC<PdfTemplateEditorProps> = ({
             value={status}
             onChange={(e) => setStatus(e.target.value as TemplateStatus)}
           >
-            <option value="Draft">{t('status.draft')}</option>
-            <option value="Approved">{t('status.approved')}</option>
-            <option value="Archived">{t('status.archived')}</option>
+            <option value="Draft">{t('planStatuses.draft')}</option>
+            <option value="Approved">{t('planStatuses.approved')}</option>
+            <option value="Archived">{t('planStatuses.archived')}</option>
           </select>
         </div>
       </div>

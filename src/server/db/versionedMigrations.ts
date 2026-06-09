@@ -607,4 +607,17 @@ export const versionedMigrations: Migration[] = [
       await db.exec(`CREATE INDEX IF NOT EXISTS idx_system_errors_recurring ON system_errors(is_recurring) WHERE is_recurring = TRUE`);
     },
   },
+
+  {
+    version: '012',
+    name: 'Make audit_tasks.plan_id nullable for routine tasks',
+    type: 'schema',
+    up: async () => {
+      // Allow plan_id to be NULL so routine tasks (without an audit plan) can be created
+      await db.exec(`ALTER TABLE audit_tasks ALTER COLUMN plan_id DROP NOT NULL`);
+
+      // Add task_type column to distinguish between routine and audit plan tasks
+      await db.exec(`ALTER TABLE audit_tasks ADD COLUMN IF NOT EXISTS task_type VARCHAR(20) DEFAULT 'audit_plan'`);
+    },
+  },
 ];

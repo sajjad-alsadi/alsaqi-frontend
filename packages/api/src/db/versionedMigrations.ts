@@ -561,4 +561,17 @@ export const versionedMigrations: Migration[] = [
       // Note: The original template_type column is preserved unchanged for backward compatibility
     },
   },
+
+  {
+    version: '010',
+    name: 'Make audit_tasks.plan_id nullable for routine tasks',
+    type: 'schema',
+    up: async () => {
+      // Allow plan_id to be NULL so routine tasks (without an audit plan) can be created
+      await db.exec(`ALTER TABLE audit_tasks ALTER COLUMN plan_id DROP NOT NULL`);
+
+      // Add task_type column to distinguish between routine and audit plan tasks
+      await db.exec(`ALTER TABLE audit_tasks ADD COLUMN IF NOT EXISTS task_type VARCHAR(20) DEFAULT 'audit_plan'`);
+    },
+  },
 ];

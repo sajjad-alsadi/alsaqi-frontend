@@ -1,9 +1,18 @@
 import express from 'express';
 import { AuditTaskService } from '../services/AuditTaskService';
 import { NotificationService } from '../services/NotificationService';
+import { BaseService } from '../services/BaseService';
+import { AuthService } from '../services/AuthService';
 import { asyncHandler } from '../utils/asyncHandler';
-import { methodNotAllowed } from '../utils/routeRegistry';
+import { ValidationError, NotFoundError } from '../utils/errors';
 import { UserRole } from '@alsaqi/shared';
+
+const TABLE_NAME = "audit_tasks";
+const ALLOWED_FIELDS = [
+  "task_number", "title", "plan_id", "program_id", "audit_type", "task_type", "status",
+  "assigned_to", "audited_unit_id", "planned_hours", "actual_hours",
+  "period_from", "period_to", "due_date", "approved_by", "approved_at", "created_by"
+];
 
 export const createAuditTaskRoutes = (
   db: any,
@@ -12,7 +21,9 @@ export const createAuditTaskRoutes = (
 ) => {
   const router = express.Router();
 
-  // Custom route for status transitions
+  // ─── Custom Operations (must be before /:id to prevent matching) ──────────
+
+  // PATCH /:id/status — Status transitions
   router.patch('/:id/status', authenticate, asyncHandler(async (req, res) => {
     const id = String(req.params.id);
     const { status } = req.body;
@@ -61,8 +72,7 @@ export const createAuditTaskRoutes = (
     }
   }));
 
-  // POST /api/v1/audit-tasks/:id/assign - Assign users to a task
-  // Requirements: 4.1, 4.3, 4.5
+  // POST /:id/assign — Assign users to a task
   router.post('/:id/assign', authenticate, asyncHandler(async (req, res) => {
     const id = String(req.params.id);
     const { userIds } = req.body;
@@ -71,7 +81,6 @@ export const createAuditTaskRoutes = (
     const userId = typedReq.user.id;
     const userRole = typedReq.user.role;
 
-    // Role validation: only Manager or Admin can assign users
     const allowedRoles = [UserRole.MANAGER, UserRole.ADMIN];
     if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({
@@ -86,7 +95,6 @@ export const createAuditTaskRoutes = (
     try {
       const result = await AuditTaskService.assignUsers(String(id), userIds, userId);
 
-      // Send notification to each assigned user (Requirement 4.3: within 60 seconds)
       try {
         const task = await db.prepare("SELECT title, task_number FROM audit_tasks WHERE id = ?::uuid").get(id) as any;
         if (task && result.assignments.length > 0) {
@@ -123,8 +131,7 @@ export const createAuditTaskRoutes = (
     }
   }));
 
-  // DELETE /api/v1/audit-tasks/:id/assign/:userId - Unassign a user from a task
-  // Requirements: 4.4, 4.5
+  // DELETE /:id/assign/:userId — Unassign a user from a task
   router.delete('/:id/assign/:userId', authenticate, asyncHandler(async (req, res) => {
     const { id, userId: targetUserId } = req.params;
 
@@ -132,7 +139,6 @@ export const createAuditTaskRoutes = (
     const currentUserId = typedReq.user.id;
     const userRole = typedReq.user.role;
 
-    // Role validation: only Manager or Admin can unassign users
     const allowedRoles = [UserRole.MANAGER, UserRole.ADMIN];
     if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({
@@ -157,15 +163,97 @@ export const createAuditTaskRoutes = (
     }
   }));
 
+  // ─── CRUD Operations ────────────────────────────────────────────────────────
+
+  // GET / — List all tasks
   router.get('/', authenticate, asyncHandler(async (req, res) => {
     const tasks = await AuditTaskService.getTasks(req.query);
     res.json(tasks);
   }));
 
-  // 405 Method Not Allowed for methods not implemented on this custom route
-  // This route supports GET (list) and PATCH (status change) only
-  router.all('/', methodNotAllowed(['GET']));
-  router.all('/:id', methodNotAllowed(['PATCH']));
+  // POST / — Create a new task
+  router.post('/', authenticate, asyncHandler(async (req, res) => {
+    const typedReq = req as any;
+    const rawBody = { ...typedReq.body };
+
+    // Strict field whitelisting
+    const body: any = {};
+    for (const key of Object.keys(rawBody)) {
+      if (ALLOWED_FIELDS.includes(key)) {
+        body[key] = rawBody[key];
+      }
+    }
+
+    // Remove empty/null UUID fields to avoid PostgreSQL type errors
+    if (!body.plan_id) delete body.plan_id;
+    if (!body.program_id) delete body.program_id;
+    if (!body.audited_unit_id) delete body.audited_unit_id;
+    if (!body.assigned_to) delete body.assigned_to;
+
+    // Set created_by to current user
+    body.created_by = typedReq.user.id;
+
+    const result = await BaseService.create(TABLE_NAME, body);
+
+    await AuthService.logAudit(
+      typedReq.user.username,
+      `Created ${TABLE_NAME}`,
+      "audit-tasks",
+      JSON.stringify(body)
+    );
+
+    res.json(result);
+  }));
+
+  // PUT /:id — Update a task
+  router.put('/:id', authenticate, asyncHandler(async (req, res) => {
+    const typedReq = req as any;
+    const id = req.params.id as string;
+    if (!id || id === 'undefined') {
+      throw new ValidationError("Invalid task ID");
+    }
+
+    const rawBody = { ...typedReq.body };
+
+    // Strict field whitelisting
+    const body: any = {};
+    for (const key of Object.keys(rawBody)) {
+      if (ALLOWED_FIELDS.includes(key)) {
+        body[key] = rawBody[key];
+      }
+    }
+
+    const result = await BaseService.update(TABLE_NAME, id, body);
+
+    await AuthService.logAudit(
+      typedReq.user.username,
+      `Updated ${TABLE_NAME} ID: ${id}`,
+      "audit-tasks",
+      JSON.stringify(body)
+    );
+
+    res.json(result);
+  }));
+
+  // DELETE /:id — Delete a task
+  router.delete('/:id', authenticate, asyncHandler(async (req, res) => {
+    const typedReq = req as any;
+    const id = req.params.id as string;
+    if (!id || id === 'undefined') {
+      throw new ValidationError("Invalid task ID");
+    }
+
+    await BaseService.delete(TABLE_NAME, id);
+
+    await AuthService.logAudit(
+      typedReq.user.username,
+      `Deleted ${TABLE_NAME} ID: ${id}`,
+      "audit-tasks",
+      JSON.stringify({ id })
+    );
+
+    res.json({ success: true });
+  }));
 
   return router;
 };

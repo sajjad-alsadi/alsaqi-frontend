@@ -61,7 +61,7 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
 
   const statusLabel = (s: string) => {
     if (s === 'In Progress') return t('common.inProgress');
-    if (s === 'Pending Approval') return t('status.pendingApproval');
+    if (s === 'Pending Approval') return t('planStatuses.pendingApproval');
     if (s === 'Closed') return t('common.closed');
     return t('common.open');
   };

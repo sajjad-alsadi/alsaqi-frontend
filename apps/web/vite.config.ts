@@ -25,7 +25,13 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:3000',
           changeOrigin: true,
         },
+        '/uploads': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+        },
       },
+      // WebSocket proxy is handled by Vite automatically when proxying to the backend
+      // The browser connects to ws://localhost:5173 and Vite upgrades to ws://localhost:3000
     },
     optimizeDeps: {
       force: true,

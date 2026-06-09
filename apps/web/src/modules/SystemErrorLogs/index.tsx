@@ -135,7 +135,8 @@ const SystemErrorLogs: React.FC = () => {
         if (!wsToken) return;
 
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        ws = new WebSocket(`${protocol}://${window.location.host}?token=${wsToken}`);
+        const wsBaseUrl = import.meta.env.VITE_WS_URL || `${protocol}://${window.location.host}`;
+        ws = new WebSocket(`${wsBaseUrl}?token=${wsToken}`);
         
         ws.onopen = () => {
           reconnectAttempts = 0;

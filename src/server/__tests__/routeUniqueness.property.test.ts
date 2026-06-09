@@ -236,7 +236,10 @@ describe('Property 18: Route Uniqueness', () => {
       }
 
       // Register custom routes (the ones that replaced CRUD generator)
+      registerRoute('GET', '/api/v1/audit-programs', 'auditPrograms.ts');
       registerRoute('POST', '/api/v1/audit-programs', 'auditPrograms.ts');
+      registerRoute('PUT', '/api/v1/audit-programs', 'auditPrograms.ts');
+      registerRoute('DELETE', '/api/v1/audit-programs', 'auditPrograms.ts');
       registerRoute('GET', '/api/v1/audit-tasks', 'auditTasks.ts');
       registerRoute('PATCH', '/api/v1/audit-tasks', 'auditTasks.ts');
       registerRoute('PATCH', '/api/v1/recommendations', 'recommendations.ts');

@@ -286,7 +286,7 @@ const RiskRegister: React.FC = () => {
               </div>
               <div className="p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-widest mb-1">{t('status')}</p>
-                <p className="text-sm font-bold text-[var(--color-text-main)]">{selectedRisk.status}</p>
+                <p className="text-sm font-bold text-[var(--color-text-main)]">{t(`common.status.${selectedRisk.status?.toLowerCase()}`) || selectedRisk.status}</p>
               </div>
               <div className="p-4 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-widest mb-1">{t('targetDate')}</p>

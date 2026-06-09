@@ -90,6 +90,9 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
           (sanitized as any)[key] = '';
         }
       });
+      // Truncate ISO dates to yyyy-MM-dd for date inputs
+      if (sanitized.planned_start_date) sanitized.planned_start_date = sanitized.planned_start_date.substring(0, 10);
+      if (sanitized.planned_end_date) sanitized.planned_end_date = sanitized.planned_end_date.substring(0, 10);
       reset(sanitized as any);
     }
   }, [initialData, reset]);
@@ -103,12 +106,11 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
       })
       .catch(() => setPrograms([]));
 
-    // Fetch auditors (Managers)
+    // Fetch auditors (all active users)
     api.get('/users/list')
       .then(res => {
         const users = Array.isArray(res.data) ? res.data : (res.data.data || []);
-        // Filter for role Manager
-        setAuditors(users.filter((u: any) => u.role === UserRole.MANAGER));
+        setAuditors(users);
       })
       .catch(() => setAuditors([]));
   }, []);

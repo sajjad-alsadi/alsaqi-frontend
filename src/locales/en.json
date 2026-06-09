@@ -402,6 +402,9 @@
       "audit_programs": "Audit Programs",
       "audit_procedures": "Audit Procedures",
       "audit_evidence": "Audit Evidence",
+      "evidence": "Audit Evidence",
+      "tasks": "Audit Tasks",
+      "findings": "Audit Findings",
       "risk_register": "Risk Register",
       "fraud_log": "Fraud Log",
       "central_bank_instructions": "Central Bank Instructions",
@@ -943,6 +946,9 @@
     "statusUpdateSuccess": "Status updated successfully",
     "responsibleRequired": "At least one responsible person is required",
     "failedToSaveTask": "Failed to save task",
+    "taskType": "Task Type",
+    "auditPlanTask": "Audit Plan Task",
+    "routineTask": "Routine Task",
     "selectAuditPlan": "Select Audit Plan",
     "procedure": "Procedure",
     "responsible": "Responsible",
@@ -960,6 +966,10 @@
     "it": "IT",
     "aml": "AML",
     "governance": "Governance"
+  },
+  "programs": {
+    "linkRisks": "Link Risks",
+    "linkStandards": "Link Standards"
   },
   "evidence": {
     "title": "Audit Evidence",
@@ -2803,13 +2813,15 @@
     "byYear": "By Year",
     "byQuarter": "By Quarter"
   },
-  "status": {
+  "planStatuses": {
     "pendingApproval": "Pending Approval",
     "archived": "Archived",
     "planned": "Planned",
     "fieldwork": "Fieldwork",
     "reporting": "Reporting",
-    "closed": "Closed"
+    "closed": "Closed",
+    "approved": "Approved",
+    "draft": "Draft"
   },
   "accessibility": {
     "breadcrumb": "Breadcrumb",

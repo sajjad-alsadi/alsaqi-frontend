@@ -39,8 +39,8 @@ export const createCrudRoutes = (
   ];
 
   const TABLE_ALLOWED_FIELDS: Record<string, string[]> = {
-    "audit_plans": ["plan_code", "program_id", "title", "department", "type", "risk_rating", "planned_start_date", "planned_end_date", "status", "lead_auditor", "team_members", "objectives", "scope", "notes"],
-    "audit_tasks": ["task_number", "title", "plan_id", "program_id", "audit_type", "status", "assigned_to", "audited_unit_id", "planned_hours", "actual_hours", "period_from", "period_to", "due_date", "approved_by", "approved_at", "created_by", "deleted_at"],
+    "audit_plans": ["plan_code", "program_id", "title", "department", "type", "risk_rating", "planned_start_date", "planned_end_date", "status", "lead_auditor", "team_members", "objectives", "scope", "notes", "year", "quarter"],
+    "audit_tasks": ["task_number", "title", "plan_id", "program_id", "audit_type", "task_type", "status", "assigned_to", "audited_unit_id", "planned_hours", "actual_hours", "period_from", "period_to", "due_date", "approved_by", "approved_at", "created_by", "deleted_at"],
     "audit_programs": ["program_code", "program_title", "audit_area", "department", "audit_type", "audit_objective", "audit_scope", "key_risks", "control_objectives", "reference_standard", "status", "version_number", "created_by"],
     "audit_procedures": ["program_id", "procedure_number", "audit_step", "audit_test_description", "risk_addressed", "control_test_type", "expected_evidence", "sampling_method", "responsible_auditor", "remarks"],
     "audit_evidence": ["audit_id", "finding_id", "type", "description", "uploaded_by", "file_name", "file_data", "upload_date"],
