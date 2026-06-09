@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { useDepartments } from '../hooks/useDepartments';
 import JobTitles from './JobTitles';
 import logger from '../utils/logger';
+import Portal from '../components/Portal';
 
 const DepartmentManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -206,32 +207,34 @@ const DepartmentManagement: React.FC = () => {
       </AnimatePresence>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[var(--color-card)] rounded-2xl p-6 w-full max-w-md shadow-2xl"
-          >
-            <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('deleteConfirm')}</h3>
-            <p className="text-[var(--color-text-muted)] mb-6">{t('deleteMessage')}</p>
-            <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-[var(--color-text-muted)] font-medium hover:bg-[var(--color-bg-main)] rounded-lg transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button 
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-rose-500 text-white font-medium rounded-lg hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20"
-              >
-                {t('common.delete')}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      <Portal>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[var(--color-card)] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            >
+              <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('deleteConfirm')}</h3>
+              <p className="text-[var(--color-text-muted)] mb-6">{t('deleteMessage')}</p>
+              <div className="flex justify-end gap-3">
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 text-[var(--color-text-muted)] font-medium hover:bg-[var(--color-bg-main)] rounded-lg transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="px-4 py-2 bg-rose-500 text-white font-medium rounded-lg hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20"
+                >
+                  {t('common.delete')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </Portal>
     </div>
   );
 };

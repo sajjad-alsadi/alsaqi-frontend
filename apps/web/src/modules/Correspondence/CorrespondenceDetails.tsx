@@ -28,6 +28,7 @@ import api from '../../api/httpClient';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../utils/formatService';
 import logger from '../../utils/logger';
+import Portal from '../../components/Portal';
 
 interface CorrespondenceDetailsProps {
   type: 'Incoming' | 'Outgoing';
@@ -360,44 +361,46 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
       </div>
 
       {/* Modals */}
-      <AnimatePresence>
-        {showStatusModal && (
-          <StatusUpdateModal 
-            language={language} 
-            id={id} 
-            type={type}
-            currentStatus={mainData.status}
-            onClose={() => setShowStatusModal(false)}
-            onSuccess={() => {
-              setShowStatusModal(false);
-              fetchDetails();
-            }}
-          />
-        )}
-        {showReferModal && (
-          <ReferralModal 
-            language={language} 
-            id={id} 
-            onClose={() => setShowReferModal(false)}
-            onSuccess={() => {
-              setShowReferModal(false);
-              fetchDetails();
-            }}
-          />
-        )}
-        {showArchiveModal && (
-          <ArchiveModal 
-            language={language} 
-            id={id} 
-            type={type}
-            onClose={() => setShowArchiveModal(false)}
-            onSuccess={() => {
-              setShowArchiveModal(false);
-              fetchDetails();
-            }}
-          />
-        )}
-      </AnimatePresence>
+      <Portal>
+        <AnimatePresence>
+          {showStatusModal && (
+            <StatusUpdateModal 
+              language={language} 
+              id={id} 
+              type={type}
+              currentStatus={mainData.status}
+              onClose={() => setShowStatusModal(false)}
+              onSuccess={() => {
+                setShowStatusModal(false);
+                fetchDetails();
+              }}
+            />
+          )}
+          {showReferModal && (
+            <ReferralModal 
+              language={language} 
+              id={id} 
+              onClose={() => setShowReferModal(false)}
+              onSuccess={() => {
+                setShowReferModal(false);
+                fetchDetails();
+              }}
+            />
+          )}
+          {showArchiveModal && (
+            <ArchiveModal 
+              language={language} 
+              id={id} 
+              type={type}
+              onClose={() => setShowArchiveModal(false)}
+              onSuccess={() => {
+                setShowArchiveModal(false);
+                fetchDetails();
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </Portal>
     </div>
   );
 };

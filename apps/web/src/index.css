@@ -53,9 +53,10 @@
    * z-0:    Base content
    * z-10:   Sticky elements within content
    * z-20:   Floating action buttons
-   * z-40:   Sticky header, sidebar overlay backdrop
-   * z-50:   Modals, mobile sidebar, dropdowns, tooltips
-   * z-[100]: Tooltip arrows (above everything)
+   * z-30:   Header (relative, above content scroll area)
+   * z-40:   Sidebar overlay backdrop (mobile)
+   * z-50:   Mobile sidebar, tooltips, inline dropdowns
+   * z-[9999]: Modals, fullscreen overlays (rendered via Portal to document.body)
    */
 }
 

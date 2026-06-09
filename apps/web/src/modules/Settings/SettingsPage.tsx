@@ -17,6 +17,7 @@ import PDFSettingsSection from '../../components/PDFSettingsSection';
 import { useDepartments } from '../../hooks/useDepartments';
 import { PdfTemplateManagement } from '../../components/PdfTemplateManagement';
 import logger from '../../utils/logger';
+import Portal from '../../components/Portal';
 
 const Settings: React.FC = () => {
   const { token } = useAuth();
@@ -561,30 +562,32 @@ const Settings: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
-      {showLogoutAllModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-soft)]">
-              <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('settings.logoutFromAllDevices')}</h2>
-              <button onClick={() => setShowLogoutAllModal(false)} className="p-1 hover:bg-[var(--color-bg-main)] rounded-full"><X size={20} /></button>
-            </div>
-            <div className="p-6 space-y-4">
-              <p className="text-sm text-[var(--color-text-muted)]">
-                {t('settings.logoutFromAllDevicesConfirm')}
-              </p>
-              <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowLogoutAllModal(false)} className="flex-1 px-4 py-2 border border-[var(--color-border-strong)] rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)]">{t('common.cancel')}</button>
-                <button 
-                  onClick={handleLogoutAll} 
-                  className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700"
-                >
-                  {t('settings.logoutFromAllDevices')}
-                </button>
+      <Portal>
+        {showLogoutAllModal && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+              <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-soft)]">
+                <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('settings.logoutFromAllDevices')}</h2>
+                <button onClick={() => setShowLogoutAllModal(false)} className="p-1 hover:bg-[var(--color-bg-main)] rounded-full"><X size={20} /></button>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+              <div className="p-6 space-y-4">
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  {t('settings.logoutFromAllDevicesConfirm')}
+                </p>
+                <div className="flex gap-3 pt-4">
+                  <button type="button" onClick={() => setShowLogoutAllModal(false)} className="flex-1 px-4 py-2 border border-[var(--color-border-strong)] rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)]">{t('common.cancel')}</button>
+                  <button 
+                    onClick={handleLogoutAll} 
+                    className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700"
+                  >
+                    {t('settings.logoutFromAllDevices')}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </Portal>
     </div>
   );
 };

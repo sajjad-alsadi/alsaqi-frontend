@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { User, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../utils/formatService';
+import Portal from '../../components/Portal';
 
 interface UserDetailsModalProps {
   user: any;
@@ -16,12 +17,13 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClose }) =>
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-[var(--color-card)] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[var(--color-border-soft)]"
-      >
+    <Portal>
+      <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[var(--color-card)] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[var(--color-border-soft)]"
+        >
         <div className="p-10">
           <div className="flex items-start justify-between mb-10">
             <div className="flex items-center gap-8">
@@ -111,6 +113,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClose }) =>
         </div>
       </motion.div>
     </div>
+    </Portal>
   );
 };
 

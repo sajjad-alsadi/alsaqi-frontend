@@ -175,7 +175,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               initial={{ height: 80, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="h-20 bg-[var(--color-card)] border-b border-[var(--color-border-soft)] flex items-center justify-between px-4 sm:px-8 z-30 shrink-0 transition-colors duration-300 shadow-sm"
+              className="h-20 bg-[var(--color-card)] border-b border-[var(--color-border-soft)] flex items-center justify-between px-4 sm:px-8 relative z-30 shrink-0 transition-colors duration-300 shadow-sm"
             >
               {/* Left side (Start) */}
               <div className="flex items-center gap-4">
@@ -257,7 +257,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Show header button when hidden */}
         {isHeaderHidden && (
-          <div className="flex items-center justify-between px-4 sm:px-8 py-2 bg-[var(--color-card)] border-b border-[var(--color-border-soft)] shrink-0 z-30">
+          <div className="flex items-center justify-between px-4 sm:px-8 py-2 bg-[var(--color-card)] border-b border-[var(--color-border-soft)] shrink-0">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

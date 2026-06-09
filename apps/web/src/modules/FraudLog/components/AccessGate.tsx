@@ -3,6 +3,7 @@ import { ShieldAlert, Lock, AlertCircle, EyeOff, Clock, XCircle, CheckCircle, X,
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import Modal from '../../../components/Modal';
+import Portal from '../../../components/Portal';
 import { AccessRequest, AccessStatus } from '../types';
 
 interface AccessGateProps {
@@ -356,79 +357,81 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-          >
-            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border-soft)]">
-              <div className="flex items-center gap-4">
-                <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('integrity.fraudPolicyGuidelines')}</h3>
-                {isManager && !isEditing && (
-                  <button 
-                    onClick={() => setIsEditing(true)}
-                    className="p-2 hover:bg-[var(--color-bg-main)] rounded-lg text-[var(--color-text-muted)] transition-colors flex items-center gap-2 text-sm font-bold"
-                  >
-                    <Plus size={16} />
-                    {t('common.edit')}
-                  </button>
+    <Portal>
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-[var(--color-border-soft)]">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-xl font-bold text-[var(--color-text-main)]">{t('integrity.fraudPolicyGuidelines')}</h3>
+                  {isManager && !isEditing && (
+                    <button 
+                      onClick={() => setIsEditing(true)}
+                      className="p-2 hover:bg-[var(--color-bg-main)] rounded-lg text-[var(--color-text-muted)] transition-colors flex items-center gap-2 text-sm font-bold"
+                    >
+                      <Plus size={16} />
+                      {t('common.edit')}
+                    </button>
+                  )}
+                </div>
+                <button 
+                  onClick={onClose}
+                  className="p-2 hover:bg-[var(--color-bg-main)] rounded-full transition-colors"
+                >
+                  <X size={24} className="text-[var(--color-text-muted)]" />
+                </button>
+              </div>
+              
+              <div className="p-8 overflow-y-auto custom-scrollbar" dir={i18n.dir()}>
+                {isEditing ? (
+                  <textarea
+                    className="w-full h-[50vh] p-4 border border-[var(--color-border-soft)] rounded-xl font-sans text-[var(--color-text-main)] leading-relaxed text-start focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                  />
+                ) : (
+                  <pre className="whitespace-pre-wrap font-sans text-[var(--color-text-main)] leading-relaxed text-start">
+                    {content}
+                  </pre>
                 )}
               </div>
-              <button 
-                onClick={onClose}
-                className="p-2 hover:bg-[var(--color-bg-main)] rounded-full transition-colors"
-              >
-                <X size={24} className="text-[var(--color-text-muted)]" />
-              </button>
-            </div>
-            
-            <div className="p-8 overflow-y-auto custom-scrollbar" dir={i18n.dir()}>
-              {isEditing ? (
-                <textarea
-                  className="w-full h-[50vh] p-4 border border-[var(--color-border-soft)] rounded-xl font-sans text-[var(--color-text-main)] leading-relaxed text-start focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
-              ) : (
-                <pre className="whitespace-pre-wrap font-sans text-[var(--color-text-main)] leading-relaxed text-start">
-                  {content}
-                </pre>
-              )}
-            </div>
-            
-            <div className="p-6 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-soft)] flex justify-end gap-4">
-              {isEditing ? (
-                <>
+              
+              <div className="p-6 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-soft)] flex justify-end gap-4">
+                {isEditing ? (
+                  <>
+                    <button 
+                      onClick={onCancelEdit}
+                      className="px-6 py-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] rounded-lg hover:bg-[var(--color-bg-soft)] transition-colors font-medium"
+                    >
+                      {t('common.cancel')}
+                    </button>
+                    <button 
+                      onClick={onSave}
+                      className="px-6 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors font-medium flex items-center gap-2"
+                    >
+                      <Save size={18} />
+                      {t('common.save')}
+                    </button>
+                  </>
+                ) : (
                   <button 
-                    onClick={onCancelEdit}
-                    className="px-6 py-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] rounded-lg hover:bg-[var(--color-bg-soft)] transition-colors font-medium"
+                    onClick={onClose}
+                    className="px-6 py-2 bg-[var(--color-text-main)] text-[var(--color-bg-main)] rounded-lg hover:opacity-90 transition-colors font-medium"
                   >
                     {t('common.cancel')}
                   </button>
-                  <button 
-                    onClick={onSave}
-                    className="px-6 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors font-medium flex items-center gap-2"
-                  >
-                    <Save size={18} />
-                    {t('common.save')}
-                  </button>
-                </>
-              ) : (
-                <button 
-                  onClick={onClose}
-                  className="px-6 py-2 bg-[var(--color-text-main)] text-[var(--color-bg-main)] rounded-lg hover:opacity-90 transition-colors font-medium"
-                >
-                  {t('common.cancel')}
-                </button>
-              )}
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </Portal>
   );
 };

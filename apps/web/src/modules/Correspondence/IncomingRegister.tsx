@@ -24,6 +24,7 @@ import Pagination from '../../components/Pagination';
 import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import logger from '../../utils/logger';
+import Portal from '../../components/Portal';
 
 import IncomingForm from './IncomingForm';
 
@@ -323,44 +324,46 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
       />
 
       {/* Add Modal */}
-      <AnimatePresence>
-        {showAddModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[var(--color-card)] rounded-3xl border border-[var(--color-border-soft)] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-            >
-              <div className="p-6 border-b border-[var(--color-border-soft)] flex items-center justify-between bg-[var(--color-bg-main)]">
-                <h2 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
-                  <Mail className="text-[var(--color-primary)]" />
-                  {t('correspondence.registerIncomingTitle')}
-                </h2>
-                <button 
-                  onClick={() => setShowAddModal(false)}
-                  className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-full hover:bg-[var(--color-border-soft)] transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              
-              <div className="p-6 overflow-y-auto flex-1">
-                <IncomingForm 
-                  language={language} 
-                  departments={departments}
-                  users={users}
-                  onSuccess={() => {
-                    setShowAddModal(false);
-                    fetchData();
-                  }}
-                  onCancel={() => setShowAddModal(false)}
-                />
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <Portal>
+        <AnimatePresence>
+          {showAddModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-[var(--color-card)] rounded-3xl border border-[var(--color-border-soft)] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+              >
+                <div className="p-6 border-b border-[var(--color-border-soft)] flex items-center justify-between bg-[var(--color-bg-main)]">
+                  <h2 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
+                    <Mail className="text-[var(--color-primary)]" />
+                    {t('correspondence.registerIncomingTitle')}
+                  </h2>
+                  <button 
+                    onClick={() => setShowAddModal(false)}
+                    className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-full hover:bg-[var(--color-border-soft)] transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                <div className="p-6 overflow-y-auto flex-1">
+                  <IncomingForm 
+                    language={language} 
+                    departments={departments}
+                    users={users}
+                    onSuccess={() => {
+                      setShowAddModal(false);
+                      fetchData();
+                    }}
+                    onCancel={() => setShowAddModal(false)}
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      </Portal>
     </div>
   );
 };

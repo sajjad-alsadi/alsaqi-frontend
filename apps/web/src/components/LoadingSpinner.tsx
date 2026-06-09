@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import Portal from './Portal';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -28,9 +29,11 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', className 
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 bg-[var(--color-card)]/50 backdrop-blur-sm flex items-center justify-center z-[9999]" aria-live="polite">
-        {spinner}
-      </div>
+      <Portal>
+        <div className="fixed inset-0 bg-[var(--color-card)]/50 backdrop-blur-sm flex items-center justify-center z-[9999]" aria-live="polite">
+          {spinner}
+        </div>
+      </Portal>
     );
   }
 

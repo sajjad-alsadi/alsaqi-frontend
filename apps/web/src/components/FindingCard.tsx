@@ -113,7 +113,7 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
                 <ChevronDown size={14} />
               </button>
               {showStatusMenu && (
-                <div className="absolute top-full mt-1 end-0 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-xl z-20 min-w-[160px] overflow-hidden">
+                <div className="absolute top-full mt-1 end-0 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-xl z-50 min-w-[160px] overflow-hidden">
                   {nextStatuses.map(s => (
                     <button
                       key={s}

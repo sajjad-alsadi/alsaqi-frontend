@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { FileText, Plus, Edit2, Trash2, CheckCircle, X, Search, Globe, Layout, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import logger from '../utils/logger';
+import Portal from './Portal';
 
 interface PdfTemplate {
   id: string;
@@ -214,9 +215,10 @@ export const PdfTemplateManagement: React.FC = () => {
         )}
       </div>
 
-      <AnimatePresence>
-        {showModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/50 backdrop-blur-sm">
+      <Portal>
+        <AnimatePresence>
+          {showModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/50 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -313,6 +315,9 @@ export const PdfTemplateManagement: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+      </Portal>
     </div>
   );
 };
+
+export default PdfTemplateManagement;

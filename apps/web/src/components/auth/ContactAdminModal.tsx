@@ -4,6 +4,7 @@ import { X, Send, User, Mail, FileText, MessageSquare, CheckCircle, AlertCircle 
 import { submitContactAdminRequest, ContactAdminRequest } from '../../utils/contactAdminService';
 import { extractErrorMessage } from '../../utils/errorService';
 import api from '../../api/httpClient';
+import Portal from '../Portal';
 
 interface ContactAdminModalProps {
   isOpen: boolean;
@@ -108,9 +109,10 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6" dir={dir}>
+    <Portal>
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6" dir={dir}>
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -293,7 +295,8 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </Portal>
   );
 };
 

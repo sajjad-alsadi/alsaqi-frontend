@@ -25,6 +25,7 @@ import PdfViewer from '../../components/PdfViewer';
 import Pagination from '../../components/Pagination';
 import { UserRole } from '../../constants';
 import logger from '../../utils/logger';
+import Portal from '../../components/Portal';
 
 import OutgoingForm from './OutgoingForm';
 
@@ -144,35 +145,37 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
         </div>
       </Modal>
 
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[var(--color-bg-main)] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[var(--color-border-soft)]">
-            <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-4">
-              {t('correspondence.confirmDelete')}
-            </h3>
-            <p className="text-[var(--color-text-muted)] mb-8">
-              {t('correspondence.deleteLetterConfirm')}
-            </p>
-            <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                  setItemToDelete(null);
-                }}
-                className="btn-secondary"
-              >
-                {t('common.cancel')}
-              </button>
-              <button 
-                onClick={confirmDelete}
-                className="px-6 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-900/20"
-              >
-                {t('common.delete')}
-              </button>
+      <Portal>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-[var(--color-bg-main)] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[var(--color-border-soft)]">
+              <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-4">
+                {t('correspondence.confirmDelete')}
+              </h3>
+              <p className="text-[var(--color-text-muted)] mb-8">
+                {t('correspondence.deleteLetterConfirm')}
+              </p>
+              <div className="flex justify-end gap-3">
+                <button 
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setItemToDelete(null);
+                  }}
+                  className="btn-secondary"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="px-6 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-900/20"
+                >
+                  {t('common.delete')}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Portal>
 
       {/* Filters Bar */}
       <div className="bg-[var(--color-bg-soft)]/50 p-4 rounded-2xl border border-[var(--color-border-soft)] flex flex-wrap items-center gap-4">
@@ -297,42 +300,44 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       />
 
       {/* Add Modal */}
-      <AnimatePresence>
-        {showAddModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[var(--color-card)] rounded-3xl border border-[var(--color-border-soft)] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
-            >
-              <div className="p-6 border-b border-[var(--color-border-soft)] flex items-center justify-between bg-[var(--color-bg-main)]">
-                <h2 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
-                  <Send className="text-[var(--color-primary)]" />
-                  {t('correspondence.registerOutgoingTitle')}
-                </h2>
-                <button 
-                  onClick={() => setShowAddModal(false)}
-                  className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-full hover:bg-[var(--color-border-soft)] transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              
-              <div className="p-6 overflow-y-auto flex-1">
-                <OutgoingForm 
-                  language={language} 
-                  onSuccess={() => {
-                    setShowAddModal(false);
-                    fetchData();
-                  }}
-                  onCancel={() => setShowAddModal(false)}
-                />
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <Portal>
+        <AnimatePresence>
+          {showAddModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-[var(--color-card)] rounded-3xl border border-[var(--color-border-soft)] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+              >
+                <div className="p-6 border-b border-[var(--color-border-soft)] flex items-center justify-between bg-[var(--color-bg-main)]">
+                  <h2 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
+                    <Send className="text-[var(--color-primary)]" />
+                    {t('correspondence.registerOutgoingTitle')}
+                  </h2>
+                  <button 
+                    onClick={() => setShowAddModal(false)}
+                    className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-full hover:bg-[var(--color-border-soft)] transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                <div className="p-6 overflow-y-auto flex-1">
+                  <OutgoingForm 
+                    language={language} 
+                    onSuccess={() => {
+                      setShowAddModal(false);
+                      fetchData();
+                    }}
+                    onCancel={() => setShowAddModal(false)}
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      </Portal>
     </div>
   );
 };

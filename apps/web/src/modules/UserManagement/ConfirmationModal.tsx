@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import Portal from '../../components/Portal';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -39,45 +40,47 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-[var(--color-card)] p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-[var(--color-border-soft)]"
-      >
-        <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-4">{title}</h3>
-        <p className="text-[var(--color-text-muted)] mb-6 font-bold">{message}</p>
-        
-        {children}
+    <Portal>
+      <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[var(--color-card)] p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-[var(--color-border-soft)]"
+        >
+          <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-4">{title}</h3>
+          <p className="text-[var(--color-text-muted)] mb-6 font-bold">{message}</p>
+          
+          {children}
 
-        {error && (
-          <div className="mb-4 p-4 bg-[var(--color-danger)]/10 text-[var(--color-danger)] rounded-2xl text-sm font-bold border border-[var(--color-danger)]/20">
-            {error}
-          </div>
-        )}
-        
-        {success && (
-          <div className="mb-4 p-4 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-2xl text-sm font-bold border border-[var(--color-success)]/20">
-            {success}
-          </div>
-        )}
+          {error && (
+            <div className="mb-4 p-4 bg-[var(--color-danger)]/10 text-[var(--color-danger)] rounded-2xl text-sm font-bold border border-[var(--color-danger)]/20">
+              {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="mb-4 p-4 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-2xl text-sm font-bold border border-[var(--color-success)]/20">
+              {success}
+            </div>
+          )}
 
-        <div className="flex justify-end gap-4 mt-8">
-          <button 
-            onClick={onClose}
-            className="px-6 py-3 rounded-xl text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--color-bg-soft)] transition-all"
-          >
-            {t('common.cancel')}
-          </button>
-          <button 
-            onClick={onConfirm}
-            className={`px-8 py-3 rounded-xl text-white font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg ${variantClasses[confirmVariant]}`}
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </motion.div>
-    </div>
+          <div className="flex justify-end gap-4 mt-8">
+            <button 
+              onClick={onClose}
+              className="px-6 py-3 rounded-xl text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--color-bg-soft)] transition-all"
+            >
+              {t('common.cancel')}
+            </button>
+            <button 
+              onClick={onConfirm}
+              className={`px-8 py-3 rounded-xl text-white font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg ${variantClasses[confirmVariant]}`}
+            >
+              {confirmLabel}
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </Portal>
   );
 };
 
