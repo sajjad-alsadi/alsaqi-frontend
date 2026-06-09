@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/httpClient';
 import { Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface LegalFormProps {
   onSuccess: () => void;
@@ -96,7 +97,7 @@ const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
       )}
       <input className="input-field" placeholder={t('legal.relatedRiskArea')} value={formData.related_risk_area} onChange={e => setFormData({...formData, related_risk_area: e.target.value})} required />
       <input className="input-field" placeholder={t('legal.keywords')} value={formData.keywords} onChange={e => setFormData({...formData, keywords: e.target.value})} required />
-      <button type="submit" className="btn-primary w-full">{t('common.save')}</button>
+      <Button type="submit" className="w-full">{t('common.save')}</Button>
     </form>
   );
 };

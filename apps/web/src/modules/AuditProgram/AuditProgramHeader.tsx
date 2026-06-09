@@ -1,6 +1,7 @@
 import React from 'react';
 import { Library, Plus, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 
 interface AuditProgramHeaderProps {
   searchTerm: string;
@@ -51,13 +52,13 @@ const AuditProgramHeader: React.FC<AuditProgramHeaderProps> = ({
             <option value="All">{t('program.allTypes')}</option>
             {auditTypes.map(type => <option key={type} value={type}>{t(`plan.${type.toLowerCase()}`)}</option>)}
           </select>
-          <button 
+          <Button 
             onClick={onAdd} 
-            className="btn-primary flex items-center gap-2 whitespace-nowrap"
+            className="flex items-center gap-2 whitespace-nowrap"
           >
             <Plus size={20} />
             {t('program.add')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

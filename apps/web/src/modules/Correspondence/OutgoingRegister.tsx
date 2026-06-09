@@ -26,6 +26,7 @@ import Pagination from '../../components/Pagination';
 import { UserRole } from '../../constants';
 import logger from '../../utils/logger';
 import Portal from '../../components/Portal';
+import { Button } from '@/components/ui/button';
 
 import OutgoingForm from './OutgoingForm';
 
@@ -132,13 +133,15 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                 <p className="text-[var(--color-text-main)] font-bold">
                   {t('correspondence.previewNotAvailable')}
                 </p>
-                <a 
-                  href={previewUrl} 
-                  download="attachment"
-                  className="mt-4 btn-primary inline-block"
-                >
-                  {t('correspondence.downloadFile')}
-                </a>
+                <Button asChild>
+                  <a 
+                    href={previewUrl} 
+                    download="attachment"
+                    className="mt-4 inline-block"
+                  >
+                    {t('correspondence.downloadFile')}
+                  </a>
+                </Button>
               </div>
             )
           )}
@@ -156,15 +159,15 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                 {t('correspondence.deleteLetterConfirm')}
               </p>
               <div className="flex justify-end gap-3">
-                <button 
+                <Button 
+                  variant="outline"
                   onClick={() => {
                     setIsDeleteModalOpen(false);
                     setItemToDelete(null);
                   }}
-                  className="btn-secondary"
                 >
                   {t('common.cancel')}
-                </button>
+                </Button>
                 <button 
                   onClick={confirmDelete}
                   className="px-6 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-900/20"
@@ -191,13 +194,13 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
         </div>
 
         {userRole !== UserRole.VIEWER && (
-          <button 
+          <Button 
             onClick={() => setShowAddModal(true)}
-            className="btn-primary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm"
+            className="!py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm"
           >
             <Plus size={18} />
             {t('correspondence.addNew')}
-          </button>
+          </Button>
         )}
       </div>
 

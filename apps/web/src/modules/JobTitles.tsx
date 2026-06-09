@@ -7,6 +7,7 @@ import { useDepartments } from '../hooks/useDepartments';
 import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
+import { Button } from '@/components/ui/button';
 
 const JobTitles: React.FC = () => {
   const { t } = useTranslation();
@@ -157,15 +158,15 @@ const JobTitles: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button onClick={() => {
+          <Button onClick={() => {
             setEditingId(null);
             setFormData({ name: '', department: '', job_level: 'Staff', description: '', reporting_to: '', status: 'Active' });
             setError(null);
             setShowForm(true);
-          }} className="btn-primary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm">
+          }} className="!py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm">
             <Plus size={20} />
             <span>{t('addJobTitle')}</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -233,8 +234,8 @@ const JobTitles: React.FC = () => {
               </div>
             </div>
             <div className="flex justify-end gap-4 mt-8">
-              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">{t('common.cancel')}</button>
-              <button type="submit" className="btn-primary">{editingId ? t('common.save') : t('addJobTitle')}</button>
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>{t('common.cancel')}</Button>
+              <Button type="submit">{editingId ? t('common.save') : t('addJobTitle')}</Button>
             </div>
           </form>
         </motion.div>

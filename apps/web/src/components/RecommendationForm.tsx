@@ -11,6 +11,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { FormField } from './ui/FormField';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 const recommendationSchema = z.object({
   finding_id: z.string().min(1, 'Field is required'),
@@ -134,13 +135,13 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCa
         >
           {t('common.cancel')}
         </button>
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="btn-primary disabled:opacity-50"
+          className="disabled:opacity-50"
         >
           {isSubmitting ? t('common.loading') : t('recommendations.save')}
-        </button>
+        </Button>
       </div>
     </form>
   );

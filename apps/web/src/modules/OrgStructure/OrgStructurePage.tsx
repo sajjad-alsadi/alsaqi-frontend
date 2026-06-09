@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
 import { UserRole } from '../../constants';
 import logger from '../../utils/logger';
+import { Button } from '@/components/ui/button';
 
 // --- Components ---
 
@@ -260,13 +261,12 @@ const OrgStructure: React.FC = () => {
         </div>
         
         {isAdmin && (
-          <button 
+          <Button 
             onClick={() => { setEditingNode({}); setIsModalOpen(true); }}
-            className="btn-primary"
           >
             <Plus size={20} className={isRTL ? 'ml-2' : 'mr-2'} />
             {t('addUnit')}
-          </button>
+          </Button>
         )}
       </header>
 
@@ -709,10 +709,10 @@ const OrgUnitModal: React.FC<OrgUnitModalProps> = ({ isOpen, onClose, editingNod
         </div>
 
         <div className="flex justify-end gap-3 pt-6 border-t">
-          <button type="button" onClick={onClose} className="btn-secondary">{t('common.cancel')}</button>
-          <button type="submit" disabled={loading} className="btn-primary min-w-[120px]">
+          <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button type="submit" disabled={loading} className="min-w-[120px]">
             {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : (editingNode?.id ? t('update') : t('create'))}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

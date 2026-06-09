@@ -5,6 +5,7 @@ import {
   Plus, Scale
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 import { usePreferences } from '../../context/PreferencesContext';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
 import { Language } from '../../constants';
@@ -121,12 +122,12 @@ const Dashboard: React.FC = () => {
           <AlertCircle size={48} className="text-[var(--color-danger)] mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">{t('common.error')}</h2>
           <p className="text-[var(--color-text-muted)] mb-6">{error}</p>
-          <button 
+          <Button 
             onClick={() => window.location.reload()}
-            className="btn-primary w-full"
+            className="w-full"
           >
             {t('dashboard.retry')}
-          </button>
+          </Button>
         </div>
       </div>
     );

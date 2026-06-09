@@ -4,6 +4,7 @@ import { X, Download } from 'lucide-react';
 import { AuditProgram, AuditProcedure } from '../../types';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../utils/formatService';
+import { Button } from '@/components/ui/button';
 
 interface AuditProgramProceduresModalProps {
   isOpen: boolean;
@@ -103,13 +104,13 @@ const AuditProgramProceduresModal: React.FC<AuditProgramProceduresModalProps> = 
         </div>
 
         <div className="p-8 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-soft)]/50 flex justify-end gap-4">
-          <button className="btn-primary bg-[var(--color-card)] !text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:bg-[var(--color-bg-main)] flex items-center gap-2">
+          <Button className="bg-[var(--color-card)] !text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:bg-[var(--color-bg-main)] flex items-center gap-2">
             <Download size={18} />
             {t('program.exportAsChecklist')}
-          </button>
-          <button onClick={onClose} className="btn-primary">
+          </Button>
+          <Button onClick={onClose}>
             {t('common.close')}
-          </button>
+          </Button>
         </div>
       </motion.div>
     </div>

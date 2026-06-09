@@ -15,6 +15,7 @@ import Modal from '../components/Modal';
 import PdfViewer from '../components/PdfViewer';
 import { useFormat } from '../utils/formatService';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 const AuditEvidence: React.FC = () => {
   const { token } = useAuth();
@@ -229,7 +230,7 @@ const AuditEvidence: React.FC = () => {
             />
           </div>
           {canEdit && (
-            <button 
+            <Button 
               onClick={() => {
                 setEditingId(null);
                 setFormData({ type: 'Document' });
@@ -237,11 +238,11 @@ const AuditEvidence: React.FC = () => {
                 setError(null);
                 setShowForm(true);
               }} 
-              className="btn-primary flex items-center justify-center gap-3 whitespace-nowrap"
+              className="flex items-center justify-center gap-3 whitespace-nowrap"
             >
               <Plus size={24} />
               <span>{t('evidence.uploadEvidence')}</span>
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -343,9 +344,9 @@ const AuditEvidence: React.FC = () => {
               >
                 {t('common.cancel')}
               </button>
-              <button type="submit" className="btn-primary">
+              <Button type="submit">
                 {editingId ? t('common.save') : (t('evidence.upload'))}
-              </button>
+              </Button>
             </div>
           </form>
         </motion.div>
@@ -508,12 +509,12 @@ const AuditEvidence: React.FC = () => {
               <div className="text-center p-10">
                 <FileText size={48} className="mx-auto text-[var(--color-border-strong)] mb-4" />
                 <p className="text-[var(--color-text-muted)] font-bold">{t('evidence.previewNotAvailableForThisFile')}</p>
-                <button 
+                <Button 
                   onClick={() => previewItem && handleDownload(previewItem)}
-                  className="mt-4 btn-primary"
+                  className="mt-4"
                 >
                   {t('tasks.downloadFile')}
-                </button>
+                </Button>
               </div>
             )
           ) : (

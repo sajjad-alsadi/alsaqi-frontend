@@ -18,6 +18,7 @@ import { useDepartments } from '../../hooks/useDepartments';
 import { PdfTemplateManagement } from '../../components/PdfTemplateManagement';
 import logger from '../../utils/logger';
 import Portal from '../../components/Portal';
+import { Button } from '@/components/ui/button';
 
 const Settings: React.FC = () => {
   const { token } = useAuth();
@@ -302,9 +303,9 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="pt-8 border-t border-[var(--color-border-soft)]">
-                    <button type="submit" className="btn-primary">
+                    <Button type="submit">
                       {t('settings.updateProfile')}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}
@@ -346,9 +347,9 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="pt-8 border-t border-[var(--color-border-soft)]">
-                    <button type="submit" className="btn-primary">
+                    <Button type="submit">
                       {t('settings.changePassword')}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}
@@ -490,9 +491,9 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="pt-8 border-t border-[var(--color-border-soft)]">
-                    <button type="submit" className="btn-primary">
+                    <Button type="submit">
                       {t('common.save')} {t('settings.preferences')}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}

@@ -56,7 +56,7 @@ const AuditFindings: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
-          className="btn-primary flex items-center justify-center gap-3"
+          className="bg-primary text-white hover:bg-primary-hover inline-flex items-center justify-center rounded-xl text-sm font-semibold h-10 px-6 py-2.5 cursor-pointer gap-3 shadow-[0_4px_14px_rgba(10,125,133,0.25)]"
         >
           <Plus size={24} />
           <span>{t('plan.add')}</span>

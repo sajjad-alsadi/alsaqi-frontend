@@ -8,6 +8,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import logger from '../utils/logger';
 import { Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AuditTaskFormProps {
   onSuccess: () => void;
@@ -234,13 +235,13 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
       </div>
 
       <div className="flex justify-end gap-6 pt-8 border-t border-[var(--color-border-soft)] dark:border-slate-800">
-        <button type="button" onClick={onCancel}
-          className="px-8 py-3 text-[var(--color-text-muted)] font-bold uppercase tracking-widest hover:bg-[var(--color-bg-soft)] rounded-xl transition-all">
+        <Button type="button" variant="ghost" onClick={onCancel}
+          className="px-8 py-3 text-[var(--color-text-muted)] font-bold uppercase tracking-widest">
           {t('common.cancel')}
-        </button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary disabled:opacity-50">
+        </Button>
+        <Button type="submit" disabled={isSubmitting} className="disabled:opacity-50">
           {isSubmitting ? t('common.loading') : t('common.save')}
-        </button>
+        </Button>
       </div>
     </form>
   );

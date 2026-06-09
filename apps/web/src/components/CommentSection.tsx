@@ -6,6 +6,7 @@ import { useUser } from '../context/UserContext';
 import api from '../api/httpClient';
 import { UserRole } from '../constants';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 interface Comment {
   id: string | number;
@@ -106,13 +107,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ relatedType, relatedId 
           className="input-field flex-1 py-3"
           onKeyDown={(e) => e.key === 'Enter' && addComment()}
         />
-        <button 
+        <Button 
           onClick={addComment} 
-          className="btn-primary w-12 h-12 flex items-center justify-center p-0 shrink-0"
+          className="w-12 h-12 flex items-center justify-center p-0 shrink-0"
           disabled={!newComment.trim()}
         >
           <Send size={20} className={i18n.language === 'ar' ? '-scale-x-100' : ''} />
-        </button>
+        </Button>
       </div>
     </div>
   );

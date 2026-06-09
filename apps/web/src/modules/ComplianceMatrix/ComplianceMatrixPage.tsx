@@ -13,6 +13,7 @@ import { useDepartments } from '../../hooks/useDepartments';
 import { useFormat } from '../../utils/formatService';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
+import { Button } from '@/components/ui/button';
 
 // --- Types ---
 type ComplianceStatus = 'compliant' | 'partial' | 'non_compliant' | 'under_review';
@@ -839,21 +840,21 @@ export default function ComplianceMatrix() {
           </div>
           
           <div className="flex justify-end gap-3 pt-2">
-            <button 
+            <Button 
+              variant="outline"
               onClick={() => {
                 setIsDeleteModalOpen(false);
                 setItemToDelete(null);
               }}
-              className="btn-secondary"
             >
               {t('common.cancel')}
-            </button>
-            <button 
+            </Button>
+            <Button 
+              variant="destructive"
               onClick={confirmDelete}
-              className="btn-danger"
             >
               {t('common.delete')}
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

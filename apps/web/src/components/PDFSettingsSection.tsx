@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Save } from 'lucide-react';
 import api from '../api/httpClient';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 const PDFSettingsSection: React.FC = () => {
   const { token } = useAuth();
@@ -246,10 +247,10 @@ const PDFSettingsSection: React.FC = () => {
       </div>
 
       <div className="flex justify-end pt-6 border-t border-[var(--color-border-soft)]">
-        <button type="submit" className="btn-primary flex items-center gap-2">
+        <Button type="submit" className="flex items-center gap-2">
           <Save size={20} />
           <span>{t('pdf.saveSettings')}</span>
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -3,6 +3,7 @@ import { ShieldAlert, Lock, Plus, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../../context/UserContext';
 import { UserRole } from '../../constants';
+import { Button } from '@/components/ui/button';
 
 // Refactored Assets
 import { useFraudLog } from './hooks/useFraudLog';
@@ -80,21 +81,23 @@ const FraudLog: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <button 
+          <Button 
+            variant="outline"
             onClick={() => setIsPolicyOpen(true)}
-            className="btn-secondary flex items-center gap-2"
+            className="flex items-center gap-2"
           >
             <FileText size={18} />
             {t('integrity.viewPolicy')}
-          </button>
+          </Button>
           {isManager && (
-            <button 
+            <Button 
+              variant="destructive"
               onClick={() => setIsAddModalOpen(true)}
-              className="btn-danger flex items-center gap-2"
+              className="flex items-center gap-2"
             >
               <Plus size={20} />
               {t('integrity.reportCase')}
-            </button>
+            </Button>
           )}
         </div>
       </div>

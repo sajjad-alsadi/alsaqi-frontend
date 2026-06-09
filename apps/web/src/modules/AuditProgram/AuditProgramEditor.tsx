@@ -6,6 +6,7 @@ import { useFormat } from '../../utils/formatService';
 import { AuditStatus, AuditType, ControlTestType, UserRole } from '../../constants';
 import { useDepartments } from '../../hooks/useDepartments';
 import api from '../../api/httpClient';
+import { Button } from '@/components/ui/button';
 
 interface AuditProgramEditorProps {
   program: Partial<AuditProgram>;
@@ -73,10 +74,10 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
           </h2>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={onSave} className="btn-primary flex items-center gap-2">
+          <Button onClick={onSave} className="flex items-center gap-2">
             <Save size={18} />
             {t('program.save')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -157,10 +158,10 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
                   <List size={20} className="text-[var(--color-primary)]" />
                   {t('program.auditProcedures')}
                 </h3>
-                <button onClick={onAddProcedure} className="btn-primary py-2 px-4 text-xs flex items-center gap-2">
+                <Button onClick={onAddProcedure} className="py-2 px-4 text-xs flex items-center gap-2">
                   <Plus size={14} />
                   {t('program.addProcedure')}
-                </button>
+                </Button>
               </div>
 
               <div className="space-y-4">
@@ -337,10 +338,10 @@ const AuditProgramEditor: React.FC<AuditProgramEditorProps> = ({
                 <span className="text-sm font-bold text-[var(--color-text-main)]">v{formatNumber(program.version_number || 1)}.0</span>
               </div>
               {program.id && (user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER) && program.status !== AuditStatus.APPROVED && (
-                <button onClick={() => onApprove(program.id!)} className="w-full btn-primary bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100 flex items-center justify-center gap-2">
+                <Button onClick={() => onApprove(program.id!)} className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100 flex items-center justify-center gap-2">
                   <CheckCircle size={18} />
                   {t('program.approve')}
-                </button>
+                </Button>
               )}
             </div>
           </div>

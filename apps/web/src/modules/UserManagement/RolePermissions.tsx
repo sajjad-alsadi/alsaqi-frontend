@@ -4,6 +4,7 @@ import { Shield, Save, CheckCircle, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '../../permissions';
 import { useFormat } from '../../utils/formatService';
+import { Button } from '@/components/ui/button';
 
 interface RolePermissionsProps {
   allRoles: any[];
@@ -84,14 +85,14 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
             <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.roles.subtitle')}</p>
           </div>
         </div>
-        <button 
+        <Button 
           onClick={handleSave} 
           disabled={!isDirty}
-          className={`btn-primary flex items-center gap-2 !py-2 !px-4 !text-xs ${!isDirty ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`flex items-center gap-2 !py-2 !px-4 !text-xs ${!isDirty ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <Save size={16} />
           {t('common.save')}
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">

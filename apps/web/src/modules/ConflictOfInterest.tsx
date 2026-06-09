@@ -8,6 +8,7 @@ import Modal from '../components/Modal';
 import api from '../api/httpClient';
 import toast from 'react-hot-toast';
 import { useFormat } from '../utils/formatService';
+import { Button } from '@/components/ui/button';
 import { UserRole } from '../constants';
 import logger from '../utils/logger';
 
@@ -96,13 +97,13 @@ const ConflictOfInterest: React.FC = () => {
           <h2 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.conflicts')}</h2>
           <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('integrity.coiSubtitle')}</p>
         </div>
-        <button 
+        <Button 
           onClick={() => setIsModalOpen(true)}
-          className="btn-primary flex items-center gap-2"
+          className="flex items-center gap-2"
         >
           <Plus size={20} />
           {t('integrity.declareConflict')}
-        </button>
+        </Button>
       </div>
 
       <div className="glass-card overflow-hidden">
@@ -189,9 +190,9 @@ const ConflictOfInterest: React.FC = () => {
             <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors">
               {t('common.cancel')}
             </button>
-            <button type="submit" className="btn-primary">
+            <Button type="submit">
               {t('common.save')}
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>
@@ -224,9 +225,9 @@ const ConflictOfInterest: React.FC = () => {
             <button type="button" onClick={() => setIsReviewModalOpen(false)} className="px-6 py-3 rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-muted)] font-bold hover:bg-[var(--color-bg-main)] transition-colors">
               {t('common.cancel')}
             </button>
-            <button type="submit" className="btn-primary">
+            <Button type="submit">
               {t('common.save')}
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Clock, UserCheck, Key, Copy, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 
 interface ResetRequestsProps {
   requests: any[];
@@ -76,13 +77,13 @@ const ResetRequests: React.FC<ResetRequestsProps> = ({
                 </div>
               </div>
             </div>
-            <button 
+            <Button 
               onClick={() => onApprove(req.id)}
-              className="btn-primary py-2 px-6 text-xs flex items-center gap-2"
+              className="py-2 px-6 text-xs flex items-center gap-2"
             >
               <UserCheck size={16} />
               {t('userManagement.resets.approve')}
-            </button>
+            </Button>
           </motion.div>
         ))}
         {requests.length === 0 && (

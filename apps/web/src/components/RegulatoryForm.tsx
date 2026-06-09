@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/httpClient';
 import { Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RegulatoryFormProps {
   onSuccess: () => void;
@@ -120,7 +121,7 @@ const RegulatoryForm: React.FC<RegulatoryFormProps> = ({ onSuccess, onClose, ini
           {(Array.isArray(departments) ? departments : []).map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
         </select>
       )}
-      <button type="submit" className="btn-primary w-full">{initialData ? t('common.update') : t('common.save')}</button>
+      <Button type="submit" className="w-full">{initialData ? t('common.update') : t('common.save')}</Button>
     </form>
   );
 };

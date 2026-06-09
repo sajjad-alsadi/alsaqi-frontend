@@ -16,6 +16,7 @@ import AuditTaskForm from '../components/AuditTaskForm';
 import PdfViewer from '../components/PdfViewer';
 import Pagination from '../components/Pagination';
 import AuditTasksTable from '../components/AuditTasksTable';
+import { Button } from '@/components/ui/button';
 
 const AuditTasksModule: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -154,7 +155,7 @@ const AuditTasksModule: React.FC = () => {
                 setEditingTask(null);
                 setIsModalOpen(true);
               }}
-              className="btn-primary flex items-center justify-center gap-3 whitespace-nowrap"
+              className="bg-primary text-white hover:bg-primary-hover inline-flex items-center justify-center rounded-xl text-sm font-semibold h-10 px-6 py-2.5 cursor-pointer gap-3 whitespace-nowrap shadow-[0_4px_14px_rgba(10,125,133,0.25)]"
             >
               <Plus size={24} />
               <span>{t('plan.add')}</span>
@@ -235,13 +236,14 @@ const AuditTasksModule: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('tasks.previewNotAvailable')}</h3>
                 <p className="text-[var(--color-text-muted)] mb-8 max-w-md">{t('tasks.previewNotAvailableDesc')}</p>
-                <a 
-                  href={previewItem.file_data} 
-                  download={previewItem.file_name}
-                  className="btn-primary"
-                >
-                  {t('tasks.downloadFile')}
-                </a>
+                <Button asChild>
+                  <a 
+                    href={previewItem.file_data} 
+                    download={previewItem.file_name}
+                  >
+                    {t('tasks.downloadFile')}
+                  </a>
+                </Button>
               </div>
             )}
           </div>

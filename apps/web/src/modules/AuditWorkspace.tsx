@@ -28,6 +28,7 @@ import Modal from '../components/Modal';
 import FindingForm from '../components/FindingForm';
 import { AuditStatus, RiskLevel } from '../constants';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 interface AuditWorkspaceProps {
   planId: string | number;
@@ -138,9 +139,9 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
         <div className="flex items-center gap-3">
           <Badge type="status" value={plan?.status} />
           <div className="w-px h-6 bg-slate-200 mx-2" />
-          <button className="btn-primary !py-2 !px-4 text-xs">
+          <Button className="!py-2 !px-4 text-xs">
             {t('common.completeAudit')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -209,14 +210,14 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                     </div>
                     <div className="flex gap-2">
                        {activeTask?.status === 'draft' && (
-                         <button 
+                         <Button 
                            onClick={() => handleUpdateTaskStatus(activeTask.id, 'in_progress')}
                            disabled={isUpdatingStatus}
-                           className="btn-primary !py-2 !px-6 text-xs flex items-center gap-2 disabled:opacity-50"
+                           className="!py-2 !px-6 text-xs flex items-center gap-2 disabled:opacity-50"
                          >
                            {isUpdatingStatus ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Clock size={16} />} 
                            {t('common.startTask')}
-                         </button>
+                         </Button>
                        )}
                        {activeTask?.status === 'in_progress' && (
                          <button 

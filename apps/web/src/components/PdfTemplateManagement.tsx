@@ -6,6 +6,7 @@ import { FileText, Plus, Edit2, Trash2, CheckCircle, X, Search, Globe, Layout, U
 import { toast } from 'react-hot-toast';
 import logger from '../utils/logger';
 import Portal from './Portal';
+import { Button } from '@/components/ui/button';
 
 interface PdfTemplate {
   id: string;
@@ -144,10 +145,10 @@ export const PdfTemplateManagement: React.FC = () => {
           <h2 className="text-2xl font-bold text-[var(--color-text-main)]">{t('pdfTemplates.title')}</h2>
           <p className="text-[var(--color-text-muted)] text-sm font-bold mt-1">{t('pdfTemplates.subtitle')}</p>
         </div>
-        <button onClick={() => openModal()} className="btn-primary flex items-center gap-2">
+        <Button onClick={() => openModal()} className="flex items-center gap-2">
           <Plus size={18} />
           {t('pdfTemplates.createNew')}
-        </button>
+        </Button>
       </div>
 
       <div className="glass-card p-6">
@@ -304,12 +305,12 @@ export const PdfTemplateManagement: React.FC = () => {
               </div>
 
               <div className="p-6 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-soft)] flex justify-end gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
+                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
                   {t('common.cancel')}
-                </button>
-                <button type="submit" form="templateForm" className="btn-primary">
+                </Button>
+                <Button type="submit" form="templateForm">
                   {t('pdfTemplates.saveTemplate')}
-                </button>
+                </Button>
               </div>
             </motion.div>
           </div>

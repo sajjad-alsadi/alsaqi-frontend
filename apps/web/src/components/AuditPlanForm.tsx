@@ -11,6 +11,7 @@ import { Select } from './ui/Select';
 import { FormField } from './ui/FormField';
 import { useDepartments } from '../hooks/useDepartments';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 type AuditPlanFormValues = {
   title: string;
@@ -248,20 +249,21 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
       </div>
 
       <div className="flex justify-end gap-6 pt-8 border-t border-[var(--color-border-soft)] dark:border-slate-800">
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={onCancel}
-          className="px-8 py-3 text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)] font-bold uppercase tracking-widest hover:bg-[var(--color-bg-main)] dark:hover:bg-slate-800 rounded-xl transition-all"
+          className="px-8 py-3 text-[var(--color-text-muted)] font-bold uppercase tracking-widest"
         >
           {t('common.cancel')}
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="btn-primary disabled:opacity-50"
+          className="disabled:opacity-50"
         >
           {isSubmitting ? t('common.loading') : t('plan.save')}
-        </button>
+        </Button>
       </div>
     </form>
   );

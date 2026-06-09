@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Loader2, Check, AlertCircle } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type ButtonState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -33,10 +35,10 @@ interface ProgressButtonProps {
 /**
  * Button with loading, success, and error states.
  * Provides clear feedback for async operations.
- * 
+ *
  * @example
  * const [state, setState] = useState<ButtonState>('idle');
- * 
+ *
  * const handleSave = async () => {
  *   setState('loading');
  *   try {
@@ -48,7 +50,7 @@ interface ProgressButtonProps {
  *     setTimeout(() => setState('idle'), 3000);
  *   }
  * };
- * 
+ *
  * <ProgressButton state={state} onClick={handleSave} icon={Save}>
  *   Save Changes
  * </ProgressButton>
@@ -68,11 +70,11 @@ const ProgressButton: React.FC<ProgressButtonProps> = ({
 }) => {
   const isDisabled = disabled || state === 'loading';
 
-  const variantClasses = {
-    primary: 'btn-primary',
-    secondary: 'btn-secondary',
-    danger: 'btn-danger',
-  };
+  const variantMap = {
+    primary: 'default',
+    secondary: 'outline',
+    danger: 'destructive',
+  } as const;
 
   const getContent = () => {
     switch (state) {
@@ -121,14 +123,15 @@ const ProgressButton: React.FC<ProgressButtonProps> = ({
   };
 
   return (
-    <button
+    <Button
       type={type}
+      variant={variantMap[variant]}
       onClick={onClick}
       disabled={isDisabled}
-      className={`${variantClasses[variant]} ${stateClasses[state]} ${className} disabled:opacity-50`}
+      className={cn(stateClasses[state], className)}
     >
       {getContent()}
-    </button>
+    </Button>
   );
 };
 

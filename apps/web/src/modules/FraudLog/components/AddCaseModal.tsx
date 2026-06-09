@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '../../../components/Modal';
 import { FraudCase } from '../types';
+import { Button } from '@/components/ui/button';
 
 interface AddCaseModalProps {
   isOpen: boolean;
@@ -126,19 +127,19 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onA
         </div>
 
         <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
-          <button 
+          <Button 
             type="button"
+            variant="outline"
             onClick={onClose}
-            className="btn-secondary"
           >
             {t('common.cancel')}
-          </button>
-          <button 
+          </Button>
+          <Button 
             type="submit"
-            className="btn-primary bg-rose-600 hover:bg-rose-700"
+            className="bg-rose-600 hover:bg-rose-700"
           >
             {t('integrity.saveCase')}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

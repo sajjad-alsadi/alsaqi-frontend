@@ -5,6 +5,7 @@ import { Save, Edit2 } from 'lucide-react';
 import api from '../api/httpClient';
 import { UserRole } from '../constants';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 const AboutSection: React.FC = () => {
   const { user } = useUser();
@@ -67,13 +68,13 @@ const AboutSection: React.FC = () => {
           {t('settings.aboutApplication')}
         </h3>
         {user?.role === UserRole.ADMIN && (
-          <button 
+          <Button 
             onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-            className="btn-primary flex items-center gap-2"
+            className="flex items-center gap-2"
           >
             {isEditing ? <Save size={16} /> : <Edit2 size={16} />}
             {isEditing ? t('common.save') : t('common.edit')}
-          </button>
+          </Button>
         )}
       </div>
 

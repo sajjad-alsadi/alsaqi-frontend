@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Modal from '../../../components/Modal';
 import Portal from '../../../components/Portal';
 import { AccessRequest, AccessStatus } from '../types';
+import { Button } from '@/components/ui/button';
 
 interface AccessGateProps {
   isManager: boolean;
@@ -179,19 +180,19 @@ export const AccessGate: React.FC<AccessGateProps> = ({
               />
             </div>
             <div className="flex justify-end gap-4 pt-4 border-t border-[var(--color-border-soft)]">
-              <button 
+              <Button 
                 type="button"
+                variant="outline"
                 onClick={() => setIsRequestModalOpen(false)}
-                className="btn-secondary"
               >
                 {t('common.cancel')}
-              </button>
-              <button 
+              </Button>
+              <Button 
                 type="submit"
-                className="btn-primary bg-rose-600 hover:bg-rose-700"
+                className="bg-rose-600 hover:bg-rose-700"
               >
                 {t('common.confirm')}
-              </button>
+              </Button>
             </div>
           </form>
         </Modal>
@@ -266,9 +267,9 @@ export const AccessGate: React.FC<AccessGateProps> = ({
             onChange={e => setRejectionReason(e.target.value)}
           />
           <div className="flex justify-end gap-3">
-            <button className="btn-secondary" onClick={() => setIsRejectModalOpen(false)}>{t('common.cancel')}</button>
-            <button 
-              className="btn-primary bg-rose-600" 
+            <Button variant="outline" onClick={() => setIsRejectModalOpen(false)}>{t('common.cancel')}</Button>
+            <Button 
+              className="bg-rose-600" 
               onClick={async () => {
                 if (selectedRequestId) {
                   await rejectRequest(selectedRequestId, rejectionReason);
@@ -277,7 +278,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
               }}
             >
               {t('integrity.confirmReject')}
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>
@@ -301,9 +302,9 @@ export const AccessGate: React.FC<AccessGateProps> = ({
             <option value="30">30 {t('integrity.days')}</option>
           </select>
           <div className="flex justify-end gap-3">
-            <button className="btn-secondary" onClick={() => setIsApproveModalOpen(false)}>{t('common.cancel')}</button>
-            <button 
-              className="btn-primary bg-emerald-600"
+            <Button variant="outline" onClick={() => setIsApproveModalOpen(false)}>{t('common.cancel')}</Button>
+            <Button 
+              className="bg-emerald-600"
               onClick={async () => {
                 if (requestToApprove) {
                   await approveRequest(requestToApprove.id.toString(), selectedApprovalDuration);
@@ -312,7 +313,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
               }}
             >
               {t('integrity.confirmApprove')}
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

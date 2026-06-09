@@ -7,6 +7,7 @@ import { ChevronDown } from 'lucide-react';
 
 import { useFormat } from '../../utils/formatService';
 import { useDepartments } from '../../hooks/useDepartments';
+import { Button } from '@/components/ui/button';
 
 interface UserFormProps {
   editingUser: any;
@@ -149,15 +150,15 @@ const UserForm: React.FC<UserFormProps> = ({
         </div>
       )}
       <div className="flex justify-end gap-3 mt-6">
-        <button onClick={onCancel} className="btn-secondary !py-2 !px-4 !text-xs" disabled={isFormDisabled}>{t('common.cancel')}</button>
-        <button 
+        <Button variant="outline" onClick={onCancel} className="!py-2 !px-4 !text-xs" disabled={isFormDisabled}>{t('common.cancel')}</Button>
+        <Button 
           onClick={onSave} 
-          className="btn-primary flex items-center gap-2 !py-2 !px-4 !text-xs"
+          className="flex items-center gap-2 !py-2 !px-4 !text-xs"
           disabled={isFormDisabled}
         >
           {isLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
           {editingUser ? t('common.save') : t('userManagement.addUser')}
-        </button>
+        </Button>
       </div>
 
     </motion.div>

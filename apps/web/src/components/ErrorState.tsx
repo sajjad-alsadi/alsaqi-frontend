@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertCircle, RefreshCw, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 
 interface ErrorStateProps {
   /** Error message to display */
@@ -51,13 +52,14 @@ const ErrorState: React.FC<ErrorStateProps> = ({
         )}
       </p>
       {onRetry && (
-        <button 
+        <Button 
           onClick={onRetry}
-          className="btn-secondary flex items-center gap-2 cursor-pointer"
+          variant="outline"
+          className="flex items-center gap-2 cursor-pointer"
         >
           <RefreshCw size={16} />
           {t('common.retry')}
-        </button>
+        </Button>
       )}
     </div>
   );

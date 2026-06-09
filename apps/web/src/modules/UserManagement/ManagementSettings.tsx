@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Settings, Shield, Lock, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 
 interface ManagementSettingsProps {
   settings: any;
@@ -187,12 +188,12 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
          </div>
  
          <div className="lg:col-span-2 flex justify-end pt-4">
-           <button 
+           <Button 
              onClick={() => onUpdate(settings)}
-             className="btn-primary px-10 py-4"
+             className="px-10 py-4"
            >
              {t('common.save')}
-           </button>
+           </Button>
          </div>
        </div>
      </div>

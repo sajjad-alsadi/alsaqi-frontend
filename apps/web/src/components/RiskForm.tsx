@@ -11,6 +11,7 @@ import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
 import { FormField } from './ui/FormField';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 type RiskFormValues = {
   risk_id: string;
@@ -269,9 +270,9 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
         <button type="button" onClick={onCancel} className="px-8 py-3 text-[var(--color-text-muted)] font-bold uppercase tracking-widest hover:bg-[var(--color-bg-soft)] rounded-xl transition-all">
           {t('common.cancel')}
         </button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary disabled:opacity-50">
+        <Button type="submit" disabled={isSubmitting} className="disabled:opacity-50">
           {isSubmitting ? t('common.loading') : t('common.save')}
-        </button>
+        </Button>
       </div>
     </form>
   );

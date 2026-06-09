@@ -28,6 +28,7 @@ import CorrespondenceArchive from './CorrespondenceArchive';
 import OutgoingRegister from './OutgoingRegister';
 import { Language, CorrespondenceType } from '../../constants';
 import { useFormat } from '../../utils/formatService';
+import { Button } from '@/components/ui/button';
 
 interface CorrespondenceSystemProps {
   language: Language;
@@ -150,20 +151,21 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button 
+          <Button 
             onClick={() => setActiveSubTab('incoming')}
-            className="btn-primary flex items-center justify-center gap-2 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <Plus size={18} />
             {t('correspondence.registerIncoming')}
-          </button>
-          <button 
+          </Button>
+          <Button 
+            variant="outline"
             onClick={() => setActiveSubTab('outgoing')}
-            className="btn-secondary flex items-center justify-center gap-2 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <Plus size={18} />
             {t('correspondence.registerOutgoing')}
-          </button>
+          </Button>
         </div>
       </div>
 

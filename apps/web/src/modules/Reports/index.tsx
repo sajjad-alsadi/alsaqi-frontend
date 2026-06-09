@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 import { 
   FileText, 
   Plus, 
@@ -154,13 +155,13 @@ const Reports: React.FC = () => {
                     <Calendar size={18} />
                     {t('reports.scheduleReport')}
                   </button>
-                  <button 
+                  <Button 
                     onClick={generateExecPDF}
-                    className="btn-primary flex items-center gap-2"
+                    className="flex items-center gap-2"
                   >
                     <Download size={20} />
                     {t('reports.generateExecutiveReport')}
-                  </button>
+                  </Button>
                 </div>
 
                 <KPICards execData={execData} onCardClick={handleCardClick} />
@@ -235,18 +236,18 @@ const Reports: React.FC = () => {
                 setRiskFilter={setRiskFilter}
                 departments={departments}
               />
-              <button 
+              <Button 
                 onClick={() => {
                   setSelectedAuditId(null);
                   setFindings([]);
                   setReportTitle('');
                   setIsModalOpen(true);
                 }}
-                className="btn-primary flex items-center gap-2 shrink-0"
+                className="flex items-center gap-2 shrink-0"
               >
                 <Plus size={20} />
                 {t('reports.newReport')}
-              </button>
+              </Button>
             </div>
 
             {loading ? (

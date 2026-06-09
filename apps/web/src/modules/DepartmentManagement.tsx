@@ -9,6 +9,7 @@ import { useDepartments } from '../hooks/useDepartments';
 import JobTitles from './JobTitles';
 import logger from '../utils/logger';
 import Portal from '../components/Portal';
+import { Button } from '@/components/ui/button';
 
 const DepartmentManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -150,14 +151,14 @@ const DepartmentManagement: React.FC = () => {
                   onChange={e => setNewDept(e.target.value)} 
                   onKeyDown={e => e.key === 'Enter' && addDept()}
                 />
-                <button 
+                <Button 
                   onClick={addDept} 
                   disabled={loading}
-                  className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   <Plus size={20} />
                   {loading ? "..." : t('common.add')}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -183,7 +184,7 @@ const DepartmentManagement: React.FC = () => {
                     )}
                     <div className="flex gap-2">
                       {editingDept?.id === dept.id ? (
-                        <button onClick={() => editDept(dept.id, editingDept.name)} className="btn-primary text-xs">{t('common.save')}</button>
+                        <Button onClick={() => editDept(dept.id, editingDept.name)} className="text-xs">{t('common.save')}</Button>
                       ) : (
                         <button onClick={() => setEditingDept(dept)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"><Edit2 size={18} /></button>
                       )}

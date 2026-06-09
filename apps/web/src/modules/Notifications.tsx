@@ -8,6 +8,7 @@ import { Bell, Check, Trash2, Filter, Search, Calendar, FileText, Info, AlertTri
 import { motion, AnimatePresence } from 'motion/react';
 import Modal from '../components/Modal';
 import { getTranslatedNotificationMessage, getTranslatedNotificationModule } from '../utils/notificationHelpers';
+import { Button } from '@/components/ui/button';
 
 const Notifications: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -81,13 +82,14 @@ const Notifications: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-3">
-          <button 
+          <Button 
             onClick={() => markAllAsRead()}
-            className="btn-secondary flex items-center gap-2"
+            variant="outline"
+            className="flex items-center gap-2"
           >
             <Check size={18} />
             <span>{t('common.markAllRead')}</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -214,12 +216,13 @@ const Notifications: React.FC = () => {
           {/* Load More Button */}
           {hasMore && !isLoading && (
             <div className="text-center pt-6">
-              <button 
+              <Button 
                 onClick={loadMore}
-                className="btn-secondary px-8"
+                variant="outline"
+                className="px-8"
               >
                 {t('common.loadMore')}
-              </button>
+              </Button>
             </div>
           )}
           {isLoading && (
@@ -243,16 +246,16 @@ const Notifications: React.FC = () => {
             {t('deleteMessage')}
           </p>
           <div className="flex justify-end gap-4">
-            <button
+            <Button
               onClick={() => {
                 setIsDeleteModalOpen(false);
                 setNotificationToDelete(null);
               }}
-              className="btn-secondary"
+              variant="outline"
             >
               {t('common.cancel')}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 if (notificationToDelete) {
                   deleteNotification(notificationToDelete);
@@ -260,10 +263,10 @@ const Notifications: React.FC = () => {
                   setNotificationToDelete(null);
                 }
               }}
-              className="btn-danger"
+              variant="destructive"
             >
               {t('common.delete')}
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

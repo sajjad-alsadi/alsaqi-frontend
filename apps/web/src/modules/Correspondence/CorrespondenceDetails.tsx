@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../utils/formatService';
 import logger from '../../utils/logger';
 import Portal from '../../components/Portal';
+import { Button } from '@/components/ui/button';
 
 interface CorrespondenceDetailsProps {
   type: 'Incoming' | 'Outgoing';
@@ -137,20 +138,22 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
         <div className="flex flex-wrap gap-2">
           {type !== 'Outgoing' && (
             <>
-              <button 
+              <Button 
                 onClick={() => setShowStatusModal(true)}
-                className="btn-secondary flex items-center gap-2"
+                variant="outline"
+                className="flex items-center gap-2"
               >
                 <Clock size={18} />
                 {t('correspondence.updateStatus')}
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => setShowReferModal(true)}
-                className="btn-secondary flex items-center gap-2"
+                variant="outline"
+                className="flex items-center gap-2"
               >
                 <Share2 size={18} />
                 {t('correspondence.refer')}
-              </button>
+              </Button>
             </>
           )}
           <button 
@@ -463,8 +466,8 @@ const ArchiveModal = ({ language, id, type, onClose, onSuccess }: any) => {
             {t('correspondence.confirmArchiveMessage')}
           </p>
           <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">{t('common.cancel')}</button>
-            <button type="submit" disabled={submitting} className="btn-primary flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.archive')}</button>
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
+            <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.archive')}</Button>
           </div>
         </form>
       </motion.div>
@@ -522,8 +525,8 @@ const StatusUpdateModal = ({ language, id, type, currentStatus, onClose, onSucce
             />
           </div>
           <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">{t('common.cancel')}</button>
-            <button type="submit" disabled={submitting} className="btn-primary flex-1 disabled:opacity-50">{submitting ? '...' : t('common.update')}</button>
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
+            <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('common.update')}</Button>
           </div>
         </form>
       </motion.div>
@@ -589,8 +592,8 @@ const ReferralModal = ({ language, id, onClose, onSuccess }: any) => {
             <textarea rows={3} className="input-field" value={instructions} onChange={(e) => setInstructions(e.target.value)} />
           </div>
           <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">{t('common.cancel')}</button>
-            <button type="submit" disabled={submitting} className="btn-primary flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.refer')}</button>
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
+            <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.refer')}</Button>
           </div>
         </form>
       </motion.div>

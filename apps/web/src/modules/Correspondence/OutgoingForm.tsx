@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 import { 
   CorrespondenceClassification, 
   SendingMethod 
@@ -117,13 +118,13 @@ const OutgoingForm: React.FC<OutgoingFormProps> = ({ language, onSuccess, onCanc
         >
           {t('common.cancel')}
         </button>
-        <button 
+        <Button 
           type="submit"
           disabled={isSubmitting}
-          className="btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
+          className="disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isSubmitting ? t('correspondence.saving') : t('correspondence.registerLetter')}
-        </button>
+        </Button>
       </div>
     </form>
   );

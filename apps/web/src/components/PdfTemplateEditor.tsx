@@ -9,6 +9,7 @@ import api from '../api/httpClient';
 import { useDebouncedCallback } from '../hooks/useDebouncedCallback';
 import { toast } from 'react-hot-toast';
 import logger from '../utils/logger';
+import { Button } from '@/components/ui/button';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -484,11 +485,11 @@ const PdfTemplateEditor: React.FC<PdfTemplateEditorProps> = ({
           <X size={16} />
           {t('common.cancel')}
         </button>
-        <button
+        <Button
           type="button"
           onClick={handleSave}
           disabled={saving || !templateName.trim() || !editorState.content.trim()}
-          className="btn-primary flex items-center gap-2 disabled:opacity-50"
+          className="flex items-center gap-2 disabled:opacity-50"
         >
           {saving ? (
             <Loader2 size={16} className="animate-spin" />
@@ -496,7 +497,7 @@ const PdfTemplateEditor: React.FC<PdfTemplateEditorProps> = ({
             <Save size={16} />
           )}
           {saving ? t('common.loading') : t('pdfTemplates.saveTemplate')}
-        </button>
+        </Button>
       </div>
     </div>
   );

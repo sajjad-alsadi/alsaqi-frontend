@@ -25,6 +25,7 @@ import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import logger from '../../utils/logger';
 import Portal from '../../components/Portal';
+import { Button } from '@/components/ui/button';
 
 import IncomingForm from './IncomingForm';
 
@@ -214,22 +215,23 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
           <option value="Restricted">{t('correspondence.restricted')}</option>
         </select>
 
-        <button 
+        <Button 
           onClick={handleExport}
-          className="btn-secondary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm bg-[var(--color-card)]"
+          variant="outline"
+          className="!py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm bg-[var(--color-card)]"
           title={t('correspondence.exportToCSV')}
         >
           <Download size={18} />
           {t('correspondence.export')}
-        </button>
+        </Button>
 
-        <button 
+        <Button 
           onClick={() => setShowAddModal(true)}
-          className="btn-primary !py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm"
+          className="!py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm"
         >
           <Plus size={18} />
           {t('correspondence.addNew')}
-        </button>
+        </Button>
       </div>
 
       {/* Table */}
