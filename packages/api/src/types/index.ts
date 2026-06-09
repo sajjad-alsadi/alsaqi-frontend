@@ -1,5 +1,6 @@
 export * from './api';
 export * from './middleware';
+export * from './pdf';
 
 import { Request } from 'express';
 import { UploadedFile } from 'express-fileupload';

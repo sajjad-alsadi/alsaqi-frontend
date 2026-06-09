@@ -48,6 +48,8 @@ import { createAdminBackupRoutes } from '../adminBackup.js';
 import { createPermissionAdminRoutes } from '../permissionAdmin.js';
 import { createArchiveRoutes } from '../archive.js';
 import { createLookupRoutes } from '../lookups.js';
+import { createReportsRoutes } from '../reports.js';
+import type { ReportQueueService, ReportStorageService } from '../reports.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,6 +73,10 @@ export interface V1RouterDeps {
   logError: any;
   config: ApiServerConfig;
   idempotencyMiddleware: express.RequestHandler;
+  /** Optional: QueueService for report generation (from infrastructure) */
+  queueService?: ReportQueueService | null;
+  /** Optional: StorageService for presigned download URLs (from infrastructure) */
+  storageService?: ReportStorageService | null;
 }
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
@@ -92,6 +98,8 @@ export function createV1Router(deps: V1RouterDeps): express.Router {
     logError,
     config,
     idempotencyMiddleware,
+    queueService,
+    storageService,
   } = deps;
 
   const v1Router = express.Router();
@@ -184,6 +192,9 @@ export function createV1Router(deps: V1RouterDeps): express.Router {
 
   // Permission Admin Routes
   v1Router.use('/', createPermissionAdminRoutes(db, authenticate, checkPermission, logError));
+
+  // Report Generation Routes (PDF report generation and status tracking)
+  v1Router.use('/reports', createReportsRoutes(db, authenticate, checkPermission, logError, queueService, storageService));
 
   return v1Router;
 }

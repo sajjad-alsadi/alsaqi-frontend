@@ -1,6 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
-import { PdfTemplateService } from '../services/PdfTemplateService';
+import { PdfTemplateService } from '../../../packages/api/src/services/PdfTemplateService.js';
+import { resolveTemplateTypeKey } from '../../../packages/api/src/constants/templateTypes.js';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ValidationError } from '../utils/errors';
 
@@ -30,7 +31,8 @@ export const createPdfTemplatesRoutes = (
     if (!type) {
       return res.status(400).json({ error: "Type is required" });
     }
-    const template = await PdfTemplateService.getActiveByType(type as string);
+    const typeKey = resolveTemplateTypeKey(type as string);
+    const template = await PdfTemplateService.getActiveByType(typeKey);
     if (!template) {
       return res.status(404).json({ error: "No active template found" });
     }

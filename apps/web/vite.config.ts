@@ -48,7 +48,6 @@ export default defineConfig(({ mode }) => {
               if (
                 id.includes('jspdf') ||
                 id.includes('xlsx') ||
-                id.includes('html2canvas') ||
                 id.includes('docx') ||
                 id.includes('react-pdf')
               ) {

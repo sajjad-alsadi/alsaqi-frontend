@@ -5,11 +5,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { FileText, Plus, Edit2, Trash2, CheckCircle, X, Search, Globe, Layout, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import logger from '../utils/logger';
+import { TEMPLATE_TYPES, type TemplateTypeKey } from '../../packages/api/src/constants/templateTypes';
 
 interface PdfTemplate {
   id: string;
   template_name: string;
-  template_type: string;
+  template_type_key: TemplateTypeKey;
+  template_type?: string; // legacy field, kept for backward compatibility display
   content: string;
   status: string;
   is_default: number;
@@ -20,17 +22,6 @@ interface PdfTemplate {
 
 export const PdfTemplateManagement: React.FC = () => {
   const { t } = useTranslation();
-  
-  const TEMPLATE_TYPES = [
-    t('pdfTemplates.auditReport'),
-    t('pdfTemplates.quarterlyReport'),
-    t('pdfTemplates.annualReport'),
-    t('pdfTemplates.auditPlan'),
-    t('pdfTemplates.auditMissions'),
-    t('pdfTemplates.recommendations'),
-    t('pdfTemplates.outgoingLetter'),
-    t('pdfTemplates.general')
-  ];
 
   const [templates, setTemplates] = useState<PdfTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +32,7 @@ export const PdfTemplateManagement: React.FC = () => {
   
   const [formData, setFormData] = useState({
     template_name: '',
-    template_type: t('pdfTemplates.auditReport'),
+    template_type_key: 'audit_report' as TemplateTypeKey,
     content: '',
     status: 'Draft',
     is_default: false
@@ -68,7 +59,7 @@ export const PdfTemplateManagement: React.FC = () => {
       setEditingTemplate(template);
       setFormData({
         template_name: template.template_name,
-        template_type: template.template_type,
+        template_type_key: template.template_type_key,
         content: template.content,
         status: template.status,
         is_default: template.is_default === 1
@@ -77,7 +68,7 @@ export const PdfTemplateManagement: React.FC = () => {
       setEditingTemplate(null);
       setFormData({
         template_name: '',
-        template_type: t('pdfTemplates.auditReport'),
+        template_type_key: 'audit_report',
         content: `<div dir="rtl" style="font-family: 'Simplified Arabic', Arial; padding: 20px;">
   <h1 style="text-align: center; color: #1a565c;">{{template_type}}</h1>
   <p><strong>${t('pdfTemplates.reportNum')}</strong> {{report_number}}</p>
@@ -131,10 +122,13 @@ export const PdfTemplateManagement: React.FC = () => {
     }
   };
 
-  const filteredTemplates = templates.filter(t => 
-    t.template_name.toLowerCase().includes(search.toLowerCase()) || 
-    t.template_type.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredTemplates = templates.filter(tmpl => {
+    const typeLabel = TEMPLATE_TYPES.find(tt => tt.key === tmpl.template_type_key)?.i18nLabel || '';
+    const translatedLabel = t(typeLabel).toLowerCase();
+    return tmpl.template_name.toLowerCase().includes(search.toLowerCase()) || 
+      translatedLabel.includes(search.toLowerCase()) ||
+      tmpl.template_type_key.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
     <div className="space-y-8">
@@ -182,7 +176,9 @@ export const PdfTemplateManagement: React.FC = () => {
                 </div>
                 
                 <h3 className="font-bold text-lg text-[var(--color-text-main)] mb-1">{template.template_name}</h3>
-                <p className="text-sm font-bold text-[var(--color-text-muted)] mb-4">{template.template_type}</p>
+                <p className="text-sm font-bold text-[var(--color-text-muted)] mb-4">
+                  {t(TEMPLATE_TYPES.find(tt => tt.key === template.template_type_key)?.i18nLabel || 'pdfTemplates.general')}
+                </p>
                 
                 <div className="mt-auto space-y-3 pt-4 border-t border-[var(--color-border-soft)]">
                   <div className="flex justify-between items-center text-xs font-bold text-[var(--color-text-muted)]">
@@ -250,11 +246,11 @@ export const PdfTemplateManagement: React.FC = () => {
                       <select 
                         required
                         className="input-field"
-                        value={formData.template_type}
-                        onChange={(e) => setFormData({...formData, template_type: e.target.value})}
+                        value={formData.template_type_key}
+                        onChange={(e) => setFormData({...formData, template_type_key: e.target.value as TemplateTypeKey})}
                       >
                         {TEMPLATE_TYPES.map(type => (
-                          <option key={type} value={type}>{type}</option>
+                          <option key={type.key} value={type.key}>{t(type.i18nLabel)}</option>
                         ))}
                       </select>
                     </div>

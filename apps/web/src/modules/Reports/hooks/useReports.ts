@@ -5,7 +5,28 @@ import { useUser } from '../../../context/UserContext';
 import { useAppContext } from '../../../context/AppContext';
 import { AuditReport, AuditPlan, AuditFinding, ExecData, ReportType } from '../types';
 import * as reportService from '../services/reportService';
-import { generatePdf, PdfSection } from '../../../utils/pdfExport';
+import api from '../../../api/httpClient';
+import { pollReportStatus, ReportStatusResponse } from '../../../utils/pollReportStatus';
+
+/**
+ * Maps the legacy camelCase report type IDs used in the frontend
+ * to the canonical snake_case TemplateTypeKey used by the server.
+ */
+const REPORT_TYPE_KEY_MAP: Record<string, string> = {
+  auditReport: 'audit_report',
+  quarterlyReport: 'quarterly_report',
+  complianceRequirements: 'audit_report',
+  activityAuditResults: 'audit_report',
+  eventParticipationSummary: 'general',
+  monthlyDepartmentReport: 'quarterly_report',
+};
+
+function resolveTemplateTypeKey(input: string | null | undefined): string {
+  if (!input) return 'general';
+  // Already a valid snake_case key
+  if (input.includes('_')) return input;
+  return REPORT_TYPE_KEY_MAP[input] || 'general';
+}
 
 export const useReports = (activeSubTab: 'audit' | 'executive') => {
   const { token } = useAuth();
@@ -37,6 +58,12 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
   const [execData, setExecData] = useState<ExecData | null>(null);
   const [execLoading, setExecLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Report generation status (server-side PDF)
+  const [reportGenerationStatus, setReportGenerationStatus] = useState<
+    'idle' | 'pending' | 'ready' | 'failed'
+  >('idle');
+  const [reportGenerationId, setReportGenerationId] = useState<string | null>(null);
 
   const reportTypes: ReportType[] = [
     { id: 'auditReport', label: t('reports.auditReport'), description: t('reports.auditReportDesc') },
@@ -129,6 +156,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
   };
 
   const generateAuditPDF = async () => {
+    // DOCX export path remains client-side (separate workflow)
     if (selectedReportType === 'quarterlyReport') {
       try {
         const { generateQuarterlyReportDocx } = await import('../../../utils/docxExport');
@@ -139,116 +167,114 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
         }, i18n.language as 'ar' | 'en');
       } catch (err) {
         console.error('Failed to generate docx:', err);
+        setError(t('reports.failedToGenerateDocument'));
       }
       return;
     }
 
-    const sections: any[] = [];
-    let content = "";
+    // Server-side PDF generation via POST /reports/generate
+    try {
+      setReportGenerationStatus('pending');
+      setError(null);
 
-    if (selectedAuditId) {
-      const audit = audits.find(a => String(a.id) === String(selectedAuditId));
-      if (audit) {
-        content += `${t('plan.department')}: ${audit.department}\n`;
-        content += `${t('plan.leadAuditor')}: ${audit.lead_auditor}\n\n`;
+      const templateTypeKey = resolveTemplateTypeKey(selectedReportType);
+
+      const response = await api.post('/reports/generate', {
+        auditId: selectedAuditId,
+        templateTypeKey,
+        title: reportTitle,
+        findings: findings.filter(f => selectedFindings.includes(f.id!)),
+      });
+
+      const { reportId, downloadUrl } = response.data;
+
+      if (downloadUrl) {
+        // Synchronous result — PDF was generated immediately
+        setReportGenerationStatus('ready');
+        window.open(downloadUrl);
+      } else if (reportId) {
+        // Asynchronous — poll for status
+        setReportGenerationId(reportId);
+        pollReportStatus(
+          reportId,
+          (url) => {
+            setReportGenerationStatus('ready');
+            setReportGenerationId(null);
+            window.open(url);
+          },
+          (errorMsg) => {
+            setReportGenerationStatus('failed');
+            setReportGenerationId(null);
+            setError(errorMsg);
+          },
+          {
+            onStatusUpdate: (status: ReportStatusResponse) => {
+              if (status.status === 'pending') {
+                setReportGenerationStatus('pending');
+              }
+            },
+          }
+        );
       }
+    } catch (err: unknown) {
+      setReportGenerationStatus('failed');
+      const message =
+        err instanceof Error ? err.message : t('reports.failedToGenerateDocument');
+      setError(message);
+      console.error('Failed to generate PDF:', err);
     }
-    
-    const typeDesc = reportTypes.find(rt => rt.id === selectedReportType)?.description;
-    if (typeDesc) {
-      content += `${t('evidence.description')}:\n${typeDesc}\n\n`;
-    }
-
-    content += `${t('reports.executiveSummary')}:\n`;
-    if (reportSummary) {
-      content += `${reportSummary}\n\n`;
-    } else if (selectedAuditId) {
-      const audit = audits.find(a => String(a.id) === String(selectedAuditId));
-      content += `${t('reports.reportSummaryText', { title: audit?.title || '' })}\n\n`;
-    } else {
-      content += `${typeDesc || t('reports.generalReportSummary')}\n\n`;
-    }
-
-    sections.push({ type: 'text', content });
-
-    if (selectedFindings.length > 0) {
-      const columns = [
-        { header: t('plan.riskRating'), dataKey: 'risk' },
-        { header: t('findings.title'), dataKey: 'finding' },
-        { header: t('findings.recommendation'), dataKey: 'recommendation' },
-        { header: t('common.statusLabel'), dataKey: 'status' }
-      ];
-      const tableData = findings
-        .filter(f => selectedFindings.includes(f.id!))
-        .map(f => ({
-          risk: f.risk_level,
-          finding: f.condition,
-          recommendation: f.recommendation,
-          status: f.status
-        }));
-      sections.push({ type: 'table', columns, data: tableData });
-    }
-
-    await generatePdf(reportTitle, sections, token || '', i18n.language as 'en' | 'ar', typeDesc ? (reportTypes.find(rt => rt.id === selectedReportType)?.label) : t('reports.auditReport'), {
-      title: reportTitle,
-      report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
-      summary: reportSummary,
-      findings: findings.filter(f => selectedFindings.includes(f.id!))
-    });
   };
 
   const generateExecPDF = async () => {
     if (!execData) return;
-    
-    const sections: PdfSection[] = [];
 
-    sections.push({
-      type: 'table',
-      title: t('reports.kpiTitle'),
-      columns: [
-        { header: t('reports.metric'), dataKey: 'metric' },
-        { header: t('reports.value'), dataKey: 'value' }
-      ],
-      data: [
-        { metric: t('reports.totalAudits'), value: execData.totalAudits },
-        { metric: t('reports.completedAudits'), value: execData.completedAudits },
-        { metric: t('reports.highRiskFindings'), value: execData.highRiskFindings }
-      ]
-    });
+    // Server-side PDF generation for executive summary
+    try {
+      setReportGenerationStatus('pending');
+      setError(null);
 
-    sections.push({
-      type: 'table',
-      title: t('reports.topRisks'),
-      columns: [
-        { header: t('reports.riskDescription'), dataKey: 'description' },
-        { header: t('plan.department'), dataKey: 'department' },
-        { header: t('reports.rating'), dataKey: 'rating' }
-      ],
-      data: execData.topRisks.map(r => ({
-        description: r.description,
-        department: r.owner,
-        rating: r.rating
-      }))
-    });
+      const response = await api.post('/reports/generate', {
+        auditId: null,
+        templateTypeKey: 'general',
+        title: t('reports.executiveSummaryReportTitle'),
+        executiveData: execData,
+      });
 
-    sections.push({
-      type: 'table',
-      title: t('reports.findingsByDepartment'),
-      columns: [
-        { header: t('plan.department'), dataKey: 'department' },
-        { header: t('reports.numberOfFindings'), dataKey: 'count' }
-      ],
-      data: execData.findingsByDept.map(f => ({
-        department: f.department,
-        count: f.count
-      }))
-    });
+      const { reportId, downloadUrl } = response.data;
 
-    await generatePdf(t('reports.executiveSummaryReportTitle'), sections, token || '', i18n.language as 'en' | 'ar', t('reports.generalReport'), {
-      title: t('reports.executiveSummaryReportTitle'),
-      report_date: new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US'),
-      kpi: execData
-    });
+      if (downloadUrl) {
+        setReportGenerationStatus('ready');
+        window.open(downloadUrl);
+      } else if (reportId) {
+        setReportGenerationId(reportId);
+        pollReportStatus(
+          reportId,
+          (url) => {
+            setReportGenerationStatus('ready');
+            setReportGenerationId(null);
+            window.open(url);
+          },
+          (errorMsg) => {
+            setReportGenerationStatus('failed');
+            setReportGenerationId(null);
+            setError(errorMsg);
+          },
+          {
+            onStatusUpdate: (status: ReportStatusResponse) => {
+              if (status.status === 'pending') {
+                setReportGenerationStatus('pending');
+              }
+            },
+          }
+        );
+      }
+    } catch (err: unknown) {
+      setReportGenerationStatus('failed');
+      const message =
+        err instanceof Error ? err.message : t('reports.failedToGenerateDocument');
+      setError(message);
+      console.error('Failed to generate executive PDF:', err);
+    }
   };
 
   const saveReport = async () => {
@@ -369,6 +395,9 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
     downloadExistingReport,
     filteredReports,
     fetchReports,
-    fetchExecData
+    fetchExecData,
+    // Server-side PDF generation status
+    reportGenerationStatus,
+    reportGenerationId,
   };
 };

@@ -1,117 +1,261 @@
-import { db } from '../db/index';
-import { NotFoundError, ValidationError } from '../utils/errors';
-import { BaseService } from './BaseService';
+import { db } from '../db/index.js';
+import { NotFoundError, ValidationError, ConflictError } from '../utils/errors.js';
+import { isValidTemplateTypeKey, type TemplateTypeKey } from '../constants/templateTypes.js';
+import {
+  mapRowToTemplate,
+  type PdfTemplate,
+  type PdfTemplateRow,
+  type CreateTemplateDto,
+  type UpdateTemplateDto,
+} from '../types/pdf.js';
 
+/** Maximum allowed content size in bytes (500 KB). */
+const MAX_CONTENT_BYTES = 500 * 1024;
+/** Maximum allowed template name length in characters. */
+const MAX_NAME_LENGTH = 200;
+
+/**
+ * PdfTemplateService — Unified CRUD service for PDF templates.
+ *
+ * Responsibilities:
+ * - CRUD operations with versioning
+ * - Ensure at most one default approved template per type
+ * - Validate inputs (name length, content size, valid typeKey)
+ * - Record audit trail (created_by / updated_by + timestamps)
+ * - Return service-layer objects with boolean is_default via mapRowToTemplate
+ */
 export class PdfTemplateService {
-  static async getAll() {
-    return await db.prepare("SELECT * FROM pdf_templates ORDER BY created_at DESC").all();
+  // ─── Read ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Returns all templates with boolean is_default mapping.
+   */
+  static async getAll(): Promise<PdfTemplate[]> {
+    const rows: PdfTemplateRow[] = await db
+      .prepare('SELECT * FROM pdf_templates ORDER BY created_at DESC')
+      .all();
+    return rows.map(mapRowToTemplate);
   }
 
-  static async getById(id: string) {
-    const template = await db.prepare("SELECT * FROM pdf_templates WHERE id = ?::uuid").get(id);
-    if (!template) throw new NotFoundError("Template not found");
-    return template;
-  }
-  
-  static async getActiveByType(type: string) {
-    const template = await db.prepare("SELECT * FROM pdf_templates WHERE template_type = ? AND status = 'Approved' AND is_default = 1 LIMIT 1").get(type);
-    return template;
+  /**
+   * Returns a single template by ID.
+   * Throws NotFoundError if the template does not exist.
+   */
+  static async getById(id: string): Promise<PdfTemplate> {
+    const row: PdfTemplateRow | undefined = await db
+      .prepare('SELECT * FROM pdf_templates WHERE id = ?::uuid')
+      .get(id);
+    if (!row) {
+      throw new NotFoundError('Template not found');
+    }
+    return mapRowToTemplate(row);
   }
 
-  static async create(data: any, username: string) {
-    if (!data.template_name || !data.template_type || !data.content) {
-      throw new ValidationError("Missing required fields for PDF template");
+  /**
+   * Returns the default approved template for a given type, or null.
+   * Postcondition: at most one template (Approved + is_default=true) per type.
+   */
+  static async getActiveByType(typeKey: TemplateTypeKey): Promise<PdfTemplate | null> {
+    const row: PdfTemplateRow | undefined = await db
+      .prepare(
+        `SELECT * FROM pdf_templates
+         WHERE template_type_key = ? AND status = 'Approved' AND is_default = 1
+         ORDER BY updated_at DESC
+         LIMIT 1`
+      )
+      .get(typeKey);
+    return row ? mapRowToTemplate(row) : null;
+  }
+
+  // ─── Create ───────────────────────────────────────────────────────────────
+
+  /**
+   * Creates a new template.
+   * - Validates name (≤200 chars), content (≤500KB), typeKey (valid)
+   * - Assigns version = 1
+   * - Records created_by / updated_by with current timestamp
+   * - If is_default requested, ensures uniqueness per type
+   */
+  static async create(data: CreateTemplateDto, username: string): Promise<PdfTemplate> {
+    // ── Validation ──
+    if (!data.template_name || !data.template_type_key || !data.content) {
+      throw new ValidationError('Missing required fields: template_name, template_type_key, and content are required');
+    }
+
+    if (data.template_name.length > MAX_NAME_LENGTH) {
+      throw new ValidationError(
+        `template_name exceeds maximum length of ${MAX_NAME_LENGTH} characters`
+      );
+    }
+
+    const contentBytes = Buffer.byteLength(data.content, 'utf-8');
+    if (contentBytes > MAX_CONTENT_BYTES) {
+      throw new ValidationError(
+        `content exceeds maximum size of 500 KB (received ${Math.round(contentBytes / 1024)} KB)`
+      );
+    }
+
+    if (!isValidTemplateTypeKey(data.template_type_key)) {
+      throw new ValidationError(
+        `Invalid template_type_key: "${data.template_type_key}". Must be one of the defined TemplateTypeKey values.`
+      );
+    }
+
+    // Only Approved templates can be set as default
+    const status = data.status || 'Draft';
+    const isDefault = data.is_default ? 1 : 0;
+
+    if (isDefault === 1 && status !== 'Approved') {
+      throw new ValidationError('Only Approved templates can be set as default');
     }
 
     return await db.transaction(async () => {
-      // If saving as default, unset others of same type
-      if (data.is_default && String(data.is_default) === '1') {
-        await db.prepare("UPDATE pdf_templates SET is_default = 0 WHERE template_type = ?").run(data.template_type);
+      // If marking as default, unset previous default for this type
+      if (isDefault === 1) {
+        await db
+          .prepare(
+            `UPDATE pdf_templates SET is_default = 0
+             WHERE template_type_key = ? AND is_default = 1`
+          )
+          .run(data.template_type_key);
       }
 
-      const stmt = db.prepare(`
-        INSERT INTO pdf_templates (template_name, template_type, content, status, is_default, version, created_by, updated_by)
-        VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-        RETURNING *
-      `);
-      
-      const newTemplate = await stmt.get(
-        data.template_name,
-        data.template_type,
-        data.content,
-        data.status || 'Draft',
-        data.is_default ? 1 : 0,
-        username,
-        username
-      );
+      const id = crypto.randomUUID();
+      const now = new Date().toISOString();
 
-      await db.prepare("INSERT INTO audit_trail (user, action, module, details) VALUES (?, ?, ?, ?)").run(
-        username, 'Created PDF Template', 'Settings', `Template ID: ${newTemplate.id}`
-      );
+      const row: PdfTemplateRow | undefined = await db
+        .prepare(
+          `INSERT INTO pdf_templates
+           (id, template_name, template_type_key, template_type, content, status, is_default, version, created_by, updated_by, created_at, updated_at)
+           VALUES (?::uuid, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?::timestamp, ?::timestamp)
+           RETURNING *`
+        )
+        .get(
+          id,
+          data.template_name,
+          data.template_type_key,
+          data.template_type_key, // template_type mirrors template_type_key for backwards compat
+          data.content,
+          status,
+          isDefault,
+          username,
+          username,
+          now,
+          now
+        );
 
-      return newTemplate;
+      if (!row) {
+        throw new Error('Failed to create template');
+      }
+
+      return mapRowToTemplate(row);
     });
   }
 
-  static async update(id: string, data: any, username: string) {
+  // ─── Update ───────────────────────────────────────────────────────────────
+
+  /**
+   * Updates an existing template.
+   * - Version increments only when content changes
+   * - Records updated_by + updated_at timestamp
+   * - If is_default requested, ensures uniqueness per type
+   */
+  static async update(id: string, data: UpdateTemplateDto, username: string): Promise<PdfTemplate> {
     const existing = await this.getById(id);
-    
+
+    // ── Validation ──
+    if (data.template_name !== undefined && data.template_name.length > MAX_NAME_LENGTH) {
+      throw new ValidationError(
+        `template_name exceeds maximum length of ${MAX_NAME_LENGTH} characters`
+      );
+    }
+
+    if (data.content !== undefined) {
+      const contentBytes = Buffer.byteLength(data.content, 'utf-8');
+      if (contentBytes > MAX_CONTENT_BYTES) {
+        throw new ValidationError(
+          `content exceeds maximum size of 500 KB (received ${Math.round(contentBytes / 1024)} KB)`
+        );
+      }
+    }
+
+    // Determine if setting default
+    const wantsDefault = data.is_default === true;
+    const effectiveStatus = data.status ?? existing.status;
+
+    if (wantsDefault && effectiveStatus !== 'Approved') {
+      throw new ValidationError('Only Approved templates can be set as default');
+    }
+
+    // Version increments only on content change (Req 1.3)
+    let newVersion = existing.version;
+    if (data.content !== undefined && data.content !== existing.content) {
+      newVersion = existing.version + 1;
+    }
+
     return await db.transaction(async () => {
-      if (data.is_default && String(data.is_default) === '1') {
-        await db.prepare("UPDATE pdf_templates SET is_default = 0 WHERE template_type = ?").run(data.template_type || existing.template_type);
+      // Ensure only one default per type (Req 2.1)
+      if (wantsDefault) {
+        await db
+          .prepare(
+            `UPDATE pdf_templates SET is_default = 0
+             WHERE template_type_key = ? AND is_default = 1`
+          )
+          .run(existing.template_type_key);
       }
 
-      // If content changed and not just status, maybe bump version
-      let version = existing.version;
-      if (data.content && data.content !== existing.content) {
-        version += 1;
+      const now = new Date().toISOString();
+
+      const row: PdfTemplateRow | undefined = await db
+        .prepare(
+          `UPDATE pdf_templates
+           SET template_name = COALESCE(?, template_name),
+               content = COALESCE(?, content),
+               status = COALESCE(?, status),
+               is_default = COALESCE(?, is_default),
+               version = ?,
+               updated_by = ?,
+               updated_at = ?::timestamp
+           WHERE id = ?::uuid
+           RETURNING *`
+        )
+        .get(
+          data.template_name ?? null,
+          data.content ?? null,
+          data.status ?? null,
+          data.is_default !== undefined ? (data.is_default ? 1 : 0) : null,
+          newVersion,
+          username,
+          now,
+          id
+        );
+
+      if (!row) {
+        throw new NotFoundError('Template not found');
       }
 
-      const stmt = db.prepare(`
-        UPDATE pdf_templates 
-        SET template_name = COALESCE(?, template_name),
-            template_type = COALESCE(?, template_type),
-            content = COALESCE(?, content),
-            status = COALESCE(?, status),
-            is_default = COALESCE(?, is_default),
-            version = ?,
-            updated_by = ?,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?::uuid
-        RETURNING *
-      `);
-
-      const updated = await stmt.get(
-        data.template_name,
-        data.template_type,
-        data.content,
-        data.status,
-        data.is_default !== undefined ? (data.is_default ? 1 : 0) : null,
-        version,
-        username,
-        id
-      );
-
-      await db.prepare("INSERT INTO audit_trail (user, action, module, details) VALUES (?, ?, ?, ?)").run(
-        username, 'Updated PDF Template', 'Settings', `Template ID: ${id}, Status: ${updated.status}`
-      );
-
-      return updated;
+      return mapRowToTemplate(row);
     });
   }
 
-  static async approve(id: string, username: string) {
-    return await this.update(id, { status: 'Approved' }, username);
-  }
+  // ─── Delete ───────────────────────────────────────────────────────────────
 
-  static async delete(id: string, username: string) {
-    return await db.transaction(async () => {
-      await db.prepare("DELETE FROM pdf_templates WHERE id = ?::uuid").run(id);
-      
-      await db.prepare("INSERT INTO audit_trail (user, action, module, details) VALUES (?, ?, ?, ?)").run(
-        username, 'Deleted PDF Template', 'Settings', `Template ID: ${id}`
+  /**
+   * Deletes a template.
+   * Rejects deletion of a default approved template (Req 1.6).
+   */
+  static async delete(id: string, _username: string): Promise<void> {
+    const existing = await this.getById(id);
+
+    // Protect default approved templates (Req 1.6)
+    if (existing.is_default === true && existing.status === 'Approved') {
+      throw new ValidationError(
+        'Cannot delete the default approved template. Designate another template as default first.'
       );
-      return true;
+    }
+
+    await db.transaction(async () => {
+      await db.prepare('DELETE FROM pdf_templates WHERE id = ?::uuid').run(id);
     });
   }
 }

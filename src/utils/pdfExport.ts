@@ -1,89 +1,21 @@
+/**
+ * PDF Export Utilities
+ *
+ * PRIMARY PATH: Server-side PDF generation via POST /reports/generate
+ * (uses Puppeteer — see PdfEngine in packages/api/)
+ *
+ * EMERGENCY FALLBACK ONLY: jsPDF + jspdf-autotable below.
+ * Used only when the server-side endpoint is unreachable.
+ * html2canvas has been removed — it produced rasterized (image-based) PDFs
+ * with no selectable text, poor RTL support, and unreliable rendering.
+ */
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
-import handlebars from 'handlebars';
-import html2canvas from 'html2canvas';
 import { TAHOMA_FONT_BASE64 } from '../assets/fonts/tahoma-base64';
 import i18n from '../i18n';
 
 const t = i18n.t.bind(i18n);
-
-export const generateDynamicPdf = async (
-  templateContent: string,
-  data: any,
-  fileName: string
-) => {
-  try {
-    // 1. Compile template
-    const template = handlebars.compile(templateContent);
-    const htmlString = template(data);
-
-    // 2. Create a temporary container
-    const container = document.createElement('div');
-    container.innerHTML = htmlString;
-    container.style.position = 'absolute';
-    container.style.top = '-9999px';
-    container.style.left = '-9999px';
-    container.style.width = '800px'; // A4 width approx in pixels
-    container.style.background = 'white';
-    document.body.appendChild(container);
-
-    // 3. Render to canvas
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
-
-    // 4. Create PDF
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'pt',
-      format: 'a4'
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    const pdfWidth = doc.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    // Handle pagination roughly
-    let heightLeft = pdfHeight;
-    let position = 0;
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft >= 0) {
-      position = heightLeft - pdfHeight;
-      doc.addPage();
-      doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-    }
-
-    doc.save(`${fileName}.pdf`);
-
-    // Clean up
-    document.body.removeChild(container);
-  } catch (err) {
-    console.error('Error generating dynamic PDF', err);
-    throw err;
-  }
-};
-
-export const fetchPdfSettings = async (token: string) => {
-  try {
-    const res = await api.get('/pdf-settings', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.data) {
-      return res.data;
-    }
-  } catch (err) {
-    console.error('Error fetching PDF settings:', err);
-  }
-  return null;
-};
 
 export interface PdfSection {
   type: 'text' | 'table';
@@ -96,27 +28,24 @@ export interface PdfSection {
 // Use locally embedded font (no internet required)
 let cachedArabicFont: string | null = TAHOMA_FONT_BASE64;
 
+/**
+ * generatePdf — Emergency fallback using jsPDF (client-side).
+ *
+ * The primary PDF generation path is server-side via POST /reports/generate.
+ * This function is kept ONLY as a fallback when the server is unreachable.
+ * It does NOT use html2canvas (removed) — it renders directly via jsPDF text/table APIs.
+ */
 export const generatePdf = async (
   title: string, 
   sections: PdfSection[],
   token: string,
   language: 'ar' | 'en',
-  templateType?: string,
-  templateData?: any
+  _templateType?: string,
+  _templateData?: any
 ) => {
-  if (templateType && templateData) {
-    try {
-      const res = await api.get(`/pdf-templates/active?type=${encodeURIComponent(templateType)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.data && res.data.content) {
-        await generateDynamicPdf(res.data.content, templateData, title);
-        return;
-      }
-    } catch (e) {
-      console.warn(`No active template found for ${templateType}, falling back to legacy export.`);
-    }
-  }
+  // NOTE: Template-based rendering (via html2canvas) has been removed.
+  // The primary path is now server-side. This fallback uses jsPDF directly.
+
   const settings = await fetchPdfSettings(token) || {
     arabic_font_name: 'Cairo',
     arabic_font_size: 12,
@@ -215,7 +144,7 @@ export const generatePdf = async (
           bottom: settings.margin_bottom, 
           left: settings.margin_left 
         },
-        didDrawPage: (data: any) => {
+        didDrawPage: (_data: any) => {
           // Footer is drawn later for all pages
         }
       });
@@ -235,4 +164,18 @@ export const generatePdf = async (
   }
 
   doc.save(`${title}.pdf`);
+};
+
+export const fetchPdfSettings = async (token: string) => {
+  try {
+    const res = await api.get('/pdf-settings', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.data) {
+      return res.data;
+    }
+  } catch (err) {
+    console.error('Error fetching PDF settings:', err);
+  }
+  return null;
 };

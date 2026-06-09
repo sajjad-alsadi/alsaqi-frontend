@@ -504,4 +504,61 @@ export const versionedMigrations: Migration[] = [
       await db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_evidence_finding_id ON audit_evidence(finding_id)`);
     },
   },
+
+  {
+    version: '009',
+    name: 'Add template_type_key column to pdf_templates',
+    type: 'schema',
+    up: async () => {
+      // Step 1: Add the template_type_key column (nullable initially to allow population)
+      await db.exec(`
+        ALTER TABLE pdf_templates ADD COLUMN IF NOT EXISTS template_type_key VARCHAR(50)
+      `);
+
+      // Step 2: Populate template_type_key using CASE mapping from existing template_type values
+      // Maps Arabic labels and English labels to snake_case keys.
+      // Unmapped, NULL, or empty values default to 'general'.
+      await db.exec(`
+        UPDATE pdf_templates SET template_type_key = CASE
+          WHEN template_type = 'تقرير التدقيق' OR template_type = 'Audit Report' THEN 'audit_report'
+          WHEN template_type = 'التقرير الربعي' OR template_type = 'Quarterly Report' THEN 'quarterly_report'
+          WHEN template_type = 'التقرير السنوي' OR template_type = 'Annual Report' THEN 'annual_report'
+          WHEN template_type = 'خطة التدقيق' OR template_type = 'Audit Plan' THEN 'audit_plan'
+          WHEN template_type = 'مهام التدقيق' OR template_type = 'Audit Missions' THEN 'audit_missions'
+          WHEN template_type = 'التوصيات' OR template_type = 'Recommendations' THEN 'recommendations'
+          WHEN template_type = 'خطاب صادر' OR template_type = 'Outgoing Letter' THEN 'outgoing_letter'
+          ELSE 'general'
+        END
+        WHERE template_type_key IS NULL
+      `);
+
+      // Step 3: Make column NOT NULL after all rows are populated
+      await db.exec(`
+        ALTER TABLE pdf_templates ALTER COLUMN template_type_key SET NOT NULL
+      `);
+
+      // Step 4: Set default value for future inserts
+      await db.exec(`
+        ALTER TABLE pdf_templates ALTER COLUMN template_type_key SET DEFAULT 'general'
+      `);
+
+      // Step 5: Create partial composite index on (template_type_key, status)
+      // filtered by is_default = 1 for fast lookups of default templates
+      await db.exec(`
+        CREATE INDEX IF NOT EXISTS idx_pdf_templates_type_key_status
+          ON pdf_templates(template_type_key, status)
+          WHERE is_default = 1
+      `);
+
+      // Step 6: Create unique partial index to enforce one default approved template per type
+      // This prevents race conditions from creating multiple defaults
+      await db.exec(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_one_default_per_type
+          ON pdf_templates(template_type_key)
+          WHERE is_default = 1 AND status = 'Approved'
+      `);
+
+      // Note: The original template_type column is preserved unchanged for backward compatibility
+    },
+  },
 ];

@@ -42,7 +42,7 @@ export default defineConfig(({mode}) => {
               if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom') || id.includes('framer-motion') || id.includes('motion')) {
                 return 'vendor-react';
               }
-              if (id.includes('jspdf') || id.includes('xlsx') || id.includes('html2canvas') || id.includes('docx') || id.includes('react-pdf')) {
+              if (id.includes('jspdf') || id.includes('xlsx') || id.includes('docx') || id.includes('react-pdf')) {
                 return 'vendor-export';
               }
               if (id.includes('recharts') || id.includes('lucide-react')) {

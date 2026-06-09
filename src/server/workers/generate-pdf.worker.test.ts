@@ -24,47 +24,53 @@ vi.mock('ioredis', () => ({
   default: vi.fn(),
 }));
 
-// Mock jspdf and jspdf-autotable
-vi.mock('jspdf', () => {
-  const mockDoc = {
-    addFileToVFS: vi.fn(),
-    addFont: vi.fn(),
-    setFont: vi.fn(),
-    setFontSize: vi.fn(),
-    setDrawColor: vi.fn(),
-    setLineWidth: vi.fn(),
-    setTextColor: vi.fn(),
-    line: vi.fn(),
-    text: vi.fn(),
-    addPage: vi.fn(),
-    setPage: vi.fn(),
-    splitTextToSize: vi.fn().mockReturnValue(['line1']),
-    output: vi.fn().mockReturnValue(new ArrayBuffer(1024)),
-    autoTable: vi.fn(),
-    lastAutoTable: { finalY: 100 },
-    internal: {
-      pageSize: {
-        getWidth: () => 210,
-        getHeight: () => 297,
-      },
-      getNumberOfPages: () => 1,
-    },
-  };
+// Mock PdfTemplateService
+const mockGetActiveByType = vi.fn();
+vi.mock('../../../packages/api/src/services/PdfTemplateService.js', () => ({
+  PdfTemplateService: {
+    getActiveByType: (...args: any[]) => mockGetActiveByType(...args),
+  },
+}));
 
-  // Use a regular function so it can be used with 'new'
-  function MockJsPDF() {
-    return mockDoc;
-  }
+// Mock SettingsService
+const mockGetPdfSettings = vi.fn();
+vi.mock('../../../packages/api/src/services/SettingsService.js', () => ({
+  SettingsService: {
+    getPdfSettings: (...args: any[]) => mockGetPdfSettings(...args),
+  },
+}));
 
-  return {
-    jsPDF: MockJsPDF,
-  };
-});
+// Mock PdfEngine
+const mockRenderFromTemplate = vi.fn();
+vi.mock('../../../packages/api/src/services/PdfEngine.js', () => ({
+  pdfEngine: {
+    renderFromTemplate: (...args: any[]) => mockRenderFromTemplate(...args),
+  },
+}));
 
-vi.mock('jspdf-autotable', () => ({}));
+// Mock resolveTemplateTypeKey
+vi.mock('../../../packages/api/src/constants/templateTypes.js', () => ({
+  resolveTemplateTypeKey: (input: string | null | undefined) => {
+    if (!input) return 'general';
+    const validKeys = ['audit_report', 'quarterly_report', 'annual_report', 'audit_plan', 'audit_missions', 'recommendations', 'outgoing_letter', 'general'];
+    if (validKeys.includes(input)) return input;
+    const mapping: Record<string, string> = {
+      'auditReport': 'audit_report',
+      'standard': 'general',
+      'default': 'general',
+    };
+    return mapping[input] || 'general';
+  },
+}));
 
-vi.mock('../../assets/fonts/tahoma-base64.js', () => ({
-  TAHOMA_FONT_BASE64: 'base64-font-data',
+// Mock mapRowToSettings
+vi.mock('../../../packages/api/src/types/pdf.js', () => ({
+  mapRowToSettings: (row: any) => ({
+    ...row,
+    rtl_enabled: row.rtl_enabled === 1,
+    show_page_number: row.show_page_number === 1,
+    logo_position: row.logo_position?.toLowerCase() || 'right',
+  }),
 }));
 
 // Import after mocks are set up
@@ -112,6 +118,29 @@ describe('generatePdfWorker', () => {
     { id: 'e-1', finding_id: 'f-1', type: 'document', description: 'Bank statement', file_name: 'stmt.pdf', upload_date: '2024-01-15' },
   ];
 
+  const defaultPdfSettings = {
+    arabic_font_name: 'Amiri',
+    arabic_font_size: 12,
+    heading_font_size: 16,
+    subheading_font_size: 14,
+    table_font_size: 10,
+    rtl_enabled: 1,
+    margin_top: 20,
+    margin_right: 20,
+    margin_bottom: 20,
+    margin_left: 20,
+    header_template: '',
+    footer_template: '',
+    logo_position: 'Right',
+    show_page_number: 1,
+  };
+
+  const defaultPdfResult = {
+    buffer: Buffer.from('%PDF-1.4 mock pdf content'),
+    pageCount: 1,
+    fileSize: 1024,
+  };
+
   function createJob(overrides?: Partial<JobDataMap['generate-pdf']>, attemptsMade = 0): Job<JobDataMap['generate-pdf']> {
     return {
       data: {
@@ -127,7 +156,6 @@ describe('generatePdfWorker', () => {
   function setupDbMocks(audit: any | null, findings: any[] = [], recommendations: any[] = [], evidence: any[] = []) {
     const prepareMock = vi.fn();
 
-    // Each prepare() call returns an object with get/all/run
     prepareMock.mockImplementation((sql: string) => {
       if (sql.includes('audit_plans')) {
         return { get: vi.fn().mockResolvedValue(audit) };
@@ -176,6 +204,11 @@ describe('generatePdfWorker', () => {
       logger: mockLogger as any,
       reportProgress: mockReportProgress,
     };
+
+    // Default mock implementations
+    mockGetActiveByType.mockResolvedValue(null); // No stored template (use fallback)
+    mockGetPdfSettings.mockResolvedValue(defaultPdfSettings);
+    mockRenderFromTemplate.mockResolvedValue(defaultPdfResult);
   });
 
   describe('successful PDF generation', () => {
@@ -193,6 +226,7 @@ describe('generatePdfWorker', () => {
 
       // Progress should be reported at expected milestones
       expect(mockReportProgress).toHaveBeenCalledWith(10);
+      expect(mockReportProgress).toHaveBeenCalledWith(20);
       expect(mockReportProgress).toHaveBeenCalledWith(30);
       expect(mockReportProgress).toHaveBeenCalledWith(70);
       expect(mockReportProgress).toHaveBeenCalledWith(90);
@@ -207,14 +241,13 @@ describe('generatePdfWorker', () => {
         (call: any[]) => call[0].includes('UPDATE audit_reports') && call[0].includes('status'),
       );
 
-      // The last UPDATE should be the success update with 'ready'
       expect(updateCalls.length).toBeGreaterThan(0);
       const lastUpdate = updateCalls[updateCalls.length - 1];
       expect(lastUpdate[0]).toContain('file_size');
       expect(lastUpdate[0]).toContain('content');
     });
 
-    it('should upload metadata with reportId, auditId, and generatedAt', async () => {
+    it('should upload metadata with reportId, auditId, templateTypeKey, and generatedAt', async () => {
       await generatePdfWorker(createJob(), context);
 
       expect(mockStorage.upload).toHaveBeenCalledWith(
@@ -222,6 +255,7 @@ describe('generatePdfWorker', () => {
           metadata: expect.objectContaining({
             reportId: 'report-456',
             auditId: 'audit-123',
+            templateTypeKey: 'general',
             generatedAt: expect.any(String),
           }),
         }),
@@ -229,37 +263,143 @@ describe('generatePdfWorker', () => {
     });
   });
 
-  describe('RTL support (Requirement 4.4)', () => {
-    it('should render PDF with RTL when audit language is Arabic', async () => {
+  describe('template and settings fetching (Req 5.1, 5.2, 5.3)', () => {
+    it('should call PdfTemplateService.getActiveByType with resolved templateTypeKey', async () => {
+      await generatePdfWorker(createJob({ template: 'audit_report' }), context);
+
+      expect(mockGetActiveByType).toHaveBeenCalledWith('audit_report');
+    });
+
+    it('should resolve legacy template names via resolveTemplateTypeKey', async () => {
+      await generatePdfWorker(createJob({ template: 'auditReport' }), context);
+
+      expect(mockGetActiveByType).toHaveBeenCalledWith('audit_report');
+    });
+
+    it('should fetch PDF settings via SettingsService', async () => {
+      await generatePdfWorker(createJob(), context);
+
+      expect(mockGetPdfSettings).toHaveBeenCalled();
+    });
+
+    it('should pass active template to PdfEngine.renderFromTemplate when found', async () => {
+      const mockTemplate = {
+        id: 'tpl-1',
+        template_name: 'Audit Report',
+        template_type_key: 'audit_report',
+        content: '<h1>{{auditTitle}}</h1>',
+        status: 'Approved',
+        is_default: true,
+        version: 1,
+        created_by: 'admin',
+        updated_by: 'admin',
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+      };
+      mockGetActiveByType.mockResolvedValue(mockTemplate);
+
+      await generatePdfWorker(createJob({ template: 'audit_report' }), context);
+
+      expect(mockRenderFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: mockTemplate,
+        }),
+      );
+    });
+
+    it('should pass undefined template to PdfEngine when no active template exists', async () => {
+      mockGetActiveByType.mockResolvedValue(null);
+
+      await generatePdfWorker(createJob(), context);
+
+      expect(mockRenderFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: undefined,
+        }),
+      );
+    });
+
+    it('should pass formatted audit data to PdfEngine', async () => {
+      await generatePdfWorker(createJob(), context);
+
+      expect(mockRenderFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            auditTitle: 'Test Audit',
+            auditorName: 'John Doe',
+            departmentName: 'Finance',
+            findings: expect.arrayContaining([
+              expect.objectContaining({ title: 'Finding 1' }),
+            ]),
+          }),
+        }),
+      );
+    });
+
+    it('should pass PdfSettings (with boolean conversions) to PdfEngine', async () => {
+      await generatePdfWorker(createJob(), context);
+
+      expect(mockRenderFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            rtl_enabled: true,
+            show_page_number: true,
+            margin_top: 20,
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('language handling', () => {
+    it('should pass language "ar" when audit language is Arabic', async () => {
       const arabicAudit = { ...defaultAudit, language: 'ar' };
       mockDb.prepare = setupDbMocks(arabicAudit, defaultFindings, defaultRecommendations, defaultEvidence);
 
       await generatePdfWorker(createJob(), context);
 
-      // Should still complete successfully
-      expect(mockStorage.upload).toHaveBeenCalled();
-      expect(mockReportProgress).toHaveBeenCalledWith(100);
+      expect(mockRenderFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          language: 'ar',
+        }),
+      );
     });
 
-    it('should render PDF without RTL when language is not Arabic', async () => {
+    it('should pass language "en" when audit language is English', async () => {
       const englishAudit = { ...defaultAudit, language: 'en' };
       mockDb.prepare = setupDbMocks(englishAudit, defaultFindings, defaultRecommendations, defaultEvidence);
 
       await generatePdfWorker(createJob(), context);
 
-      expect(mockStorage.upload).toHaveBeenCalled();
-      expect(mockReportProgress).toHaveBeenCalledWith(100);
+      expect(mockRenderFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          language: 'en',
+        }),
+      );
+    });
+
+    it('should default to "ar" when no language specified', async () => {
+      const noLangAudit = { ...defaultAudit, language: undefined };
+      mockDb.prepare = setupDbMocks(noLangAudit, defaultFindings, defaultRecommendations, defaultEvidence);
+
+      await generatePdfWorker(createJob(), context);
+
+      expect(mockRenderFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          language: 'ar',
+        }),
+      );
     });
   });
 
-  describe('audit not found (Requirement 4.7)', () => {
+  describe('audit not found (Requirement 5.5)', () => {
     it('should throw UnrecoverableError when audit ID not found', async () => {
       mockDb.prepare = setupDbMocks(null);
 
       await expect(generatePdfWorker(createJob(), context)).rejects.toThrow('Audit audit-123 not found');
     });
 
-    it('should atomically update report status and error when audit not found', async () => {
+    it('should mark report status as failed when audit not found', async () => {
       const runMock = vi.fn().mockResolvedValue(undefined);
       mockDb.prepare = vi.fn().mockImplementation((sql: string) => {
         if (sql.includes('audit_plans')) {
@@ -275,35 +415,21 @@ describe('generatePdfWorker', () => {
         'Audit audit-123 not found',
       );
 
-      // Should update both status AND error in one call
       expect(runMock).toHaveBeenCalledWith('failed', 'Audit audit-123 not found', 'report-456');
     });
 
-    it('should NOT retry when audit is not found', async () => {
+    it('should NOT retry when audit is not found (UnrecoverableError)', async () => {
       mockDb.prepare = setupDbMocks(null);
 
       try {
         await generatePdfWorker(createJob(), context);
       } catch (error: any) {
-        // UnrecoverableError tells BullMQ to not retry
         expect(error.name).toBe('UnrecoverableError');
       }
     });
-
-    it('should report progress(10) before checking audit existence', async () => {
-      mockDb.prepare = setupDbMocks(null);
-
-      try {
-        await generatePdfWorker(createJob(), context);
-      } catch {
-        // Expected
-      }
-
-      expect(mockReportProgress).toHaveBeenCalledWith(10);
-    });
   });
 
-  describe('retry and failure handling (Requirement 4.8)', () => {
+  describe('retry and failure handling (Requirement 5.6, 5.9, 8.3)', () => {
     it('should mark report as failed when max retries exhausted on upload failure', async () => {
       const runMock = vi.fn().mockResolvedValue(undefined);
       mockDb.prepare = vi.fn().mockImplementation((sql: string) => {
@@ -325,7 +451,6 @@ describe('generatePdfWorker', () => {
         return { get: vi.fn(), all: vi.fn(), run: vi.fn() };
       });
 
-      // Upload fails
       mockStorage.upload.mockRejectedValue(new Error('Storage unavailable'));
 
       // attemptsMade = 2 means this is the 3rd attempt (0-indexed)
@@ -333,11 +458,10 @@ describe('generatePdfWorker', () => {
 
       await expect(generatePdfWorker(job, context)).rejects.toThrow('Storage unavailable');
 
-      // Should mark report as failed with error message
       expect(runMock).toHaveBeenCalledWith('failed', 'Storage unavailable', 'report-456');
     });
 
-    it('should NOT mark report as failed on intermediate retry attempts', async () => {
+    it('should NOT mark report as failed on intermediate retry attempts (Req 5.9)', async () => {
       const runMock = vi.fn().mockResolvedValue(undefined);
       mockDb.prepare = vi.fn().mockImplementation((sql: string) => {
         if (sql.includes('audit_plans')) {
@@ -360,7 +484,7 @@ describe('generatePdfWorker', () => {
 
       mockStorage.upload.mockRejectedValue(new Error('Storage unavailable'));
 
-      // attemptsMade = 0 means first attempt
+      // attemptsMade = 0 means first attempt — should retry, NOT mark failed
       const job = createJob(undefined, 0);
 
       await expect(generatePdfWorker(job, context)).rejects.toThrow('Storage unavailable');
@@ -386,15 +510,15 @@ describe('generatePdfWorker', () => {
       }
     });
 
-    it('should report progress in order: 10, 30, 70, 90, 100', async () => {
+    it('should report progress in expected order: 10, 20, 30, 70, 90, 100', async () => {
       await generatePdfWorker(createJob(), context);
 
       const progressCalls = mockReportProgress.mock.calls.map((c: any[]) => c[0]);
-      expect(progressCalls).toEqual([10, 30, 70, 90, 100]);
+      expect(progressCalls).toEqual([10, 20, 30, 70, 90, 100]);
     });
   });
 
-  describe('storage key format (Requirement 4.5)', () => {
+  describe('storage key format (Requirement 5.4)', () => {
     it('should upload PDF to audits/{auditId}/reports/{reportId}.pdf', async () => {
       const job = createJob({ reportId: 'rpt-xyz', auditId: 'aud-abc', template: 'standard' });
 
@@ -415,19 +539,15 @@ describe('generatePdfWorker', () => {
     });
   });
 
-  describe('fetching audit data (Requirement 4.3)', () => {
+  describe('fetching audit data', () => {
     it('should fetch findings, recommendations, and evidence from PostgreSQL', async () => {
       await generatePdfWorker(createJob(), context);
 
       const prepareCalls = mockDb.prepare.mock.calls.map((c: any[]) => c[0]);
 
-      // Should query audit_plans
       expect(prepareCalls.some((sql: string) => sql.includes('audit_plans'))).toBe(true);
-      // Should query audit_findings
       expect(prepareCalls.some((sql: string) => sql.includes('audit_findings'))).toBe(true);
-      // Should query recommendations
       expect(prepareCalls.some((sql: string) => sql.includes('recommendations'))).toBe(true);
-      // Should query audit_evidence
       expect(prepareCalls.some((sql: string) => sql.includes('audit_evidence'))).toBe(true);
     });
 
