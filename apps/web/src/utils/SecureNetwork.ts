@@ -29,7 +29,9 @@ export class SecureNetwork {
 
     private async initKeys() {
         // Derive key from env variable; in production VITE_NETWORK_SECRET must be set
-        const baseKey = import.meta.env.VITE_NETWORK_SECRET || 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const env = (import.meta as any).env as Record<string, string> | undefined;
+        const baseKey = env?.['VITE_NETWORK_SECRET'] || 
             (typeof window !== 'undefined' ? `${window.location.origin}-${navigator.userAgent.slice(0, 32)}` : 'dev-only-key');
         this.hmacKey = await CryptoUtils.importHMACKey(baseKey);
     }

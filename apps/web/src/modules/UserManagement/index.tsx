@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUserManagement } from '../../hooks/useUserManagement';
-import { userService } from '../../api/compat/userService';
+import { api } from '../../api';
 import { ROLES } from '../../permissions';
 import { UserManagementTab, AccessScope } from '../../constants';
 import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
-import api from '../../api/httpClient';
 import { extractErrorMessage } from '../../utils/errorService';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
@@ -135,7 +134,7 @@ const UserManagement: React.FC = () => {
     try {
       const promises = modifiedRoles.map(modifiedRole => {
         const newPermIds = [...new Set((modifiedRole.permissions || []).map((p: any) => p.id))] as string[];
-        return userService.updateRolePermissions(modifiedRole.id, { permissionIds: newPermIds });
+        return api.userManagement.updateRolePermissions(modifiedRole.id, { permissionIds: newPermIds });
       });
 
       await Promise.all(promises);
@@ -151,7 +150,7 @@ const UserManagement: React.FC = () => {
 
   const handleUpdateSettings = async (newSettings: any) => {
     try {
-      await userService.updateSettings(newSettings);
+      await api.userManagement.updateSettings(newSettings);
       setShowSaveSuccess(true);
       setTimeout(() => setShowSaveSuccess(false), 3000);
       toast.success(t('updateSuccess'));
@@ -164,7 +163,7 @@ const UserManagement: React.FC = () => {
 
   const handleRevokeSession = async (sessionId: string | number) => {
     try {
-      await userService.revokeSession(sessionId);
+      await api.userManagement.revokeSession(sessionId);
       refreshAll();
     } catch (err) { logger.error('Operation failed', err); }
   };
@@ -211,10 +210,10 @@ const UserManagement: React.FC = () => {
       }
 
       if (editingUser) {
-        await userService.updateUser(editingUser.id, payload);
+        await api.users.update(editingUser.id, payload);
         toast.success(t('updateSuccess'));
       } else {
-        await userService.createUser(payload);
+        await api.users.create(payload);
         toast.success(t('createSuccess'));
       }
       
@@ -256,7 +255,7 @@ const UserManagement: React.FC = () => {
   const handleConfirmSuspend = async () => {
     if (!selectedUserId) return;
     try {
-      await userService.suspendUser(selectedUserId);
+      await api.userManagement.suspendUser(selectedUserId);
       toast.success(t('updateSuccess'));
       refreshAll();
     } catch (err) { 
@@ -270,7 +269,7 @@ const UserManagement: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (!selectedUserId) return;
     try {
-      await userService.deleteUser(selectedUserId);
+      await api.users.delete(selectedUserId);
       toast.success(t('deleteSuccess'));
       refreshAll();
     } catch (err) { 
@@ -290,7 +289,7 @@ const UserManagement: React.FC = () => {
       return;
     }
     try {
-      await userService.resetPassword(selectedUserId, { newPassword: resetPasswordValue });
+      await api.userManagement.resetPassword(selectedUserId, { newPassword: resetPasswordValue });
       toast.success(t('userManagement.resetPassword'));
       setTimeout(() => {
         setShowResetPassword(false);
@@ -306,7 +305,7 @@ const UserManagement: React.FC = () => {
     setUnlockError('');
     if (!selectedUserId) return;
     try {
-      await userService.unlockUser(selectedUserId);
+      await api.userManagement.unlockUser(selectedUserId);
       toast.success(t('updateSuccess'));
       refreshAll();
       setShowUnlockConfirm(false);
@@ -319,7 +318,7 @@ const UserManagement: React.FC = () => {
 
   const handleApproveReset = async (requestId: string | number) => {
     try {
-      await userService.approveReset({ requestId: String(requestId), action: 'approve' });
+      await api.userManagement.approveReset({ requestId: String(requestId), action: 'approve' });
       refreshAll();
     } catch (err) { logger.error('Operation failed', err); }
   };
@@ -327,8 +326,8 @@ const UserManagement: React.FC = () => {
   const handleConfirmApproveReset = async () => {
     if (!selectedRequestId) return;
     try {
-      const res = await api.post('/auth/approve-reset', { requestId: selectedRequestId });
-      setTempPassword(res.data.tempPassword);
+      const res = await api.userManagement.approveReset({ requestId: String(selectedRequestId), action: 'approve' });
+      setTempPassword((res as any).tempPassword || '');
       refreshAll();
       setShowResetConfirm(false);
     } catch (err) { logger.error('Operation failed', err); }

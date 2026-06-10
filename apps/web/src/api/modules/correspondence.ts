@@ -49,6 +49,8 @@ const DeleteResponseSchema = z.object({
   deleted: z.boolean(),
 });
 
+const StatsResponseSchema = z.record(z.string(), z.unknown());
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface CorrespondenceApi {
@@ -59,11 +61,20 @@ export interface CorrespondenceApi {
     status?: string;
   }): Promise<Correspondence[]>;
   getById(id: string): Promise<Correspondence>;
+  getStats(): Promise<Record<string, unknown>>;
+  getIncoming(query?: { page?: number; pageSize?: number; search?: string; status?: string; type?: string }): Promise<Correspondence[]>;
+  getOutgoing(query?: { page?: number; pageSize?: number; search?: string; status?: string; type?: string }): Promise<Correspondence[]>;
+  getArchive(query?: { page?: number; pageSize?: number; search?: string; status?: string; type?: string }): Promise<Correspondence[]>;
+  getDetails(type: string, id: number | string): Promise<Correspondence>;
   createIncoming(data: CreateIncomingCorrespondenceInput): Promise<Correspondence>;
   updateIncoming(id: string, data: UpdateIncomingCorrespondenceInput): Promise<Correspondence>;
   createOutgoing(data: CreateOutgoingCorrespondenceInput): Promise<Correspondence>;
   updateOutgoing(id: string, data: UpdateOutgoingCorrespondenceInput): Promise<Correspondence>;
   delete(id: string): Promise<{ deleted: boolean }>;
+  deleteIncoming(id: number | string): Promise<{ deleted: boolean }>;
+  deleteOutgoing(id: number | string): Promise<{ deleted: boolean }>;
+  archiveIncoming(id: number | string): Promise<Correspondence>;
+  archiveOutgoing(id: number | string): Promise<Correspondence>;
 }
 
 // ─── Factory ──────────────────────────────────────────────────────────────────
@@ -76,6 +87,26 @@ export function createCorrespondenceApi(client: ApiClient): CorrespondenceApi {
 
     getById(id) {
       return client.get(`/v1/correspondence/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
+    },
+
+    getStats() {
+      return client.get('/v1/correspondence/stats', StatsResponseSchema);
+    },
+
+    getIncoming(query) {
+      return client.get('/v1/correspondence/incoming', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
+    },
+
+    getOutgoing(query) {
+      return client.get('/v1/correspondence/outgoing', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
+    },
+
+    getArchive(query) {
+      return client.get('/v1/correspondence/archive', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
+    },
+
+    getDetails(type, id) {
+      return client.get(`/v1/correspondence/details/${type}/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
     },
 
     createIncoming(data) {
@@ -96,6 +127,22 @@ export function createCorrespondenceApi(client: ApiClient): CorrespondenceApi {
 
     delete(id) {
       return client.delete(`/v1/correspondence/${id}`, DeleteResponseSchema);
+    },
+
+    deleteIncoming(id) {
+      return client.delete(`/v1/correspondence/incoming/${id}`, DeleteResponseSchema);
+    },
+
+    deleteOutgoing(id) {
+      return client.delete(`/v1/correspondence/outgoing/${id}`, DeleteResponseSchema);
+    },
+
+    archiveIncoming(id) {
+      return client.put(`/v1/correspondence/archive/incoming/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
+    },
+
+    archiveOutgoing(id) {
+      return client.put(`/v1/correspondence/archive/outgoing/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
     },
   };
 }

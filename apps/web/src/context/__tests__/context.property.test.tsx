@@ -20,7 +20,7 @@ import { Language } from '../../constants';
  */
 
 // Mock the API module to prevent real HTTP calls
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: vi.fn().mockRejectedValue(new Error('mock')),
     put: vi.fn().mockResolvedValue({ data: {} }),

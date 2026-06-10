@@ -39,7 +39,7 @@ const DashboardRiskOverview: React.FC<DashboardRiskOverviewProps> = React.memo((
                 animationEasing="ease-out"
               >
                 {(Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []).map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                  <Cell key={`cell-${index}`} fill={colors[index % colors.length] ?? '#888'} />
                 ))}
               </Pie>
               <Tooltip 

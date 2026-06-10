@@ -20,6 +20,9 @@ import { createNotificationsApi, type NotificationsApi } from './modules/notific
 import { createCorrespondenceApi, type CorrespondenceApi } from './modules/correspondence';
 import { createRiskRegisterApi, type RiskRegisterApi } from './modules/risk-register';
 import { createRecommendationsApi, type RecommendationsApi } from './modules/recommendations';
+import { createDashboardApi, type DashboardApi } from './modules/dashboard';
+import { createRegulatoryApi, type RegulatoryApi } from './modules/regulatory';
+import { createUserManagementApi, type UserManagementApi } from './modules/user-management';
 
 // ─── Composed API Client Interface ────────────────────────────────────────────
 
@@ -34,6 +37,9 @@ export interface ComposedApiClient {
   correspondence: CorrespondenceApi;
   riskRegister: RiskRegisterApi;
   recommendations: RecommendationsApi;
+  dashboard: DashboardApi;
+  regulatory: RegulatoryApi;
+  userManagement: UserManagementApi;
 }
 
 // ─── Factory ──────────────────────────────────────────────────────────────────
@@ -58,6 +64,9 @@ export function createComposedApiClient(config: ApiClientConfig): ComposedApiCli
     correspondence: createCorrespondenceApi(client),
     riskRegister: createRiskRegisterApi(client),
     recommendations: createRecommendationsApi(client),
+    dashboard: createDashboardApi(client),
+    regulatory: createRegulatoryApi(client),
+    userManagement: createUserManagementApi(client),
   };
 }
 
@@ -72,7 +81,7 @@ export function createComposedApiClient(config: ApiClientConfig): ComposedApiCli
 const env = (import.meta as any).env as Record<string, string> | undefined;
 
 export const api: ComposedApiClient = createComposedApiClient({
-  baseUrl: env?.VITE_API_URL || '/api',
+  baseUrl: env?.['VITE_API_URL'] || '/api',
   timeout: 30000,
   onUnauthorized: () => {
     window.location.href = '/login';
@@ -96,6 +105,9 @@ export type { NotificationsApi } from './modules/notifications';
 export type { CorrespondenceApi } from './modules/correspondence';
 export type { RiskRegisterApi } from './modules/risk-register';
 export type { RecommendationsApi } from './modules/recommendations';
+export type { DashboardApi } from './modules/dashboard';
+export type { RegulatoryApi } from './modules/regulatory';
+export type { UserManagementApi } from './modules/user-management';
 
 // ─── React Query Hooks ────────────────────────────────────────────────────────
 

@@ -64,8 +64,8 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
       classification: CorrespondenceClassification.GENERAL,
       priority: CorrespondencePriority.NORMAL,
       method: SendingMethod.OFFICIAL_MAIL,
-      letter_date: new Date().toISOString().split('T')[0],
-      receipt_date: new Date().toISOString().split('T')[0],
+      letter_date: new Date().toISOString().split('T')[0] ?? '',
+      receipt_date: new Date().toISOString().split('T')[0] ?? '',
       follow_up_required: false,
       response_required: false,
     },
@@ -85,7 +85,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <FormField label={t('correspondence.originalLetterNo')} error={errors.letter_number?.message}>
           <Input {...register('letter_number')} defaultValue="" placeholder={t('correspondence.originalLetterNoPlaceholder')} />

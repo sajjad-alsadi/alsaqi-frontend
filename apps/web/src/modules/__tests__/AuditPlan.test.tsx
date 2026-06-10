@@ -33,14 +33,19 @@ vi.mock('../../utils/logger', () => ({
   },
 }));
 
-vi.mock('../../api/compat/auditService', () => ({
-  auditService: {
-    getPlans: vi.fn(),
-    deletePlan: vi.fn(),
+vi.mock('../../api', () => ({
+  api: {
+    auditPlans: {
+      list: vi.fn(),
+      delete: vi.fn(),
+    },
+    findings: {
+      list: vi.fn(),
+    },
   },
 }));
 
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),

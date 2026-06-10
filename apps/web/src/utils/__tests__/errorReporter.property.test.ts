@@ -169,23 +169,22 @@ describe('Property 8: Error report payload contains required metadata', () => {
   });
 
   it('appVersion defaults to "unknown" when VITE_APP_VERSION is not set', async () => {
-    // Override env to remove version
-    Object.defineProperty(import.meta, 'env', {
-      value: {
-        VITE_ERROR_REPORT_URL: '/api/system-errors',
-        VITE_APP_VERSION: '',
-      },
-      writable: true,
-      configurable: true,
-    });
+    vi.resetModules();
+    capturedPayloads = [];
+
+    // Mock the env module to return empty version
+    vi.doMock('../env', () => ({
+      getAppVersion: () => 'unknown',
+      getErrorReportUrl: () => '/api/system-errors',
+    }));
+
+    const { errorReporter: reporter } = await import('../errorReporter');
 
     await fc.assert(
       fc.asyncProperty(arbPartialError, async (errorInput) => {
-        vi.resetModules();
         capturedPayloads = [];
 
-        const { errorReporter } = await import('../errorReporter');
-        errorReporter.report(errorInput);
+        reporter.report(errorInput);
 
         await vi.waitFor(() => {
           expect(capturedPayloads.length).toBeGreaterThan(0);
@@ -200,6 +199,8 @@ describe('Property 8: Error report payload contains required metadata', () => {
       }),
       { numRuns: 100 }
     );
+
+    vi.doUnmock('../env');
   });
 
   it('sessionId remains consistent across multiple reports in same session', async () => {

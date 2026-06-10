@@ -193,7 +193,7 @@ const Reports: React.FC = () => {
                               stroke="none"
                             >
                               {execData.findingsByDept.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length] ?? '#888'} />
                               ))}
                             </Pie>
                             <Tooltip 

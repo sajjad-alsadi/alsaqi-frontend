@@ -26,6 +26,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
       if (!entries || entries.length === 0) return;
       
       const entry = entries[0];
+      if (!entry) return;
       const { width, height } = entry.contentRect;
       
       if (width > 0 && height > 0) {

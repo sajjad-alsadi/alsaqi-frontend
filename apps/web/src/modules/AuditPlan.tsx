@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuditPlans } from '../hooks/useAuditPlans';
-import { auditService } from '../api/compat/auditService';
+import { api } from '../api';
 import { AuditPlan } from '../types';
 import { Plus, Search, Calendar, Edit, Trash2, Archive } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useFormat } from '../utils/formatService';
 import { useDebounce } from '../hooks/useDebounce';
 import { AuditStatus } from '../constants';
-import api from '../api/httpClient';
 import toast from 'react-hot-toast';
 import logger from '../utils/logger';
 
@@ -46,7 +45,7 @@ const AuditPlanModule: React.FC = () => {
   const confirmDelete = async () => {
     if (!planToDelete) return;
     try {
-      await auditService.deletePlan(planToDelete);
+      await api.auditPlans.delete(String(planToDelete));
       toast.success(t('deleteSuccess'));
       fetchPlans({ page, pageSize, search: searchTerm });
       setIsDeleteModalOpen(false);
@@ -61,14 +60,22 @@ const AuditPlanModule: React.FC = () => {
     if (!planToArchive?.id) return;
     setArchiving(true);
     try {
-      await api.post(`/audit-plans/${planToArchive.id}/archive`);
+      const res = await fetch(`/api/audit-plans/${planToArchive.id}/archive`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data?.error?.message || data?.error || t('errorOccurred');
+        throw new Error(typeof msg === 'string' ? msg : t('errorOccurred'));
+      }
       toast.success(t('archive.success'));
       fetchPlans({ page, pageSize, search: searchTerm });
       setIsArchiveModalOpen(false);
       setPlanToArchive(null);
     } catch (err: any) {
-      const msg = err.response?.data?.error?.message || err.response?.data?.error || t('errorOccurred');
-      toast.error(typeof msg === 'string' ? msg : t('errorOccurred'));
+      toast.error(err.message || t('errorOccurred'));
     } finally {
       setArchiving(false);
     }

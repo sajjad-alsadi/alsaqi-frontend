@@ -28,7 +28,7 @@ export const useFormat = () => {
 
     if (isArabic) {
       const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return formatted.replace(/[0-9]/g, (w) => id[+w]);
+      return formatted.replace(/[0-9]/g, (w) => id[+w] ?? w);
     }
     return formatted;
   };
@@ -51,7 +51,7 @@ export const useFormat = () => {
 
     if (isArabic) {
       const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return formatted.replace(/[0-9]/g, (w) => id[+w]);
+      return formatted.replace(/[0-9]/g, (w) => id[+w] ?? w);
     }
     return formatted;
   };
@@ -64,7 +64,7 @@ export const useFormat = () => {
     
     if (isArabic) {
       const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return String(num).replace(/[0-9]/g, (w) => id[+w]);
+      return String(num).replace(/[0-9]/g, (w) => id[+w] ?? w);
     }
 
     const n = typeof num === 'string' ? parseFloat(num) : num;
@@ -100,7 +100,7 @@ export const useFormat = () => {
 
     if (isArabic) {
       const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return formatted.replace(/[0-9]/g, (w) => id[+w]);
+      return formatted.replace(/[0-9]/g, (w) => id[+w] ?? w);
     }
     return formatted;
   };
@@ -158,7 +158,7 @@ export const useFormat = () => {
     // Handle "Updated [TableName]" (includes ID cases)
     if (lowerAction.startsWith('updated ')) {
       const parts = action.split(/ID:/i);
-      const tablePart = parts[0].replace(/Updated/i, '').trim();
+      const tablePart = (parts[0] ?? '').replace(/Updated/i, '').trim();
       const idPart = parts[1] ? ` (ID:${parts[1]})` : '';
       return `${t('common.updated')} ${translateModule(tablePart)}${idPart}`;
     }
@@ -166,7 +166,7 @@ export const useFormat = () => {
     // Handle "Deleted [TableName]"
     if (lowerAction.startsWith('deleted ')) {
       const parts = action.split(/ID:/i);
-      const tablePart = parts[0].replace(/Deleted/i, '').trim();
+      const tablePart = (parts[0] ?? '').replace(/Deleted/i, '').trim();
       const idPart = parts[1] ? ` (ID:${parts[1]})` : '';
       return `${t('common.deleted')} ${translateModule(tablePart)}${idPart}`;
     }

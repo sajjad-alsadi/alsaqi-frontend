@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/httpClient';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
 
 interface RegulatoryFormProps {
   onSuccess: () => void;
@@ -29,15 +30,21 @@ const RegulatoryForm: React.FC<RegulatoryFormProps> = ({ onSuccess, onClose, ini
     related_instruction_id: initialData?.related_instruction_id || '',
     attachment: initialData?.attachment || ''
   });
+  const { validateAndFilter } = useFileUploadValidation();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({...formData, attachment: reader.result as string});
-      };
-      reader.readAsDataURL(file);
+      const validFiles = await validateAndFilter([file]);
+      if (validFiles.length > 0) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData({...formData, attachment: reader.result as string});
+        };
+        reader.readAsDataURL(validFiles[0]!);
+      } else {
+        e.target.value = '';
+      }
     }
   };
 

@@ -168,7 +168,7 @@ export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'e
           children: row.map((cellText, cellIndex) => {
             return new TableCell({
               width: { size: cellIndex === 0 ? 60 : 40, type: WidthType.PERCENTAGE },
-              shading: index === 0 ? { fill: LIGHT_FILL, type: ShadingType.CLEAR, color: "auto" } : undefined,
+              ...(index === 0 ? { shading: { fill: LIGHT_FILL, type: ShadingType.CLEAR, color: "auto" } } : {}),
               children: [
                 new Paragraph({
                   alignment: isRtl ? AlignmentType.RIGHT : AlignmentType.LEFT,

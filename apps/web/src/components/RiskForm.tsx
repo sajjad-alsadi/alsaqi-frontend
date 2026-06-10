@@ -107,7 +107,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
       target_date: '',
       review_date: '',
       notes: '',
-      entry_date: new Date().toISOString().split('T')[0],
+      entry_date: new Date().toISOString().split('T')[0] ?? '',
       entered_by: ''
     },
   });
@@ -139,7 +139,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar pe-4">
+    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar pe-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <FormField label={t('riskId')} error={errors.risk_id?.message} required>
           <Input {...register('risk_id')} placeholder="R-001" />

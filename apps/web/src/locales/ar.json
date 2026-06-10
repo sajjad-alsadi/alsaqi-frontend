@@ -571,7 +571,10 @@
     "networkErrorDesc": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
     "errorDesc": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
     "retry": "إعادة المحاولة",
-    "stalePermissions": "قد تكون الصلاحيات غير محدّثة"
+    "stalePermissions": "قد تكون الصلاحيات غير محدّثة",
+    "connectionOnline": "متصل",
+    "connectionDegraded": "اتصال بطيء",
+    "connectionOffline": "لا يوجد اتصال"
   },
   "legal": {
     "title": "القوانين والتشريعات",
@@ -2838,5 +2841,21 @@
     "riskId": "R-001",
     "entityCode": "DEPT-001",
     "emailRecipients": "email@example.com"
+  },
+  "globalError": {
+    "title": "خطأ في التطبيق",
+    "description": "حدث خطأ حرج ولا يمكن للتطبيق المتابعة. يرجى إعادة تحميل الصفحة للمحاولة مرة أخرى."
+  },
+  "moduleError": {
+    "title": "حدث خطأ في وحدة {{moduleName}}",
+    "description": "حدث خطأ غير متوقع في هذه الوحدة. يمكنك المحاولة مرة أخرى أو الانتقال إلى وحدة أخرى.",
+    "retry": "إعادة المحاولة"
+  },
+  "fileUpload": {
+    "errors": {
+      "fileTooLarge": "حجم الملف ({{actualSize}}) يتجاوز الحد المسموح ({{maxSize}})",
+      "disallowedType": "نوع الملف غير مسموح. الأنواع المسموحة: {{allowedTypes}}",
+      "mimeExtensionMismatch": "محتوى الملف لا يتطابق مع امتداده. قد يكون الملف تالفاً أو مُعدّلاً"
+    }
   }
 }

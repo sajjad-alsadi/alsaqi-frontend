@@ -20,7 +20,7 @@ export interface NavigationConfig {
   /** Display order in sidebar */
   order: number;
   /** Parent module name for nested navigation */
-  parent?: string;
+  parent?: string | undefined;
 }
 
 /**
@@ -38,9 +38,9 @@ export interface ModuleDefinition {
   /** Default permissions per role (used for DB seeding & offline fallback) */
   defaults: Record<string, PermissionAction[]>;
   /** Sidebar/navigation configuration */
-  navigation?: NavigationConfig;
+  navigation?: NavigationConfig | undefined;
   /** Whether files can be scoped to this module for file-level permission checks */
-  fileScope?: boolean;
+  fileScope?: boolean | undefined;
 }
 
 /**

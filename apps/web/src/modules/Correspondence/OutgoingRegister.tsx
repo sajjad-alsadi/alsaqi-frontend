@@ -32,7 +32,7 @@ import OutgoingForm from './OutgoingForm';
 
 interface OutgoingRegisterProps {
   language: 'ar' | 'en';
-  userRole?: string;
+  userRole?: string | undefined;
   onViewDetails: (type: 'Outgoing', id: number) => void;
 }
 

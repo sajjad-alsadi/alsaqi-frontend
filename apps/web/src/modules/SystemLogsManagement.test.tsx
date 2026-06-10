@@ -19,7 +19,7 @@ import SystemLogsManagement from './SystemLogsManagement';
  */
 
 // Mock the API module
-vi.mock('../services/api', () => ({
+vi.mock('../api/httpClient', () => ({
   default: {
     get: vi.fn(),
   },

@@ -10,7 +10,7 @@ import { createNotification } from '../../test/factories';
 const mockGet = vi.fn();
 const mockPut = vi.fn();
 const mockDelete = vi.fn();
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: (...args: any[]) => mockGet(...args),
     put: (...args: any[]) => mockPut(...args),

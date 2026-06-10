@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { dashboardService } from '../api/compat/dashboardService';
+import { api } from '../api';
 
 export const useDashboardStats = (department?: string) => {
   const statsQuery = useQuery({
     queryKey: ['dashboard-stats', department],
-    queryFn: () => dashboardService.getStats(department),
+    queryFn: () => api.dashboard.getStats(department),
     staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
   // Ensure stats has the expected structure with safe defaults
-  const rawStats = statsQuery.data;
+  const rawStats = statsQuery.data as any;
   const stats = rawStats ? {
     audits: {
       total: rawStats.audits?.total ?? 0,
@@ -56,4 +56,3 @@ export const useDashboardStats = (department?: string) => {
     refresh: () => statsQuery.refetch() 
   };
 };
-

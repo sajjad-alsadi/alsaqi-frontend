@@ -13,6 +13,7 @@ import {
 import { Language, UserRole } from '../../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import AboutSection from '../../components/AboutSection';
+import { useFileUploadValidation } from '../../hooks/useFileUploadValidation';
 import PDFSettingsSection from '../../components/PDFSettingsSection';
 import { useDepartments } from '../../hooks/useDepartments';
 import { PdfTemplateManagement } from '../../components/PdfTemplateManagement';
@@ -48,6 +49,10 @@ const Settings: React.FC = () => {
   });
 
   const [showLogoutAllModal, setShowLogoutAllModal] = useState(false);
+  const { validateAndFilter } = useFileUploadValidation({
+    allowedExtensions: ['.jpg', '.jpeg', '.png'],
+    allowedMimeTypes: ['image/jpeg', 'image/png'],
+  });
 
   useEffect(() => {
     fetchProfile();
@@ -124,14 +129,19 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileForm(prev => ({ ...prev, profile_picture: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+      const validFiles = await validateAndFilter([file]);
+      if (validFiles.length > 0) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfileForm(prev => ({ ...prev, profile_picture: reader.result as string }));
+        };
+        reader.readAsDataURL(validFiles[0]!);
+      } else {
+        e.target.value = '';
+      }
     }
   };
 

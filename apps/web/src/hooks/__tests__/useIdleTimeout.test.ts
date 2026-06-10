@@ -15,7 +15,7 @@ vi.mock('../../context/AppContext', () => ({
   useAppContext: () => ({ logout: mockLogout }),
 }));
 
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: vi.fn().mockResolvedValue({ data: { session_timeout_minutes: 30 } }),
   },

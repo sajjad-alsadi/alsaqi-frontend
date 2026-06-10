@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import React from 'react';
 
 // Mock lucide-react
@@ -15,6 +15,13 @@ vi.mock('../../utils/logger', () => ({
     error: vi.fn(),
     warn: vi.fn(),
     info: vi.fn(),
+  },
+}));
+
+// Mock errorReporter
+vi.mock('../../utils/errorReporter', () => ({
+  errorReporter: {
+    report: vi.fn(),
   },
 }));
 
@@ -40,6 +47,7 @@ vi.mock('react-i18next', () => ({
 
 import { ErrorBoundary } from '../ErrorBoundary';
 import logger from '../../utils/logger';
+import { errorReporter } from '../../utils/errorReporter';
 
 // Component that throws an error for testing
 const ThrowingComponent = ({ shouldThrow = true }: { shouldThrow?: boolean }) => {
@@ -49,30 +57,27 @@ const ThrowingComponent = ({ shouldThrow = true }: { shouldThrow?: boolean }) =>
   return <div>Normal content</div>;
 };
 
-// Component that throws a database error
-const DatabaseErrorComponent = () => {
-  throw new Error(JSON.stringify({
-    error: 'Connection refused',
-    operationType: 'SELECT',
-  }));
-};
-
-describe('ErrorBoundary Component', () => {
+describe('ErrorBoundary Component (Global - Ultimate Fallback)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Suppress React error boundary console errors during tests
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   describe('Normal Rendering', () => {
     it('should render children when no error occurs', () => {
-      render(
+      const { container } = render(
         <ErrorBoundary>
           <div>Child content</div>
         </ErrorBoundary>
       );
 
-      expect(screen.getByText('Child content')).toBeInTheDocument();
+      expect(screen.getByText('Child content')).toBeTruthy();
+      expect(container.querySelector('[role="alert"]')).toBeNull();
     });
 
     it('should not show error UI when children render successfully', () => {
@@ -82,20 +87,20 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>
       );
 
-      expect(screen.queryByText('sorrySomethingWentWrong')).not.toBeInTheDocument();
+      expect(screen.queryByText('globalError.title')).toBeNull();
     });
   });
 
-  describe('Error Fallback UI', () => {
-    it('should render fallback UI when a child component throws an error', () => {
+  describe('Full-Page Fallback UI', () => {
+    it('should render full-page fallback UI when a child component throws', () => {
       render(
         <ErrorBoundary>
           <ThrowingComponent />
         </ErrorBoundary>
       );
 
-      expect(screen.getByText('sorrySomethingWentWrong')).toBeInTheDocument();
-      expect(screen.getByText('Test error message')).toBeInTheDocument();
+      expect(screen.getByText('globalError.title')).toBeTruthy();
+      expect(screen.getByText('globalError.description')).toBeTruthy();
     });
 
     it('should render custom fallback when provided', () => {
@@ -107,28 +112,8 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>
       );
 
-      expect(screen.getByText('Custom error page')).toBeInTheDocument();
-      expect(screen.queryByText('sorrySomethingWentWrong')).not.toBeInTheDocument();
-    });
-
-    it('should display the error message in the fallback UI', () => {
-      render(
-        <ErrorBoundary>
-          <ThrowingComponent />
-        </ErrorBoundary>
-      );
-
-      expect(screen.getByText('Test error message')).toBeInTheDocument();
-    });
-
-    it('should display database error details for JSON error messages', () => {
-      render(
-        <ErrorBoundary>
-          <DatabaseErrorComponent />
-        </ErrorBoundary>
-      );
-
-      expect(screen.getByText('databaseError')).toBeInTheDocument();
+      expect(screen.getByText('Custom error page')).toBeTruthy();
+      expect(screen.queryByText('globalError.title')).toBeNull();
     });
 
     it('should render a reload button in the fallback UI', () => {
@@ -138,8 +123,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>
       );
 
-      const reloadButton = screen.getByText('reloadPage');
-      expect(reloadButton).toBeInTheDocument();
+      expect(screen.getByText('reloadPage')).toBeTruthy();
     });
 
     it('should call window.location.reload when reload button is clicked', () => {
@@ -160,9 +144,21 @@ describe('ErrorBoundary Component', () => {
 
       expect(reloadMock).toHaveBeenCalledTimes(1);
     });
+
+    it('should have full-screen styling (min-h-screen)', () => {
+      const { container } = render(
+        <ErrorBoundary>
+          <ThrowingComponent />
+        </ErrorBoundary>
+      );
+
+      const alertContainer = container.querySelector('[role="alert"]');
+      expect(alertContainer).not.toBeNull();
+      expect(alertContainer!.className).toContain('min-h-screen');
+    });
   });
 
-  describe('Error Logging', () => {
+  describe('Error Reporting', () => {
     it('should log the error via logger.error', () => {
       render(
         <ErrorBoundary>
@@ -180,13 +176,29 @@ describe('ErrorBoundary Component', () => {
         })
       );
     });
+
+    it('should report error via errorReporter with critical severity', () => {
+      render(
+        <ErrorBoundary>
+          <ThrowingComponent />
+        </ErrorBoundary>
+      );
+
+      expect(errorReporter.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          module: 'global',
+          message: 'Test error message',
+          severity: 'critical',
+          type: 'boundary',
+          componentStack: expect.any(String),
+        })
+      );
+    });
   });
 
   describe('Recovery', () => {
-    it('should prevent app crash and show fallback instead', () => {
-      // The key test: ErrorBoundary catches the error and renders fallback
-      // instead of crashing the entire React tree
-      const { container } = render(
+    it('should prevent app crash and show full-page fallback', () => {
+      render(
         <div>
           <ErrorBoundary>
             <ThrowingComponent />
@@ -196,34 +208,36 @@ describe('ErrorBoundary Component', () => {
       );
 
       // Sibling content should still be visible
-      expect(screen.getByText('Sibling content')).toBeInTheDocument();
-      // Error fallback should be shown
-      expect(screen.getByText('sorrySomethingWentWrong')).toBeInTheDocument();
+      expect(screen.getByText('Sibling content')).toBeTruthy();
+      // Global error fallback should be shown
+      expect(screen.getByText('globalError.title')).toBeTruthy();
     });
   });
 
   describe('Accessibility', () => {
+    it('should have role="alert" and aria-live="assertive"', () => {
+      const { container } = render(
+        <ErrorBoundary>
+          <ThrowingComponent />
+        </ErrorBoundary>
+      );
+
+      const alertContainer = container.querySelector('[role="alert"]');
+      expect(alertContainer).not.toBeNull();
+      expect(alertContainer!.getAttribute('aria-live')).toBe('assertive');
+    });
+
     it('should have an error icon for visual indication', () => {
-      render(
+      const { container } = render(
         <ErrorBoundary>
           <ThrowingComponent />
         </ErrorBoundary>
       );
 
-      expect(screen.getByTestId('alert-circle-icon')).toBeInTheDocument();
+      expect(container.querySelector('[data-testid="alert-circle-icon"]')).not.toBeNull();
     });
 
-    it('should have a refresh icon on the reload button', () => {
-      render(
-        <ErrorBoundary>
-          <ThrowingComponent />
-        </ErrorBoundary>
-      );
-
-      expect(screen.getByTestId('refresh-icon')).toBeInTheDocument();
-    });
-
-    it('should have a clickable reload button with text', () => {
+    it('should have a clickable reload button', () => {
       render(
         <ErrorBoundary>
           <ThrowingComponent />
@@ -231,7 +245,7 @@ describe('ErrorBoundary Component', () => {
       );
 
       const button = screen.getByRole('button', { name: /reloadPage/i });
-      expect(button).toBeInTheDocument();
+      expect(button).toBeTruthy();
     });
   });
 });

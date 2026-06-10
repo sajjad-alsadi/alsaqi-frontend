@@ -5,7 +5,7 @@ import fc from 'fast-check';
 import React from 'react';
 
 // Mock modules required by PreferencesContext
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: { put: vi.fn().mockResolvedValue({}) },
 }));
 

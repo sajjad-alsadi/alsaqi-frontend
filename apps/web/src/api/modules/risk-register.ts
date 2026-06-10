@@ -8,6 +8,7 @@ import type { RiskItem } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
 const RiskItemSchema: z.ZodType<RiskItem> = z.object({
   id: z.string().optional(),
   risk_id: z.string(),
@@ -51,8 +52,10 @@ export interface RiskRegisterApi {
   list(query?: {
     page?: number;
     pageSize?: number;
-    status?: string;
+    type?: string;
     rating?: string;
+    status?: string;
+    search?: string;
   }): Promise<RiskItem[]>;
   getById(id: string): Promise<RiskItem>;
   create(data: CreateRiskItemInput): Promise<RiskItem>;

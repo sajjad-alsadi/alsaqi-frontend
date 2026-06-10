@@ -78,6 +78,7 @@ export interface AuthApi {
     status?: 'Active' | 'Inactive' | 'Suspended';
   }): Promise<{ user: User }>;
   changePassword(data: { newPassword: string }): Promise<{ success: boolean }>;
+  getCurrentUser(): Promise<User | null>;
 }
 
 // ─── Factory ──────────────────────────────────────────────────────────────────
@@ -108,6 +109,15 @@ export function createAuthApi(client: ApiClient): AuthApi {
 
     changePassword(data) {
       return client.post('/v1/auth/change-password', ChangePasswordResponseSchema, data);
+    },
+
+    async getCurrentUser() {
+      try {
+        const response = await client.get('/v1/auth/me', z.object({ user: UserSchema }));
+        return response.user as User;
+      } catch {
+        return null;
+      }
     },
   };
 }

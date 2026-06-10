@@ -1,22 +1,21 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { auditService } from '../api/compat/auditService';
+import { api } from '../api';
 
 export const useAuditPlans = (initialParams: any = {}) => {
   const queryClient = useQueryClient();
 
   const plansQuery = useQuery({
     queryKey: ['audit-plans', initialParams],
-    queryFn: () => auditService.getPlans(initialParams),
+    queryFn: () => api.auditPlans.list(initialParams),
     staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
-  const data = plansQuery.data || {};
-  const plans = (data.data || (Array.isArray(data) ? data : [])) as any[];
+  const plans = Array.isArray(plansQuery.data) ? plansQuery.data : [];
   const pagination = {
-    total: data.pagination?.total || 0,
-    totalPages: data.pagination?.totalPages || 0,
-    page: data.pagination?.page || 1,
-    limit: data.pagination?.pageSize || 15
+    total: plans.length,
+    totalPages: Math.ceil(plans.length / (initialParams.pageSize || 15)),
+    page: initialParams.page || 1,
+    limit: initialParams.pageSize || 15
   };
 
   const fetchPlans = (_params?: any) => {

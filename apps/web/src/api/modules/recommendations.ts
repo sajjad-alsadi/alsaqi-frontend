@@ -8,6 +8,7 @@ import type { Recommendation } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
 const RecommendationSchema: z.ZodType<Recommendation> = z.object({
   id: z.number().optional(),
   finding_id: z.number(),

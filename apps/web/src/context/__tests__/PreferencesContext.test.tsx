@@ -6,7 +6,7 @@ import { PreferencesProvider, usePreferences } from '../PreferencesContext';
 import { Language } from '../../constants';
 
 // Mock the API module
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     put: vi.fn().mockResolvedValue({ data: {} }),
   },
@@ -134,7 +134,7 @@ describe('PreferencesContext', () => {
       /**
        * Validates: Requirements 16.5
        */
-      const api = (await import('../../services/api')).default;
+      const api = (await import('../../api/httpClient')).default;
 
       const { unmount } = render(
         <PreferencesProvider>
@@ -227,7 +227,7 @@ describe('PreferencesContext', () => {
       /**
        * Validates: Requirements 16.6
        */
-      const api = (await import('../../services/api')).default;
+      const api = (await import('../../api/httpClient')).default;
 
       const { unmount } = render(
         <PreferencesProvider>
@@ -351,7 +351,7 @@ describe('PreferencesContext', () => {
       /**
        * Validates: Requirements 16.5, 16.6
        */
-      const api = (await import('../../services/api')).default;
+      const api = (await import('../../api/httpClient')).default;
 
       const { unmount } = render(
         <PreferencesProvider>

@@ -1,17 +1,16 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { auditService } from '../api/compat/auditService';
+import { api } from '../api';
 
 export const useAuditFindings = (initialParams: any = {}) => {
   const queryClient = useQueryClient();
 
   const findingsQuery = useQuery({
     queryKey: ['audit-findings', initialParams],
-    queryFn: () => auditService.getFindings(initialParams),
+    queryFn: () => api.findings.list(initialParams),
     staleTime: 5 * 60 * 1000,
   });
 
-  const data = findingsQuery.data || {};
-  const findings = (data.data || (Array.isArray(data) ? data : [])) as any[];
+  const findings = Array.isArray(findingsQuery.data) ? findingsQuery.data : [];
 
   const fetchFindings = () => {
     queryClient.invalidateQueries({ queryKey: ['audit-findings'] });

@@ -14,6 +14,7 @@ import { useFormat } from '../../utils/formatService';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
 import { Button } from '@/components/ui/button';
+import { useFileUploadValidation } from '../../hooks/useFileUploadValidation';
 
 // --- Types ---
 type ComplianceStatus = 'compliant' | 'partial' | 'non_compliant' | 'under_review';
@@ -84,6 +85,10 @@ export default function ComplianceMatrix() {
   const [selectedItem, setSelectedItem] = useState<ComplianceItem | null>(null);
   const [formData, setFormData] = useState<Partial<ComplianceItem>>({ compliance_status: 'under_review' });
   const [file, setFile] = useState<File | null>(null);
+  const { validateAndFilter } = useFileUploadValidation({
+    allowedExtensions: ['.pdf'],
+    allowedMimeTypes: ['application/pdf'],
+  });
 
   // Filters
   const [search, setSearch] = useState('');
@@ -783,9 +788,14 @@ export default function ComplianceMatrix() {
                         type="file" 
                         accept=".pdf" 
                         className="absolute inset-0 opacity-0 cursor-pointer z-10" 
-                        onChange={e => {
+                        onChange={async e => {
                           if (e.target.files?.[0]) {
-                            setFile(e.target.files[0]);
+                            const validFiles = await validateAndFilter([e.target.files[0]]);
+                            if (validFiles.length > 0) {
+                              setFile(validFiles[0]!);
+                            } else {
+                              e.target.value = '';
+                            }
                           }
                         }}
                       />

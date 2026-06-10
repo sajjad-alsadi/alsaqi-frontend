@@ -47,7 +47,7 @@ const AuditTrailModule: React.FC = () => {
           action: filterAction !== 'all' ? filterAction : undefined,
           username: searchTerm || undefined
         },
-        signal
+        ...(signal ? { signal } : {})
       });
       
       const data = Array.isArray(res.data) ? res.data : (res.data.data || []);

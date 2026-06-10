@@ -281,11 +281,11 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
     if (!reportTitle) return;
     
     const reportData: Partial<AuditReport> = {
-      audit_id: selectedAuditId || undefined,
+      ...(selectedAuditId ? { audit_id: selectedAuditId } : {}),
       title: reportTitle,
       report_type: selectedReportType,
       generated_by: user?.username || 'Unknown',
-      date_generated: new Date().toISOString().split('T')[0],
+      date_generated: new Date().toISOString().split('T')[0] ?? '',
       status: 'Final',
       content: JSON.stringify({
         selectedFindings,

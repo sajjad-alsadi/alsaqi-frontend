@@ -8,6 +8,7 @@ import type { AuditFinding, CreateFindingInput, UpdateFindingInput } from '@alsa
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
 const FindingSchema: z.ZodType<AuditFinding> = z.object({
   id: z.union([z.number(), z.string()]).optional(),
   audit_id: z.union([z.number(), z.string()]),
@@ -34,7 +35,10 @@ export interface FindingsApi {
   list(query?: {
     page?: number;
     pageSize?: number;
+    audit_id?: string;
+    risk_level?: string;
     status?: string;
+    search?: string;
   }): Promise<AuditFinding[]>;
   create(data: CreateFindingInput): Promise<AuditFinding>;
   update(id: string, data: UpdateFindingInput): Promise<AuditFinding>;

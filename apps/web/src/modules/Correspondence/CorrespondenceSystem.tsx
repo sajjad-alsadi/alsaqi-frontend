@@ -20,7 +20,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { useCorrespondence } from '../../hooks/useCorrespondence';
-import { correspondenceService } from '../../api/compat/correspondenceService';
 import toast from 'react-hot-toast';
 import IncomingRegister from './IncomingRegister';
 import CorrespondenceDetails from './CorrespondenceDetails';
@@ -39,9 +38,10 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
   const { t } = useTranslation();
   const { formatNumber } = useFormat();
   const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'incoming' | 'outgoing' | 'archive'>('dashboard');
-  const [selectedRecord, setSelectedRecord] = useState<{ type: CorrespondenceType, id: number } | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<{ type: CorrespondenceType, id: number | string } | null>(null);
   
-  const { stats, incoming: recentIncoming, loading, error, fetchStats } = useCorrespondence({ limit: 5 });
+  const { stats: rawStats, incoming: recentIncoming, loading, error, fetchStats } = useCorrespondence({ limit: 5 });
+  const stats = rawStats as any;
 
   if (loading && activeSubTab === 'dashboard' && !stats) {
     return (
@@ -100,7 +100,7 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
                   className="p-3 border border-[var(--color-border-soft)] rounded-xl hover:bg-[var(--color-bg-main)] cursor-pointer transition-colors flex justify-between items-center"
                 >
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-[var(--color-text-main)]">{formatNumber(item.sequence_number)}</span>
+                    <span className="text-sm font-bold text-[var(--color-text-main)]">{formatNumber((item as any).sequence_number || item.id)}</span>
                     <span className="text-xs text-[var(--color-text-muted)] truncate max-w-[200px]">{item.subject}</span>
                   </div>
                   <span className="text-xs text-[var(--color-text-muted)]/70">{item.receipt_date}</span>
@@ -124,7 +124,7 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
     return (
       <CorrespondenceDetails 
         type={selectedRecord.type} 
-        id={selectedRecord.id} 
+        id={Number(selectedRecord.id)} 
         language={language} 
         onBack={() => {
           setSelectedRecord(null);

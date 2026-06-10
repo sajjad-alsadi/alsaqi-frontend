@@ -42,12 +42,12 @@ export const FocusTrap: React.FC<FocusTrapProps> = ({ active, onEscape, children
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {
           e.preventDefault();
-          lastElement.focus();
+          lastElement?.focus();
         }
       } else {
         if (document.activeElement === lastElement) {
           e.preventDefault();
-          firstElement.focus();
+          firstElement?.focus();
         }
       }
     },

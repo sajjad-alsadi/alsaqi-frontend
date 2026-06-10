@@ -3,13 +3,14 @@
  *
  * Framework-agnostic WebSocket client that:
  * - Connects to the API server with JWT auth via ?token= query parameter
- * - Implements exponential backoff reconnection (1s, 2s, 4s, 8s, 16s; capped at 30s; max 5 attempts)
- * - Falls back to HTTP polling (30s interval) when WebSocket reconnection fails
- * - Syncs missed notifications by sequence ID on reconnection (max 100)
+ * - Implements exponential backoff reconnection with jitter (1s→30s cap; max 10 attempts)
+ * - After 10 failed attempts: enters 'failed' state with manual refresh indicator
+ * - Falls back to HTTP polling (30s interval) in degraded mode
+ * - Syncs missed notifications by sequence ID on reconnection (max 100, within 30 min window)
  * - Stops polling and resumes WebSocket when connection is re-established
- * - Exposes reactive connection state (connected/degraded/disconnected)
+ * - Exposes reactive connection state (connected/degraded/disconnected/failed)
  *
- * Requirements: 9.2, 9.3, 9.4, 9.5
+ * Requirements: 3.2, 3.3, 3.4, 9.2, 9.3, 9.4, 9.5
  */
 
 import type { Notification } from '@alsaqi/shared';
@@ -17,7 +18,7 @@ import type { Notification } from '@alsaqi/shared';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /** Connection state exposed to the UI */
-export type ConnectionState = 'connected' | 'degraded' | 'disconnected';
+export type ConnectionState = 'connected' | 'degraded' | 'disconnected' | 'failed';
 
 /** WebSocket message from the server */
 export interface WsNotificationMessage {
@@ -38,6 +39,8 @@ export interface WebSocketClientConfig {
   onNotification?: (notification: Notification, sequenceId: number) => void;
   /** Callback when connection state changes */
   onStateChange?: (state: ConnectionState) => void;
+  /** Callback when all reconnection attempts are exhausted (Requirement 3.3) */
+  onReconnectionFailed?: () => void;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -45,9 +48,13 @@ export interface WebSocketClientConfig {
 const INITIAL_RECONNECT_DELAY_MS = 1000;
 const RECONNECT_MULTIPLIER = 2;
 const MAX_RECONNECT_DELAY_MS = 30_000;
-const MAX_RECONNECT_ATTEMPTS = 5;
+const MAX_RECONNECT_ATTEMPTS = 10;
 const POLLING_INTERVAL_MS = 30_000;
 const MAX_MISSED_NOTIFICATIONS = 100;
+/** Jitter factor: ±20% of calculated delay to prevent thundering herd */
+const JITTER_FACTOR = 0.2;
+/** Maximum disconnection duration (30 minutes) for notification sync eligibility */
+const MAX_SYNC_WINDOW_MS = 30 * 60 * 1000;
 
 // ─── WebSocket Client Class ───────────────────────────────────────────────────
 
@@ -61,6 +68,10 @@ export class WebSocketClient {
   private lastSequenceId = 0;
   private isDestroyed = false;
   private isReconnecting = false;
+  /** Timestamp when the disconnection started (for 30-min sync window check) */
+  private disconnectedAt: number | null = null;
+  /** Timestamp of the last received message (for sync purposes) */
+  private lastMessageTimestamp: number | null = null;
 
   constructor(config: WebSocketClientConfig) {
     this.config = config;
@@ -76,6 +87,21 @@ export class WebSocketClient {
   /** Get the last received sequence ID */
   getLastSequenceId(): number {
     return this.lastSequenceId;
+  }
+
+  /** Get the timestamp of the last received message */
+  getLastMessageTimestamp(): number | null {
+    return this.lastMessageTimestamp;
+  }
+
+  /** Get the timestamp when the client disconnected */
+  getDisconnectedAt(): number | null {
+    return this.disconnectedAt;
+  }
+
+  /** Get the current reconnect attempt count */
+  getReconnectAttempts(): number {
+    return this.reconnectAttempts;
   }
 
   /** Connect to the WebSocket server */
@@ -132,6 +158,7 @@ export class WebSocketClient {
 
   private handleOpen(): void {
     const wasInDegradedMode = this.state === 'degraded';
+    const wasDisconnected = this.disconnectedAt !== null;
 
     // Reset reconnection state
     this.reconnectAttempts = 0;
@@ -145,10 +172,17 @@ export class WebSocketClient {
 
     this.setState('connected');
 
-    // Sync missed notifications on reconnection (Requirement 9.4)
-    if (this.lastSequenceId > 0) {
-      this.requestMissedNotifications();
+    // Sync missed notifications on reconnection (Requirement 3.4)
+    // Only sync if disconnected for ≤ 30 minutes and we have a last sequence ID
+    if (this.lastSequenceId > 0 && wasDisconnected) {
+      const disconnectionDuration = Date.now() - (this.disconnectedAt ?? 0);
+      if (disconnectionDuration <= MAX_SYNC_WINDOW_MS) {
+        this.requestMissedNotifications();
+      }
     }
+
+    // Clear disconnection timestamp
+    this.disconnectedAt = null;
   }
 
   private handleMessage(event: MessageEvent): void {
@@ -163,6 +197,9 @@ export class WebSocketClient {
           this.lastSequenceId = message.sequenceId;
         }
 
+        // Track the last message timestamp for sync purposes
+        this.lastMessageTimestamp = Date.now();
+
         this.config.onNotification?.(message.payload, message.sequenceId);
       }
     } catch {
@@ -175,24 +212,40 @@ export class WebSocketClient {
 
     this.ws = null;
 
-    // Attempt reconnection with exponential backoff (Requirement 9.2)
+    // Record disconnection time if this is the first close
+    if (this.disconnectedAt === null) {
+      this.disconnectedAt = Date.now();
+    }
+
+    // Attempt reconnection with exponential backoff (Requirement 3.2)
     if (this.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
       this.isReconnecting = true;
       this.scheduleReconnect();
     } else {
-      // All reconnection attempts exhausted — fall back to polling (Requirement 9.3)
-      this.startPollingFallback();
+      // All 10 reconnection attempts exhausted (Requirement 3.3)
+      // Enter 'failed' state — UI should display error with manual refresh message
+      this.isReconnecting = false;
+      this.setState('failed');
+      this.config.onReconnectionFailed?.();
     }
   }
 
   private handleConnectionFailure(): void {
     if (this.isDestroyed) return;
 
+    // Record disconnection time if this is the first failure
+    if (this.disconnectedAt === null) {
+      this.disconnectedAt = Date.now();
+    }
+
     if (this.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
       this.isReconnecting = true;
       this.scheduleReconnect();
     } else {
-      this.startPollingFallback();
+      // All 10 reconnection attempts exhausted (Requirement 3.3)
+      this.isReconnecting = false;
+      this.setState('failed');
+      this.config.onReconnectionFailed?.();
     }
   }
 
@@ -213,13 +266,25 @@ export class WebSocketClient {
   }
 
   /**
-   * Calculate exponential backoff delay:
-   * Attempt 1: 1s, Attempt 2: 2s, Attempt 3: 4s, Attempt 4: 8s, Attempt 5: 16s
-   * Capped at 30s max
+   * Calculate exponential backoff delay with jitter:
+   * Base delays: 1s, 2s, 4s, 8s, 16s, 30s, 30s, 30s, 30s, 30s (capped at 30s)
+   * Jitter: ±20% of calculated delay to prevent thundering herd
+   *
+   * Requirement 3.2: Exponential backoff starting at 1s up to 30s max
    */
   calculateReconnectDelay(attempt: number): number {
-    const delay = INITIAL_RECONNECT_DELAY_MS * Math.pow(RECONNECT_MULTIPLIER, attempt - 1);
-    return Math.min(delay, MAX_RECONNECT_DELAY_MS);
+    const baseDelay = INITIAL_RECONNECT_DELAY_MS * Math.pow(RECONNECT_MULTIPLIER, attempt - 1);
+    const cappedDelay = Math.min(baseDelay, MAX_RECONNECT_DELAY_MS);
+    return this.applyJitter(cappedDelay);
+  }
+
+  /**
+   * Apply ±20% jitter to a delay value to prevent thundering herd.
+   * Returns a value in the range [delay * 0.8, delay * 1.2].
+   */
+  applyJitter(delay: number): number {
+    const jitter = delay * JITTER_FACTOR * (2 * Math.random() - 1);
+    return Math.max(0, Math.round(delay + jitter));
   }
 
   // ─── HTTP Polling Fallback ──────────────────────────────────────────────────
@@ -295,19 +360,25 @@ export class WebSocketClient {
   // ─── Missed Notification Sync ───────────────────────────────────────────────
 
   /**
-   * Request missed notifications since the last known sequence ID (Requirement 9.4)
-   * Sends a message to the WebSocket server requesting up to 100 missed notifications
+   * Request missed notifications since the last known sequence ID (Requirement 3.4)
+   * Sends a message to the WebSocket server requesting up to 100 missed notifications.
+   * Only syncs if disconnected for ≤ 30 minutes.
    */
   private requestMissedNotifications(): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
-    this.ws.send(
-      JSON.stringify({
-        type: 'sync',
-        lastSequenceId: this.lastSequenceId,
-        limit: MAX_MISSED_NOTIFICATIONS,
-      })
-    );
+    const syncPayload: Record<string, unknown> = {
+      type: 'sync',
+      lastSequenceId: this.lastSequenceId,
+      limit: MAX_MISSED_NOTIFICATIONS,
+    };
+
+    // Include lastMessageTimestamp if available for server-side filtering
+    if (this.lastMessageTimestamp !== null) {
+      syncPayload['since'] = new Date(this.lastMessageTimestamp).toISOString();
+    }
+
+    this.ws.send(JSON.stringify(syncPayload));
   }
 
   // ─── State Management ───────────────────────────────────────────────────────

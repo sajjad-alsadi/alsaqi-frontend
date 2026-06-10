@@ -6,7 +6,6 @@ import { AuditFinding } from '../types';
 import { Plus, AlertTriangle, FileText, CheckCircle2, MoreVertical, Search, Eye } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuditFindings } from '../hooks/useAuditFindings';
-import { auditService } from '../api/compat/auditService';
 import InteractiveIcon from '../components/InteractiveIcon';
 import { RiskLevel } from '../constants';
 import toast from 'react-hot-toast';

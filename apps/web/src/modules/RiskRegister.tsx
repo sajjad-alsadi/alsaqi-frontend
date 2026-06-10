@@ -4,10 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { RiskItem } from '../types';
 import { Plus, Search, ShieldAlert, Activity, ArrowRight, Info, Upload, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { useRisks } from '../hooks/useRisks';
-import { riskService } from '../api/compat/riskService';
-import api from '../api/httpClient';
+import { api } from '../api';
 import InteractiveIcon from '../components/InteractiveIcon';
 import { useFormat } from '../utils/formatService';
 import toast from 'react-hot-toast';
@@ -17,6 +16,7 @@ import Modal from '../components/Modal';
 import RiskForm from '../components/RiskForm';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
 
 const RiskRegister: React.FC = () => {
   const { token } = useAuth();
@@ -25,6 +25,13 @@ const RiskRegister: React.FC = () => {
   const { formatDate, formatNumber } = useFormat();
   
   const { risks, loading, fetchRisks } = useRisks();
+  const { validateAndFilter } = useFileUploadValidation({
+    allowedExtensions: ['.xlsx', '.xls'],
+    allowedMimeTypes: [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+    ],
+  });
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<RiskItem | null>(null);
@@ -49,7 +56,7 @@ const RiskRegister: React.FC = () => {
   const confirmDelete = async () => {
     if (itemToDelete === null) return;
     try {
-      await riskService.deleteRisk(itemToDelete);
+      await api.riskRegister.delete(String(itemToDelete));
       toast.success(t('deleteSuccess'));
       fetchRisks();
       setIsDeleteModalOpen(false);
@@ -64,17 +71,44 @@ const RiskRegister: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const validFiles = await validateAndFilter([file]);
+    if (validFiles.length === 0) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
-        const bstr = evt.target?.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
+        const buffer = evt.target?.result as ArrayBuffer;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        const worksheet = workbook.worksheets[0];
+        if (!worksheet) return;
+
+        // Extract headers from the first row
+        const headers: string[] = [];
+        const headerRow = worksheet.getRow(1);
+        headerRow.eachCell((cell, colNumber) => {
+          headers[colNumber] = String(cell.value ?? '');
+        });
+
+        // Convert rows to JSON objects using headers
+        const data: Record<string, string>[] = [];
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return; // skip header row
+          const rowObj: Record<string, string> = {};
+          row.eachCell((cell, colNumber) => {
+            const header = headers[colNumber];
+            if (header) {
+              rowObj[header] = String(cell.value ?? '');
+            }
+          });
+          data.push(rowObj);
+        });
 
         // Helper to find value by multiple possible keys (translations)
-        const getValue = (row: any, key: string) => {
+        const getValue = (row: Record<string, string>, key: string) => {
           const enHeader = t(`excelHeaders.${key}`, { lng: 'en' });
           const arHeader = t(`excelHeaders.${key}`, { lng: 'ar' });
           
@@ -85,7 +119,7 @@ const RiskRegister: React.FC = () => {
         };
 
         // Map Excel columns to our schema
-        const mappedData = data.map((row: any) => ({
+        const mappedData = data.map((row) => ({
           risk_id: getValue(row, 'riskId'),
           description: getValue(row, 'description'),
           owner: getValue(row, 'owner'),
@@ -114,7 +148,7 @@ const RiskRegister: React.FC = () => {
 
         // Send to backend one by one
         for (const item of mappedData) {
-          await api.post('/risk-register', item);
+          await api.riskRegister.create(item as any);
         }
         
         fetchRisks();
@@ -122,7 +156,7 @@ const RiskRegister: React.FC = () => {
         logger.error('Error parsing Excel:', error);
       }
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(validFiles[0]!);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 

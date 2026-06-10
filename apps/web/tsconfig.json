@@ -11,6 +11,9 @@
     ],
     "jsx": "react-jsx",
     "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -30,6 +33,10 @@
     "src/**/*.json"
   ],
   "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/__tests__/**",
+    "src/test/**",
     "src/permissions/seeder.ts",
     "src/permissions/__tests__/seeder.property.test.ts",
     "src/components/FindingCard.test.tsx"

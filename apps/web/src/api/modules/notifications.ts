@@ -8,6 +8,7 @@ import type { Notification } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
 const NotificationSchema: z.ZodType<Notification> = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   recipient_row_id: z.string().optional(),

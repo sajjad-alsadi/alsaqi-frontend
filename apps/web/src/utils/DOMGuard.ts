@@ -125,7 +125,7 @@ export class DOMGuard {
         // إضافة طبقة حماية مرئية في وضع التصحيح
         if ((window as any).DEBUG_MODE) {
             element.style.outline = '2px solid green';
-            element.dataset.protected = 'true';
+            element.dataset['protected'] = 'true';
         }
     }
 

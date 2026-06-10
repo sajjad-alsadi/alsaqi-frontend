@@ -9,7 +9,7 @@ import { AuthProvider, useAuth } from '../AuthContext';
 const mockGet = vi.fn();
 const mockPost = vi.fn();
 
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: (...args: any[]) => mockGet(...args),
     post: (...args: any[]) => mockPost(...args),

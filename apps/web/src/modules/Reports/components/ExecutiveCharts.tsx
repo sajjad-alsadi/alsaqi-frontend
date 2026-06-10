@@ -119,7 +119,7 @@ const ExecutiveCharts: React.FC<ExecutiveChartsProps> = ({ execData, language })
                 />
                 <Bar dataKey="count" fill="var(--color-primary)" radius={language === 'ar' ? [10, 0, 0, 10] : [0, 10, 10, 0]} barSize={20}>
                   {execData.findingsByDept.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length] ?? '#888'} />
                   ))}
                 </Bar>
               </BarChart>

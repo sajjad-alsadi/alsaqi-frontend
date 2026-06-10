@@ -12,7 +12,7 @@ export class SecurityLogger {
     private buffer: any[];
     private flushInterval: number;
     private maxBufferSize: number;
-    public onAlert?: (eventType: string, details: any) => void;
+    public onAlert?: ((eventType: string, details: any) => void) | undefined;
 
     constructor(config: SecurityLoggerConfig = {}) {
         this.endpoint = config.endpoint || '/api/security/log';

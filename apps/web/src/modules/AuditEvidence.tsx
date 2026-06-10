@@ -16,6 +16,7 @@ import PdfViewer from '../components/PdfViewer';
 import { useFormat } from '../utils/formatService';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
+import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
 
 const AuditEvidence: React.FC = () => {
   const { token } = useAuth();
@@ -45,6 +46,7 @@ const AuditEvidence: React.FC = () => {
   });
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { validateAndFilter } = useFileUploadValidation();
 
   useEffect(() => {
     fetchData();
@@ -68,9 +70,15 @@ const AuditEvidence: React.FC = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const validFiles = await validateAndFilter([e.target.files[0]]);
+      if (validFiles.length > 0) {
+        setFile(validFiles[0]!);
+      } else {
+        setFile(null);
+        e.target.value = '';
+      }
     }
   };
 

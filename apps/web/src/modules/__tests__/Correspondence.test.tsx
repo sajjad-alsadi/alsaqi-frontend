@@ -26,12 +26,14 @@ vi.mock('react-hot-toast', () => ({
   },
 }));
 
-vi.mock('../../api/compat/correspondenceService', () => ({
-  correspondenceService: {
-    getStats: vi.fn(),
-    getIncoming: vi.fn(),
-    getOutgoing: vi.fn(),
-    getArchive: vi.fn(),
+vi.mock('../../api', () => ({
+  api: {
+    correspondence: {
+      getStats: vi.fn(),
+      getIncoming: vi.fn(),
+      getOutgoing: vi.fn(),
+      getArchive: vi.fn(),
+    },
   },
 }));
 

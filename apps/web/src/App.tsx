@@ -10,6 +10,7 @@ import { useIdleTimeout } from './hooks/useIdleTimeout';
 import { usePermissions } from './hooks/usePermissions';
 import { MODULES } from './permissions';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ModuleErrorBoundary } from './components/ModuleErrorBoundary';
 import { SkipToContent } from './components/SkipToContent';
 import { LiveRegion } from './components/LiveRegion';
 import Login from './components/Login';
@@ -83,20 +84,20 @@ const AppContent: React.FC = () => {
           <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/charter" element={<AuditCharter />} />
-          <Route path="/plan" element={<AuditPlan />} />
+          <Route path="/plan" element={<ModuleErrorBoundary moduleName="AuditPlan"><AuditPlan /></ModuleErrorBoundary>} />
           <Route path="/tasks" element={<AuditTasks />} />
           <Route path="/library" element={<AuditProgramLibrary />} />
-          <Route path="/findings" element={<AuditFindings />} />
+          <Route path="/findings" element={<ModuleErrorBoundary moduleName="AuditFindings"><AuditFindings /></ModuleErrorBoundary>} />
           <Route path="/evidence" element={<AuditEvidence />} />
           <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/risks" element={<RiskRegister />} />
+          <Route path="/risks" element={<ModuleErrorBoundary moduleName="RiskRegister"><RiskRegister /></ModuleErrorBoundary>} />
           <Route path="/org-structure" element={<OrgStructure />} />
-          <Route path="/cms" element={<CorrespondenceSystem language={language} />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/integrity" element={<IntegrityManagement />} />
+          <Route path="/cms" element={<ModuleErrorBoundary moduleName="Correspondence"><CorrespondenceSystem language={language} /></ModuleErrorBoundary>} />
+          <Route path="/reports" element={<ModuleErrorBoundary moduleName="Reports"><Reports /></ModuleErrorBoundary>} />
+          <Route path="/integrity" element={<ModuleErrorBoundary moduleName="FraudLog"><IntegrityManagement /></ModuleErrorBoundary>} />
           <Route path="/fraud" element={<Navigate to="/integrity" replace />} />
           <Route path="/coi" element={<Navigate to="/integrity" replace />} />
-          <Route path="/compliance-matrix" element={<ComplianceMatrix />} />
+          <Route path="/compliance-matrix" element={<ModuleErrorBoundary moduleName="ComplianceMatrix"><ComplianceMatrix /></ModuleErrorBoundary>} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/departments" element={<DepartmentManagement />} />
           
@@ -105,7 +106,7 @@ const AppContent: React.FC = () => {
           <Route path="/system-errors" element={canView(MODULES.SYSTEM_LOGS) ? <Navigate to="/system-logs" replace /> : <Navigate to="/dashboard" replace />} />
           <Route path="/error-logs" element={canView(MODULES.SYSTEM_LOGS) ? <SystemErrorLogs /> : <Navigate to="/dashboard" replace />} />
           <Route path="/trail" element={canView(MODULES.SYSTEM_LOGS) ? <AuditTrail /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/users" element={canView(MODULES.USER_MANAGEMENT) ? <UserManagement /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/users" element={canView(MODULES.USER_MANAGEMENT) ? <ModuleErrorBoundary moduleName="UserManagement"><UserManagement /></ModuleErrorBoundary> : <Navigate to="/dashboard" replace />} />
           <Route path="/job-titles" element={<Navigate to="/departments" replace />} />
           
           <Route path="/settings" element={<Settings />} />

@@ -135,7 +135,9 @@ const SystemErrorLogs: React.FC = () => {
         if (!wsToken) return;
 
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsBaseUrl = import.meta.env.VITE_WS_URL || `${protocol}://${window.location.host}`;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const env = (import.meta as any).env as Record<string, string> | undefined;
+        const wsBaseUrl = env?.['VITE_WS_URL'] || `${protocol}://${window.location.host}`;
         ws = new WebSocket(`${wsBaseUrl}?token=${wsToken}`);
         
         ws.onopen = () => {

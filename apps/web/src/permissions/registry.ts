@@ -15,7 +15,7 @@ export interface NavigationItem {
   icon: string;
   path: string;
   order: number;
-  parent?: string;
+  parent?: string | undefined;
 }
 
 /** Valid PermissionAction values for validation */

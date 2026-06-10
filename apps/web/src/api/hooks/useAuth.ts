@@ -24,6 +24,7 @@ export function useLogin() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    // @ts-expect-error -- react-query adds | undefined to optional fields, conflicts with exactOptionalPropertyTypes
     mutationFn: (data: LoginInput) => api.auth.login(data),
     onSuccess: () => {
       queryClient.clear();
@@ -36,6 +37,7 @@ export function useLogin() {
  */
 export function useRegister() {
   return useMutation({
+    // @ts-expect-error -- react-query adds | undefined to optional fields, conflicts with exactOptionalPropertyTypes
     mutationFn: (data: RegisterInput) => api.auth.register(data),
   });
 }

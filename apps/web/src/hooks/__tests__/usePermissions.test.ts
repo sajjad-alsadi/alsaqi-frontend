@@ -20,7 +20,7 @@ vi.mock('../../context/AppContext', () => ({
 
 // Mock the API service
 const mockApiGet = vi.fn();
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: (...args: any[]) => mockApiGet(...args),
   },

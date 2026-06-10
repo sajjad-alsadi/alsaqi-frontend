@@ -89,7 +89,7 @@ export interface MockApiInstance {
 }
 
 /**
- * Sets up API mocking for tests by mocking `src/services/api.ts`.
+ * Sets up API mocking for tests by mocking `src/api/httpClient`.
  * Returns a mock axios-like instance with helpers for setting up responses.
  *
  * Usage:
@@ -106,7 +106,7 @@ export function mockApi(): MockApiInstance {
   const patchMock = vi.fn();
   const deleteMock = vi.fn();
 
-  vi.mock('../../services/api', () => ({
+  vi.mock('../../api/httpClient', () => ({
     default: {
       get: getMock,
       post: postMock,

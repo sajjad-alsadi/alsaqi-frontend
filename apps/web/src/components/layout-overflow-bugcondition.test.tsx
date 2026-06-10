@@ -72,12 +72,14 @@ vi.mock('../utils/formatService', () => ({
   }),
 }));
 
-vi.mock('../api/compat/authService', () => ({
-  loginUser: vi.fn(),
-}));
-
-vi.mock('../services/api', () => ({
-  default: { get: vi.fn(), post: vi.fn(), put: vi.fn() },
+vi.mock('../api', () => ({
+  api: {
+    auth: {
+      login: vi.fn(),
+      logout: vi.fn(),
+      getCurrentUser: vi.fn(),
+    },
+  },
 }));
 
 // Minimal motion mock

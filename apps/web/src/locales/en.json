@@ -571,7 +571,10 @@
     "networkErrorDesc": "Please check your internet connection and try again.",
     "errorDesc": "An unexpected error occurred. Please try again.",
     "retry": "Try Again",
-    "stalePermissions": "Permissions may be stale"
+    "stalePermissions": "Permissions may be stale",
+    "connectionOnline": "Connected",
+    "connectionDegraded": "Slow connection",
+    "connectionOffline": "No connection"
   },
   "legal": {
     "title": "Legal & Regulations",
@@ -2835,5 +2838,21 @@
     "riskId": "R-001",
     "entityCode": "e.g. DEPT-001",
     "emailRecipients": "email@example.com"
+  },
+  "globalError": {
+    "title": "Application Error",
+    "description": "A critical error occurred and the application cannot continue. Please reload the page to try again."
+  },
+  "moduleError": {
+    "title": "An error occurred in {{moduleName}}",
+    "description": "An unexpected error occurred in this module. You can try again or navigate to another module.",
+    "retry": "Try Again"
+  },
+  "fileUpload": {
+    "errors": {
+      "fileTooLarge": "File size ({{actualSize}}) exceeds the maximum allowed size ({{maxSize}})",
+      "disallowedType": "File type is not allowed. Allowed types: {{allowedTypes}}",
+      "mimeExtensionMismatch": "File content does not match its extension. The file may be corrupted or tampered with"
+    }
   }
 }

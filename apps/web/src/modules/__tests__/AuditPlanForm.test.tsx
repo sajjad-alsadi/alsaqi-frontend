@@ -80,7 +80,7 @@ const mockApi = {
   put: vi.fn(),
 };
 
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: (...args: any[]) => mockApi.get(...args),
     post: (...args: any[]) => mockApi.post(...args),

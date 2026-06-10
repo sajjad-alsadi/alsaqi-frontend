@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { usePreferences } from '../context/PreferencesContext';
-import { loginUser } from '../api/compat/authService';
-import api from '../api/httpClient';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { ResetStatus, Language } from '../constants';
@@ -62,7 +60,20 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const result = await loginUser(username, password, rememberMe);
+      // Use fetch for login because the response shape varies (normal login vs 2FA required)
+      const loginRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ usernameOrEmail: username, password, rememberMe }),
+      });
+      const loginData = await loginRes.json();
+      if (!loginRes.ok) {
+        const errorData = loginData?.error;
+        const errorMessage = typeof errorData === 'object' ? errorData.message : (errorData || 'Login failed');
+        throw new Error(errorMessage);
+      }
+      const result = loginData;
       
       // Handle 2FA required response
       if (result && result.requires2FA) {
@@ -110,16 +121,21 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/2fa/validate', {
-        tempToken: twoFATempToken,
-        token: twoFACode,
+      const fetchRes = await fetch('/api/auth/2fa/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ tempToken: twoFATempToken, token: twoFACode }),
       });
-      const result = response.data;
+      const result = await fetchRes.json();
+      if (!fetchRes.ok) {
+        throw new Error(result.error?.message || result.error || t('auth.loginFailed'));
+      }
       if (result && result.user) {
         login(result.user, result.token || 'authenticated');
       }
     } catch (err: any) {
-      const message = err.response?.data?.error || err.message || t('auth.loginFailed');
+      const message = err.message || t('auth.loginFailed');
       setTwoFAError(typeof message === 'object' ? message.message : message);
     } finally {
       setLoading(false);

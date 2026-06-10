@@ -1,31 +1,31 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { correspondenceService } from '../api/compat/correspondenceService';
+import { api } from '../api';
 
 export const useCorrespondence = (initialParams: any = {}) => {
   const queryClient = useQueryClient();
 
   const statsQuery = useQuery({
     queryKey: ['correspondence-stats'],
-    queryFn: () => correspondenceService.getStats(),
+    queryFn: () => api.correspondence.getStats(),
     staleTime: 2 * 60 * 1000,
   });
 
   const incomingQuery = useQuery({
     queryKey: ['correspondence-incoming', initialParams],
-    queryFn: () => correspondenceService.getIncoming(initialParams),
+    queryFn: () => api.correspondence.getIncoming(initialParams),
     staleTime: 1 * 60 * 1000,
   });
 
   const outgoingQuery = useQuery({
     queryKey: ['correspondence-outgoing', initialParams],
-    queryFn: () => correspondenceService.getOutgoing(initialParams),
+    queryFn: () => api.correspondence.getOutgoing(initialParams),
     staleTime: 1 * 60 * 1000,
   });
 
   const archiveQuery = useQuery({
     queryKey: ['correspondence-archive', initialParams],
-    queryFn: () => correspondenceService.getArchive(initialParams),
+    queryFn: () => api.correspondence.getArchive(initialParams),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -44,10 +44,9 @@ export const useCorrespondence = (initialParams: any = {}) => {
     loading: statsQuery.isLoading || incomingQuery.isLoading || outgoingQuery.isLoading,
     error: (statsQuery.error || incomingQuery.error || outgoingQuery.error) ? 'Failed to fetch correspondence data' : null,
     fetchStats: () => queryClient.refetchQueries({ queryKey: ['correspondence-stats'] }),
-    fetchIncoming: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-incoming', params], queryFn: () => correspondenceService.getIncoming(params) }),
-    fetchOutgoing: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-outgoing', params], queryFn: () => correspondenceService.getOutgoing(params) }),
-    fetchArchive: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-archive', params], queryFn: () => correspondenceService.getArchive(params) }),
+    fetchIncoming: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-incoming', params], queryFn: () => api.correspondence.getIncoming(params) }),
+    fetchOutgoing: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-outgoing', params], queryFn: () => api.correspondence.getOutgoing(params) }),
+    fetchArchive: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-archive', params], queryFn: () => api.correspondence.getArchive(params) }),
     refreshAll
   };
 };
-

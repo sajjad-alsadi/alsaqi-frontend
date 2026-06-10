@@ -38,6 +38,8 @@ export interface AuditPlansApi {
     pageSize?: number;
     status?: string;
     department?: string;
+    type?: string;
+    search?: string;
   }): Promise<AuditPlan[]>;
   getById(id: string): Promise<AuditPlan>;
   create(data: CreateAuditPlanInput): Promise<AuditPlan>;

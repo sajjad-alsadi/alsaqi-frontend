@@ -22,7 +22,7 @@ import { createApiClient } from './client';
 const env = (import.meta as any).env as Record<string, string> | undefined;
 
 const client = createApiClient({
-  baseUrl: env?.VITE_API_URL || '/api',
+  baseUrl: env?.['VITE_API_URL'] || '/api',
   timeout: 30000,
   onUnauthorized: () => {
     if (window.location.pathname !== '/login') {

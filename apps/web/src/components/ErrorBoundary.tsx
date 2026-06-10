@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import logger from '../utils/logger';
+import { errorReporter } from '../utils/errorReporter';
 
 interface Props extends WithTranslation {
   children: ReactNode;
@@ -13,6 +14,21 @@ interface State {
   error: Error | null;
 }
 
+/**
+ * Global Error Boundary — Ultimate Fallback
+ *
+ * Wraps the entire application at the top level. Catches any error that
+ * escapes ModuleErrorBoundary (e.g., if ModuleErrorBoundary itself throws).
+ * Displays a full-page fallback with a red/error theme, a clear error
+ * indication, and a page-reload action.
+ *
+ * On error:
+ *  - Logs via structured logger
+ *  - Reports to /api/system-errors via errorReporter
+ *  - Displays a full-screen centered fallback with reload button
+ *
+ * Requirements: 1.6
+ */
 class ErrorBoundaryBase extends Component<Props, State> {
   public state: State = {
     hasError: false,
@@ -24,11 +40,23 @@ class ErrorBoundaryBase extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const componentStack = errorInfo.componentStack || '';
+
+    // Log via structured logger
     logger.error('Uncaught error:', { error, errorInfo });
+
+    // Report to error reporting service
+    errorReporter.report({
+      module: 'global',
+      message: error.message,
+      componentStack,
+      severity: 'critical',
+      type: 'boundary',
+      stack: error.stack,
+    });
   }
 
-  private handleReset = () => {
-    this.setState({ hasError: false, error: null });
+  private handleReload = () => {
     window.location.reload();
   };
 
@@ -40,40 +68,27 @@ class ErrorBoundaryBase extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      let errorMessage = t('unexpectedError');
-      let isDatabaseError = false;
-
-      try {
-        if (this.state.error?.message) {
-          const parsedError = JSON.parse(this.state.error.message);
-          if (parsedError.error && parsedError.operationType) {
-            isDatabaseError = true;
-            errorMessage = `${t('databaseError')}: ${parsedError.error} (${t('operation')}: ${parsedError.operationType})`;
-          }
-        }
-      } catch (e) {
-        // Not a JSON error message, use default or raw message
-        if (this.state.error?.message) {
-          errorMessage = this.state.error.message;
-        }
-      }
-
       return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800 text-center">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
-            <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+        <div
+          className="min-h-screen flex flex-col items-center justify-center p-6 bg-red-50 dark:bg-red-950 text-center"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="w-20 h-20 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center mb-6">
+            <AlertCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
           </div>
-          <h2 className="text-xl font-bold text-red-900 dark:text-red-100 mb-2">
-            {isDatabaseError ? t('databaseError') : t('sorrySomethingWentWrong')}
-          </h2>
-          <p className="text-red-700 dark:text-red-300 mb-6 max-w-md">
-            {errorMessage}
+          <h1 className="text-2xl font-bold text-red-900 dark:text-red-100 mb-3">
+            {t('globalError.title')}
+          </h1>
+          <p className="text-red-700 dark:text-red-300 mb-8 max-w-md text-base">
+            {t('globalError.description')}
           </p>
           <button
-            onClick={this.handleReset}
-            className="flex items-center gap-2 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-lg shadow-red-600/20"
+            onClick={this.handleReload}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-base font-medium text-white shadow-lg shadow-red-600/20 transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            type="button"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-5 h-5" />
             {t('reloadPage')}
           </button>
         </div>
@@ -84,4 +99,4 @@ class ErrorBoundaryBase extends Component<Props, State> {
   }
 }
 
-export const ErrorBoundary: React.ComponentType<any> = withTranslation()(ErrorBoundaryBase);
+export const ErrorBoundary: React.ComponentType<Omit<Props, keyof WithTranslation>> = withTranslation()(ErrorBoundaryBase);

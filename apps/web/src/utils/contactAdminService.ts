@@ -57,7 +57,7 @@ export const submitContactAdminRequest = async (
     };
   }
 
-  const ticketId = `REQ-${crypto.getRandomValues(new Uint16Array(1))[0].toString().padStart(5, '0')}`;
+  const ticketId = `REQ-${(crypto.getRandomValues(new Uint16Array(1))[0] ?? 0).toString().padStart(5, '0')}`;
   const newRequest: ContactAdminRequest = {
     ...requestData,
     id: crypto.getRandomValues(new Uint32Array(2)).reduce((s, v) => s + v.toString(36), '').slice(0, 12),

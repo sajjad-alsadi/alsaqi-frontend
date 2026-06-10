@@ -32,7 +32,7 @@ export interface ApiClientError {
   url: string;
   attempts: number;
   reason: string;
-  status?: number;
+  status?: number | undefined;
 }
 
 export interface ApiClient {

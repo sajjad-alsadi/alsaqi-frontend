@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/httpClient';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
 
 interface LegalFormProps {
   onSuccess: () => void;
@@ -27,6 +28,7 @@ const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
     department: '',
     attachment: ''
   });
+  const { validateAndFilter } = useFileUploadValidation();
 
   useEffect(() => {
     if (!token) return;
@@ -41,14 +43,19 @@ const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
       });
   }, [token]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({...formData, attachment: reader.result as string});
-      };
-      reader.readAsDataURL(file);
+      const validFiles = await validateAndFilter([file]);
+      if (validFiles.length > 0) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData({...formData, attachment: reader.result as string});
+        };
+        reader.readAsDataURL(validFiles[0]!);
+      } else {
+        e.target.value = '';
+      }
     }
   };
 

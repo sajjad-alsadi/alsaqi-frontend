@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService } from '../api/compat/userService';
+import { api } from '../api';
 import toast from 'react-hot-toast';
 
 export const useUserManagement = (initialParams: any = {}) => {
@@ -8,67 +8,67 @@ export const useUserManagement = (initialParams: any = {}) => {
 
   const usersQuery = useQuery({
     queryKey: ['users', initialParams],
-    queryFn: () => userService.getUsers(initialParams),
+    queryFn: () => api.userManagement.init().then(() => api.users.list(initialParams)),
     staleTime: 5 * 60 * 1000,
   });
 
   const summaryQuery = useQuery({
     queryKey: ['users-summary'],
-    queryFn: () => userService.getSummary(),
+    queryFn: () => api.userManagement.getSummary(),
     staleTime: 5 * 60 * 1000,
   });
 
   const rolesQuery = useQuery({
     queryKey: ['roles'],
-    queryFn: () => userService.getRoles(),
+    queryFn: () => api.userManagement.getRoles(),
     staleTime: 30 * 60 * 1000,
   });
 
   const permissionsQuery = useQuery({
     queryKey: ['permissions'],
-    queryFn: () => userService.getPermissions(),
+    queryFn: () => api.userManagement.getPermissions(),
     staleTime: 60 * 60 * 1000,
   });
 
   const sessionsQuery = useQuery({
     queryKey: ['sessions'],
-    queryFn: () => userService.getSessions(),
+    queryFn: () => api.userManagement.getSessions(),
     staleTime: 1 * 60 * 1000, // Refresh sessions more often
   });
 
   const settingsQuery = useQuery({
     queryKey: ['user-management-settings'],
-    queryFn: () => userService.getSettings(),
+    queryFn: () => api.userManagement.getSettings(),
   });
 
   const loginHistoryQuery = useQuery({
     queryKey: ['login-history', initialParams.historyPage],
-    queryFn: () => userService.getLoginHistory({ page: initialParams.historyPage || 1, pageSize: 50 }),
+    queryFn: () => api.userManagement.getLoginHistory({ page: initialParams.historyPage || 1, pageSize: 50 }),
   });
 
   const auditTrailQuery = useQuery({
     queryKey: ['audit-trail', initialParams.auditPage],
-    queryFn: () => userService.getAuditTrail({ page: initialParams.auditPage || 1, pageSize: 50 }),
+    queryFn: () => api.userManagement.getAuditTrail({ page: initialParams.auditPage || 1, pageSize: 50 }),
   });
 
   const resetRequestsQuery = useQuery({
     queryKey: ['password-reset-requests'],
-    queryFn: () => userService.getResetRequests(),
+    queryFn: () => api.userManagement.getResetRequests(),
   });
 
   const departmentsQuery = useQuery({
     queryKey: ['departments'],
-    queryFn: () => userService.getDepartments(),
+    queryFn: () => api.departments.list(),
   });
 
   const jobTitlesQuery = useQuery({
     queryKey: ['jobTitles'],
-    queryFn: () => userService.getJobTitles(),
+    queryFn: () => api.userManagement.getJobTitles(),
   });
 
   // Mutations
   const updateUserMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => userService.updateUser(id, data),
+    mutationFn: ({ id, data }: { id: string; data: any }) => api.users.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User updated successfully');
@@ -86,27 +86,26 @@ export const useUserManagement = (initialParams: any = {}) => {
   }, [queryClient]);
 
   return {
-    users: usersQuery.data?.data || [],
+    users: usersQuery.data || [],
     summary: summaryQuery.data || null,
-    roles: Array.isArray(rolesQuery.data) ? rolesQuery.data : (rolesQuery.data as any)?.data || [],
-    permissions: Array.isArray(permissionsQuery.data) ? permissionsQuery.data : (permissionsQuery.data as any)?.data || [],
-    sessions: Array.isArray(sessionsQuery.data) ? sessionsQuery.data : (sessionsQuery.data as any)?.data || [],
+    roles: Array.isArray(rolesQuery.data) ? rolesQuery.data : [],
+    permissions: Array.isArray(permissionsQuery.data) ? permissionsQuery.data : [],
+    sessions: Array.isArray(sessionsQuery.data) ? sessionsQuery.data : [],
     settings: settingsQuery.data || null,
-    loginHistory: loginHistoryQuery.data?.data || [],
-    auditTrail: auditTrailQuery.data?.data || [],
-    resetRequests: Array.isArray(resetRequestsQuery.data) ? resetRequestsQuery.data : (resetRequestsQuery.data as any)?.requests || [],
-    departments: Array.isArray(departmentsQuery.data) ? departmentsQuery.data : (departmentsQuery.data as any)?.departments || [],
-    jobTitles: Array.isArray(jobTitlesQuery.data) ? jobTitlesQuery.data : (jobTitlesQuery.data as any)?.jobTitles || [],
+    loginHistory: Array.isArray(loginHistoryQuery.data) ? loginHistoryQuery.data : [],
+    auditTrail: Array.isArray(auditTrailQuery.data) ? auditTrailQuery.data : [],
+    resetRequests: Array.isArray(resetRequestsQuery.data) ? resetRequestsQuery.data : [],
+    departments: Array.isArray(departmentsQuery.data) ? departmentsQuery.data : [],
+    jobTitles: Array.isArray(jobTitlesQuery.data) ? jobTitlesQuery.data : [],
     loading: usersQuery.isLoading || summaryQuery.isLoading,
     error: usersQuery.error ? (usersQuery.error as any).message : null,
-    pagination: usersQuery.data?.pagination || { total: 0, page: 1, pageSize: 10, totalPages: 0 },
-    historyPagination: loginHistoryQuery.data?.pagination || { total: 0, page: 1, pageSize: 50, totalPages: 0 },
-    activityPagination: auditTrailQuery.data?.pagination || { total: 0, page: 1, pageSize: 50, totalPages: 0 },
-    fetchUsers: (params: any) => queryClient.prefetchQuery({ queryKey: ['users', params], queryFn: () => userService.getUsers(params) }),
-    fetchLoginHistory: (params: any) => queryClient.prefetchQuery({ queryKey: ['login-history', params], queryFn: () => userService.getLoginHistory(params) }),
-    fetchAuditTrail: (params: any) => queryClient.prefetchQuery({ queryKey: ['audit-trail', params], queryFn: () => userService.getAuditTrail(params) }),
+    pagination: { total: Array.isArray(usersQuery.data) ? usersQuery.data.length : 0, page: 1, pageSize: 10, totalPages: 0 },
+    historyPagination: { total: 0, page: 1, pageSize: 50, totalPages: 0 },
+    activityPagination: { total: 0, page: 1, pageSize: 50, totalPages: 0 },
+    fetchUsers: (params: any) => queryClient.prefetchQuery({ queryKey: ['users', params], queryFn: () => api.users.list(params) }),
+    fetchLoginHistory: (params: any) => queryClient.prefetchQuery({ queryKey: ['login-history', params], queryFn: () => api.userManagement.getLoginHistory(params) }),
+    fetchAuditTrail: (params: any) => queryClient.prefetchQuery({ queryKey: ['audit-trail', params], queryFn: () => api.userManagement.getAuditTrail(params) }),
     refreshAll,
     updateUser: updateUserMutation.mutateAsync
   };
 };
-

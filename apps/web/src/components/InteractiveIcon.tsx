@@ -14,7 +14,7 @@ interface InteractiveIconProps {
   disabled?: boolean;
   active?: boolean;
   variant?: 'ghost' | 'solid' | 'outline' | 'danger';
-  badge?: string | number;
+  badge?: string | number | undefined;
   ariaExpanded?: boolean;
 }
 

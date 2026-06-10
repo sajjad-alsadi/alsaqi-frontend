@@ -7,13 +7,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-interface FormFieldProps {
+export interface FormFieldProps {
   label?: React.ReactNode;
-  error?: string;
+  error?: string | undefined;
   required?: boolean;
   children: React.ReactNode;
-  className?: string;
-  hint?: string;
+  className?: string | undefined;
+  hint?: string | undefined;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({

@@ -9,7 +9,7 @@ export const formatNumber = (num: number | string): string => {
   
   if (currentLng.startsWith('ar')) {
     const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return String(num).replace(/[0-9]/g, (w) => id[+w]);
+    return String(num).replace(/[0-9]/g, (w) => id[+w] ?? w);
   }
   
   const n = typeof num === 'string' ? parseFloat(num) : num;

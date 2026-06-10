@@ -80,11 +80,11 @@ const Dashboard: React.FC = () => {
 
     // Initialize with zeros for known categories to ensure they always show up
     const trackedData: Record<string, {name: string, planned: number, completed: number}> = {
-      'Operational': { name: typeMapping['Operational'], planned: 0, completed: 0 },
-      'Financial': { name: typeMapping['Financial'], planned: 0, completed: 0 },
-      'Compliance': { name: typeMapping['Compliance'], planned: 0, completed: 0 },
-      'IT': { name: typeMapping['IT'], planned: 0, completed: 0 },
-      'AML': { name: typeMapping['AML'], planned: 0, completed: 0 }
+      'Operational': { name: typeMapping['Operational'] ?? '', planned: 0, completed: 0 },
+      'Financial': { name: typeMapping['Financial'] ?? '', planned: 0, completed: 0 },
+      'Compliance': { name: typeMapping['Compliance'] ?? '', planned: 0, completed: 0 },
+      'IT': { name: typeMapping['IT'] ?? '', planned: 0, completed: 0 },
+      'AML': { name: typeMapping['AML'] ?? '', planned: 0, completed: 0 }
     };
 
     stats.audits.progress_by_type.forEach((item: any) => {

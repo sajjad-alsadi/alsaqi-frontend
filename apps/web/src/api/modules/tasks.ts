@@ -8,6 +8,7 @@ import type { AuditTask, CreateTaskInput, UpdateTaskInput } from '@alsaqi/shared
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
 const TaskSchema: z.ZodType<AuditTask> = z.object({
   id: z.union([z.number(), z.string()]).optional(),
   task_number: z.string(),

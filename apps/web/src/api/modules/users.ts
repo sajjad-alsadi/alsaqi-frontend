@@ -38,8 +38,10 @@ export interface UsersApi {
   list(query?: {
     page?: number;
     pageSize?: number;
+    search?: string;
     role?: string;
     status?: string;
+    department?: string;
   }): Promise<User[]>;
   getById(id: string): Promise<User>;
   create(data: CreateUserInput): Promise<User>;

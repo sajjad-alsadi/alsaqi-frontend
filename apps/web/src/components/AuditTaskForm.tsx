@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuditTask, AuditPlan } from '../types';
 import { AuditType } from '../constants';
-import api from '../services/api';
+import api from '../api/httpClient';
 import { FormField } from './ui/FormField';
 import { Input } from './ui/Input';
 import logger from '../utils/logger';

@@ -33,33 +33,40 @@ vi.mock('../../utils/logger', () => ({
   },
 }));
 
-vi.mock('../../api/compat/userService', () => ({
-  userService: {
-    getUsers: vi.fn(),
-    getSummary: vi.fn(),
-    getRoles: vi.fn(),
-    getPermissions: vi.fn(),
-    getSessions: vi.fn(),
-    getSettings: vi.fn(),
-    getLoginHistory: vi.fn(),
-    getAuditTrail: vi.fn(),
-    getResetRequests: vi.fn(),
-    getDepartments: vi.fn(),
-    getJobTitles: vi.fn(),
-    createUser: vi.fn(),
-    updateUser: vi.fn(),
-    deleteUser: vi.fn(),
-    suspendUser: vi.fn(),
-    unlockUser: vi.fn(),
-    resetPassword: vi.fn(),
-    updateRolePermissions: vi.fn(),
-    updateSettings: vi.fn(),
-    revokeSession: vi.fn(),
-    approveReset: vi.fn(),
+vi.mock('../../api', () => ({
+  api: {
+    users: {
+      list: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    userManagement: {
+      init: vi.fn().mockResolvedValue({}),
+      getSummary: vi.fn(),
+      getRoles: vi.fn(),
+      getPermissions: vi.fn(),
+      getSessions: vi.fn(),
+      getSettings: vi.fn(),
+      getLoginHistory: vi.fn(),
+      getAuditTrail: vi.fn(),
+      getJobTitles: vi.fn(),
+      getResetRequests: vi.fn(),
+      suspendUser: vi.fn(),
+      unlockUser: vi.fn(),
+      resetPassword: vi.fn(),
+      updateRolePermissions: vi.fn(),
+      updateSettings: vi.fn(),
+      revokeSession: vi.fn(),
+      approveReset: vi.fn(),
+    },
+    departments: {
+      list: vi.fn(),
+    },
   },
 }));
 
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/httpClient', () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),
