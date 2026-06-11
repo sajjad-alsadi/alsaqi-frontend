@@ -2,173 +2,147 @@
 
 ## Introduction
 
-يحدد هذا المستند المتطلبات الوظيفية وغير الوظيفية لتحقيق جاهزية نظام الساقي (AL-SAQI) للإنتاج. النظام هو تطبيق إدارة تدقيق داخلي مبني بـ React 19 + TypeScript + Vite يعمل في بيئة air-gapped ويتعامل مع بيانات حساسة في القطاع المصرفي. تُشتق هذه المتطلبات من وثيقة التصميم التي حددت فجوات في الأمان والأداء والموثوقية والمراقبة والديون التقنية.
+The Production Readiness Analysis feature generates a standalone Markdown report (`PRODUCTION_READINESS_REPORT.md`) that exhaustively audits the Al-Saqi web frontend codebase across six categories: build settings, security, performance, error handling/UX, code quality/stability, and RTL/Arabic support. The report identifies issues with severity levels, provides file/line references, calculates an overall readiness percentage, lists blockers, and recommends missing production infrastructure. The report is meant to be read and shared with the development team.
 
 ## Glossary
 
-- **System**: نظام الساقي (AL-SAQI) — تطبيق الواجهة الأمامية ومنظومة البناء والنشر
-- **Module_Error_Boundary**: مكون React يلتقط أخطاء التصيير (render errors) ضمن وحدة فردية ويعرض واجهة بديلة
-- **Typed_API_Client**: طبقة API الموحدة في `api/index.ts` التي تتواصل مع الخلفية عبر Axios مع Zod validation
-- **Compat_Layer**: طبقة API القديمة في `api/compat/*.ts` المُراد إزالتها
-- **Connection_Monitor**: مكون يراقب حالة اتصال الشبكة و WebSocket ويعرض مؤشراً بصرياً
-- **Build_Pipeline**: عملية بناء التطبيق عبر Vite/Rollup التي تنتج حزم الإنتاج
-- **Production_Server**: خادم Nginx الذي يقدم التطبيق في بيئة الإنتاج
-- **Structured_Logger**: أداة تسجيل منظمة تُفرّق بين بيئة التطوير والإنتاج وترسل الأخطاء إلى `/api/system-errors`
-- **Error_Reporter**: مكون يرسل تقارير الأخطاء إلى نقطة نهاية `/api/system-errors`
-- **Web_Vitals_Monitor**: مكون يجمع مقاييس أداء الواجهة (LCP, FID, CLS, FCP, TTFB, INP)
-- **CSP**: Content Security Policy — سياسة أمان المحتوى في HTTP headers
+- **Analyzer**: The production readiness analysis tool that scans the codebase and produces the report
+- **Report**: The generated `PRODUCTION_READINESS_REPORT.md` Markdown file
+- **Finding**: A single identified issue or recommendation within the report
+- **Severity_Level**: One of three classifications — 🔴 Critical (must fix before deploy), 🟡 Warning (should fix soon), 🟢 Improvement (nice to have)
+- **Audit_Category**: One of the six inspection domains: Build Settings, Security, Performance, Error Handling/UX, Code Quality/Stability, RTL/Arabic Support
+- **Readiness_Score**: A percentage from 0 to 100 representing overall production readiness
+- **Blocker**: A 🔴 Critical finding that prevents production deployment
+- **Codebase**: The Al-Saqi web frontend application located at `apps/web/src/`
+- **Infrastructure_Recommendation**: A recommendation for production tooling not currently present in the codebase (error monitoring, feature flags, health checks, etc.)
 
 ## Requirements
 
-### Requirement 1: عزل أخطاء الوحدات
+### Requirement 1: Exhaustive Codebase Scanning
 
-**User Story:** As an end user, I want module-level error boundaries so that a failure in one module does not crash the entire application.
-
-#### Acceptance Criteria
-
-1. WHEN an unhandled render error occurs in a feature module, THE Module_Error_Boundary SHALL catch the error and display a fallback UI within that module's allocated area containing: an error indication message in the user's active locale, and a retry action that re-mounts the failed module
-2. WHEN a Module_Error_Boundary catches an error, THE Error_Reporter SHALL send a structured error report containing the module name, error message, and component stack to `/api/system-errors` within 5 seconds of the error occurring
-3. IF the Error_Reporter fails to send the error report, THEN THE System SHALL retain the report in memory and retry delivery up to 3 times with exponential backoff, without affecting the displayed fallback UI
-4. WHILE a module is in an error state, THE System SHALL allow the user to navigate to other modules without a full page reload
-5. WHEN a Module_Error_Boundary catches an error, THE System SHALL render all other feature modules in their normal functional state without re-mounting or resetting their internal state
-6. IF the Module_Error_Boundary itself fails to render, THEN THE global Error Boundary SHALL catch the error and display a full-page fallback containing an error indication message and a page-reload action
-
-### Requirement 2: توحيد طبقة API
-
-**User Story:** As a developer, I want a single unified API layer so that error handling and data validation are consistent across all modules.
+**User Story:** As a developer, I want every file in the web frontend source to be inspected, so that no production issues are missed.
 
 #### Acceptance Criteria
 
-1. THE Typed_API_Client SHALL provide a typed function for every operation available in the Compat_Layer, accepting the same input parameters and covering the same API endpoints
-2. WHEN the Typed_API_Client receives an API response, THE Typed_API_Client SHALL validate the response against its Zod schema and return the validated typed data to the caller
-3. IF the Zod schema validation fails for an API response, THEN THE Typed_API_Client SHALL throw an error of type 'validation' containing the request URL and a reason describing the schema mismatch
-4. WHEN the Typed_API_Client encounters a network, timeout, or server error, THE Typed_API_Client SHALL produce an ApiClientError object containing type, url, attempts, reason, and status fields
-5. WHEN a Compat_Layer function is called and the application is running in development mode (VITE_MODE equals 'development'), THE System SHALL log a deprecation warning to the console identifying the equivalent Typed_API_Client function name
-6. THE System SHALL not import or reference the Compat_Layer in any module created after the Typed_API_Client reaches full operation coverage
+1. WHEN the Analyzer executes, THE Analyzer SHALL inspect every file within the `apps/web/src/` directory tree including all subdirectories.
+2. WHEN the Analyzer inspects a file, THE Analyzer SHALL evaluate the file against all six Audit_Category checklists applicable to the file type.
+3. THE Analyzer SHALL scan TypeScript files (`.ts`, `.tsx`), configuration files (`vite.config.ts`, `tsconfig.json`, `package.json`), HTML files, and environment files within the project scope.
+4. WHEN scanning is complete, THE Analyzer SHALL report the total number of files inspected in the Report header.
 
-### Requirement 3: مرونة الاتصال
+### Requirement 2: Build Settings and Configuration Audit
 
-**User Story:** As an end user, I want the application to handle network interruptions gracefully so that I do not lose unsaved work or miss notifications.
+**User Story:** As a developer, I want the build configuration audited for production safety, so that the deployed bundle is optimized and secure.
 
 #### Acceptance Criteria
 
-1. WHEN the network connection is lost, THE Connection_Monitor SHALL display a persistent on-screen indicator within 2 seconds showing the offline status, visually distinct from the degraded-connection indicator
-2. WHEN the WebSocket connection drops, THE System SHALL attempt reconnection using exponential backoff starting at 1 second up to a maximum interval of 30 seconds, for a maximum of 10 attempts
-3. IF all reconnection attempts are exhausted without success, THEN THE System SHALL display an error indicator informing the user that automatic reconnection has failed and manual page refresh is required
-4. WHEN the WebSocket reconnects after a disconnection of up to 30 minutes, THE System SHALL synchronize up to 100 missed notifications that accumulated during the disconnection period
-5. WHILE the network connection is lost, THE System SHALL preserve all user-entered form data in memory without discarding it for the duration of the browser session
-6. WHEN the network connection is restored, THE Connection_Monitor SHALL update the indicator to show the online status within 2 seconds
-7. WHEN the API latency exceeds 5 seconds, THE Connection_Monitor SHALL display a degraded-connection indicator that is visually distinct from the offline status indicator
+1. WHEN the Analyzer inspects build configuration, THE Analyzer SHALL verify that `drop_console` and `drop_debugger` are set to `true` in Terser options.
+2. WHEN the Analyzer inspects build configuration, THE Analyzer SHALL verify that sourcemaps are set to `hidden` mode.
+3. WHEN the Analyzer inspects build configuration, THE Analyzer SHALL evaluate manual chunk splitting strategy for correctness and bundle size optimization.
+4. WHEN the Analyzer inspects build configuration, THE Analyzer SHALL check for environment variable leakage by verifying no secrets are embedded via `define` or exposed through `VITE_` prefixed variables.
+5. WHEN the Analyzer inspects build configuration, THE Analyzer SHALL verify that the TypeScript strict mode configuration is enabled with production-appropriate compiler options.
+6. IF a build setting deviates from production best practices, THEN THE Analyzer SHALL generate a Finding with the relevant Severity_Level, file path, line number, problem description, production impact, and suggested fix.
 
-### Requirement 4: حتمية البناء
+### Requirement 3: Security Audit
 
-**User Story:** As a DevOps engineer, I want deterministic builds that work offline so that the application can be deployed reliably in an air-gapped environment.
-
-#### Acceptance Criteria
-
-1. WHEN executed from the same Git commit with the same lock file, THE Build_Pipeline SHALL produce byte-identical bundle output files such that their SHA-256 content hashes match across consecutive runs
-2. THE Build_Pipeline SHALL complete successfully without initiating any outbound network connections (HTTP, HTTPS, DNS, or registry requests) during the build process
-3. IF a required environment variable (VITE_API_URL, VITE_APP_VERSION, VITE_ERROR_REPORT_URL, or VITE_WS_URL) is missing, THEN THE Build_Pipeline SHALL fail with an error message that names each missing variable
-4. THE Build_Pipeline SHALL not include the `xlsx` CDN dependency and SHALL instead resolve all dependencies from locally available packages declared in the lock file
-5. THE Build_Pipeline SHALL produce a total initial bundle size (sum of all JavaScript and CSS assets loaded for the application's first route) of less than 500KB gzipped
-6. THE Build_Pipeline SHALL complete within 120 seconds on a machine with at least 4 CPU cores and 8GB RAM
-
-### Requirement 5: وجود ترويسات الأمان
-
-**User Story:** As a security engineer, I want all HTTP responses to include mandatory security headers so that the application is protected against common web attacks.
+**User Story:** As a developer, I want security vulnerabilities identified, so that the application is safe for production users.
 
 #### Acceptance Criteria
 
-1. THE Production_Server SHALL include a `Content-Security-Policy` header on every HTTP response that restricts `default-src` to `'self'`, allows `connect-src` for `'self'` and WebSocket connections to the same origin (`wss:`), and sets `frame-ancestors` to `'none'`
-2. THE Production_Server SHALL include `X-Content-Type-Options: nosniff` on every HTTP response
-3. THE Production_Server SHALL include `X-Frame-Options: DENY` on every HTTP response
-4. THE Production_Server SHALL include a `Referrer-Policy` header with value `strict-origin-when-cross-origin` on every HTTP response
-5. THE Production_Server SHALL include a `Permissions-Policy` header that disables camera, microphone, and geolocation on every HTTP response
-6. THE Production_Server SHALL include `Cross-Origin-Opener-Policy: same-origin` on every HTTP response
-7. IF HTTPS is enabled, THEN THE Production_Server SHALL include a `Strict-Transport-Security` header with a minimum `max-age` of 31536000 seconds and the `includeSubDomains` directive on every HTTP response
-8. THE Production_Server SHALL include all required security headers (criteria 1–7) on every HTTP response regardless of status code, including error responses (4xx, 5xx), redirects (3xx), and static asset responses
+1. WHEN the Analyzer performs a security audit, THE Analyzer SHALL verify that authentication tokens are not stored in localStorage or sessionStorage.
+2. WHEN the Analyzer performs a security audit, THE Analyzer SHALL verify that CSRF tokens are attached to mutating requests.
+3. WHEN the Analyzer performs a security audit, THE Analyzer SHALL check for hardcoded secrets, API keys, or credentials in source files.
+4. WHEN the Analyzer performs a security audit, THE Analyzer SHALL evaluate Content Security Policy headers in the deployment configuration.
+5. WHEN the Analyzer performs a security audit, THE Analyzer SHALL verify that API responses are validated with a schema validation library before consumption.
+6. WHEN the Analyzer performs a security audit, THE Analyzer SHALL check for XSS vectors including unsafe `dangerouslySetInnerHTML` usage without sanitization.
+7. WHEN the Analyzer performs a security audit, THE Analyzer SHALL verify that sensitive routes enforce authentication checks.
+8. IF a security vulnerability is identified, THEN THE Analyzer SHALL classify the Finding as 🔴 Critical Severity_Level.
 
-### Requirement 6: بناء إنتاجي خالٍ من Console
+### Requirement 4: Performance Audit
 
-**User Story:** As a security engineer, I want production builds to contain no console output statements so that technical information is not exposed to end users.
-
-#### Acceptance Criteria
-
-1. THE Build_Pipeline SHALL remove all `console.log`, `console.debug`, `console.info`, `console.warn`, `console.error`, `console.trace`, `console.table`, and `console.dir` statements from the production bundle output such that a text search of the final JavaScript bundle files returns zero matches for direct console method invocations
-2. IF a third-party dependency emits console output at runtime, THEN THE Build_Pipeline SHALL suppress it by configuring the minifier to drop all `console.*` calls including those originating from `node_modules`
-3. WHEN an unhandled exception, rejected promise, or API error occurs in production, THE System SHALL route the error exclusively through the Structured_Logger which reports to the `/api/system-errors` endpoint without writing any output to the browser console
-4. THE production bundle SHALL not expose stack traces, source file paths, or internal module names to the end user through browser console output, DOM content, or network response bodies originating from the frontend application
-5. WHEN the production build completes, THE Build_Pipeline SHALL produce hidden source maps (not accessible to end users via the browser) and SHALL NOT inline source map references in the output bundle files
-
-### Requirement 7: مراقبة أداء الواجهة
-
-**User Story:** As a DevOps engineer, I want Web Vitals monitoring so that I can track frontend performance and detect regressions.
+**User Story:** As a developer, I want performance bottlenecks identified, so that the application loads fast and runs smoothly in production.
 
 #### Acceptance Criteria
 
-1. WHEN a page finishes loading or a route transition completes, THE Web_Vitals_Monitor SHALL collect Largest Contentful Paint (LCP), First Input Delay (FID), Cumulative Layout Shift (CLS), First Contentful Paint (FCP), and Time to First Byte (TTFB) metrics as reported by the browser Performance API
-2. WHEN a Web Vitals metric is collected, THE Web_Vitals_Monitor SHALL classify it as `good`, `needs-improvement`, or `poor` based on the following thresholds: LCP good ≤ 2500ms / poor > 4000ms, FID good ≤ 100ms / poor > 300ms, CLS good ≤ 0.1 / poor > 0.25, FCP good ≤ 1800ms / poor > 3000ms, TTFB good ≤ 800ms / poor > 1800ms
-3. WHEN a Web Vitals metric is collected, THE Web_Vitals_Monitor SHALL include the current route path (as defined by the application router) and an ISO 8601 UTC timestamp with the metric data
-4. THE Web_Vitals_Monitor SHALL report collected metrics to the backend monitoring endpoint asynchronously, without adding more than 50ms of blocking time to the main thread per reporting cycle
-5. IF the backend monitoring endpoint is unreachable or returns a non-success response, THEN THE Web_Vitals_Monitor SHALL retain the metric data in memory (up to 50 entries) and retry delivery on the next reporting cycle without discarding metrics or surfacing errors to the end user
+1. WHEN the Analyzer performs a performance audit, THE Analyzer SHALL identify components that should use lazy loading via `React.lazy` and code splitting.
+2. WHEN the Analyzer performs a performance audit, THE Analyzer SHALL check for missing memoization on expensive computations or frequently re-rendered components.
+3. WHEN the Analyzer performs a performance audit, THE Analyzer SHALL evaluate React Query cache configuration for appropriate stale times and cache invalidation.
+4. WHEN the Analyzer performs a performance audit, THE Analyzer SHALL identify large bundle dependencies that could be lazy-loaded or tree-shaken.
+5. WHEN the Analyzer performs a performance audit, THE Analyzer SHALL check for unnecessary re-renders caused by unstable references in context providers.
+6. WHEN the Analyzer performs a performance audit, THE Analyzer SHALL evaluate image and asset loading strategies for optimization opportunities.
+7. WHEN the Analyzer performs a performance audit, THE Analyzer SHALL verify that the WebSocket client implements proper reconnection without causing memory leaks.
 
-### Requirement 8: تقسيم الحزم وتحسين الأداء
+### Requirement 5: Error Handling and UX Audit
 
-**User Story:** As an end user, I want the application to load quickly so that I can start working without long wait times.
-
-#### Acceptance Criteria
-
-1. THE Build_Pipeline SHALL split vendor dependencies into separate chunks grouped by domain (react, query, ui, pdf, excel, editor, i18n, forms)
-2. THE Build_Pipeline SHALL produce chunks where each feature module is loaded on demand via lazy loading
-3. THE System SHALL achieve a Time to Interactive of less than 3.5 seconds on a simulated 4G connection (download 9 Mbps, upload 1.5 Mbps, latency 170ms)
-4. THE Build_Pipeline SHALL enable tree-shaking by ensuring all imports use named imports from ES modules
-5. THE Build_Pipeline SHALL produce an initial bundle size (JavaScript and CSS loaded before first route render) of less than 500KB gzipped
-
-### Requirement 9: تشديد Docker والنشر
-
-**User Story:** As a DevOps engineer, I want the production Docker container to follow security best practices so that the deployment surface area is minimized.
+**User Story:** As a developer, I want error handling gaps identified, so that users have a graceful experience when things go wrong in production.
 
 #### Acceptance Criteria
 
-1. THE Docker container SHALL run the Nginx process as a non-root user with a numeric UID of 101 or higher, verifiable by inspecting the container's running process owner via `docker top` or equivalent
-2. THE Docker container SHALL disable the Nginx `server_tokens` directive so that HTTP responses do not include the Nginx version number in the `Server` header
-3. THE Docker container SHALL enable gzip compression for responses with content types `text/html`, `text/css`, `application/javascript`, `application/json`, and `image/svg+xml`, with a minimum response size threshold of 256 bytes
-4. THE Docker container SHALL serve static assets (files matching `.js`, `.css`, `.png`, `.jpg`, `.svg`, `.woff2`) with a `Cache-Control` header containing `immutable` and a `max-age` of at least 31536000 seconds (1 year), where filenames include a build-time content hash segment
-5. THE Docker container SHALL support running with a read-only root filesystem (`--read-only` flag), with only Nginx temporary directories (pid, cache, logs) mounted as writable tmpfs volumes
+1. WHEN the Analyzer performs an error handling audit, THE Analyzer SHALL verify that ErrorBoundary components cover all route-level and module-level component trees.
+2. WHEN the Analyzer performs an error handling audit, THE Analyzer SHALL identify async operations (API calls, WebSocket messages) that lack error handling.
+3. WHEN the Analyzer performs an error handling audit, THE Analyzer SHALL verify that loading states are displayed during data fetching operations.
+4. WHEN the Analyzer performs an error handling audit, THE Analyzer SHALL check that user-facing error messages are localized and do not expose technical details.
+5. WHEN the Analyzer performs an error handling audit, THE Analyzer SHALL evaluate the retry mechanism for network failures to confirm exponential backoff behavior.
+6. WHEN the Analyzer performs an error handling audit, THE Analyzer SHALL verify that 401 responses trigger proper re-authentication flow without data loss.
+7. IF the codebase lacks error monitoring integration (Sentry or equivalent), THEN THE Analyzer SHALL generate an Infrastructure_Recommendation Finding.
 
-### Requirement 10: التحقق من الأنماط TypeScript الصارمة
+### Requirement 6: Code Quality and Stability Audit
 
-**User Story:** As a developer, I want strict TypeScript configuration so that potential runtime errors are caught at compile time.
-
-#### Acceptance Criteria
-
-1. THE Build_Pipeline SHALL enforce `noUncheckedIndexedAccess: true` in the TypeScript compiler configuration to prevent silent undefined values from index access
-2. THE Build_Pipeline SHALL enforce `exactOptionalPropertyTypes: true` in the TypeScript compiler configuration to distinguish between missing and explicitly undefined properties
-3. WHEN the TypeScript compiler detects one or more type errors, THE Build_Pipeline SHALL exit with a non-zero exit code and list all detected errors to standard output without producing bundled application artifacts
-4. THE Build_Pipeline SHALL contain zero usages of the explicit `any` type, `@ts-ignore` directives, and `as any` type assertions in security-critical modules defined as: the API client module (`src/api/client.ts`), authentication hooks (`src/api/hooks/useAuth.ts`), and any provider file matching `*Security*` or `*Auth*Provider*` under `src/`
-5. WHEN a developer introduces an explicit `any` type or a `@ts-ignore` directive in a security-critical module, THE Build_Pipeline SHALL fail the type-check step and report the violation location
-
-### Requirement 11: تغطية الاختبارات
-
-**User Story:** As a QA engineer, I want comprehensive test coverage so that regressions are detected automatically before deployment.
+**User Story:** As a developer, I want code quality issues flagged, so that the codebase is maintainable and stable in production.
 
 #### Acceptance Criteria
 
-1. THE System SHALL have end-to-end tests that execute and assert successful completion of: login flow, audit plan creation, finding creation with recommendation, and correspondence sending, where each flow test passes only when the final expected UI state is rendered without errors
-2. THE System SHALL have unit tests for each feature module (Reports, FraudLog, Correspondence, RiskRegister, ComplianceMatrix) achieving a minimum of 70% line coverage per module as reported by the coverage tool
-3. THE System SHALL have automated accessibility tests that verify WCAG 2.1 AA compliance for all form components including text inputs, select dropdowns, checkboxes, radio buttons, and submit buttons
-4. WHEN a pull request is submitted, THE CI pipeline SHALL run type-check, lint, and test suites sequentially and block merge if any command exits with a non-zero exit code
-5. IF the overall unit test line coverage falls below 70%, THEN THE CI pipeline SHALL fail the build and report the current coverage percentage in the output
+1. WHEN the Analyzer performs a code quality audit, THE Analyzer SHALL identify any `console.log`, `console.warn`, or `console.error` statements that will be stripped by Terser but indicate debugging code left behind.
+2. WHEN the Analyzer performs a code quality audit, THE Analyzer SHALL check for `any` type assertions that bypass TypeScript strict mode safety.
+3. WHEN the Analyzer performs a code quality audit, THE Analyzer SHALL identify TODO, FIXME, or HACK comments that indicate incomplete implementations.
+4. WHEN the Analyzer performs a code quality audit, THE Analyzer SHALL verify that shared types from `@alsaqi/shared` are used consistently across API modules.
+5. WHEN the Analyzer performs a code quality audit, THE Analyzer SHALL check for unused exports, dead code paths, and unreachable branches.
+6. WHEN the Analyzer performs a code quality audit, THE Analyzer SHALL evaluate test coverage gaps by identifying critical business logic modules without corresponding test files.
+7. WHEN the Analyzer performs a code quality audit, THE Analyzer SHALL verify that dependency versions are pinned and do not use open ranges that could introduce breaking changes.
 
-### Requirement 12: التحقق من رفع الملفات
+### Requirement 7: RTL and Arabic Support Audit
 
-**User Story:** As a security engineer, I want client-side file upload validation so that oversized or malicious files are rejected before transmission.
+**User Story:** As a developer, I want RTL/Arabic rendering issues identified, so that Arabic-speaking users have a correct layout and reading experience.
 
 #### Acceptance Criteria
 
-1. WHEN a user selects a file for upload, THE System SHALL validate the file size against a configurable maximum limit (default: 10 MB, configurable range: 1 MB to 100 MB) before initiating the upload request
-2. WHEN a user selects a file for upload, THE System SHALL validate the file extension and MIME type against a configurable whitelist of allowed types (containing at least one entry) before initiating the upload request
-3. IF a file exceeds the maximum allowed size, THEN THE System SHALL display an error message indicating the maximum permitted size and the actual file size, and prevent the upload request from being sent
-4. IF a file has a disallowed type, THEN THE System SHALL display an error message indicating the allowed file types, and prevent the upload request from being sent
-5. WHEN a user selects multiple files for upload, THE System SHALL validate each file independently and reject only the files that fail validation while permitting valid files to proceed
-6. IF the file extension does not match the detected MIME type from the file header, THEN THE System SHALL reject the file and display an error message indicating a file type mismatch
+1. WHEN the Analyzer performs an RTL audit, THE Analyzer SHALL verify that i18next is configured with Arabic locale support and browser language detection.
+2. WHEN the Analyzer performs an RTL audit, THE Analyzer SHALL identify CSS properties that use fixed directional values (`left`, `right`, `margin-left`, `padding-right`) instead of logical properties (`inset-inline-start`, `margin-inline-start`).
+3. WHEN the Analyzer performs an RTL audit, THE Analyzer SHALL check that the HTML `dir` attribute is dynamically set based on the active locale.
+4. WHEN the Analyzer performs an RTL audit, THE Analyzer SHALL identify icons, images, or UI elements that require mirroring in RTL mode but lack directional handling.
+5. WHEN the Analyzer performs an RTL audit, THE Analyzer SHALL verify that form inputs, dropdowns, and navigation elements function correctly in RTL layout.
+6. WHEN the Analyzer performs an RTL audit, THE Analyzer SHALL check that number formatting, date formatting, and currency display respect Arabic locale conventions.
+
+### Requirement 8: Report Structure and Output
+
+**User Story:** As a developer, I want a well-structured Markdown report, so that I can quickly understand the findings and share them with the team.
+
+#### Acceptance Criteria
+
+1. THE Analyzer SHALL output the report as a single Markdown file named `PRODUCTION_READINESS_REPORT.md` in the project root directory.
+2. THE Analyzer SHALL structure the report with an executive summary section containing the Readiness_Score, total findings count per Severity_Level, and a blockers list.
+3. THE Analyzer SHALL organize findings by Audit_Category, with each category as a top-level section.
+4. WHEN a Finding is generated, THE Analyzer SHALL include the file path, line number, problem description, production impact statement, and suggested fix.
+5. THE Analyzer SHALL order findings within each Audit_Category by Severity_Level from 🔴 Critical to 🟡 Warning to 🟢 Improvement.
+6. THE Analyzer SHALL include an Infrastructure_Recommendations section listing production tooling not present in the codebase (error monitoring, CSP headers, health checks, feature flags, rate limiting).
+
+### Requirement 9: Readiness Score Calculation
+
+**User Story:** As a developer, I want a numeric readiness percentage, so that I can gauge overall production preparedness at a glance.
+
+#### Acceptance Criteria
+
+1. THE Analyzer SHALL calculate the Readiness_Score as a percentage from 0 to 100 based on weighted findings across all Audit_Category domains.
+2. WHEN calculating the Readiness_Score, THE Analyzer SHALL apply heavier penalty weight to 🔴 Critical findings than 🟡 Warning findings, and heavier weight to 🟡 Warning findings than 🟢 Improvement findings.
+3. IF any 🔴 Critical findings exist, THEN THE Analyzer SHALL cap the Readiness_Score at a maximum of 70.
+4. THE Analyzer SHALL display the Readiness_Score prominently in the executive summary with a visual indicator (emoji or bar).
+
+### Requirement 10: Blockers List
+
+**User Story:** As a developer, I want a clear list of deployment blockers, so that I know exactly what must be fixed before going to production.
+
+#### Acceptance Criteria
+
+1. THE Analyzer SHALL generate a Blockers list containing all findings classified as 🔴 Critical Severity_Level.
+2. WHEN a Blocker is listed, THE Analyzer SHALL include the file path, a one-line problem summary, and a reference to the detailed finding in the report body.
+3. IF zero 🔴 Critical findings exist, THEN THE Analyzer SHALL display a "No Blockers — Ready for Production" message in the Blockers section.
+4. THE Analyzer SHALL position the Blockers list immediately after the Readiness_Score in the executive summary for immediate visibility.
