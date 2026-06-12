@@ -13,14 +13,16 @@
  */
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { DashboardStatsSchema } from '../modules/dashboard';
+// These schemas were relocated to `@alsaqi/shared` (FIX-FE-3); the API modules
+// import them from the shared package and no longer re-export the values.
 import {
+  DashboardStatsSchema,
   RoleSchema,
   PermissionSchema,
   SessionSchema,
   SettingsSchema,
   JobTitleSchema,
-} from '../modules/user-management';
+} from '@alsaqi/shared';
 
 // ─── Shared building-block arbitraries ─────────────────────────────────────────
 

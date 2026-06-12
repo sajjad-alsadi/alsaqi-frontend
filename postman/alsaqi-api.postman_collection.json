@@ -1,0 +1,350 @@
+{
+  "info": {
+    "name": "Alsaqi API",
+    "description": "Auto-generated collection for the Alsaqi internal-audit API, derived from the typed API client modules under apps/web/src/api/modules. Base path: {{base_url}} (e.g. http://localhost:3000/api). All routes are versioned under /v1. Auth is cookie-based (withCredentials) with an x-csrf-token header and an x-correlation-id per request. Responses use a { success, data, meta } envelope.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000/api", "type": "string" },
+    { "key": "csrf_token", "value": "", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "refresh_token", "value": "", "type": "string" },
+    { "key": "id", "value": "1", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.collectionVariables.get('csrf_token')) {",
+          "  pm.request.headers.upsert({ key: 'x-csrf-token', value: pm.collectionVariables.get('csrf_token') });",
+          "}",
+          "pm.request.headers.upsert({ key: 'x-correlation-id', value: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'pm-' + Date.now() });"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Status code is not a server error (5xx)', function () {",
+          "  pm.expect(pm.response.code).to.be.below(500);",
+          "});",
+          "pm.test('Response time is reasonable (< 5s)', function () {",
+          "  pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "var ct = pm.response.headers.get('Content-Type') || '';",
+          "if (ct.indexOf('application/json') !== -1) {",
+          "  pm.test('Body is valid JSON', function () { pm.response.json(); });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login succeeds', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "try {",
+                  "  var body = pm.response.json();",
+                  "  var data = body && body.data ? body.data : body;",
+                  "  if (data && data.accessToken) pm.collectionVariables.set('access_token', data.accessToken);",
+                  "  if (data && data.refreshToken) pm.collectionVariables.set('refresh_token', data.refreshToken);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"changeme\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/auth/login", "host": ["{{base_url}}"], "path": ["v1", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/auth/me", "host": ["{{base_url}}"], "path": ["v1", "auth", "me"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/auth/refresh", "host": ["{{base_url}}"], "path": ["v1", "auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"changeme\",\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"department\": \"IT\",\n  \"role\": \"Auditor\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/auth/register", "host": ["{{base_url}}"], "path": ["v1", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"newPassword\": \"newchangeme\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/auth/change-password", "host": ["{{base_url}}"], "path": ["v1", "auth", "change-password"] }
+          }
+        },
+        {
+          "name": "Get Reset Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/auth/reset-requests", "host": ["{{base_url}}"], "path": ["v1", "auth", "reset-requests"] }
+          }
+        },
+        {
+          "name": "Approve Reset",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"requestId\": \"1\",\n  \"action\": \"approve\",\n  \"tempPassword\": \"temp1234\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/auth/approve-reset", "host": ["{{base_url}}"], "path": ["v1", "auth", "approve-reset"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/auth/logout", "host": ["{{base_url}}"], "path": ["v1", "auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Plans",
+      "item": [
+        {
+          "name": "List Audit Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/audit-plans?page=1&pageSize=20", "host": ["{{base_url}}"], "path": ["v1", "audit-plans"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "status", "value": "", "disabled": true }, { "key": "department", "value": "", "disabled": true }, { "key": "type", "value": "", "disabled": true }, { "key": "search", "value": "", "disabled": true }] }
+          }
+        },
+        {
+          "name": "Get Audit Plan By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/audit-plans/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "audit-plans", "{{id}}"] }
+          }
+        },
+        {
+          "name": "Create Audit Plan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Annual IT Audit\",\n  \"department\": \"IT\",\n  \"type\": \"Operational\",\n  \"risk_rating\": \"High\",\n  \"planned_start_date\": \"2025-01-01\",\n  \"planned_end_date\": \"2025-03-31\",\n  \"status\": \"Planned\",\n  \"lead_auditor\": \"Jane Auditor\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/audit-plans", "host": ["{{base_url}}"], "path": ["v1", "audit-plans"] }
+          }
+        },
+        {
+          "name": "Update Audit Plan",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Fieldwork\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/audit-plans/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "audit-plans", "{{id}}"] }
+          }
+        },
+        {
+          "name": "Delete Audit Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/audit-plans/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "audit-plans", "{{id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Findings",
+      "item": [
+        {
+          "name": "List Findings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/findings?page=1&pageSize=20", "host": ["{{base_url}}"], "path": ["v1", "findings"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "audit_id", "value": "", "disabled": true }, { "key": "risk_level", "value": "", "disabled": true }, { "key": "status", "value": "", "disabled": true }, { "key": "search", "value": "", "disabled": true }] }
+          }
+        },
+        {
+          "name": "Create Finding",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"audit_id\": \"1\",\n  \"condition\": \"Access controls not enforced\",\n  \"criteria\": \"Policy AC-2\",\n  \"cause\": \"Missing review process\",\n  \"consequence\": \"Unauthorized access risk\",\n  \"recommendation\": \"Implement quarterly access reviews\",\n  \"risk_level\": \"High\",\n  \"status\": \"Open\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/findings", "host": ["{{base_url}}"], "path": ["v1", "findings"] }
+          }
+        },
+        {
+          "name": "Update Finding",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"In Progress\"\n}" },
+            "url": { "raw": "{{base_url}}/v1/findings/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "findings", "{{id}}"] }
+          }
+        },
+        {
+          "name": "Delete Finding",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/findings/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "findings", "{{id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/v1/dashboard-stats", "host": ["{{base_url}}"], "path": ["v1", "dashboard-stats"], "query": [{ "key": "department", "value": "", "disabled": true }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Correspondence",
+      "item": [
+        { "name": "List Correspondence", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence", "host": ["{{base_url}}"], "path": ["v1", "correspondence"] } } },
+        { "name": "Get Correspondence By Id", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "{{id}}"] } } },
+        { "name": "Get Correspondence Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/stats", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "stats"] } } },
+        { "name": "Get Incoming", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/incoming", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "incoming"] } } },
+        { "name": "Get Outgoing", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/outgoing", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "outgoing"] } } },
+        { "name": "Get Archive", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/archive", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "archive"] } } },
+        { "name": "Get Details", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/details/incoming/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "details", "incoming", "{{id}}"] } } },
+        { "name": "Create Incoming", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"letter_number\": \"IN-2025-001\",\n  \"subject\": \"Regulatory notice\",\n  \"letter_date\": \"2025-01-10\",\n  \"classification\": \"Confidential\",\n  \"priority\": \"High\",\n  \"status\": \"New\",\n  \"sender_entity\": \"Central Bank\"\n}" }, "url": { "raw": "{{base_url}}/v1/correspondence/incoming", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "incoming"] } } },
+        { "name": "Update Incoming", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"In Progress\"\n}" }, "url": { "raw": "{{base_url}}/v1/correspondence/incoming/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "incoming", "{{id}}"] } } },
+        { "name": "Create Outgoing", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"letter_number\": \"OUT-2025-001\",\n  \"subject\": \"Response letter\",\n  \"letter_date\": \"2025-01-12\",\n  \"classification\": \"Internal\",\n  \"priority\": \"Medium\",\n  \"status\": \"Draft\",\n  \"recipient_entity\": \"Central Bank\"\n}" }, "url": { "raw": "{{base_url}}/v1/correspondence/outgoing", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "outgoing"] } } },
+        { "name": "Update Outgoing", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"Sent\"\n}" }, "url": { "raw": "{{base_url}}/v1/correspondence/outgoing/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "outgoing", "{{id}}"] } } },
+        { "name": "Delete Correspondence", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "{{id}}"] } } },
+        { "name": "Delete Incoming", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/incoming/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "incoming", "{{id}}"] } } },
+        { "name": "Delete Outgoing", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/outgoing/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "outgoing", "{{id}}"] } } },
+        { "name": "Archive Incoming", "request": { "method": "PUT", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/archive/incoming/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "archive", "incoming", "{{id}}"] } } },
+        { "name": "Archive Outgoing", "request": { "method": "PUT", "header": [], "url": { "raw": "{{base_url}}/v1/correspondence/archive/outgoing/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "correspondence", "archive", "outgoing", "{{id}}"] } } }
+      ]
+    },
+    {
+      "name": "Departments",
+      "item": [
+        { "name": "List Departments", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/departments", "host": ["{{base_url}}"], "path": ["v1", "departments"] } } },
+        { "name": "Get Department By Id", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/departments/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "departments", "{{id}}"] } } },
+        { "name": "Create Department", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Internal Audit\",\n  \"name_ar\": \"\u0627\u0644\u062a\u062f\u0642\u064a\u0642 \u0627\u0644\u062f\u0627\u062e\u0644\u064a\",\n  \"name_en\": \"Internal Audit\",\n  \"entity_code\": \"IA-001\",\n  \"entity_type\": \"Department\",\n  \"parent_id\": null,\n  \"manager_name\": \"John Manager\",\n  \"level\": 1,\n  \"status\": \"Active\",\n  \"display_order\": 1\n}" }, "url": { "raw": "{{base_url}}/v1/departments", "host": ["{{base_url}}"], "path": ["v1", "departments"] } } },
+        { "name": "Update Department", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"Inactive\"\n}" }, "url": { "raw": "{{base_url}}/v1/departments/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "departments", "{{id}}"] } } },
+        { "name": "Delete Department", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/departments/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "departments", "{{id}}"] } } }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        { "name": "List Notifications", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/notifications", "host": ["{{base_url}}"], "path": ["v1", "notifications"] } } },
+        { "name": "Mark Read", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"notification_ids\": [1, 2, 3]\n}" }, "url": { "raw": "{{base_url}}/v1/notifications/mark-read", "host": ["{{base_url}}"], "path": ["v1", "notifications", "mark-read"] } } },
+        { "name": "Mark All Read", "request": { "method": "PUT", "header": [], "url": { "raw": "{{base_url}}/v1/notifications/mark-all-read", "host": ["{{base_url}}"], "path": ["v1", "notifications", "mark-all-read"] } } }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "item": [
+        { "name": "List Recommendations", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/recommendations", "host": ["{{base_url}}"], "path": ["v1", "recommendations"] } } },
+        { "name": "Get Recommendation By Id", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/recommendations/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "recommendations", "{{id}}"] } } },
+        { "name": "Create Recommendation", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"finding_id\": 1,\n  \"department\": \"IT\",\n  \"responsible\": \"Jane Doe\",\n  \"due_date\": \"2025-06-30\",\n  \"status\": \"Open\",\n  \"risk_level\": \"High\"\n}" }, "url": { "raw": "{{base_url}}/v1/recommendations", "host": ["{{base_url}}"], "path": ["v1", "recommendations"] } } },
+        { "name": "Update Recommendation", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"Implemented\"\n}" }, "url": { "raw": "{{base_url}}/v1/recommendations/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "recommendations", "{{id}}"] } } },
+        { "name": "Delete Recommendation", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/recommendations/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "recommendations", "{{id}}"] } } }
+      ]
+    },
+    {
+      "name": "Regulatory",
+      "item": [
+        { "name": "List Central Bank Instructions", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/central-bank-instructions", "host": ["{{base_url}}"], "path": ["v1", "central-bank-instructions"] } } },
+        { "name": "Create Central Bank Instruction", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Liquidity Coverage Ratio\",\n  \"reference_number\": \"CB-2025-001\",\n  \"issue_date\": \"2025-01-05\"\n}" }, "url": { "raw": "{{base_url}}/v1/central-bank-instructions", "host": ["{{base_url}}"], "path": ["v1", "central-bank-instructions"] } } },
+        { "name": "Update Central Bank Instruction", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Instruction\"\n}" }, "url": { "raw": "{{base_url}}/v1/central-bank-instructions/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "central-bank-instructions", "{{id}}"] } } },
+        { "name": "Delete Central Bank Instruction", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/central-bank-instructions/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "central-bank-instructions", "{{id}}"] } } }
+      ]
+    },
+    {
+      "name": "Risk Register",
+      "item": [
+        { "name": "List Risk Items", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/risk-register", "host": ["{{base_url}}"], "path": ["v1", "risk-register"] } } },
+        { "name": "Get Risk Item By Id", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/risk-register/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "risk-register", "{{id}}"] } } },
+        { "name": "Create Risk Item", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Cybersecurity threat\",\n  \"type\": \"Operational\",\n  \"rating\": \"High\",\n  \"status\": \"Open\"\n}" }, "url": { "raw": "{{base_url}}/v1/risk-register", "host": ["{{base_url}}"], "path": ["v1", "risk-register"] } } },
+        { "name": "Update Risk Item", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"Mitigated\"\n}" }, "url": { "raw": "{{base_url}}/v1/risk-register/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "risk-register", "{{id}}"] } } },
+        { "name": "Delete Risk Item", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/risk-register/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "risk-register", "{{id}}"] } } }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        { "name": "List Tasks", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/tasks", "host": ["{{base_url}}"], "path": ["v1", "tasks"] } } },
+        { "name": "Get Task By Id", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/tasks/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "tasks", "{{id}}"] } } },
+        { "name": "Create Task", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"task_number\": \"T-001\",\n  \"title\": \"Review access logs\",\n  \"plan_id\": \"1\",\n  \"audit_type\": \"Operational\",\n  \"status\": \"draft\"\n}" }, "url": { "raw": "{{base_url}}/v1/tasks", "host": ["{{base_url}}"], "path": ["v1", "tasks"] } } },
+        { "name": "Update Task", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_progress\"\n}" }, "url": { "raw": "{{base_url}}/v1/tasks/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "tasks", "{{id}}"] } } },
+        { "name": "Delete Task", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/tasks/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "tasks", "{{id}}"] } } }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        { "name": "List Users", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/users?page=1&pageSize=20", "host": ["{{base_url}}"], "path": ["v1", "users"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }] } } },
+        { "name": "Get User By Id", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/users/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "users", "{{id}}"] } } },
+        { "name": "Create User", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"jdoe\",\n  \"name\": \"Jane Doe\",\n  \"email\": \"jdoe@example.com\",\n  \"department\": \"IT\",\n  \"role\": \"Auditor\",\n  \"status\": \"Active\"\n}" }, "url": { "raw": "{{base_url}}/v1/users", "host": ["{{base_url}}"], "path": ["v1", "users"] } } },
+        { "name": "Update User", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"Disabled\"\n}" }, "url": { "raw": "{{base_url}}/v1/users/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "users", "{{id}}"] } } },
+        { "name": "Delete User", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/users/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "users", "{{id}}"] } } }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        { "name": "Init", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/users/init", "host": ["{{base_url}}"], "path": ["v1", "users", "init"] } } },
+        { "name": "Summary", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/users/summary", "host": ["{{base_url}}"], "path": ["v1", "users", "summary"] } } },
+        { "name": "Get Roles", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/roles", "host": ["{{base_url}}"], "path": ["v1", "roles"] } } },
+        { "name": "Get Permissions", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/permissions", "host": ["{{base_url}}"], "path": ["v1", "permissions"] } } },
+        { "name": "Get Sessions", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/user-sessions", "host": ["{{base_url}}"], "path": ["v1", "user-sessions"] } } },
+        { "name": "Get Settings", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/user-management-settings", "host": ["{{base_url}}"], "path": ["v1", "user-management-settings"] } } },
+        { "name": "Get Login History", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/login-history", "host": ["{{base_url}}"], "path": ["v1", "login-history"] } } },
+        { "name": "Get Audit Trail", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/audit-trail", "host": ["{{base_url}}"], "path": ["v1", "audit-trail"] } } },
+        { "name": "Get Job Titles", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/v1/job-titles", "host": ["{{base_url}}"], "path": ["v1", "job-titles"] } } },
+        { "name": "Suspend User", "request": { "method": "POST", "header": [], "url": { "raw": "{{base_url}}/v1/users/{{id}}/suspend", "host": ["{{base_url}}"], "path": ["v1", "users", "{{id}}", "suspend"] } } },
+        { "name": "Reset Password", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"newPassword\": \"changeme123\"\n}" }, "url": { "raw": "{{base_url}}/v1/users/{{id}}/reset-password", "host": ["{{base_url}}"], "path": ["v1", "users", "{{id}}", "reset-password"] } } },
+        { "name": "Unlock User", "request": { "method": "POST", "header": [], "url": { "raw": "{{base_url}}/v1/users/{{id}}/unlock", "host": ["{{base_url}}"], "path": ["v1", "users", "{{id}}", "unlock"] } } },
+        { "name": "Update Role Permissions", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": [\"1\", \"2\"]\n}" }, "url": { "raw": "{{base_url}}/v1/roles/{{id}}/permissions", "host": ["{{base_url}}"], "path": ["v1", "roles", "{{id}}", "permissions"] } } },
+        { "name": "Update Settings", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}/v1/user-management-settings", "host": ["{{base_url}}"], "path": ["v1", "user-management-settings"] } } },
+        { "name": "Revoke Session", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/v1/user-sessions/{{id}}", "host": ["{{base_url}}"], "path": ["v1", "user-sessions", "{{id}}"] } } }
+      ]
+    }
+  ]
+}

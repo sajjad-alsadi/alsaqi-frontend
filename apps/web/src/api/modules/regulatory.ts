@@ -7,20 +7,9 @@
 import { z } from 'zod';
 import type { ApiClient } from '../client';
 import type { CentralBankInstruction } from '@alsaqi/shared';
+import { InstructionSchema } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
-
-const InstructionSchema = z.object({
-  id: z.string().optional(),
-  title: z.string(),
-  issue_date: z.string(),
-  reference_number: z.string(),
-  category: z.string(),
-  description: z.string(),
-  related_department: z.string(),
-  attachment: z.string().optional(),
-  status: z.string(),
-});
 
 const InstructionListSchema = z.array(InstructionSchema);
 

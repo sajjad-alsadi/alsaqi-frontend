@@ -57,11 +57,11 @@ Notes on governance gates (these are review/coordination gates, not coding steps
     - Assert none of the affected schemas carry a manual `: z.ZodType<` annotation
     - _Requirements: 4.3, 4.5_
 
-- [~] 3. Checkpoint - type-check the local cleanup
+- [x] 3. Checkpoint - type-check the local cleanup
   - Ensure all tests pass and `tsc --noEmit` with `exactOptionalPropertyTypes` enabled reports zero errors for `apps/web`; ask the user if questions arise.
   - _Requirements: 2.6, 4.4_
 
-- [ ] 4. Confirm API base-URL and version configuration (FIX-FE-5)
+- [x] 4. Confirm API base-URL and version configuration (FIX-FE-5)
   - [x] 4.1 Extract a pure `resolveBaseUrl` helper and set dev env values
     - In `apps/web/src/api/httpClient.ts` (and `client.ts` as needed), extract base-URL resolution into a pure `resolveBaseUrl(value?: string)` returning the value when non-empty and `/api` when unset/empty/whitespace
     - Update `apps/web/.env` to `VITE_API_URL=http://localhost:3000/api` and document it in `.env.example` (per the design default for the development environment)
@@ -87,7 +87,7 @@ Notes on governance gates (these are review/coordination gates, not coding steps
     - Correct any deviation so behavior matches the criteria
     - _Requirements: 5.4, 5.6, 5.7_
 
-  - [-] 4.6 Write property test for version-match notification
+  - [x] 4.6 Write property test for version-match notification
     - **Feature: frontend-consistency-fixes, Property 4: Patch-insensitive version match drives the mismatch notification**
     - Generate version triples (equal major/minor with differing/absent patch → match, no notification; perturbed major or minor → mismatch, notification shown; no header → no comparison, no notification) and drive the side effect through a jsdom harness, asserting at-most-once display, `numRuns >= 100`
     - **Validates: Requirements 5.4, 5.6, 5.7**
@@ -96,54 +96,54 @@ Notes on governance gates (these are review/coordination gates, not coding steps
     - Assert `API_VERSION` matches `^\d+\.\d+$` (MAJOR.MINOR, no patch) and that the development `VITE_API_URL` equals `http://localhost:3000/api`
     - _Requirements: 5.1, 5.3_
 
-- [~] 5. Checkpoint - confirm config and run the suite
+- [x] 5. Checkpoint - confirm config and run the suite
   - Ensure all tests pass for `apps/web` and `packages/shared`; ask the user if questions arise.
   - _Requirements: 5.3_
 
-- [ ] 6. Relocate local Zod schemas into the shared package (FIX-FE-3 — requires recorded Backend_Team approval, criterion 3.7)
-  - [-] 6.1 Snapshot baseline copies of the schemas being relocated
+- [x] 6. Relocate local Zod schemas into the shared package (FIX-FE-3 — requires recorded Backend_Team approval, criterion 3.7)
+  - [x] 6.1 Snapshot baseline copies of the schemas being relocated
     - Add a checked-in baseline copy of each original schema (`RiskItemSchema`, `InstructionSchema`, `DashboardStatsSchema` (+ `AuditProgressByTypeSchema`, `RiskLevelBreakdownSchema`), `RoleSchema`, `PermissionSchema`, `SessionSchema`, `SettingsSchema`, `JobTitleSchema`) under a test fixtures path for behavioral-parity comparison
     - _Requirements: 3.9_
 
-  - [~] 6.2 Relocate `RiskItemSchema` to shared and consume it
+  - [x] 6.2 Relocate `RiskItemSchema` to shared and consume it
     - Move `RiskItemSchema` into `packages/shared/src/validators/risk-register.ts` with identical fields/rules, deriving and exporting its type via `z.infer` (FIX-FE-4 pattern), and export it from `validators/index.ts`
     - Add exactly one Endpoint_Contract under `packages/shared/src/types/endpoints/risk-register.ts` referencing the validator and register it in `endpoints/index.ts`
     - Remove the local definition from `apps/web/src/api/modules/risk-register.ts` and import the validator from `@alsaqi/shared`
     - _Requirements: 3.1, 3.5, 3.6, 3.8, 3.10_
 
-  - [~] 6.3 Relocate `InstructionSchema` to shared and consume it
+  - [x] 6.3 Relocate `InstructionSchema` to shared and consume it
     - Move `InstructionSchema` into `packages/shared/src/validators/regulatory.ts` with identical fields/rules; export schema + `z.infer` type from `validators/index.ts`
     - Add exactly one Endpoint_Contract under `packages/shared/src/types/endpoints/regulatory.ts` referencing the validator; register in `endpoints/index.ts`
     - Remove the local definition from `apps/web/src/api/modules/regulatory.ts` and import from `@alsaqi/shared`
     - _Requirements: 3.2, 3.5, 3.6, 3.8, 3.10_
 
-  - [~] 6.4 Relocate `DashboardStatsSchema` (and sub-schemas) to shared and consume it
+  - [x] 6.4 Relocate `DashboardStatsSchema` (and sub-schemas) to shared and consume it
     - Move `DashboardStatsSchema`, `AuditProgressByTypeSchema`, and `RiskLevelBreakdownSchema` into `packages/shared/src/validators/dashboard.ts` with identical fields/rules; export schema(s) + types from `validators/index.ts`
     - Add exactly one Endpoint_Contract under `packages/shared/src/types/endpoints/dashboard.ts` referencing the validator; register in `endpoints/index.ts`
     - Remove the local definitions from `apps/web/src/api/modules/dashboard.ts` and import from `@alsaqi/shared`
     - _Requirements: 3.3, 3.5, 3.6, 3.8, 3.10_
 
-  - [~] 6.5 Relocate the five user-management schemas to shared and consume them
+  - [x] 6.5 Relocate the five user-management schemas to shared and consume them
     - Move `RoleSchema`, `PermissionSchema`, `SessionSchema`, `SettingsSchema`, `JobTitleSchema` into `packages/shared/src/validators/user-management.ts` with identical fields/rules; export schemas + types from `validators/index.ts`
     - Add exactly one Endpoint_Contract under `packages/shared/src/types/endpoints/user-management.ts` referencing the validators; register in `endpoints/index.ts`
     - Remove the local definitions from `apps/web/src/api/modules/user-management.ts` and import from `@alsaqi/shared`
     - _Requirements: 3.4, 3.5, 3.6, 3.8, 3.10_
 
-  - [~] 6.6 Write property test for schema behavioral equivalence
+  - [x] 6.6 Write property test for schema behavioral equivalence
     - **Feature: frontend-consistency-fixes, Property 1: Schema relocation and de-suppression preserve validation behavior**
     - Quantify over all relocated/de-suppressed schemas; for generated inputs (valid shapes plus malformed variants via `fc.anything()` and field-mutation arbitraries) assert `safeParse(input).success` parity against the baseline and deep-equal parsed output on success, `numRuns >= 100`
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 4.6**
 
-  - [~] 6.7 Write guard test for single-definition and contract counts
+  - [x] 6.7 Write guard test for single-definition and contract counts
     - Assert exactly one definition of each relocated schema exists repository-wide, located in `packages/shared/src/validators/`, and exactly one Endpoint_Contract exists per relocated schema
     - Ensure the existing response-validation suites still pass
     - _Requirements: 3.8, 3.9_
 
-- [~] 7. Checkpoint - validate the schema relocation
+- [x] 7. Checkpoint - validate the schema relocation
   - Ensure all tests pass for `apps/web` and `packages/shared`; ask the user if questions arise.
   - _Requirements: 3.9_
 
-- [ ] 8. Add shared-package unification guards and switch-over (FIX-FE-1 — gated by Unified_Source decision, criteria 1.2/1.5)
+- [x] 8. Add shared-package unification guards and switch-over (FIX-FE-1 — gated by Unified_Source decision, criteria 1.2/1.5)
   - [x] 8.1 Record the Extra_Shared_Types baseline and type-equality check
     - Add a checked-in baseline snapshot (`.d.ts` or `satisfies`-based fixture) of the 8 Extra_Shared_Types (`DashboardStats`, `AuditProgressByType`, `RiskLevelBreakdown`, `Role`, `Permission`, `UserSession`, `JobTitle`, `UserManagementSettings`)
     - Add a type-level equality check that fails if any field is deleted, renamed, narrowed, or has its optionality/type changed
@@ -153,16 +153,16 @@ Notes on governance gates (these are review/coordination gates, not coding steps
     - Add a CI check script that runs a version-control diff over `packages/shared` and fails if any line changed while no Unified_Source is agreed (exempting the FIX-FE-3 relocation commits performed under recorded backend approval)
     - _Requirements: 1.2_
 
-  - [~] 8.3 Implement the Unified_Source switch-over and teardown checks
+  - [x] 8.3 Implement the Unified_Source switch-over and teardown checks
     - Add a check/script that repoints `@alsaqi/shared` imports to the Unified_Source and asserts zero imports resolve from the duplicated local copy; if any import is unresolved or fails to build, block removal, retain local files unchanged, and surface the unresolved imports
     - Gate teardown (removal of the duplicated local copy) behind: all imports resolve from the Unified_Source, the type-equality check passes, and `tsc` reports zero errors and zero local-copy imports
     - _Requirements: 1.3, 1.4, 1.5_
 
-  - [~] 8.4 Write guard tests for unification preconditions and regression protection
+  - [x] 8.4 Write guard tests for unification preconditions and regression protection
     - Assert the freeze guard fails on any `packages/shared` line change (pre-decision), the teardown precondition checklist blocks removal when any condition is unmet, and a review-gate check rejects (with a recorded rejection) any change degrading one of the 8 Extra_Shared_Types
     - _Requirements: 1.2, 1.4, 1.5, 1.6_
 
-- [~] 9. Final checkpoint - full build and test pass
+- [x] 9. Final checkpoint - full build and test pass
   - Run typecheck, lint, unit + property tests, and build for `apps/web` and `packages/shared`; ensure everything passes and ask the user if questions arise.
   - _Requirements: 1.5, 2.6, 3.9, 4.4_
 

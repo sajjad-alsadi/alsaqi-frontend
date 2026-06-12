@@ -7,6 +7,13 @@
  * (Basic CRUD is already covered by api/modules/users.ts)
  */
 import { z } from 'zod';
+import {
+  RoleSchema,
+  PermissionSchema,
+  SessionSchema,
+  SettingsSchema,
+  JobTitleSchema,
+} from '@alsaqi/shared';
 import type {
   Role,
   Permission,
@@ -33,64 +40,15 @@ const DeleteResponseSchema = z.object({ deleted: z.boolean() });
 
 const UserSummarySchema = z.record(z.string(), z.unknown());
 
-export const RoleSchema = z.object({
-  id: z.union([z.string(), z.number()]),
-  name: z.string(),
-  description: z.string().optional(),
-});
-// Compile-time only: assert the inferred schema type stays assignable to the
-// shared Role type under exactOptionalPropertyTypes. Never executed.
-const _roleContract: Role = {} as z.infer<typeof RoleSchema>;
-void _roleContract;
 const RoleListSchema = z.array(RoleSchema);
 
-export const PermissionSchema = z.object({
-  id: z.union([z.string(), z.number()]),
-  module: z.string(),
-  action: z.string(),
-});
-const _permissionContract: Permission = {} as z.infer<typeof PermissionSchema>;
-void _permissionContract;
 const PermissionListSchema = z.array(PermissionSchema);
 
-export const SessionSchema = z.object({
-  id: z.union([z.string(), z.number()]),
-  user_id: z.union([z.string(), z.number()]),
-  ip_address: z.string().optional(),
-  user_agent: z.string().optional(),
-  created_at: z.string().optional(),
-  expires_at: z.string().optional(),
-});
-const _sessionContract: UserSession = {} as z.infer<typeof SessionSchema>;
-void _sessionContract;
 const SessionListSchema = z.array(SessionSchema);
-
-export const SettingsSchema = z.object({
-  failed_login_threshold: z.number().optional(),
-  inactive_account_threshold_days: z.number().optional(),
-  password_min_length: z.number().optional(),
-  password_require_uppercase: z.number().optional(),
-  password_require_lowercase: z.number().optional(),
-  password_require_numbers: z.number().optional(),
-  password_require_symbols: z.number().optional(),
-  password_expiry_days: z.number().optional(),
-  enforce_single_session: z.number().optional(),
-  session_timeout_minutes: z.number().optional(),
-});
-const _settingsContract: UserManagementSettings = {} as z.infer<typeof SettingsSchema>;
-void _settingsContract;
 
 const LoginHistorySchema = z.array(z.record(z.string(), z.unknown()));
 const AuditTrailSchema = z.array(z.record(z.string(), z.unknown()));
 
-export const JobTitleSchema = z.object({
-  id: z.union([z.string(), z.number()]),
-  name: z.string(),
-  name_ar: z.string().optional(),
-  name_en: z.string().optional(),
-});
-const _jobTitleContract: JobTitle = {} as z.infer<typeof JobTitleSchema>;
-void _jobTitleContract;
 const JobTitleListSchema = z.array(JobTitleSchema);
 
 // ─── Types ────────────────────────────────────────────────────────────────────

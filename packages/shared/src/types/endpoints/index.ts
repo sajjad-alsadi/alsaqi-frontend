@@ -11,3 +11,6 @@ export type { CorrespondenceEndpoints } from './correspondence';
 export type { RecommendationsEndpoints } from './recommendations';
 export type { DepartmentsEndpoints } from './departments';
 export type { RiskRegisterEndpoints } from './risk-register';
+export type { RegulatoryEndpoints } from './regulatory';
+export type { DashboardEndpoints } from './dashboard';
+export type { UserManagementEndpoints } from './user-management';

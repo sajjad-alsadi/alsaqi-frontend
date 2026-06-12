@@ -65,6 +65,36 @@ export {
   type ResetUserPasswordInput,
 } from './users';
 
+// Risk register schemas
+export { RiskItemSchema, type RiskItemValidated } from './risk-register';
+
+// Regulatory schemas
+export { InstructionSchema, type InstructionValidated } from './regulatory';
+
+// Dashboard schemas
+export {
+  DashboardStatsSchema,
+  AuditProgressByTypeSchema,
+  RiskLevelBreakdownSchema,
+  type DashboardStatsValidated,
+  type AuditProgressByTypeValidated,
+  type RiskLevelBreakdownValidated,
+} from './dashboard';
+
+// User management schemas
+export {
+  RoleSchema,
+  PermissionSchema,
+  SessionSchema,
+  SettingsSchema,
+  JobTitleSchema,
+  type RoleValidated,
+  type PermissionValidated,
+  type UserSessionValidated,
+  type UserManagementSettingsValidated,
+  type JobTitleValidated,
+} from './user-management';
+
 // Correspondence schemas
 export {
   CreateIncomingCorrespondenceSchema,

@@ -18,6 +18,7 @@
     "lint": "eslint .",
     "lint:security-types": "node scripts/check-security-types.mjs",
     "check:shared-freeze": "node scripts/check-shared-freeze.mjs",
+    "check:unified-source-teardown": "node scripts/check-unified-source-teardown.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test -w @alsaqi/web",

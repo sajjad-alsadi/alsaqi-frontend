@@ -4,42 +4,11 @@
  */
 import { z } from 'zod';
 import type { ApiClient } from '../client';
-import type { RiskItem } from '@alsaqi/shared';
+import { RiskItemSchema, type RiskItem } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
-
-const RiskItemSchema = z.object({
-  id: z.string().optional(),
-  risk_id: z.string(),
-  description: z.string(),
-  owner: z.string(),
-  source: z.string(),
-  early_warning: z.string(),
-  type: z.string(),
-  likelihood: z.string(),
-  impact: z.string(),
-  score: z.number(),
-  rating: z.string(),
-  controls: z.string(),
-  control_assessment: z.string(),
-  mitigation: z.string(),
-  treatment_option: z.string(),
-  residual_likelihood: z.string(),
-  residual_impact: z.string(),
-  residual_score: z.number(),
-  residual_rating: z.string(),
-  status: z.string(),
-  target_date: z.string(),
-  review_date: z.string(),
-  notes: z.string(),
-  entry_date: z.string(),
-  entered_by: z.string(),
-});
-
-// Compile-time assertion: keep the inferred schema type in lockstep with the
-// shared RiskItem type without a `z.ZodType<T>` annotation or any suppression.
-const _riskItemContract: RiskItem = {} as z.infer<typeof RiskItemSchema>;
-void _riskItemContract;
+// `RiskItemSchema` is the single source of validation truth, relocated to
+// `@alsaqi/shared` (packages/shared/src/validators/risk-register.ts).
 
 const RiskItemListSchema = z.array(RiskItemSchema);
 
