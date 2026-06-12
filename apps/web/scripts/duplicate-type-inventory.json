@@ -1,0 +1,67 @@
+[
+  {
+    "typeName": "AuditEvidence",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "AuditFinding",
+    "filePath": "apps/web/src/types.ts",
+    "status": "divergent-needs-reconciliation"
+  },
+  {
+    "typeName": "AuditPlan",
+    "filePath": "apps/web/src/types.ts",
+    "status": "divergent-needs-reconciliation"
+  },
+  {
+    "typeName": "AuditProcedure",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "AuditProgram",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "AuditReport",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "AuditTask",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "AuditTrail",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "CentralBankInstruction",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "Notification",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "Recommendation",
+    "filePath": "apps/web/src/types.ts",
+    "status": "divergent-needs-reconciliation"
+  },
+  {
+    "typeName": "RiskItem",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  },
+  {
+    "typeName": "User",
+    "filePath": "apps/web/src/types.ts",
+    "status": "duplicate-removable"
+  }
+]

@@ -6,7 +6,7 @@
  */
 import { z } from 'zod';
 import type { ApiClient } from '../client';
-import type { CentralBankInstruction } from '../../types';
+import type { CentralBankInstruction } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 

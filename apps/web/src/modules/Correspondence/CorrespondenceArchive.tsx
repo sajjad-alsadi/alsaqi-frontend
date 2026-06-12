@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';
+import { toList, toPagination } from '../../api/utils/envelope';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
 import Pagination from '../../components/Pagination';
@@ -49,14 +50,9 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
         }
       });
       
-      if (response.data.data) {
-        setItems(response.data.data);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination?.total ?? response.data.data.length,
-          totalPages: response.data.pagination?.totalPages ?? 1
-        }));
-      }
+      const list = toList(response.data);
+      setItems(list);
+      setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
     } catch (error) {
       logger.error("Failed to fetch archived correspondence", error);
       toast.error(t('errorOccurred'));

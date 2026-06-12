@@ -8,8 +8,7 @@ import type { RiskItem } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
-// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
-const RiskItemSchema: z.ZodType<RiskItem> = z.object({
+const RiskItemSchema = z.object({
   id: z.string().optional(),
   risk_id: z.string(),
   description: z.string(),
@@ -36,6 +35,11 @@ const RiskItemSchema: z.ZodType<RiskItem> = z.object({
   entry_date: z.string(),
   entered_by: z.string(),
 });
+
+// Compile-time assertion: keep the inferred schema type in lockstep with the
+// shared RiskItem type without a `z.ZodType<T>` annotation or any suppression.
+const _riskItemContract: RiskItem = {} as z.infer<typeof RiskItemSchema>;
+void _riskItemContract;
 
 const RiskItemListSchema = z.array(RiskItemSchema);
 

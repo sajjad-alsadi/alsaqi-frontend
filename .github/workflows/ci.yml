@@ -13,6 +13,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Full history so the packages/shared freeze guard can diff against the
+          # PR base ref (origin/<base>) rather than a shallow single commit.
+          fetch-depth: 0
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
@@ -22,6 +26,15 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Shared package freeze guard (FIX-FE-1, req 1.2)
+        # Fails if any line under packages/shared changed while no Unified_Source
+        # decision is agreed. Exemptions are documented in scripts/check-shared-freeze.mjs:
+        #   - Unified_Source agreed: SHARED_UNIFIED_SOURCE_AGREED=true or
+        #     .kiro/approvals/unified-source.json
+        #   - FIX-FE-3 relocation under recorded backend approval: FIX_FE3_BACKEND_APPROVAL=true
+        #     or .kiro/approvals/fix-fe-3-backend-approval.json (limited to the relocation paths)
+        run: npm run check:shared-freeze
 
       - name: Typecheck
         run: npm run typecheck --workspace=@alsaqi/web

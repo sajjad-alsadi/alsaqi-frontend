@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "test": "vitest --run",
+    "inventory:duplicate-types": "node scripts/duplicate-type-inventory.mjs --write",
     "ci": "npm run typecheck && npm run lint && npm run test -- --coverage"
   },
   "dependencies": {

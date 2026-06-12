@@ -34,6 +34,24 @@ import { errorReporter, type ErrorSeverity } from '../utils/errorReporter';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const env = (import.meta as any).env as Record<string, string> | undefined;
 
+/**
+ * Resolve the HTTP client base URL from a configured `VITE_API_URL` value.
+ *
+ * Pure and side-effect free so it can be unit/property tested in isolation.
+ * Returns the provided value when it is a non-empty string (after rejecting
+ * whitespace-only input); otherwise — when the value is `undefined`, empty, or
+ * whitespace-only — falls back to the same-origin default `/api`.
+ *
+ * @param value - The raw `VITE_API_URL` env value (may be undefined).
+ * @returns The configured value when meaningful, else `/api`.
+ */
+export function resolveBaseUrl(value?: string): string {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value;
+  }
+  return '/api';
+}
+
 // ─── Retry Constants (mirror client.ts) ─────────────────────────────────────────
 // Kept in sync with the typed client's `requestWithRetry`: 1s → 2s → 4s base,
 // bounded by the shared MAX_RETRY_ATTEMPTS.
@@ -80,7 +98,7 @@ function reportApiError(error: AxiosError, attempts: number): void {
 }
 
 const client = createApiClient({
-  baseUrl: env?.['VITE_API_URL'] || '/api',
+  baseUrl: resolveBaseUrl(env?.['VITE_API_URL']),
   timeout: 30000,
   onUnauthorized: () => {
     if (window.location.pathname !== '/login') {

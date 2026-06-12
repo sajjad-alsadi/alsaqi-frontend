@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/httpClient';
+import { toList, toPagination } from '../../api/utils/envelope';
 import { AlertCircle, RefreshCw, Trash2, Download, ChevronDown, ChevronUp, ShieldAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../utils/formatService';
@@ -53,16 +54,9 @@ const SystemErrorLogs: React.FC = () => {
           end_date: endDate || undefined
         }
       });
-      if (response.data.data) {
-        setLogs(response.data.data);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination?.total ?? response.data.data.length,
-          totalPages: response.data.pagination?.totalPages ?? 1
-        }));
-      } else {
-        setLogs(response.data);
-      }
+      const list = toList<SystemError>(response.data);
+      setLogs(list);
+      setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
       setError(null);
     } catch (error) {
       logger.error('Error fetching logs:', error);

@@ -9,6 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import api from '../../api/httpClient';
+import { toList, toData } from '../../api/utils/envelope';
 import Modal from '../../components/Modal';
 import { useDepartments } from '../../hooks/useDepartments';
 import { useFormat } from '../../utils/formatService';
@@ -130,7 +131,7 @@ export default function ComplianceMatrix() {
       if (filterSource) q.append('source_type', filterSource);
       if (filterStatus) q.append('compliance_status', filterStatus);
       const res = await api.get('/compliance?' + q.toString());
-      if (res.data.success) setItems(res.data.data);
+      setItems(toList(res.data));
       setError(null);
     } catch (e) {
       logger.error('Operation failed', e);
@@ -144,7 +145,7 @@ export default function ComplianceMatrix() {
   const fetchSummary = async () => {
     try {
       const res = await api.get('/compliance/summary');
-      if (res.data.success) setSummary(res.data.data);
+      setSummary(toData(res.data) ?? null);
     } catch (e) {
       logger.error('Operation failed', e);
     }
@@ -153,10 +154,12 @@ export default function ComplianceMatrix() {
   const fetchUsers = async () => {
     try {
       const uRes = await api.get('/users/summary');
-      if (uRes.data?.success) setUsers(uRes.data.data);
-      else {
+      const summaryUsers = toList<UserOption>(uRes.data);
+      if (summaryUsers.length > 0) {
+        setUsers(summaryUsers);
+      } else {
         const uResFallback = await api.get('/users');
-        if (uResFallback.data?.success) setUsers(uResFallback.data.data);
+        setUsers(toList<UserOption>(uResFallback.data));
       }
     } catch (e) {}
   };

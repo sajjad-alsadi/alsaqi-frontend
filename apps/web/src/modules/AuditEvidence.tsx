@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { usePreferences } from '../context/PreferencesContext';
@@ -12,11 +12,15 @@ import {
 import { motion } from 'motion/react';
 import { UserRole } from '../constants';
 import Modal from '../components/Modal';
-import PdfViewer from '../components/PdfViewer';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { useFormat } from '../utils/formatService';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
+
+// Lazy-load PdfViewer (and its react-pdf/pdfjs-dist dependencies) so the chunk
+// only loads when a PDF is actually previewed.
+const PdfViewer = React.lazy(() => import('../components/PdfViewer'));
 
 const AuditEvidence: React.FC = () => {
   const { token } = useAuth();
@@ -511,7 +515,9 @@ const AuditEvidence: React.FC = () => {
               />
             ) : previewItem.file_data.startsWith('data:application/pdf') || /\.pdf$/i.test(previewItem.file_name) || (previewItem.file_data && !previewItem.file_data.startsWith('data:') && !previewItem.file_data.startsWith('http') && !previewItem.file_data.startsWith('/') && previewItem.file_data.length > 100) ? (
               <div className="w-full h-full">
-                <PdfViewer url={previewItem.file_data} />
+                <Suspense fallback={<LoadingSpinner />}>
+                  <PdfViewer url={previewItem.file_data} />
+                </Suspense>
               </div>
             ) : (
               <div className="text-center p-10">

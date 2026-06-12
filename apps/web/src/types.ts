@@ -1,22 +1,35 @@
-import { UserRole } from "./constants";
-
 export { Language } from "./constants";
 
-export interface User {
-  id?: number | string;
-  username: string;
-  password?: string;
-  name: string;
-  email: string;
-  department: string;
-  job_title?: string;
-  role: `${UserRole}`;
-  profile_picture?: string;
-  status: 'Active' | 'Disabled';
-  last_login?: string;
-  theme?: 'light' | 'dark';
-  permissions?: Array<{ module: string; action: string }>;
-}
+// ─── Shared types (single source of truth) ─────────────────────────────────────
+// These types are defined once in `@alsaqi/shared` and re-exported here so that
+// existing consumers importing from `src/types` keep working while every shared
+// data-model type resolves to the single `@alsaqi/shared` definition. (FIX-FE-2)
+// Do NOT redefine any of these locally — that would reintroduce a duplicate
+// Local_Type. Reconciliation of divergent types (below) is tracked under
+// FIX-FE-1 / FIX-FE-3.
+export type {
+  User,
+  AuditTask,
+  AuditProgram,
+  AuditProcedure,
+  AuditEvidence,
+  RiskItem,
+  CentralBankInstruction,
+  Notification,
+  AuditTrail,
+  AuditReport,
+} from "@alsaqi/shared";
+
+// ─── Divergent local types (needs-reconciliation) ──────────────────────────────
+// The following types intentionally differ from their `@alsaqi/shared`
+// counterparts and are kept local until reconciled with the backend under
+// FIX-FE-1 / FIX-FE-3. They must NOT be deleted as part of FIX-FE-2.
+//
+//  - AuditPlan:      local `type` is a string-literal union rather than the
+//                    enum-derived `${AuditType}` used by the shared type.
+//  - AuditFinding:   adds a local `title?` field not present in the shared type.
+//  - Recommendation: adds local `plan_id` and `rec_number` fields and uses a
+//                    different `finding_id` type than the shared type.
 
 export interface AuditPlan {
   id?: string;
@@ -34,69 +47,6 @@ export interface AuditPlan {
   notes?: string;
 }
 
-export interface AuditTask {
-  id?: number | string;
-  task_number: string;
-  title: string;
-  plan_id: string; // audit_plans(id)
-  program_id?: string;
-  audit_type: string;
-  status: 'draft' | 'in_progress' | 'review' | 'approved' | 'completed';
-  assigned_to?: string;
-  audited_unit_id?: string;
-  planned_hours?: number;
-  actual_hours?: number;
-  period_from?: string;
-  period_to?: string;
-  due_date?: string;
-  approved_by?: string;
-  approved_at?: string;
-  created_by?: string;
-  created_at?: string;
-  updated_at?: string;
-  deleted_at?: string;
-  
-  // legacy props to satisfy old code until fully removed
-  audit_id?: number | string;
-  procedure?: string;
-  responsible?: string;
-  evidence_link?: string;
-  evidence_id?: number;
-}
-
-export interface AuditProgram {
-  id?: number;
-  program_code: string;
-  program_title: string;
-  audit_area: string;
-  department: string;
-  audit_type: 'Operational' | 'Financial' | 'Compliance' | 'IT' | 'AML' | 'Governance';
-  audit_objective: string;
-  audit_scope: string;
-  key_risks: string;
-  control_objectives: string;
-  reference_standard: string;
-  status: 'Active' | 'Archived' | 'Draft' | 'Submitted' | 'Approved';
-  version_number: number;
-  created_by: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface AuditProcedure {
-  id?: number;
-  program_id: number;
-  procedure_number: string;
-  audit_step: string;
-  audit_test_description: string;
-  risk_addressed: string;
-  control_test_type: 'Walkthrough' | 'Inspection' | 'Observation' | 'Recalculation' | 'Reperformance' | 'Inquiry' | 'Analytical Review';
-  expected_evidence: string;
-  sampling_method: string;
-  responsible_auditor: string;
-  remarks?: string;
-}
-
 export interface AuditFinding {
   id?: number | string;
   audit_id: number | string;
@@ -112,18 +62,6 @@ export interface AuditFinding {
   status: 'Open' | 'In Progress' | 'Closed';
 }
 
-export interface AuditEvidence {
-  id?: number | string;
-  audit_id: number | string;
-  finding_id: number | string;
-  type: 'Document' | 'Email' | 'Screenshot' | 'System Log' | 'Contract';
-  description: string;
-  uploaded_by: string;
-  upload_date: string;
-  file_name: string;
-  file_data?: string;
-}
-
 export interface Recommendation {
   id?: number;
   finding_id: number;
@@ -134,83 +72,4 @@ export interface Recommendation {
   due_date: string;
   status: 'Open' | 'In Progress' | 'Implemented' | 'Overdue';
   risk_level: 'Low' | 'Medium' | 'High';
-}
-
-export interface RiskItem {
-  id?: string;
-  risk_id: string;
-  description: string;
-  owner: string;
-  source: string;
-  early_warning: string;
-  type: string;
-  likelihood: string;
-  impact: string;
-  score: number;
-  rating: string;
-  controls: string;
-  control_assessment: string;
-  mitigation: string;
-  treatment_option: string;
-  residual_likelihood: string;
-  residual_impact: string;
-  residual_score: number;
-  residual_rating: string;
-  status: string;
-  target_date: string;
-  review_date: string;
-  notes: string;
-  entry_date: string;
-  entered_by: string;
-}
-
-export interface CentralBankInstruction {
-  id?: string;
-  title: string;
-  issue_date: string;
-  reference_number: string;
-  category: string;
-  description: string;
-  related_department: string;
-  attachment?: string;
-  status: string;
-}
-
-export interface Notification {
-  id?: string | number;
-  recipient_row_id?: string;
-  user_id?: number;
-  event_type: string;
-  title?: string | null;
-  description: string;
-  related_module: string;
-  date: string;
-  status?: 'Read' | 'Unread';
-  is_read?: boolean;
-  read_at?: string | null;
-  link?: string;
-  actor_id?: string;
-  entity_id?: string;
-  entity_type?: string;
-  data?: Record<string, any>;
-}
-
-export interface AuditTrail {
-  id: number;
-  user: string;
-  action: string;
-  module: string;
-  timestamp: string;
-  details: string;
-}
-
-export interface AuditReport {
-  id?: number | string;
-  audit_id?: number | string;
-  title: string;
-  report_type?: string;
-  generated_by: string;
-  date_generated: string;
-  status: 'Draft' | 'Final';
-  content: string; // JSON string containing selected findings and report configuration
 }

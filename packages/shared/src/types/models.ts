@@ -164,7 +164,7 @@ export interface Recommendation {
 // ─── Risk Item ────────────────────────────────────────────────────────────────
 
 export interface RiskItem {
-  id?: string;
+  id?: string | undefined;
   risk_id: string;
   description: string;
   owner: string;
@@ -380,7 +380,7 @@ export interface DashboardStats {
       total: number;
       high: number;
     };
-    byLevel?: RiskLevelBreakdown[];
+    byLevel?: RiskLevelBreakdown[] | undefined;
   };
   correspondence: {
     incoming_total: number;
@@ -399,7 +399,7 @@ export interface DashboardStats {
 export interface Role {
   id: string | number;
   name: string;
-  description?: string;
+  description?: string | undefined;
 }
 
 /** A permission record returned by `GET /v1/permissions`. */
@@ -413,18 +413,18 @@ export interface Permission {
 export interface UserSession {
   id: string | number;
   user_id: string | number;
-  ip_address?: string;
-  user_agent?: string;
-  created_at?: string;
-  expires_at?: string;
+  ip_address?: string | undefined;
+  user_agent?: string | undefined;
+  created_at?: string | undefined;
+  expires_at?: string | undefined;
 }
 
 /** A job-title record returned by `GET /v1/job-titles`. */
 export interface JobTitle {
   id: string | number;
   name: string;
-  name_ar?: string;
-  name_en?: string;
+  name_ar?: string | undefined;
+  name_en?: string | undefined;
 }
 
 /**
@@ -432,14 +432,14 @@ export interface JobTitle {
  * Numeric flags mirror the backend's 0/1 boolean-as-number convention.
  */
 export interface UserManagementSettings {
-  failed_login_threshold?: number;
-  inactive_account_threshold_days?: number;
-  password_min_length?: number;
-  password_require_uppercase?: number;
-  password_require_lowercase?: number;
-  password_require_numbers?: number;
-  password_require_symbols?: number;
-  password_expiry_days?: number;
-  enforce_single_session?: number;
-  session_timeout_minutes?: number;
+  failed_login_threshold?: number | undefined;
+  inactive_account_threshold_days?: number | undefined;
+  password_min_length?: number | undefined;
+  password_require_uppercase?: number | undefined;
+  password_require_lowercase?: number | undefined;
+  password_require_numbers?: number | undefined;
+  password_require_symbols?: number | undefined;
+  password_expiry_days?: number | undefined;
+  enforce_single_session?: number | undefined;
+  session_timeout_minutes?: number | undefined;
 }

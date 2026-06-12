@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { 
   Search, 
   Plus, 
@@ -16,12 +16,13 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';
+import { toList, toPagination } from '../../api/utils/envelope';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import Modal from '../../components/Modal';
-import PdfViewer from '../../components/PdfViewer';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import Pagination from '../../components/Pagination';
 import { UserRole } from '../../constants';
 import logger from '../../utils/logger';
@@ -29,6 +30,10 @@ import Portal from '../../components/Portal';
 import { Button } from '@/components/ui/button';
 
 import OutgoingForm from './OutgoingForm';
+
+// Lazy-load PdfViewer (and its react-pdf/pdfjs-dist dependencies) so the chunk
+// only loads when a PDF is actually previewed.
+const PdfViewer = React.lazy(() => import('../../components/PdfViewer'));
 
 interface OutgoingRegisterProps {
   language: 'ar' | 'en';
@@ -64,16 +69,9 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
           search: debouncedSearch || undefined
         }
       });
-      if (response.data.data) {
-        setItems(response.data.data);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination?.total ?? response.data.data.length,
-          totalPages: response.data.pagination?.totalPages ?? 1
-        }));
-      } else {
-        setItems(response.data);
-      }
+      const list = toList(response.data);
+      setItems(list);
+      setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
     } catch (error) {
       logger.error("Failed to fetch outgoing correspondence", error);
       toast.error(t('errorOccurred'));
@@ -125,7 +123,9 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
               />
             ) : previewUrl.startsWith('data:application/pdf') || /\.pdf$/i.test(previewUrl) || (previewUrl && !previewUrl.startsWith('data:') && !previewUrl.startsWith('http') && !previewUrl.startsWith('/') && previewUrl.length > 100) ? (
               <div className="w-full h-full">
-                <PdfViewer url={previewUrl} />
+                <Suspense fallback={<LoadingSpinner />}>
+                  <PdfViewer url={previewUrl} />
+                </Suspense>
               </div>
             ) : (
               <div className="text-center p-10">

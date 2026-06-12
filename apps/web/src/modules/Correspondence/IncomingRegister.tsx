@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';
+import { toList, toPagination } from '../../api/utils/envelope';
 import { motion, AnimatePresence } from 'motion/react';
 import Pagination from '../../components/Pagination';
 import { useFormat } from '../../utils/formatService';
@@ -75,16 +76,9 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
       if (filters.end_date) params.append('end_date', filters.end_date);
 
       const response = await api.get(`/correspondence/incoming?${params.toString()}`);
-      if (response.data.data) {
-        setItems(response.data.data);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination?.total ?? response.data.data.length,
-          totalPages: response.data.pagination?.totalPages ?? 1
-        }));
-      } else {
-        setItems(response.data);
-      }
+      const list = toList(response.data);
+      setItems(list);
+      setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
     } catch (error) {
       logger.error("Failed to fetch incoming correspondence", error);
     } finally {

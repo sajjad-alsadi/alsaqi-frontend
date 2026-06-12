@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/httpClient';
 import { useTranslation } from 'react-i18next';
@@ -13,10 +13,14 @@ import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
 import AuditTaskForm from '../components/AuditTaskForm';
-import PdfViewer from '../components/PdfViewer';
+import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import AuditTasksTable from '../components/AuditTasksTable';
 import { Button } from '@/components/ui/button';
+
+// Lazy-load PdfViewer (and its react-pdf/pdfjs-dist dependencies) so the chunk
+// only loads when a PDF is actually previewed.
+const PdfViewer = React.lazy(() => import('../components/PdfViewer'));
 
 const AuditTasksModule: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -224,7 +228,9 @@ const AuditTasksModule: React.FC = () => {
         >
           <div className="h-[70vh] flex flex-col bg-[var(--color-bg-main)] rounded-2xl overflow-hidden">
             {previewItem.file_data?.startsWith('data:application/pdf') || /\.(pdf)$/i.test(previewItem.file_data || '') || (previewItem.file_data && !previewItem.file_data.startsWith('data:') && !previewItem.file_data.startsWith('http') && !previewItem.file_data.startsWith('/') && previewItem.file_data.length > 100) ? (
-              <PdfViewer url={previewItem.file_data || ''} />
+              <Suspense fallback={<LoadingSpinner />}>
+                <PdfViewer url={previewItem.file_data || ''} />
+              </Suspense>
             ) : previewItem.file_data?.startsWith('data:image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(previewItem.file_data || '') ? (
               <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
                 <img src={previewItem.file_data} alt={previewItem.file_name} className="max-w-full max-h-full object-contain shadow-xl rounded-xl" />

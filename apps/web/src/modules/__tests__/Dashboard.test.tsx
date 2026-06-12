@@ -189,22 +189,26 @@ describe('Dashboard Module', () => {
 
     render(<Dashboard />);
 
-    expect(screen.getByText('common.loading')).toBeInTheDocument();
+    // While loading, the dashboard renders the shared stats skeleton.
+    expect(screen.getByTestId('stats-skeleton')).toBeInTheDocument();
   });
 
   it('shows error state when API fails', () => {
-    // The component shows loading when stats is null (even with error)
-    // because the condition `if (loading || !stats)` comes first.
-    // Error state is only reachable if stats is somehow set but error is also set.
-    // In practice, when the query fails, stats remains null and loading becomes false,
-    // so the component shows the loading/empty state.
-    // We test that when loading is false and stats is null, the loading UI is shown.
+    // Error state now takes precedence over the loading/skeleton branch:
+    // when the query fails, the component renders an error indication
+    // (error heading, the error message, and a retry action) and never
+    // leaves the skeleton visible.
     mockUseDashboardStats.mockReturnValue({ stats: null, loading: false, error: 'Network error', refresh: vi.fn() });
 
     render(<Dashboard />);
 
-    // Component shows loading state when stats is null
-    expect(screen.getByText('common.loading')).toBeInTheDocument();
+    // Error heading and the surfaced error message are shown.
+    expect(screen.getByText('common.error')).toBeInTheDocument();
+    expect(screen.getByText('Network error')).toBeInTheDocument();
+    // A retry action is offered.
+    expect(screen.getByText('dashboard.retry')).toBeInTheDocument();
+    // The skeleton is no longer displayed once an error is present.
+    expect(screen.queryByTestId('stats-skeleton')).not.toBeInTheDocument();
   });
 
   it('calculates completion rate correctly', () => {

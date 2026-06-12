@@ -80,12 +80,12 @@ Implementation language: **TypeScript** (matching the existing React 19 + Vite c
 - [x] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Bundle optimization and dead code removal (Area D)
+- [x] 5. Bundle optimization and dead code removal (Area D)
   - [x] 5.1 Dynamically import ExcelJS in `apps/web/src/modules/RiskRegister.tsx`
     - Replace the top-level `import ExcelJS from 'exceljs'` with `const ExcelJS = (await import('exceljs')).default;` inside the import/export handlers
     - _Requirements: 4.1_
 
-  - [~] 5.2 Add lazy `PdfViewer` boundaries
+  - [x] 5.2 Add lazy `PdfViewer` boundaries
     - Replace static `import PdfViewer` with `React.lazy(() => import(...))` wrapped in `<Suspense fallback={<LoadingSpinner />}>` in `AuditEvidence.tsx`, `AuditTasks.tsx`, and `Correspondence/OutgoingRegister.tsx`, rendered only when a PDF is selected
     - _Requirements: 4.2_
 
@@ -130,7 +130,7 @@ Implementation language: **TypeScript** (matching the existing React 19 + Vite c
     - Assert each data view shows one skeleton while loading, content within 300ms on success, and an error (no skeleton) on failure; assert listed files contain no inline spinner markup
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [~] 7. Checkpoint - Ensure all tests pass
+- [x] 7. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 8. Type safety and tests (Area F)
@@ -208,7 +208,7 @@ Implementation language: **TypeScript** (matching the existing React 19 + Vite c
     - Assert Sentry `init` is invoked at startup (mocked), a Web Vital is POSTed to `/api/metrics/web-vitals`, a feature gate renders children only when enabled, and the log pipeline falls back to `/api/system-errors`
     - _Requirements: 7.1, 7.2, 17.1, 15.2, 18.4_
 
-- [~] 10. Checkpoint - Ensure all tests pass
+- [x] 10. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 11. RTL and Arabic correctness (Area H)
@@ -241,7 +241,7 @@ Implementation language: **TypeScript** (matching the existing React 19 + Vite c
     - Assert the inline `index.html` script sets `dir`/`lang` from `localStorage` before modules; assert the health percent renders Eastern Arabic numerals with a percent sign
     - _Requirements: 11.2, 14.3_
 
-- [~] 12. Final checkpoint - Ensure all tests pass
+- [x] 12. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

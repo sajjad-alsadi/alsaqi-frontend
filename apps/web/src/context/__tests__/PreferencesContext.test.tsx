@@ -58,10 +58,14 @@ describe('PreferencesContext', () => {
     document.documentElement.classList.remove('dark');
   });
 
-  describe('تغيير اللغة: تحديث اتجاه الصفحة (RTL/LTR)', () => {
-    it('should set RTL direction when language is Arabic', async () => {
+  describe('تغيير اللغة: تحديث حالة اللغة (الاتجاه مملوك لـ i18n.ts)', () => {
+    // NOTE: Document direction (`document.documentElement.dir`/`lang`) is now owned
+    // solely by `i18n.ts` (single source of truth, Requirement 11.3). PreferencesContext
+    // no longer sets the document direction, so these tests assert language state only
+    // and explicitly verify that PreferencesContext does NOT mutate the document direction.
+    it('should update language state to Arabic without setting document direction', async () => {
       /**
-       * Validates: Requirements 16.5
+       * Validates: Requirements 16.5, 11.3
        */
       const { unmount } = render(
         <PreferencesProvider>
@@ -73,16 +77,17 @@ describe('PreferencesContext', () => {
         screen.getByTestId('set-lang-ar').click();
       });
 
-      expect(document.documentElement.dir).toBe('rtl');
-      expect(document.documentElement.lang).toBe('ar');
+      // Language state updates...
       expect(screen.getByTestId('language').textContent).toBe('ar');
+      // ...but direction is NOT set here (i18n.ts is the single source of truth).
+      expect(document.documentElement.dir).toBe('');
 
       unmount();
     });
 
-    it('should set LTR direction when language is English', async () => {
+    it('should update language state to English without setting document direction', async () => {
       /**
-       * Validates: Requirements 16.5
+       * Validates: Requirements 16.5, 11.3
        */
       // Start with Arabic
       (localStorage.getItem as ReturnType<typeof vi.fn>).mockImplementation((key: string) => {
@@ -96,16 +101,14 @@ describe('PreferencesContext', () => {
         </PreferencesProvider>
       );
 
-      // Initial state should be Arabic/RTL
-      expect(document.documentElement.dir).toBe('rtl');
-
       await act(async () => {
         screen.getByTestId('set-lang-en').click();
       });
 
-      expect(document.documentElement.dir).toBe('ltr');
-      expect(document.documentElement.lang).toBe('en');
+      // Language state updates...
       expect(screen.getByTestId('language').textContent).toBe('en');
+      // ...but direction is NOT set here (i18n.ts is the single source of truth).
+      expect(document.documentElement.dir).toBe('');
 
       unmount();
     });
@@ -264,7 +267,8 @@ describe('PreferencesContext', () => {
       );
 
       expect(screen.getByTestId('language').textContent).toBe('en');
-      expect(document.documentElement.dir).toBe('ltr');
+      // Direction is owned by i18n.ts, not PreferencesContext (Requirement 11.3).
+      expect(document.documentElement.dir).toBe('');
 
       unmount();
     });
@@ -324,7 +328,8 @@ describe('PreferencesContext', () => {
 
       // Default language is AR per the implementation
       expect(screen.getByTestId('language').textContent).toBe('ar');
-      expect(document.documentElement.dir).toBe('rtl');
+      // Direction is owned by i18n.ts, not PreferencesContext (Requirement 11.3).
+      expect(document.documentElement.dir).toBe('');
 
       unmount();
     });

@@ -17,6 +17,7 @@ import axios, {
 } from 'axios';
 import { z } from 'zod';
 import { API_VERSION, type ApiError } from '@alsaqi/shared';
+import { unwrapEnvelope } from './utils/envelope';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -281,15 +282,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       checkVersionMismatch(response);
 
       // Unwrap the response envelope: { success: true, data: T, meta: ... } → T
-      if (
-        response.data &&
-        typeof response.data === 'object' &&
-        'success' in response.data &&
-        response.data.success === true &&
-        'data' in response.data
-      ) {
-        response.data = response.data.data;
-      }
+      response.data = unwrapEnvelope(response.data);
 
       return response;
     },

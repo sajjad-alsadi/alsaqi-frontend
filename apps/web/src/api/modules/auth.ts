@@ -4,7 +4,7 @@
  */
 import { z } from 'zod';
 import type { ApiClient } from '../client';
-import type { User } from '@alsaqi/shared';
+import type { User, LoginInput, RegisterInput } from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ const ChangePasswordResponseSchema = z.object({
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface AuthApi {
-  login(data: { usernameOrEmail: string; password: string; rememberMe?: boolean }): Promise<{
+  login(data: LoginInput): Promise<{
     user: User;
     accessToken: string;
     refreshToken: string;
@@ -62,21 +62,7 @@ export interface AuthApi {
     accessToken: string;
     refreshToken: string;
   }>;
-  register(data: {
-    username: string;
-    password: string;
-    name: string;
-    email: string;
-    role: string;
-    department?: string | null;
-    job_title_id?: string | null;
-    unit?: string | null;
-    reporting_manager_id?: string | null;
-    access_scope?: string | null;
-    phone_number?: string | null;
-    notes?: string | null;
-    status?: 'Active' | 'Inactive' | 'Suspended';
-  }): Promise<{ user: User }>;
+  register(data: RegisterInput): Promise<{ user: User }>;
   changePassword(data: { newPassword: string }): Promise<{ success: boolean }>;
   getCurrentUser(): Promise<User | null>;
 }

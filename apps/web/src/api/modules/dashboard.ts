@@ -27,9 +27,15 @@ const RiskLevelBreakdownSchema = z.object({
 /**
  * Typed schema for `GET /v1/dashboard-stats`.
  * Mirrors the grouped backend response described by {@link DashboardStats}.
+ *
+ * The schema type is inferred from the `z.object({...})` shape rather than
+ * annotated as `z.ZodType<DashboardStats>`. Zod v4's `.optional()` produces an
+ * optional key (`{ byLevel?: ... }`), which is exactly what
+ * `exactOptionalPropertyTypes` requires, so no suppression is needed. The
+ * `_dashboardStatsContract` assertion below keeps the inferred type and
+ * {@link DashboardStats} in lockstep at compile time.
  */
-// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
-export const DashboardStatsSchema: z.ZodType<DashboardStats> = z.object({
+export const DashboardStatsSchema = z.object({
   audits: z.object({
     total: z.number(),
     completed: z.number(),
@@ -62,6 +68,15 @@ export const DashboardStatsSchema: z.ZodType<DashboardStats> = z.object({
   }),
   activity: z.array(z.record(z.string(), z.unknown())),
 });
+
+/**
+ * Compile-time only: assert the inferred schema type stays assignable to the
+ * shared {@link DashboardStats} type under `exactOptionalPropertyTypes`. Never
+ * executed at runtime; it exists solely so a drift between the schema and the
+ * shared type surfaces as a `tsc` error.
+ */
+const _dashboardStatsContract: DashboardStats = {} as z.infer<typeof DashboardStatsSchema>;
+void _dashboardStatsContract;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

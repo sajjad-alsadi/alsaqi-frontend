@@ -217,9 +217,8 @@ describe('ComplianceMatrix Module', () => {
     mockApiGet.mockImplementation(() => new Promise(() => {}));
     render(<ComplianceMatrix />);
 
-    // Loading spinner should appear
-    const spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    // While loading with no items yet, the shared table skeleton is shown.
+    expect(screen.getByTestId('table-skeleton')).toBeInTheDocument();
   });
 
   it('shows empty state when no items found', async () => {
