@@ -49,7 +49,7 @@ export const userArb = fc.record({
   email: validEmailArb,
   role: userRoleArb,
   name: fc.string({ minLength: 2, maxLength: 50 }).filter((s) => s.trim().length >= 2),
-  status: fc.constantFrom('Active' as const, 'Disabled' as const),
+  status: fc.constantFrom('Active' as const, 'Suspended' as const),
   failed_attempts: fc.integer({ min: 0, max: 10 }),
   session_version: fc.integer({ min: 1, max: 100 }),
 });

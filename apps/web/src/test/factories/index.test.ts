@@ -26,9 +26,9 @@ describe('Test Data Factories', () => {
     });
 
     it('should accept overrides', () => {
-      const user = createUser({ role: 'Admin', status: 'Disabled' });
+      const user = createUser({ role: 'Admin', status: 'Suspended' });
       expect(user.role).toBe('Admin');
-      expect(user.status).toBe('Disabled');
+      expect(user.status).toBe('Suspended');
     });
   });
 

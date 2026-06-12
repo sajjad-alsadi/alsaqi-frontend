@@ -8,7 +8,16 @@ export const useUserManagement = (initialParams: any = {}) => {
 
   const usersQuery = useQuery({
     queryKey: ['users', initialParams],
-    queryFn: () => api.userManagement.init().then(() => api.users.list(initialParams)),
+    queryFn: async () => {
+      // `init()` primes server-side state but must never block the list: if the
+      // endpoint is missing or errors, swallow it so the users list still loads.
+      try {
+        await api.userManagement.init();
+      } catch {
+        /* non-fatal: proceed to load the list regardless */
+      }
+      return api.users.list(initialParams);
+    },
     staleTime: 5 * 60 * 1000,
   });
 

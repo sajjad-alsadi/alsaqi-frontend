@@ -4,6 +4,7 @@
  */
 import type {
   UserRole,
+  UserStatus,
   AuditType,
   RiskLevel,
   ControlTestType,
@@ -27,7 +28,7 @@ export interface User {
   job_title?: string;
   role: `${UserRole}`;
   profile_picture?: string;
-  status: 'Active' | 'Disabled';
+  status: `${UserStatus}`;
   last_login?: string;
   theme?: 'light' | 'dark';
   permissions?: Array<{ module: string; action: string }>;

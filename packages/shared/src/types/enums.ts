@@ -62,6 +62,7 @@ export enum UserStatus {
   ACTIVE = 'Active',
   INACTIVE = 'Inactive',
   SUSPENDED = 'Suspended',
+  LOCKED = 'Locked',
 }
 
 export enum CorrespondencePriority {

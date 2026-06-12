@@ -18,7 +18,7 @@ const UserSchema = z.object({
   job_title: z.string().optional(),
   role: z.string(),
   profile_picture: z.string().optional(),
-  status: z.enum(['Active', 'Disabled']),
+  status: z.string(),
   last_login: z.string().optional(),
   theme: z.enum(['light', 'dark']).optional(),
   permissions: z
