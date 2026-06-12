@@ -96,9 +96,10 @@ export const useFraudLog = (isManager: boolean) => {
       fetchMyStatus();
       if (isManager) fetchRequests();
       return true;
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setRequestError(err.response?.data?.error || 'Failed to request access');
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setRequestError(axiosErr.response?.data?.error || 'Failed to request access');
       return false;
     }
   };

@@ -178,7 +178,7 @@ const SystemLogsManagement: React.FC = () => {
                   <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('systemLogsManagement.systemHealth')}</h3>
                   <p className="text-sm font-bold text-[var(--color-text-muted)]">{t('systemLogsManagement.serverStatus')}</p>
                   <div className="mt-6 flex items-end gap-2">
-                    <span className={`text-5xl font-bold tracking-tighter ${stats.healthColor}`}>{stats.healthPercent.toFixed(1)}%</span>
+                    <span className={`text-5xl font-bold tracking-tighter ${stats.healthColor}`}>{new Intl.NumberFormat('ar-IQ', { style: 'percent', maximumFractionDigits: 1 }).format(stats.healthPercent / 100)}</span>
                     <span className="text-[var(--color-text-muted)] font-bold mb-1 text-xs uppercase tracking-widest">{t(`systemLogsManagement.${stats.healthStatus}`)}</span>
                   </div>
                 </div>

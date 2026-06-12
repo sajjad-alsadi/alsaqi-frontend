@@ -21,13 +21,28 @@ import logger from '../../utils/logger';
 import Portal from '../../components/Portal';
 import { Button } from '@/components/ui/button';
 
+type SettingsTab = 'profile' | 'password' | 'preferences' | 'security' | 'about' | 'pdf';
+
+interface ProfileData {
+  name?: string;
+  email?: string;
+  department?: string;
+  profile_picture?: string;
+  job_title?: string;
+  role?: string;
+  employee_id?: string | number;
+  username?: string;
+  id?: string | number;
+  last_login?: string;
+}
+
 const Settings: React.FC = () => {
   const { token } = useAuth();
   const { user, updateUser } = useUser();
   const { language, setLanguage, theme, setTheme, dashboardLayout, setDashboardLayout } = usePreferences();
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'preferences' | 'security' | 'about' | 'pdf'>('profile');
-  const [profile, setProfile] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const { departments } = useDepartments();
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
@@ -89,7 +104,7 @@ const Settings: React.FC = () => {
       setMessage({ text: t('settings.profileUpdated'), type: 'success' });
       updateUser(profileForm);
       fetchProfile();
-    } catch (err: any) {
+    } catch (err) {
       logger.error('Operation failed', err);
       const errorMsg = extractErrorMessage(err, t('common.error'));
       setMessage({ text: errorMsg, type: 'error' });
@@ -114,7 +129,7 @@ const Settings: React.FC = () => {
       });
       setMessage({ text: t('settings.passwordChanged'), type: 'success' });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err: any) {
+    } catch (err) {
       const errorMsg = extractErrorMessage(err, t('failedToChangePassword'));
       setMessage({ text: errorMsg, type: 'error' });
     }
@@ -196,7 +211,7 @@ const Settings: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => {
-                setActiveTab(tab.id as any);
+                setActiveTab(tab.id as SettingsTab);
                 setMessage(null);
               }}
               className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-bold transition-all duration-300 ${

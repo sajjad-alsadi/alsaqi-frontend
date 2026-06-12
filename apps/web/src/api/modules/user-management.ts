@@ -7,32 +7,49 @@
  * (Basic CRUD is already covered by api/modules/users.ts)
  */
 import { z } from 'zod';
+import type {
+  Role,
+  Permission,
+  UserSession,
+  JobTitle,
+  UserManagementSettings,
+} from '@alsaqi/shared';
 import type { ApiClient } from '../client';
+
+// Re-export the shared types so existing consumers of this module keep working.
+export type {
+  Role,
+  Permission,
+  UserSession,
+  JobTitle,
+  UserManagementSettings,
+} from '@alsaqi/shared';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
 const GenericListSchema = z.array(z.record(z.string(), z.unknown()));
 const GenericObjectSchema = z.record(z.string(), z.unknown());
-const SuccessResponseSchema = z.object({ success: z.boolean() });
 const DeleteResponseSchema = z.object({ deleted: z.boolean() });
 
 const UserSummarySchema = z.record(z.string(), z.unknown());
 
-const RoleSchema = z.object({
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
+export const RoleSchema: z.ZodType<Role> = z.object({
   id: z.union([z.string(), z.number()]),
   name: z.string(),
   description: z.string().optional(),
 });
 const RoleListSchema = z.array(RoleSchema);
 
-const PermissionSchema = z.object({
+export const PermissionSchema: z.ZodType<Permission> = z.object({
   id: z.union([z.string(), z.number()]),
   module: z.string(),
   action: z.string(),
 });
 const PermissionListSchema = z.array(PermissionSchema);
 
-const SessionSchema = z.object({
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
+export const SessionSchema: z.ZodType<UserSession> = z.object({
   id: z.union([z.string(), z.number()]),
   user_id: z.union([z.string(), z.number()]),
   ip_address: z.string().optional(),
@@ -42,12 +59,25 @@ const SessionSchema = z.object({
 });
 const SessionListSchema = z.array(SessionSchema);
 
-const SettingsSchema = z.record(z.string(), z.unknown());
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
+export const SettingsSchema: z.ZodType<UserManagementSettings> = z.object({
+  failed_login_threshold: z.number().optional(),
+  inactive_account_threshold_days: z.number().optional(),
+  password_min_length: z.number().optional(),
+  password_require_uppercase: z.number().optional(),
+  password_require_lowercase: z.number().optional(),
+  password_require_numbers: z.number().optional(),
+  password_require_symbols: z.number().optional(),
+  password_expiry_days: z.number().optional(),
+  enforce_single_session: z.number().optional(),
+  session_timeout_minutes: z.number().optional(),
+});
 
 const LoginHistorySchema = z.array(z.record(z.string(), z.unknown()));
 const AuditTrailSchema = z.array(z.record(z.string(), z.unknown()));
 
-const JobTitleSchema = z.object({
+// @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
+export const JobTitleSchema: z.ZodType<JobTitle> = z.object({
   id: z.union([z.string(), z.number()]),
   name: z.string(),
   name_ar: z.string().optional(),
@@ -56,47 +86,6 @@ const JobTitleSchema = z.object({
 const JobTitleListSchema = z.array(JobTitleSchema);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface Role {
-  id: string | number;
-  name: string;
-  description?: string;
-}
-
-export interface Permission {
-  id: string | number;
-  module: string;
-  action: string;
-}
-
-export interface UserSession {
-  id: string | number;
-  user_id: string | number;
-  ip_address?: string;
-  user_agent?: string;
-  created_at?: string;
-  expires_at?: string;
-}
-
-export interface JobTitle {
-  id: string | number;
-  name: string;
-  name_ar?: string;
-  name_en?: string;
-}
-
-export interface UserManagementSettings {
-  failed_login_threshold?: number;
-  inactive_account_threshold_days?: number;
-  password_min_length?: number;
-  password_require_uppercase?: number;
-  password_require_lowercase?: number;
-  password_require_numbers?: number;
-  password_require_symbols?: number;
-  password_expiry_days?: number;
-  enforce_single_session?: number;
-  session_timeout_minutes?: number;
-}
 
 export interface LoginHistoryParams {
   page?: number;
@@ -119,7 +108,7 @@ export interface UserManagementApi {
   getRoles(): Promise<Role[]>;
   getPermissions(): Promise<Permission[]>;
   getSessions(): Promise<UserSession[]>;
-  getSettings(): Promise<Record<string, unknown>>;
+  getSettings(): Promise<UserManagementSettings>;
   getLoginHistory(params?: LoginHistoryParams): Promise<Array<Record<string, unknown>>>;
   getAuditTrail(params?: AuditTrailParams): Promise<Array<Record<string, unknown>>>;
   getJobTitles(): Promise<JobTitle[]>;
@@ -129,7 +118,7 @@ export interface UserManagementApi {
   unlockUser(id: string | number): Promise<Record<string, unknown>>;
   approveReset(data: { requestId: string; action: 'approve' | 'reject'; tempPassword?: string }): Promise<Record<string, unknown>>;
   updateRolePermissions(roleId: string | number, data: { permissionIds: string[] }): Promise<Record<string, unknown>>;
-  updateSettings(data: UserManagementSettings): Promise<Record<string, unknown>>;
+  updateSettings(data: UserManagementSettings): Promise<UserManagementSettings>;
   revokeSession(sessionId: string | number): Promise<{ deleted: boolean }>;
 }
 
@@ -146,7 +135,7 @@ export function createUserManagementApi(client: ApiClient): UserManagementApi {
     },
 
     getRoles() {
-      return client.get('/v1/roles', RoleListSchema) as Promise<Role[]>;
+      return client.get('/v1/roles', RoleListSchema);
     },
 
     getPermissions() {
@@ -154,7 +143,7 @@ export function createUserManagementApi(client: ApiClient): UserManagementApi {
     },
 
     getSessions() {
-      return client.get('/v1/user-sessions', SessionListSchema) as Promise<UserSession[]>;
+      return client.get('/v1/user-sessions', SessionListSchema);
     },
 
     getSettings() {
@@ -170,7 +159,7 @@ export function createUserManagementApi(client: ApiClient): UserManagementApi {
     },
 
     getJobTitles() {
-      return client.get('/v1/job-titles', JobTitleListSchema) as Promise<JobTitle[]>;
+      return client.get('/v1/job-titles', JobTitleListSchema);
     },
 
     getResetRequests() {

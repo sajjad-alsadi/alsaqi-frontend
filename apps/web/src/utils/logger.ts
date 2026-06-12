@@ -23,6 +23,19 @@ export interface LogEntry {
   context?: Record<string, unknown> | undefined;
 }
 
+/**
+ * Configuration for the log aggregation forwarding hook (Req 18.1, 18.3).
+ *
+ * - `destination`: the aggregation endpoint structured entries are forwarded to in
+ *   production. When unset/unavailable, `/api/system-errors` is used as the fallback.
+ * - `forwardWarn`: when `true`, `warn`-level entries are forwarded in addition to
+ *   `error`-level entries.
+ */
+export interface LogForwardingConfig {
+  destination?: string | undefined;
+  forwardWarn: boolean;
+}
+
 // Use bracket notation per noPropertyAccessFromIndexSignature
 const MODE = import.meta.env['MODE'] as string | undefined;
 const isProduction = MODE === 'production';
@@ -61,21 +74,85 @@ const LEVEL_LABELS: Record<LogLevel, string> = {
   error: 'ERROR',
 };
 
+/** The fallback delivery path retained for backward compatibility (Req 18.4). */
+const FALLBACK_DESTINATION = '/api/system-errors';
+
+/** Mutable forwarding configuration; defaults to fallback-only delivery. */
+let forwardingConfig: LogForwardingConfig = { forwardWarn: false };
+
 /**
- * Send error-level log entries to the backend in production.
- * Fire-and-forget — never throws or surfaces errors to the caller.
+ * Configure the log aggregation forwarding hook (Req 18.1).
+ *
+ * Merges the provided partial configuration over the current one so callers can
+ * set the destination and warn-forwarding independently. Safe to call at startup
+ * (e.g. from `main.tsx`) once the aggregation destination is known.
  */
-function reportToBackend(entry: LogEntry): void {
+export function configureLogForwarding(config: Partial<LogForwardingConfig>): void {
+  forwardingConfig = {
+    destination: config.destination ?? forwardingConfig.destination,
+    forwardWarn: config.forwardWarn ?? forwardingConfig.forwardWarn,
+  };
+}
+
+/** Read-only view of the current forwarding configuration (useful for tests/diagnostics). */
+export function getLogForwardingConfig(): Readonly<LogForwardingConfig> {
+  return forwardingConfig;
+}
+
+/**
+ * Pure routing decision (Property 8 — routes by level and warn-configuration).
+ *
+ * An entry is forwarded to the aggregation pipeline if and only if its level is
+ * `error`, or its level is `warn` and `forwardWarn` is enabled. Entries of any
+ * other level are never forwarded.
+ *
+ * This function is intentionally side-effect free so it can be property-tested
+ * across all levels and `forwardWarn` configurations.
+ */
+export function shouldForward(level: LogLevel, forwardWarn: boolean): boolean {
+  return level === 'error' || (level === 'warn' && forwardWarn);
+}
+
+/**
+ * POST a structured entry to the given URL. Resolves on a 2xx response and
+ * rejects otherwise so the caller can apply the fallback path.
+ */
+function postEntry(url: string, entry: LogEntry): Promise<void> {
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry),
+  }).then((res) => {
+    if (!res.ok) {
+      throw new Error(`Log forwarding failed with status ${res.status}`);
+    }
+  });
+}
+
+/**
+ * Forward a structured entry to the configured aggregation destination, falling
+ * back to `/api/system-errors` when the destination is unset or unavailable
+ * (Req 18.2, 18.4). Fire-and-forget — never throws or surfaces errors.
+ */
+function forwardToPipeline(entry: LogEntry): void {
+  const { destination } = forwardingConfig;
   try {
-    fetch('/api/system-errors', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry),
-    }).catch(() => {
-      // Silently ignore — errorReporter handles retries separately
-    });
+    if (destination && destination !== FALLBACK_DESTINATION) {
+      // Forward to the configured destination; on failure, retain the
+      // `/api/system-errors` delivery path as the fallback.
+      postEntry(destination, entry).catch(() => {
+        postEntry(FALLBACK_DESTINATION, entry).catch(() => {
+          // Fallback also failed — silently ignore (fire-and-forget).
+        });
+      });
+    } else {
+      // Destination unavailable/unset — use the fallback path directly.
+      postEntry(FALLBACK_DESTINATION, entry).catch(() => {
+        // Silently ignore — errorReporter handles retries separately.
+      });
+    }
   } catch {
-    // Guard against synchronous failures (e.g., during teardown)
+    // Guard against synchronous failures (e.g., during teardown).
   }
 }
 
@@ -196,19 +273,28 @@ class StructuredLogger {
 
   /**
    * Log a warning-level message.
-   * In production: suppressed entirely.
+   * In production: NO console output; forwarded to the aggregation pipeline only
+   * when warn-forwarding is enabled (`forwardWarn: true`), otherwise suppressed.
    * In development: outputs to console.warn with structured formatting.
    */
   warn(message: string, ...args: unknown[]): void {
-    if (isProduction) return;
     const { context, extra } = parseArgs(args);
     const entry = buildEntry('warn', message, context);
+
+    if (isProduction) {
+      if (shouldForward('warn', forwardingConfig.forwardWarn)) {
+        forwardToPipeline(entry);
+      }
+      return;
+    }
+
     devOutput(entry, ...extra);
   }
 
   /**
    * Log an error-level message.
-   * In production: NO console output; routes to /api/system-errors via HTTP POST.
+   * In production: NO console output; forwarded to the configured aggregation
+   * destination with `/api/system-errors` as the fallback path.
    * In development: outputs to console.error with structured formatting.
    */
   error(message: string, ...args: unknown[]): void {
@@ -216,7 +302,9 @@ class StructuredLogger {
     const entry = buildEntry('error', message, context);
 
     if (isProduction) {
-      reportToBackend(entry);
+      if (shouldForward('error', forwardingConfig.forwardWarn)) {
+        forwardToPipeline(entry);
+      }
       return;
     }
 

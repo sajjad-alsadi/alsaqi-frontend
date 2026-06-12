@@ -7,6 +7,7 @@ import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import SystemErrorAnalytics from './SystemErrorAnalytics';
 import logger from '../../utils/logger';
+import { TableSkeleton } from '../../components/SkeletonLoader';
 
 interface SystemError {
   id: number;
@@ -23,6 +24,7 @@ const SystemErrorLogs: React.FC = () => {
   const [logs, setLogs] = useState<SystemError[]>([]);
   const [analytics, setAnalytics] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [moduleFilter, setModuleFilter] = useState('');
@@ -61,8 +63,10 @@ const SystemErrorLogs: React.FC = () => {
       } else {
         setLogs(response.data);
       }
+      setError(null);
     } catch (error) {
       logger.error('Error fetching logs:', error);
+      setError(t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -320,6 +324,14 @@ const SystemErrorLogs: React.FC = () => {
       
       <SystemErrorAnalytics data={analytics} />
       
+      {loading && (Array.isArray(logs) ? logs : []).length === 0 ? (
+        <TableSkeleton rows={6} cols={5} />
+      ) : error && (Array.isArray(logs) ? logs : []).length === 0 ? (
+        <div className="bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm rounded-2xl p-20 text-center" role="alert">
+          <AlertCircle className="text-[var(--color-danger)] mx-auto mb-4" size={48} />
+          <p className="text-[var(--color-text-muted)] font-bold">{error}</p>
+        </div>
+      ) : (
       <div className="bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -333,14 +345,7 @@ const SystemErrorLogs: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]/50">
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-8 py-20 text-center">
-                    <RefreshCw className="animate-spin text-[var(--color-primary)] mx-auto mb-4" size={32} />
-                    <p className="text-[var(--color-text-muted)] font-bold">{t('common.loading')}</p>
-                  </td>
-                </tr>
-              ) : (Array.isArray(logs) ? logs : []).length === 0 ? (
+              {(Array.isArray(logs) ? logs : []).length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-8 py-20 text-center">
                     <AlertCircle className="text-slate-200 mx-auto mb-4" size={48} />
@@ -409,6 +414,7 @@ const SystemErrorLogs: React.FC = () => {
           />
         </div>
       </div>
+      )}
     </div>
   );
 };

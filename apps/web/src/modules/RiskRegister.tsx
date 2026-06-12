@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { RiskItem } from '../types';
 import { Plus, Search, ShieldAlert, Activity, ArrowRight, Info, Upload, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import ExcelJS from 'exceljs';
 import { useRisks } from '../hooks/useRisks';
 import { api } from '../api';
 import InteractiveIcon from '../components/InteractiveIcon';
@@ -81,6 +80,7 @@ const RiskRegister: React.FC = () => {
     reader.onload = async (evt) => {
       try {
         const buffer = evt.target?.result as ArrayBuffer;
+        const ExcelJS = (await import('exceljs')).default;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
         const worksheet = workbook.worksheets[0];
@@ -278,7 +278,7 @@ const RiskRegister: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-start gap-3 p-4 bg-[var(--color-bg-soft)]/50 rounded-xl border border-[var(--color-border-soft)]">
-                <ArrowRight size={16} className="text-[var(--color-primary)] mt-0.5" />
+                <ArrowRight size={16} className="rtl:rotate-180 text-[var(--color-primary)] mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] text-[var(--color-text-muted)] uppercase font-bold tracking-widest mb-1">{t('mitigation')}</p>
                   <p className="text-xs font-bold text-[var(--color-text-main)] opacity-80 truncate">{risk.mitigation}</p>
@@ -362,7 +362,7 @@ const RiskRegister: React.FC = () => {
 
               <div className="p-6 bg-[var(--color-bg-soft)] rounded-xl border border-[var(--color-border-soft)]">
                 <div className="flex items-center gap-3 mb-4">
-                  <ArrowRight size={20} className="text-[var(--color-primary)]" />
+                  <ArrowRight size={20} className="rtl:rotate-180 text-[var(--color-primary)]" />
                   <h4 className="text-sm font-bold text-[var(--color-text-main)] uppercase tracking-widest opacity-80">{t('mitigationPlan')}</h4>
                 </div>
                 <p className="text-[var(--color-text-main)] opacity-70 font-medium leading-relaxed">{selectedRisk.mitigation}</p>

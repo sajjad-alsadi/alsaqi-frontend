@@ -34,6 +34,13 @@ interface CorrespondenceSystemProps {
   userRole?: string;
 }
 
+interface CorrespondenceStats {
+  total_incoming?: number;
+  total_outgoing?: number;
+  pending_response?: number;
+  archived?: number;
+}
+
 const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, userRole }) => {
   const { t } = useTranslation();
   const { formatNumber } = useFormat();
@@ -41,7 +48,7 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
   const [selectedRecord, setSelectedRecord] = useState<{ type: CorrespondenceType, id: number | string } | null>(null);
   
   const { stats: rawStats, incoming: recentIncoming, loading, error, fetchStats } = useCorrespondence({ limit: 5 });
-  const stats = rawStats as any;
+  const stats = rawStats as CorrespondenceStats | null;
 
   if (loading && activeSubTab === 'dashboard' && !stats) {
     return (
@@ -100,7 +107,7 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
                   className="p-3 border border-[var(--color-border-soft)] rounded-xl hover:bg-[var(--color-bg-main)] cursor-pointer transition-colors flex justify-between items-center"
                 >
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-[var(--color-text-main)]">{formatNumber((item as any).sequence_number || item.id)}</span>
+                    <span className="text-sm font-bold text-[var(--color-text-main)]">{formatNumber((item as { sequence_number?: number | string }).sequence_number || item.id)}</span>
                     <span className="text-xs text-[var(--color-text-muted)] truncate max-w-[200px]">{item.subject}</span>
                   </div>
                   <span className="text-xs text-[var(--color-text-muted)]/70">{item.receipt_date}</span>

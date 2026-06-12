@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { usePreferences } from '../../context/PreferencesContext';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
 import { Language } from '../../constants';
+import { StatsSkeleton } from '../../components/SkeletonLoader';
 
 // Sub-components
 import DashboardHeader from './DashboardHeader';
@@ -104,17 +105,8 @@ const Dashboard: React.FC = () => {
     return Object.values(trackedData);
   }, [stats, t]);
 
-  if (loading || !stats) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-[var(--color-bg-main)]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-xs">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Error state takes precedence: on failure remove the skeleton and show an error
+  // indication (never leave the skeleton visible, never render partial data).
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen bg-[var(--color-bg-main)]">
@@ -129,6 +121,16 @@ const Dashboard: React.FC = () => {
             {t('dashboard.retry')}
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // Initial-load state: show exactly one skeleton variant for this summary-statistic
+  // view and never display partially-rendered data.
+  if (loading || !stats) {
+    return (
+      <div className="space-y-8 max-w-[1600px] mx-auto min-h-screen pb-12" aria-busy="true">
+        <StatsSkeleton count={8} />
       </div>
     );
   }

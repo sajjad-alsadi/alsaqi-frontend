@@ -22,7 +22,7 @@ const TopRisksList: React.FC<TopRisksListProps> = ({ risks }) => {
         <button 
           className="text-xs font-bold text-[var(--color-primary)] uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all"
         >
-          {t('reports.viewAll')} <ArrowRight size={14} />
+          {t('reports.viewAll')} <ArrowRight size={14} className="rtl:rotate-180" />
         </button>
       </div>
       <div className="space-y-4">

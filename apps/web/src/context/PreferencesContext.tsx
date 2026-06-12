@@ -37,10 +37,12 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
   const dashboardLayoutRef = useRef(dashboardLayout);
   dashboardLayoutRef.current = dashboardLayout;
 
-  useEffect(() => {
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = language;
-  }, [language]);
+  // NOTE: Document direction (`document.documentElement.dir`/`lang`) is intentionally
+  // NOT set here. `i18n.ts` is the single source of truth for direction: it listens to
+  // i18next's `languageChanged` event and updates the document direction whenever the
+  // language changes. Since `setLanguage` below calls `i18n.changeLanguage(lang)`, that
+  // handler runs automatically. Duplicating the logic here previously caused two
+  // independent direction-setting paths (Requirement 11.3).
 
   useEffect(() => {
     if (theme === 'dark') {

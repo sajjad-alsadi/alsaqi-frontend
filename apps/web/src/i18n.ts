@@ -13,6 +13,12 @@ i18n
       ar: { translation: ar },
       en: { translation: en }
     },
+    // Arabic-first decision: this is an Arabic-primary application, so when no
+    // persisted/detected language is available we default to Arabic (RTL). The
+    // initial language prefers the persisted `i18nextLng` value, otherwise 'ar'.
+    // `LanguageDetector` is enabled (order: localStorage -> cookie -> navigator)
+    // to allow browser-language detection for first-time visitors, but the
+    // `fallbackLng` remains 'ar' so any unsupported/undetected case lands on Arabic.
     lng: localStorage.getItem('i18nextLng') || 'ar',
     fallbackLng: 'ar',
     supportedLngs: ['en', 'ar'],
@@ -53,7 +59,11 @@ i18n
     returnEmptyString: false,
   });
 
-// Set initial direction
+// Single source of truth for document direction.
+// Direction-setting lives ONLY here (Requirement 11.3): the `languageChanged`
+// handler updates `document.documentElement.dir`/`lang` (and `document.body.dir`)
+// whenever the active language changes. Do not duplicate this logic elsewhere
+// (e.g. in PreferencesContext); call `i18n.changeLanguage(...)` instead.
 const updateDirection = (lng: string) => {
   const dir = lng === 'ar' ? 'rtl' : 'ltr';
   document.documentElement.dir = dir;

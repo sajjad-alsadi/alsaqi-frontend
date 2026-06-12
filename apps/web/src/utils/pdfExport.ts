@@ -17,12 +17,28 @@ import i18n from '../i18n';
 
 const t = i18n.t.bind(i18n);
 
+export interface PdfColumn {
+  header: string;
+  dataKey: string;
+}
+
 export interface PdfSection {
   type: 'text' | 'table';
   title?: string;
   content?: string;
-  columns?: any[];
-  data?: any[];
+  columns?: PdfColumn[];
+  data?: Array<Record<string, unknown>>;
+}
+
+/**
+ * jsPDF surface contributed by the `jspdf-autotable` plugin. The plugin augments
+ * the runtime `jsPDF` instance with `lastAutoTable` (and exposes `getNumberOfPages`)
+ * but does not ship a module augmentation in this version, so we describe it locally
+ * to access these members without `as any`.
+ */
+interface JsPDFWithAutoTable {
+  lastAutoTable?: { finalY: number };
+  getNumberOfPages(): number;
 }
 
 // Use locally embedded font (no internet required)
@@ -41,7 +57,7 @@ export const generatePdf = async (
   token: string,
   language: 'ar' | 'en',
   _templateType?: string,
-  _templateData?: any
+  _templateData?: unknown
 ) => {
   // NOTE: Template-based rendering (via html2canvas) has been removed.
   // The primary path is now server-side. This fallback uses jsPDF directly.
@@ -144,16 +160,16 @@ export const generatePdf = async (
           bottom: settings.margin_bottom, 
           left: settings.margin_left 
         },
-        didDrawPage: (_data: any) => {
+        didDrawPage: () => {
           // Footer is drawn later for all pages
         }
       });
-      currentY = (doc as any).lastAutoTable.finalY + 30;
+      currentY = ((doc as jsPDF & JsPDFWithAutoTable).lastAutoTable?.finalY ?? currentY) + 30;
     }
   }
 
   // Draw footer on all pages
-  const pageCount = (doc as any).internal.getNumberOfPages();
+  const pageCount = (doc as jsPDF & JsPDFWithAutoTable).getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     if (settings.footer_template || settings.show_page_number === 1) {

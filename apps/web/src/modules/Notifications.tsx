@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import Modal from '../components/Modal';
 import { getTranslatedNotificationMessage, getTranslatedNotificationModule } from '../utils/notificationHelpers';
 import { Button } from '@/components/ui/button';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { CardSkeleton } from '../components/SkeletonLoader';
 
 const Notifications: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -128,6 +130,9 @@ const Notifications: React.FC = () => {
         </div>
 
         <div className="space-y-4">
+          {isLoading && notifications.length === 0 ? (
+            <CardSkeleton count={6} />
+          ) : (
           <AnimatePresence>
             {filteredNotifications.length === 0 ? (
               <motion.div 
@@ -212,6 +217,7 @@ const Notifications: React.FC = () => {
               ))
             )}
           </AnimatePresence>
+          )}
           
           {/* Load More Button */}
           {hasMore && !isLoading && (
@@ -225,9 +231,9 @@ const Notifications: React.FC = () => {
               </Button>
             </div>
           )}
-          {isLoading && (
+          {isLoading && notifications.length > 0 && (
             <div className="text-center py-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)] mx-auto"></div>
+              <LoadingSpinner size="sm" />
             </div>
           )}
         </div>

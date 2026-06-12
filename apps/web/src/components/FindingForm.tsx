@@ -46,7 +46,7 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FindingFormValues>({
-    resolver: zodResolver(findingSchema) as any,
+    resolver: zodResolver(findingSchema),
     mode: 'onBlur',
     defaultValues: {
       audit_id: '',
@@ -66,13 +66,10 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
 
   useEffect(() => {
     if (initialData) {
-      const sanitized = { ...initialData };
-      Object.keys(sanitized).forEach((key) => {
-        if (sanitized[key as keyof AuditFinding] === null) {
-          (sanitized as any)[key] = '';
-        }
-      });
-      reset(sanitized as any);
+      const sanitized = Object.fromEntries(
+        Object.entries(initialData).map(([key, value]) => [key, value === null ? '' : value]),
+      ) as Partial<FindingFormValues>;
+      reset(sanitized);
     }
   }, [initialData, reset]);
 

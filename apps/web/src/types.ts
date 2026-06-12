@@ -176,27 +176,6 @@ export interface CentralBankInstruction {
   status: string;
 }
 
-export interface LawBankItem {
-  id?: number;
-  title: string;
-  type: string;
-  authority: string;
-  issue_date: string;
-  description: string;
-  related_risk_area: string;
-  attachment?: string;
-  keywords: string;
-}
-
-export interface FraudCase {
-  id?: number;
-  description: string;
-  department: string;
-  detection_method: string;
-  status: string;
-  notes?: string;
-}
-
 export interface Notification {
   id?: string | number;
   recipient_row_id?: string;
@@ -223,18 +202,6 @@ export interface AuditTrail {
   module: string;
   timestamp: string;
   details: string;
-}
-
-export interface OrgPosition {
-  id: number;
-  title: string;
-  department: string;
-  unit?: string;
-  employee_name: string;
-  reporting_to?: number;
-  role_description: string;
-  access_level: 'High' | 'Medium' | 'Low';
-  status: 'Active' | 'Archived';
 }
 
 export interface AuditReport {

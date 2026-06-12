@@ -2,6 +2,14 @@ import { usePreferences } from '../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
 
 /**
+ * Canonical Arabic locale used for number formatting.
+ * MUST stay in sync with `utils/format.ts` (`ARABIC_LOCALE`) so that
+ * `formatNumber` output is identical between the two modules. `ar-EG` yields
+ * Eastern Arabic numerals (٠١٢٣٤٥٦٧٨٩) with grouping separators.
+ */
+const ARABIC_LOCALE = 'ar-EG';
+
+/**
  * Hook to provide localized formatting functions
  */
 export const useFormat = () => {
@@ -57,18 +65,20 @@ export const useFormat = () => {
   };
 
   /**
-   * Formats a number according to the current language
+   * Formats a number according to the current language. In the Arabic locale
+   * this delegates to `Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true })`,
+   * producing Eastern Arabic numerals with grouping separators instead of the
+   * previous manual digit replacement that dropped grouping.
    */
   const formatNumber = (num: number | string | undefined) => {
     if (num === undefined || num === null) return isArabic ? '٠' : '0';
-    
-    if (isArabic) {
-      const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return String(num).replace(/[0-9]/g, (w) => id[+w] ?? w);
-    }
 
     const n = typeof num === 'string' ? parseFloat(num) : num;
     if (isNaN(n)) return String(num);
+
+    if (isArabic) {
+      return new Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true }).format(n);
+    }
 
     return n.toLocaleString('en-US');
   };

@@ -1,14 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <title>Al-Saqi Audit Management</title>
+    <script>
+      // Pre-React direction bootstrap: synchronously apply the persisted
+      // language so the first paint matches the user's last-used direction
+      // and avoids a flash of wrong direction (RTL-001).
+      (function () {
+        try {
+          var lng = localStorage.getItem('i18nextLng');
+          if (lng) {
+            document.documentElement.lang = lng;
+            document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+          }
+        } catch (e) {
+          /* localStorage may be unavailable; keep static ar/rtl defaults */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

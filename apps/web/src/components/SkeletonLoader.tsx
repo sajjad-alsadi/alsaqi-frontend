@@ -12,7 +12,7 @@ const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => (
  * Table skeleton loader — shows placeholder rows while data loads.
  */
 export const TableSkeleton: React.FC<{ rows?: number; cols?: number }> = ({ rows = 5, cols = 4 }) => (
-  <div className="glass-card overflow-hidden">
+  <div className="glass-card overflow-hidden" data-testid="table-skeleton" role="status" aria-busy="true">
     {/* Header */}
     <div className="flex gap-4 p-5 bg-[var(--color-bg-soft)] border-b border-[var(--color-border-soft)]">
       {Array.from({ length: cols }).map((_, i) => (
@@ -34,7 +34,7 @@ export const TableSkeleton: React.FC<{ rows?: number; cols?: number }> = ({ rows
  * Card grid skeleton loader.
  */
 export const CardSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="card-skeleton" role="status" aria-busy="true">
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} className="glass-card p-6 space-y-4">
         <div className="flex items-center gap-3">
@@ -56,7 +56,7 @@ export const CardSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => (
  * KPI/Stats skeleton loader.
  */
 export const StatsSkeleton: React.FC<{ count?: number }> = ({ count = 4 }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="stats-skeleton" role="status" aria-busy="true">
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} className="glass-card p-5 space-y-3">
         <Skeleton className="w-10 h-10 rounded-xl" />

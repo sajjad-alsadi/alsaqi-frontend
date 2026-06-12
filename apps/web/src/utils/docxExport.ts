@@ -12,7 +12,8 @@ const PRIMARY_COLOR = "0A7D85";
 const MUTED_COLOR = "64748B";
 const LIGHT_FILL = "F8FAFC";
 
-export const generateQuarterlyReportDocx = async (data: any, language: 'ar' | 'en') => {
+export const generateQuarterlyReportDocx = async (data: unknown, language: 'ar' | 'en') => {
+  void data; // reserved for future data-driven rendering; content currently sourced from i18n
   const isRtl = language === 'ar';
 
   const createHeader = () => {

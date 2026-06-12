@@ -13,20 +13,19 @@ import { useDepartments } from '../hooks/useDepartments';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 
-type AuditPlanFormValues = {
-  title: string;
+interface AuditProgramOption {
+  id: string | number;
+  status?: string;
+  program_code?: string;
+  program_title: string;
   department: string;
-  type: AuditType;
-  risk_rating: RiskLevel;
-  planned_start_date: string;
-  planned_end_date: string;
-  lead_auditor: string;
-  status: AuditStatus;
-  notes?: string;
-  program_id?: string | number;
-  year: number;
-  quarter?: string;
-};
+  audit_type: string;
+}
+
+interface AuditorOption {
+  id: string | number;
+  name: string;
+}
 
 interface AuditPlanFormProps {
   onSuccess: () => void;
@@ -51,10 +50,13 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
     year: z.coerce.number().min(2000).max(2100),
     quarter: z.string().optional(),
   });
-  
+
+  type AuditPlanFormInput = z.input<typeof auditPlanSchema>;
+  type AuditPlanFormValues = z.output<typeof auditPlanSchema>;
+
   const { departments } = useDepartments();
-  const [programs, setPrograms] = useState<any[]>([]);
-  const [auditors, setAuditors] = useState<any[]>([]);
+  const [programs, setPrograms] = useState<AuditProgramOption[]>([]);
+  const [auditors, setAuditors] = useState<AuditorOption[]>([]);
 
   const {
     register,
@@ -63,8 +65,8 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<AuditPlanFormValues>({
-    resolver: zodResolver(auditPlanSchema) as any,
+  } = useForm<AuditPlanFormInput, unknown, AuditPlanFormValues>({
+    resolver: zodResolver(auditPlanSchema),
     mode: 'onBlur',
     defaultValues: {
       title: '',
@@ -85,16 +87,15 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
 
   useEffect(() => {
     if (initialData) {
-      const sanitized = { ...initialData };
-      Object.keys(sanitized).forEach((key) => {
-        if (sanitized[key as keyof AuditPlan] === null) {
-          (sanitized as any)[key] = '';
-        }
-      });
+      const normalized = Object.fromEntries(
+        Object.entries(initialData).map(([key, value]) => [key, value === null ? '' : value]),
+      ) as Record<string, unknown>;
       // Truncate ISO dates to yyyy-MM-dd for date inputs
-      if (sanitized.planned_start_date) sanitized.planned_start_date = sanitized.planned_start_date.substring(0, 10);
-      if (sanitized.planned_end_date) sanitized.planned_end_date = sanitized.planned_end_date.substring(0, 10);
-      reset(sanitized as any);
+      const start = normalized['planned_start_date'];
+      if (typeof start === 'string') normalized['planned_start_date'] = start.substring(0, 10);
+      const end = normalized['planned_end_date'];
+      if (typeof end === 'string') normalized['planned_end_date'] = end.substring(0, 10);
+      reset(normalized as Partial<AuditPlanFormInput>);
     }
   }, [initialData, reset]);
 
@@ -103,7 +104,7 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
     api.get('/audit-programs')
       .then(res => {
         const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
-        setPrograms(data.filter((p: any) => p.status === 'Approved'));
+        setPrograms(data.filter((p: AuditProgramOption) => p.status === 'Approved'));
       })
       .catch(() => setPrograms([]));
 

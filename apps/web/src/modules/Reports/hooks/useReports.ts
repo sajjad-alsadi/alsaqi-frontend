@@ -7,6 +7,7 @@ import { AuditReport, AuditPlan, AuditFinding, ExecData, ReportType } from '../t
 import * as reportService from '../services/reportService';
 import api from '../../../api/httpClient';
 import { pollReportStatus, ReportStatusResponse } from '../../../utils/pollReportStatus';
+import logger from '../../../utils/logger';
 
 /**
  * Maps the legacy camelCase report type IDs used in the frontend
@@ -89,7 +90,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       const data = await reportService.fetchReports();
       setReports(data);
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to fetch reports:', err);
     } finally {
       setLoading(false);
     }
@@ -100,7 +101,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       const data = await reportService.fetchAudits();
       setAudits(data);
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to fetch audits:', err);
     }
   };
 
@@ -110,7 +111,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       const data = await reportService.fetchExecData();
       setExecData(data);
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to fetch executive data:', err);
     } finally {
       setExecLoading(false);
     }
@@ -130,7 +131,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       setFindings(auditFindings);
       setSelectedFindings(auditFindings.map(f => f.id!));
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to fetch audit findings:', err);
     }
   };
 
@@ -166,7 +167,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
           findings: findings.filter(f => selectedFindings.includes(f.id!))
         }, i18n.language as 'ar' | 'en');
       } catch (err) {
-        console.error('Failed to generate docx:', err);
+        logger.error('Failed to generate docx:', err);
         setError(t('reports.failedToGenerateDocument'));
       }
       return;
@@ -221,7 +222,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       const message =
         err instanceof Error ? err.message : t('reports.failedToGenerateDocument');
       setError(message);
-      console.error('Failed to generate PDF:', err);
+      logger.error('Failed to generate PDF:', err);
     }
   };
 
@@ -273,7 +274,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       const message =
         err instanceof Error ? err.message : t('reports.failedToGenerateDocument');
       setError(message);
-      console.error('Failed to generate executive PDF:', err);
+      logger.error('Failed to generate executive PDF:', err);
     }
   };
 
@@ -300,7 +301,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       fetchReports();
       generateAuditPDF();
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to save report:', err);
     }
   };
 
@@ -312,7 +313,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to delete report:', err);
     }
   };
 
@@ -340,7 +341,7 @@ export const useReports = (activeSubTab: 'audit' | 'executive') => {
           findings: [] // We might not have the full findings here, but we can pass what we have
         }, i18n.language as 'ar' | 'en');
       } catch (err) {
-        console.error('Failed to generate docx:', err);
+        logger.error('Failed to generate docx:', err);
         setError(t('reports.failedToGenerateDocument'));
       }
       return;

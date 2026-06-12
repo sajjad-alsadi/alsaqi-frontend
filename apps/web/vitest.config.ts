@@ -17,6 +17,9 @@ export default defineConfig({
       reporter: ['text', 'text-summary', 'json', 'lcov'],
       thresholds: {
         lines: 70,
+        'src/api/**': { lines: 75, functions: 70 },
+        'src/context/**': { lines: 75, functions: 70 },
+        'src/permissions/**': { lines: 80, functions: 75 },
       },
     },
   },

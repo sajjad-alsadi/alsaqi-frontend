@@ -1,20 +1,30 @@
 import i18n from '../i18n';
 
 /**
- * Converts numbers to Eastern Arabic numerals (٠١٢٣٤٥٦٧٨٩) if the current language is Arabic.
- * Otherwise, returns the number as a string in Western Arabic numerals.
+ * Canonical Arabic locale used for number formatting across the app.
+ * `ar-EG` yields Eastern Arabic numerals (٠١٢٣٤٥٦٧٨٩) and grouping separators.
+ * This MUST stay in sync with the locale used in `formatService.ts` so that
+ * `formatNumber` output is identical between the two modules.
+ */
+const ARABIC_LOCALE = 'ar-EG';
+
+/**
+ * Formats numbers for display. In the Arabic locale this delegates to
+ * `Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true })`, which produces
+ * Eastern Arabic numerals with proper grouping separators (e.g. ١٬٢٣٤) instead
+ * of the previous manual digit replacement that dropped grouping. Non-Arabic
+ * locales use the en-US grouped representation.
  */
 export const formatNumber = (num: number | string): string => {
   const currentLng = i18n.language || 'ar';
-  
-  if (currentLng.startsWith('ar')) {
-    const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return String(num).replace(/[0-9]/g, (w) => id[+w] ?? w);
-  }
-  
+
   const n = typeof num === 'string' ? parseFloat(num) : num;
   if (isNaN(n)) return String(num);
-  
+
+  if (currentLng.startsWith('ar')) {
+    return new Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true }).format(n);
+  }
+
   return n.toLocaleString('en-US');
 };
 

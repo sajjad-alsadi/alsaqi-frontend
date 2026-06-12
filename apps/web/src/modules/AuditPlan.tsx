@@ -18,6 +18,12 @@ import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 
+interface AuditPlanRow extends AuditPlan {
+  year?: number | string;
+  quarter?: string;
+  is_archived?: boolean;
+}
+
 const AuditPlanModule: React.FC = () => {
   const { t } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
@@ -32,7 +38,7 @@ const AuditPlanModule: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<string | number | null>(null);
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
-  const [planToArchive, setPlanToArchive] = useState<any | null>(null);
+  const [planToArchive, setPlanToArchive] = useState<AuditPlanRow | null>(null);
   const [archiving, setArchiving] = useState(false);
 
   const handleAddSuccess = () => {
@@ -50,7 +56,7 @@ const AuditPlanModule: React.FC = () => {
       fetchPlans({ page, pageSize, search: searchTerm });
       setIsDeleteModalOpen(false);
       setPlanToDelete(null);
-    } catch (err: any) {
+    } catch (err) {
       logger.error('delete failed', err);
       toast.error(t('errorOccurred'));
     }
@@ -74,8 +80,8 @@ const AuditPlanModule: React.FC = () => {
       fetchPlans({ page, pageSize, search: searchTerm });
       setIsArchiveModalOpen(false);
       setPlanToArchive(null);
-    } catch (err: any) {
-      toast.error(err.message || t('errorOccurred'));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('errorOccurred'));
     } finally {
       setArchiving(false);
     }
@@ -155,7 +161,7 @@ const AuditPlanModule: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border-soft)]">
-                {(Array.isArray(plans) ? plans : []).map((plan: any, idx: number) => (
+                {((Array.isArray(plans) ? plans : []) as unknown as AuditPlanRow[]).map((plan, idx) => (
                   <motion.tr key={plan.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04 }}
                     className={`hover:bg-[var(--color-primary)]/5 transition-colors group cursor-pointer ${plan.is_archived ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4 text-xs font-bold text-[var(--color-text-muted)] tracking-widest">{plan.plan_code || `#${formatNumber(plan.id)}`}</td>

@@ -45,14 +45,14 @@ export interface WebSocketClientConfig {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const INITIAL_RECONNECT_DELAY_MS = 1000;
-const RECONNECT_MULTIPLIER = 2;
-const MAX_RECONNECT_DELAY_MS = 30_000;
-const MAX_RECONNECT_ATTEMPTS = 10;
+export const INITIAL_RECONNECT_DELAY_MS = 1000;
+export const RECONNECT_MULTIPLIER = 2;
+export const MAX_RECONNECT_DELAY_MS = 30_000;
+export const MAX_RECONNECT_ATTEMPTS = 10;
 const POLLING_INTERVAL_MS = 30_000;
 const MAX_MISSED_NOTIFICATIONS = 100;
 /** Jitter factor: ±20% of calculated delay to prevent thundering herd */
-const JITTER_FACTOR = 0.2;
+export const JITTER_FACTOR = 0.2;
 /** Maximum disconnection duration (30 minutes) for notification sync eligibility */
 const MAX_SYNC_WINDOW_MS = 30 * 60 * 1000;
 

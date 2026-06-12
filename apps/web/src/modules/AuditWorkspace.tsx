@@ -29,6 +29,39 @@ import FindingForm from '../components/FindingForm';
 import { AuditStatus, RiskLevel } from '../constants';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
+import type { AuditFinding } from '../types';
+
+interface WorkspacePlan {
+  title?: string;
+  plan_code?: string;
+  department?: string;
+  status?: string;
+}
+
+interface WorkspaceTask {
+  id: string;
+  task_number?: string;
+  title?: string;
+  status?: string;
+  assigned_name?: string;
+  audit_type?: string;
+  period_from?: string;
+  period_to?: string;
+}
+
+interface WorkspaceFinding {
+  id: string | number;
+  title: string;
+  risk_level: string;
+  description?: string;
+  status: string;
+}
+
+interface WorkspaceEvidence {
+  id: string | number;
+  file_name?: string;
+  type?: string;
+}
 
 interface AuditWorkspaceProps {
   planId: string | number;
@@ -40,13 +73,13 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
   const { formatNumber } = useFormat();
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
-  const [plan, setPlan] = useState<any>(null);
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [findings, setFindings] = useState<any[]>([]);
-  const [evidence, setEvidence] = useState<any[]>([]);
-  const [activeTask, setActiveTask] = useState<any>(null);
+  const [plan, setPlan] = useState<WorkspacePlan | null>(null);
+  const [tasks, setTasks] = useState<WorkspaceTask[]>([]);
+  const [findings, setFindings] = useState<WorkspaceFinding[]>([]);
+  const [evidence, setEvidence] = useState<WorkspaceEvidence[]>([]);
+  const [activeTask, setActiveTask] = useState<WorkspaceTask | null>(null);
   const [isFindingModalOpen, setIsFindingModalOpen] = useState(false);
-  const [selectedFinding, setSelectedFinding] = useState<any>(null);
+  const [selectedFinding, setSelectedFinding] = useState<WorkspaceFinding | null>(null);
   const [currentFindingIndex, setCurrentFindingIndex] = useState(0);
 
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -103,7 +136,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
       await api.patch(`/audit-tasks/${taskId}/status`, { status: newStatus });
       toast.success(t('statusUpdated'));
       await fetchData();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(extractErrorMessage(error, t('errorOccurred')));
     } finally {
       setIsUpdatingStatus(false);
@@ -111,6 +144,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
   };
 
   const isRTL = i18n.language === 'ar';
+  const currentFinding = findings[currentFindingIndex];
 
   if (loading && !plan) {
     return (
@@ -137,7 +171,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge type="status" value={plan?.status} />
+          <Badge type="status" value={plan?.status ?? ''} />
           <div className="w-px h-6 bg-slate-200 mx-2" />
           <Button className="!py-2 !px-4 text-xs">
             {t('common.completeAudit')}
@@ -288,7 +322,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                       ) : (
                         <div className="relative overflow-hidden w-full bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)] rounded-2xl p-6 h-[200px]">
                           <AnimatePresence mode="wait">
-                            {findings.length > 0 && (
+                            {currentFinding && (
                               <motion.div
                                 key={currentFindingIndex}
                                 initial={{ opacity: 0, x: isRTL ? -20 : 20 }}
@@ -298,17 +332,17 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
                                 className="absolute inset-0 p-6 flex flex-col h-full"
                               >
                                 <div className="flex justify-between items-start mb-4">
-                                  <h5 className="font-bold text-[var(--color-text-main)] text-lg line-clamp-1">{findings[currentFindingIndex].title}</h5>
-                                  <Badge type="risk" value={findings[currentFindingIndex].risk_level} />
+                                  <h5 className="font-bold text-[var(--color-text-main)] text-lg line-clamp-1">{currentFinding.title}</h5>
+                                  <Badge type="risk" value={currentFinding.risk_level} />
                                 </div>
-                                <p className="text-sm text-[var(--color-text-muted)] line-clamp-3 mb-auto leading-relaxed">{findings[currentFindingIndex].description}</p>
+                                <p className="text-sm text-[var(--color-text-muted)] line-clamp-3 mb-auto leading-relaxed">{currentFinding.description}</p>
                                 <div className="flex flex-row items-center justify-between mt-4 border-t border-[var(--color-border-soft)]/50 pt-4">
                                   <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest bg-[var(--color-card)] px-3 py-1 rounded-full shadow-sm">
-                                    {findings[currentFindingIndex].status}
+                                    {currentFinding.status}
                                   </span>
                                   <button 
                                     onClick={() => {
-                                      setSelectedFinding(findings[currentFindingIndex]);
+                                      setSelectedFinding(currentFinding);
                                       setIsFindingModalOpen(true);
                                     }}
                                     className="text-[var(--color-primary)] text-xs font-bold uppercase tracking-widest hover:underline"
@@ -424,7 +458,7 @@ const AuditWorkspace: React.FC<AuditWorkspaceProps> = ({ planId, onClose }) => {
             fetchData();
           }}
           onCancel={() => setIsFindingModalOpen(false)}
-          initialData={selectedFinding ? { ...selectedFinding, audit_id: planId } : { audit_id: planId }}
+          initialData={(selectedFinding ? { ...selectedFinding, audit_id: planId } : { audit_id: planId }) as unknown as AuditFinding}
         />
       </Modal>
     </div>

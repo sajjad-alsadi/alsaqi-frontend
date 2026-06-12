@@ -3,7 +3,8 @@ import {
   ShieldCheck, Search, Filter, Plus, Edit2, Trash2, Eye, 
   Download, FileText, CheckCircle, AlertTriangle, XCircle, AlertCircle,
   LayoutGrid, List, BarChart3, ArrowRight, Calendar, User, Building,
-  Tag, Info, MoreHorizontal, ChevronRight, FileDown, Layers, Upload
+  Tag, Info, MoreHorizontal, ChevronRight, FileDown, Layers, Upload,
+  type LucideIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
@@ -15,6 +16,7 @@ import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
 import { Button } from '@/components/ui/button';
 import { useFileUploadValidation } from '../../hooks/useFileUploadValidation';
+import { TableSkeleton } from '../../components/SkeletonLoader';
 
 // --- Types ---
 type ComplianceStatus = 'compliant' | 'partial' | 'non_compliant' | 'under_review';
@@ -44,11 +46,22 @@ interface ComplianceItem {
   open_findings_count?: number;
 }
 
+interface ComplianceSummary {
+  total?: number;
+}
+
+interface UserOption {
+  id: string | number;
+  name?: string;
+  full_name?: string;
+  username?: string;
+}
+
 export default function ComplianceMatrix() {
   const { t } = useTranslation();
   const { formatNumber } = useFormat();
 
-  const statusConfig: Record<ComplianceStatus, { color: string, icon: any, label: string }> = {
+  const statusConfig: Record<ComplianceStatus, { color: string, icon: LucideIcon, label: string }> = {
     compliant: { color: 'emerald', icon: CheckCircle, label: t('complianceMatrix.compliant') },
     partial: { color: 'amber', icon: AlertTriangle, label: t('complianceMatrix.partial') },
     non_compliant: { color: 'rose', icon: XCircle, label: t('complianceMatrix.nonCompliant') },
@@ -71,8 +84,9 @@ export default function ComplianceMatrix() {
 
   const [activeTab, setActiveTab] = useState<'registry'|'matrix'|'dashboard'>('registry');
   const [items, setItems] = useState<ComplianceItem[]>([]);
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<ComplianceSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,7 +110,7 @@ export default function ComplianceMatrix() {
   const [filterStatus, setFilterStatus] = useState('');
 
   // Dropdown data
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserOption[]>([]);
   const { departments } = useDepartments();
 
   useEffect(() => {
@@ -117,8 +131,10 @@ export default function ComplianceMatrix() {
       if (filterStatus) q.append('compliance_status', filterStatus);
       const res = await api.get('/compliance?' + q.toString());
       if (res.data.success) setItems(res.data.data);
+      setError(null);
     } catch (e) {
       logger.error('Operation failed', e);
+      setError(t('complianceMatrix.loadError'));
       toast.error(t('complianceMatrix.loadError'));
     } finally {
       setLoading(false);
@@ -279,6 +295,14 @@ export default function ComplianceMatrix() {
         </div>
       </div>
 
+      {loading && items.length === 0 ? (
+        <TableSkeleton rows={6} cols={7} />
+      ) : error && items.length === 0 ? (
+        <div className="glass-card flex flex-col items-center justify-center py-20" role="alert">
+          <AlertCircle size={48} className="text-[var(--color-danger)] mb-4" />
+          <p className="text-[var(--color-text-muted)] font-bold">{error}</p>
+        </div>
+      ) : (
       <div className="glass-card">
         <div className="overflow-x-visible lg:overflow-x-auto">
           <table className="w-full text-start">
@@ -377,23 +401,18 @@ export default function ComplianceMatrix() {
               </AnimatePresence>
             </tbody>
           </table>
-          {(loading || items.length === 0) && (
+          {items.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-card)]/20">
-               {loading ? (
-                 <div className="animate-spin rounded-full h-10 w-10 border-4 border-[var(--color-primary)] border-t-transparent shadow-lg shadow-[var(--color-primary)]/20"></div>
-               ) : (
-                 <>
-                  <div className="bg-[var(--color-bg-main)] p-6 rounded-full border-2 border-dashed border-[var(--color-border-strong)] mb-4 animate-pulse">
-                    <ShieldCheck size={48} className="text-[var(--color-border-strong)]" />
-                  </div>
-                  <p className="text-[var(--color-text-muted)] font-bold">{t('complianceMatrix.noRecords')}</p>
-                  <p className="text-[var(--color-text-muted)] text-sm mt-1">{t('complianceMatrix.tryAdjustFilters')}</p>
-                 </>
-               )}
+              <div className="bg-[var(--color-bg-main)] p-6 rounded-full border-2 border-dashed border-[var(--color-border-strong)] mb-4 animate-pulse">
+                <ShieldCheck size={48} className="text-[var(--color-border-strong)]" />
+              </div>
+              <p className="text-[var(--color-text-muted)] font-bold">{t('complianceMatrix.noRecords')}</p>
+              <p className="text-[var(--color-text-muted)] text-sm mt-1">{t('complianceMatrix.tryAdjustFilters')}</p>
             </div>
           )}
         </div>
       </div>
+      )}
     </div>
   );
 
@@ -528,7 +547,7 @@ export default function ComplianceMatrix() {
                     <p className="text-xs text-[var(--color-text-muted)] font-bold mt-1">{t('complianceMatrix.overdueReviewsDesc')}</p>
                  </div>
                  <button className="text-[10px] font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] flex items-center gap-1 uppercase tracking-widest p-2 bg-[var(--color-primary)]/10 rounded-lg transition-colors">
-                    {t('complianceMatrix.viewAll')} <ChevronRight size={12} className="rotate-180" />
+                    {t('complianceMatrix.viewAll')} <ChevronRight size={12} className="ltr:rotate-180" />
                  </button>
               </div>
 
@@ -616,7 +635,7 @@ export default function ComplianceMatrix() {
               </div>
 
               <div className="mt-12 p-6 rounded-3xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 shadow-inner relative overflow-hidden group">
-                 <div className="absolute top-0 end-0 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
+                 <div className="absolute top-0 end-0 w-32 h-32 bg-[var(--color-primary)]/5 rounded-full -me-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
                  <div className="relative z-10">
                     <h4 className="text-sm font-bold text-[var(--color-primary)] mb-2">{t('complianceMatrix.maturityLevel')}</h4>
                     <div className="flex items-end gap-3 mb-4">
@@ -657,7 +676,7 @@ export default function ComplianceMatrix() {
         ].map(tab => (
           <button 
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as 'registry' | 'matrix' | 'dashboard')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer
               ${activeTab === tab.id ? 'bg-[var(--color-card)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
           >

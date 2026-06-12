@@ -115,7 +115,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
                   {formatNumber((role.permissions || []).length)} {t('userManagement.roles.permissionsLabel')}
                 </p>
               </div>
-              <ChevronRight size={14} className={selectedRoleId === role.id ? 'opacity-100 flex-shrink-0' : 'opacity-0'} />
+              <ChevronRight size={14} className={`rtl:rotate-180 ${selectedRoleId === role.id ? 'opacity-100 flex-shrink-0' : 'opacity-0'}`} />
             </button>
           )) : (
             <div className="p-4 text-center text-[var(--color-text-muted)] text-[10px]">{t('common.loading')}</div>

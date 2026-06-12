@@ -319,6 +319,17 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* Direction-aware variants so entry animations slide from the correct inline side in RTL */
+@keyframes slideInRightRTL {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeftRTL {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
@@ -343,6 +354,14 @@
 
 .animate-slide-in-left {
   animation: slideInLeft 0.3s ease-out forwards;
+}
+
+[dir="rtl"] .animate-slide-in-right {
+  animation-name: slideInRightRTL;
+}
+
+[dir="rtl"] .animate-slide-in-left {
+  animation-name: slideInLeftRTL;
 }
 
 .animate-scale-in {
@@ -410,7 +429,7 @@
 /* === Skip to Content Link === */
 .skip-link {
   position: absolute;
-  left: -9999px;
+  inset-inline-start: -9999px;
   top: auto;
   width: 1px;
   height: 1px;
@@ -420,7 +439,7 @@
 .skip-link:focus {
   position: fixed;
   top: 10px;
-  left: 10px;
+  inset-inline-start: 10px;
   width: auto;
   height: auto;
   z-index: 9999;

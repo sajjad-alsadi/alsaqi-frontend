@@ -36,6 +36,10 @@ RUN npm run build --workspace=@alsaqi/web
 # Stage 2: Serve with nginx
 FROM nginx:alpine AS runtime
 
+# Upstream API backend the frontend proxies /api/ to (override at build time).
+# Kept configurable so the container is not hard-coupled to a fixed backend host.
+ARG API_UPSTREAM=http://api:3000
+
 # Add non-root user (UID 1001, no home dir, no login shell)
 RUN adduser -D -H -u 1001 -s /sbin/nologin appuser
 
@@ -76,6 +80,11 @@ http {\n\
     # Disable server version in responses\n\
     server_tokens off;\n\
 \n\
+    # Rate limiting zone keyed on client address (Requirement 16)\n\
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;\n\
+    # Reject excess requests with HTTP 429 (Too Many Requests)\n\
+    limit_req_status 429;\n\
+\n\
     # Gzip compression\n\
     gzip on;\n\
     gzip_min_length 256;\n\
@@ -99,7 +108,7 @@ http {\n\
 
 # Create security headers snippet (included in server and location blocks that use add_header)
 RUN mkdir -p /etc/nginx/snippets && printf '\
-add_header Content-Security-Policy "default-src '"'"'self'"'"'; connect-src '"'"'self'"'"' wss:; frame-ancestors '"'"'none'"'"'" always;\n\
+add_header Content-Security-Policy "default-src '"'"'self'"'"'; script-src '"'"'self'"'"'; style-src '"'"'self'"'"' '"'"'unsafe-inline'"'"'; img-src '"'"'self'"'"' data:; font-src '"'"'self'"'"'; connect-src '"'"'self'"'"' wss:; frame-ancestors '"'"'none'"'"'; report-uri /api/csp-report" always;\n\
 add_header X-Content-Type-Options "nosniff" always;\n\
 add_header X-Frame-Options "DENY" always;\n\
 add_header Referrer-Policy "strict-origin-when-cross-origin" always;\n\
@@ -120,6 +129,22 @@ RUN printf 'server {\n\
     # SPA fallback - serve index.html for all routes\n\
     location / {\n\
         try_files $uri $uri/ /index.html;\n\
+    }\n\
+\n\
+    # API proxy with edge rate limiting (Requirement 16)\n\
+    # limit_req zone=api applies the 10r/s rate with a burst of 20;\n\
+    # excess requests are rejected (HTTP 429 via limit_req_status above).\n\
+    location /api/ {\n\
+        limit_req zone=api burst=20 nodelay;\n\
+        proxy_pass '"$API_UPSTREAM"';\n\
+        proxy_http_version 1.1;\n\
+        proxy_set_header Host $host;\n\
+        proxy_set_header X-Real-IP $remote_addr;\n\
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+        proxy_set_header X-Forwarded-Proto $scheme;\n\
+        proxy_set_header Upgrade $http_upgrade;\n\
+        proxy_set_header Connection "upgrade";\n\
+        include /etc/nginx/snippets/security-headers.conf;\n\
     }\n\
 \n\
     # Immutable cache for hashed static assets (Vite produces content-hashed filenames)\n\

@@ -4,6 +4,12 @@ import { Notification } from '../types';
 import { useUser } from './UserContext';
 import { useAuth } from './AuthContext';
 import logger from '../utils/logger';
+import {
+  createWebSocketClient,
+  type WebSocketClient,
+  type ConnectionState,
+} from '../api/ws/websocket-client';
+import { playNotificationSound } from '../utils/notificationSound';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -34,8 +40,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [isLoading, setIsLoading] = useState(false);
   const [latestNotification, setLatestNotification] = useState<Notification | null>(null);
   const [bellShake, setBellShake] = useState(false);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  /** Resilient WebSocket client (exponential backoff + jitter + HTTP polling fallback). */
+  const wsClientRef = useRef<WebSocketClient | null>(null);
+  /** Short-lived ws-token resolved once per connect cycle and exposed via getToken. */
+  const wsTokenRef = useRef<string | null>(null);
   const bellShakeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchNotifications = useCallback(async (reset = false) => {
@@ -78,96 +86,113 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [hasMore, isLoading, fetchNotifications]);
 
-  // WebSocket connection for real-time notifications
-  const connectWebSocket = useCallback(async () => {
+  /**
+   * Handle an incoming real-time notification from the WebSocket client.
+   * Maps the server payload onto the local Notification shape, prepends it,
+   * bumps the unread count, raises a toast, shakes the bell, and plays a sound.
+   */
+  const handleIncomingNotification = useCallback((payload: Notification) => {
+    const newNotif: Notification = {
+      ...payload,
+      is_read: false,
+      status: 'Unread',
+    };
+    setNotifications(prev => [newNotif, ...prev]);
+    setUnreadCount(prev => prev + 1);
+    setLatestNotification(newNotif);
+    setBellShake(true);
+    if (bellShakeTimeoutRef.current) clearTimeout(bellShakeTimeoutRef.current);
+    bellShakeTimeoutRef.current = setTimeout(() => setBellShake(false), 1000);
+    playNotificationSound();
+  }, []);
+
+  /**
+   * Establish the real-time connection using the resilient WebSocketClient.
+   * Resolves a short-lived ws-token once per connect cycle (preserving the
+   * existing /auth/ws-token flow) and exposes it through the client's getToken.
+   */
+  const connect = useCallback(async () => {
     if (!user) return;
+
+    // Tear down any existing client before opening a new connect cycle.
+    if (wsClientRef.current) {
+      wsClientRef.current.disconnect();
+      wsClientRef.current = null;
+    }
+
     try {
-      // Fetch a short-lived WebSocket token from the server
+      // Fetch a short-lived WebSocket token from the server (once per connect cycle).
       const res = await api.get('/auth/ws-token');
       const wsToken = res.data?.token;
       if (!wsToken) return;
+      wsTokenRef.current = wsToken;
 
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const env = (import.meta as any).env as Record<string, string> | undefined;
-      const wsBaseUrl = env?.['VITE_WS_URL'] || `${protocol}://${window.location.host}`;
-      const ws = new WebSocket(`${wsBaseUrl}?token=${wsToken}`);
+      const wsUrl = env?.['VITE_WS_URL'] || `${protocol}://${window.location.host}`;
+      const httpBaseUrl = env?.['VITE_API_URL'] || '/api';
 
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          if (msg.type === 'NEW_NOTIFICATION') {
-            const newNotif: Notification = {
-              ...msg.notification,
-              is_read: false,
-              status: 'Unread',
-            };
-            // Prepend to list
-            setNotifications(prev => [newNotif, ...prev]);
-            setUnreadCount(prev => prev + 1);
-            // Trigger toast
-            setLatestNotification(newNotif);
-            // Trigger bell shake
-            setBellShake(true);
-            if (bellShakeTimeoutRef.current) clearTimeout(bellShakeTimeoutRef.current);
-            bellShakeTimeoutRef.current = setTimeout(() => setBellShake(false), 1000);
-            // Play sound
-            playNotificationSound();
+      const client = createWebSocketClient({
+        wsUrl,
+        // Resolve once per connect cycle; reconnect attempts reuse the cached token.
+        getToken: () => wsTokenRef.current,
+        httpBaseUrl,
+        onNotification: (payload) => {
+          handleIncomingNotification(payload as unknown as Notification);
+        },
+        onStateChange: (state: ConnectionState) => {
+          if (import.meta.env.DEV) {
+            logger.debug('Notification WebSocket state:', state);
           }
-        } catch { /* ignore non-JSON */ }
-      };
+        },
+        onReconnectionFailed: () => {
+          if (import.meta.env.DEV) {
+            logger.warn('Notification WebSocket reconnection attempts exhausted');
+          }
+        },
+      });
 
-      ws.onclose = () => {
-        wsRef.current = null;
-        if (user) {
-          reconnectTimeoutRef.current = setTimeout(connectWebSocket, 5000);
-        }
-      };
+      wsClientRef.current = client;
+      client.connect();
+    } catch {
+      /* WebSocket not available or token fetch failed */
+    }
+  }, [user, handleIncomingNotification]);
 
-      ws.onerror = () => { ws.close(); };
-      wsRef.current = ws;
-    } catch { /* WebSocket not available or token fetch failed */ }
-  }, [user]);
+  // Store callbacks in refs so the connection effect can re-run on auth
+  // user-state changes using current references without listing every callback
+  // as a dependency (fixes the stale-closure effect-dependency bug).
+  const connectRef = useRef(connect);
+  const fetchNotificationsRef = useRef(fetchNotifications);
+  const fetchUnreadCountRef = useRef(fetchUnreadCount);
 
-  const playNotificationSound = () => {
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.setValueAtTime(660, ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.25);
-    } catch { /* audio not available */ }
-  };
+  useEffect(() => { connectRef.current = connect; }, [connect]);
+  useEffect(() => { fetchNotificationsRef.current = fetchNotifications; }, [fetchNotifications]);
+  useEffect(() => { fetchUnreadCountRef.current = fetchUnreadCount; }, [fetchUnreadCount]);
 
   useEffect(() => {
     if (isCheckingSession) return;
     if (user) {
-      fetchNotifications(true);
-      fetchUnreadCount();
-      connectWebSocket();
+      fetchNotificationsRef.current(true);
+      fetchUnreadCountRef.current();
+      connectRef.current();
 
-      const handleFocus = () => { fetchUnreadCount(); };
+      const handleFocus = () => { fetchUnreadCountRef.current(); };
       window.addEventListener('focus', handleFocus);
-      const interval = setInterval(fetchUnreadCount, 3 * 60 * 1000);
+      const interval = setInterval(() => fetchUnreadCountRef.current(), 3 * 60 * 1000);
 
       return () => {
         window.removeEventListener('focus', handleFocus);
         clearInterval(interval);
-        if (wsRef.current) { wsRef.current.onclose = null; wsRef.current.close(); wsRef.current = null; }
-        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+        if (wsClientRef.current) { wsClientRef.current.disconnect(); wsClientRef.current = null; }
         if (bellShakeTimeoutRef.current) clearTimeout(bellShakeTimeoutRef.current);
       };
     } else {
       setNotifications([]);
       setUnreadCount(0);
       setPage(1);
-      if (wsRef.current) { wsRef.current.onclose = null; wsRef.current.close(); wsRef.current = null; }
+      if (wsClientRef.current) { wsClientRef.current.disconnect(); wsClientRef.current = null; }
     }
   }, [user, isCheckingSession]);
 

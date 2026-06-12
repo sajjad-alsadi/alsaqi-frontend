@@ -13,33 +13,6 @@ import { FormField } from './ui/FormField';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 
-type RiskFormValues = {
-  risk_id: string;
-  description: string;
-  owner?: string;
-  source?: string;
-  early_warning?: string;
-  type?: string;
-  likelihood?: string;
-  impact?: string;
-  score?: number;
-  rating?: RiskLevel;
-  controls?: string;
-  control_assessment?: string;
-  mitigation?: string;
-  treatment_option?: string;
-  residual_likelihood?: string;
-  residual_impact?: string;
-  residual_score?: number;
-  residual_rating?: RiskLevel;
-  status?: string;
-  target_date?: string;
-  review_date?: string;
-  notes?: string;
-  entry_date?: string;
-  entered_by?: string;
-};
-
 interface RiskFormProps {
   onSuccess: () => void;
   onCancel: () => void;
@@ -76,13 +49,16 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
     entered_by: z.string().optional(),
   });
 
+  type RiskFormInput = z.input<typeof riskSchema>;
+  type RiskFormValues = z.output<typeof riskSchema>;
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<RiskFormValues>({
-    resolver: zodResolver(riskSchema) as any,
+  } = useForm<RiskFormInput, unknown, RiskFormValues>({
+    resolver: zodResolver(riskSchema),
     mode: 'onBlur',
     defaultValues: {
       risk_id: '',
@@ -93,7 +69,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
       type: AuditType.OPERATIONAL,
       likelihood: 'Low',
       impact: 'Low',
-      score: 0,
+      score: '0',
       rating: RiskLevel.LOW,
       controls: '',
       control_assessment: '',
@@ -101,7 +77,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
       treatment_option: '',
       residual_likelihood: 'Low',
       residual_impact: 'Low',
-      residual_score: 0,
+      residual_score: '0',
       residual_rating: RiskLevel.LOW,
       status: RiskStatus.ACTIVE,
       target_date: '',
@@ -114,13 +90,10 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
 
   useEffect(() => {
     if (initialData) {
-      const sanitized = { ...initialData };
-      Object.keys(sanitized).forEach((key) => {
-        if (sanitized[key as keyof RiskItem] === null) {
-          (sanitized as any)[key] = '';
-        }
-      });
-      reset(sanitized as any);
+      const sanitized = Object.fromEntries(
+        Object.entries(initialData).map(([key, value]) => [key, value === null ? '' : value]),
+      ) as Partial<RiskFormInput>;
+      reset(sanitized);
     }
   }, [initialData, reset]);
 
@@ -139,7 +112,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ onSuccess, onCancel, initialData })
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar pe-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar pe-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <FormField label={t('riskId')} error={errors.risk_id?.message} required>
           <Input {...register('risk_id')} placeholder="R-001" />

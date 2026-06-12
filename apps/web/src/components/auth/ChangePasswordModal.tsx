@@ -94,7 +94,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               type="button"
               tabIndex={-1}
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1"
             >
               {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -147,7 +147,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               type="button"
               tabIndex={-1}
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1"
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>

@@ -53,7 +53,12 @@ export interface ApiClient {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const DEFAULT_TIMEOUT = 30_000;
-const MAX_RETRY_ATTEMPTS = 3;
+/**
+ * Maximum number of attempts (initial try + retries) for a retriable request.
+ * Shared with the raw-axios retry interceptor in `httpClient.ts` so both retry
+ * paths stay bounded by the same limit.
+ */
+export const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 1000;
 const RETRY_MULTIPLIER = 2;
 
@@ -98,8 +103,14 @@ function isMajorMinorMatch(clientVersion: string, serverVersion: string): boolea
 
 /**
  * Check if an error is a network error or 5xx server error (retriable).
+ *
+ * Exported so the raw-axios retry interceptor in `httpClient.ts` (and its
+ * property tests) can reuse the exact same classification logic: an error is
+ * retriable if and only if it is an Axios network error (no response received)
+ * or carries a status in the 500–599 range. All other errors (including 4xx
+ * such as 401, which is handled by the refresh flow) are not retriable.
  */
-function isRetriableError(error: unknown): boolean {
+export function isRetriableError(error: unknown): boolean {
   if (!axios.isAxiosError(error)) return false;
 
   // Network errors (no response received)
@@ -139,8 +150,12 @@ let versionMismatchShown = false;
 /**
  * Display a non-dismissible notification when API version mismatch is detected.
  * This uses a DOM-based approach to avoid dependency on specific UI libraries.
+ *
+ * Exported (named) so the security behavior of the reload button — built with
+ * `document.createElement` + `addEventListener` rather than `innerHTML` with an
+ * inline `onclick` — can be unit tested directly without an HTTP round-trip.
  */
-function showVersionMismatchNotification(): void {
+export function showVersionMismatchNotification(): void {
   if (versionMismatchShown) return;
   versionMismatchShown = true;
 
@@ -170,22 +185,31 @@ function showVersionMismatchNotification(): void {
     text-align: center;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
   `;
-  dialog.innerHTML = `
-    <h2 style="margin: 0 0 12px; font-size: 18px; font-weight: 600;">تحديث متوفر</h2>
-    <p style="margin: 0 0 20px; color: #555; font-size: 14px;">
-      يوجد إصدار جديد من التطبيق. يرجى تحديث الصفحة للحصول على آخر التحديثات.
-    </p>
-    <button onclick="window.location.reload()" style="
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 10px 24px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-    ">تحديث الصفحة</button>
+  const heading = document.createElement('h2');
+  heading.style.cssText = 'margin: 0 0 12px; font-size: 18px; font-weight: 600;';
+  heading.textContent = 'تحديث متوفر';
+
+  const message = document.createElement('p');
+  message.style.cssText = 'margin: 0 0 20px; color: #555; font-size: 14px;';
+  message.textContent = 'يوجد إصدار جديد من التطبيق. يرجى تحديث الصفحة للحصول على آخر التحديثات.';
+
+  const reloadButton = document.createElement('button');
+  reloadButton.style.cssText = `
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
   `;
+  reloadButton.textContent = 'تحديث الصفحة';
+  reloadButton.addEventListener('click', () => window.location.reload());
+
+  dialog.appendChild(heading);
+  dialog.appendChild(message);
+  dialog.appendChild(reloadButton);
 
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
