@@ -1,0 +1,142 @@
+
+ RUN  v4.1.8 C:/Users/sajjad.abdulbaqi/Documents/GitHub/alsaqi
+
+ ❯ apps/web/src/modules/__tests__/loadingStates.test.tsx (0 test)
+ ❯ apps/web/src/modules/__tests__/Correspondence.test.tsx (0 test)
+ ❯ apps/web/src/components/__tests__/RequirePermission.test.tsx (3 tests | 3 failed) 36ms
+     × renders the loading fallback and does not redirect while permissions are loading 27ms
+     × renders children when loaded and the user can view the module 3ms
+     × redirects to /dashboard when loaded and the user cannot view the module 4ms
+ ❯ apps/web/src/components/Layout.test.tsx (16 tests | 16 failed) 8ms
+       × should render the sidebar with navigation items 3ms
+       × should render the main content area with children 0ms
+       × should render the brand name and logo 0ms
+       × should render user info in the header 0ms
+       × should render the notification bell 0ms
+       × should render the chatbot component 0ms
+       × should navigate when a menu item is clicked 0ms
+       × should highlight the active navigation item 0ms
+       × should call logout when logout button is clicked 0ms
+       × should have a skip-to-content link 0ms
+       × should have a main content area with role="main" 0ms
+       × should have navigation landmark with aria-label 0ms
+       × should have aria-expanded on mobile menu button 0ms
+       × should have aria-label on the sidebar collapse button 0ms
+       × should render theme toggle button 0ms
+       × should render language toggle button 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/src/modules/__tests__/Correspondence.test.tsx [ apps/web/src/modules/__tests__/Correspondence.test.tsx ]
+Error: Failed to resolve import "@/components/ui/button" from "apps/web/src/modules/Correspondence/CorrespondenceSystem.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/sajjad.abdulbaqi/Documents/GitHub/alsaqi/apps/web/src/modules/Correspondence/CorrespondenceSystem.tsx:31:23
+  20 |  import { useFormat } from "../../utils/formatService";
+  21 |  import { StatsSkeleton } from "../../components/SkeletonLoader";
+  22 |  import { Button } from "@/components/ui/button";
+     |                          ^
+  23 |  const CorrespondenceSystem = ({ language, userRole }) => {
+  24 |    const { t } = useTranslation();
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29079:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29076:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27199:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27257:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27225:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:28877:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22746:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/21]⎯
+
+ FAIL  apps/web/src/modules/__tests__/loadingStates.test.tsx [ apps/web/src/modules/__tests__/loadingStates.test.tsx ]
+Error: Failed to resolve import "@/components/ui/button" from "apps/web/src/modules/Dashboard/index.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/sajjad.abdulbaqi/Documents/GitHub/alsaqi/apps/web/src/modules/Dashboard/index.tsx:8:23
+  17 |  } from "lucide-react";
+  18 |  import { useTranslation } from "react-i18next";
+  19 |  import { Button } from "@/components/ui/button";
+     |                          ^
+  20 |  import { usePreferences } from "../../context/PreferencesContext";
+  21 |  import { useDashboardStats } from "../../api/hooks/useDashboardStats";
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29079:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29076:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27199:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27257:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27225:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:28877:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22746:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/21]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Rendering > should render the sidebar with navigation items
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Rendering > should render the main content area with children
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Rendering > should render the brand name and logo
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Rendering > should render user info in the header
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Rendering > should render the notification bell
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Rendering > should render the chatbot component
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Navigation > should navigate when a menu item is clicked
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Navigation > should highlight the active navigation item
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Navigation > should call logout when logout button is clicked
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Accessibility > should have a skip-to-content link
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Accessibility > should have a main content area with role="main"
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Accessibility > should have navigation landmark with aria-label
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Accessibility > should have aria-expanded on mobile menu button
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Accessibility > should have aria-label on the sidebar collapse button
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Theme and Language > should render theme toggle button
+ FAIL  apps/web/src/components/Layout.test.tsx > Layout Component Tests > Theme and Language > should render language toggle button
+TypeError: localStorage.getItem.mockReturnValue is not a function
+ ❯ apps/web/src/components/Layout.test.tsx:212:35
+    210|     vi.clearAllMocks();
+    211|     // Reset localStorage mock
+    212|     (localStorage.getItem as any).mockReturnValue('false');
+       |                                   ^
+    213|   });
+    214|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/21]⎯
+
+ FAIL  apps/web/src/components/__tests__/RequirePermission.test.tsx > RequirePermission > renders the loading fallback and does not redirect while permissions are loading
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ apps/web/src/components/__tests__/RequirePermission.test.tsx:55:47
+     53|     // Access is not evaluated, so canView is never called and no redi…
+     54|     expect(canView).not.toHaveBeenCalled();
+     55|     expect(screen.queryByTestId('dashboard')).not.toBeInTheDocument();
+       |                                               ^
+     56|     expect(screen.queryByTestId('protected-content')).not.toBeInTheDoc…
+     57|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/21]⎯
+
+ FAIL  apps/web/src/components/__tests__/RequirePermission.test.tsx > RequirePermission > renders children when loaded and the user can view the module
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ apps/web/src/components/__tests__/RequirePermission.test.tsx:69:51
+     67|     renderGuarded();
+     68|
+     69|     expect(screen.getByTestId('protected-content')).toBeInTheDocument(…
+       |                                                   ^
+     70|     expect(screen.queryByTestId('dashboard')).not.toBeInTheDocument();
+     71|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/21]⎯
+
+ FAIL  apps/web/src/components/__tests__/RequirePermission.test.tsx > RequirePermission > redirects to /dashboard when loaded and the user cannot view the module
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ apps/web/src/components/__tests__/RequirePermission.test.tsx:83:43
+     81|     renderGuarded();
+     82|
+     83|     expect(screen.getByTestId('dashboard')).toBeInTheDocument();
+       |                                           ^
+     84|     expect(screen.queryByTestId('protected-content')).not.toBeInTheDoc…
+     85|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/21]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  19 failed (19)
+   Start at  17:54:18
+   Duration  2.26s (transform 655ms, setup 0ms, import 1.05s, tests 44ms, environment 5.89s)
+
+DONE_EXIT=1 

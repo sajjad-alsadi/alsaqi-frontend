@@ -58,6 +58,96 @@ interface UserOption {
   username?: string;
 }
 
+// --- Static color lookup maps (Defect 1) ---
+// Complete, literal Tailwind class strings keyed by color token. Tailwind's
+// content scanner only matches whole literal classes in source, and `apps/web`
+// has no `tailwind.config`/safelist, so any string-interpolated color utility
+// (a token spliced into a `bg-...-50`-style class) is purged from production
+// CSS. These maps emit every class as a complete literal so the matrix tab,
+// dashboard tab, and registry status-change dropdown colors survive a
+// production build.
+
+// Matrix tab — tokens from statusConfig[*].color: emerald, amber, rose, slate.
+const STATUS_COLOR_CLASSES: Record<
+  string,
+  { header: string; icon: string; badge: string; accentBar: string }
+> = {
+  emerald: {
+    header: 'border-emerald-500/30',
+    icon: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    badge: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    accentBar: 'bg-emerald-400/50 group-hover:bg-emerald-500',
+  },
+  amber: {
+    header: 'border-amber-500/30',
+    icon: 'bg-amber-50 text-amber-600 border-amber-100',
+    badge: 'bg-amber-100 text-amber-700 border-amber-200',
+    accentBar: 'bg-amber-400/50 group-hover:bg-amber-500',
+  },
+  rose: {
+    header: 'border-rose-500/30',
+    icon: 'bg-rose-50 text-rose-600 border-rose-100',
+    badge: 'bg-rose-100 text-rose-700 border-rose-200',
+    accentBar: 'bg-rose-400/50 group-hover:bg-rose-500',
+  },
+  slate: {
+    header: 'border-slate-500/30',
+    icon: 'bg-slate-50 text-slate-600 border-slate-100',
+    badge: 'bg-slate-100 text-slate-700 border-slate-200',
+    accentBar: 'bg-slate-400/50 group-hover:bg-slate-500',
+  },
+};
+
+// Dashboard tab stat cards — tokens from stats[].color: primary, emerald, rose,
+// amber, slate.
+const STAT_COLOR_CLASSES: Record<
+  string,
+  { card: string; icon: string; value: string }
+> = {
+  primary: {
+    card: 'border-b-primary-500 shadow-primary-500/5 hover:shadow-primary-500/10',
+    icon: 'bg-primary-50 text-primary-600',
+    value: 'group-hover:text-primary-600',
+  },
+  emerald: {
+    card: 'border-b-emerald-500 shadow-emerald-500/5 hover:shadow-emerald-500/10',
+    icon: 'bg-emerald-50 text-emerald-600',
+    value: 'group-hover:text-emerald-600',
+  },
+  rose: {
+    card: 'border-b-rose-500 shadow-rose-500/5 hover:shadow-rose-500/10',
+    icon: 'bg-rose-50 text-rose-600',
+    value: 'group-hover:text-rose-600',
+  },
+  amber: {
+    card: 'border-b-amber-500 shadow-amber-500/5 hover:shadow-amber-500/10',
+    icon: 'bg-amber-50 text-amber-600',
+    value: 'group-hover:text-amber-600',
+  },
+  slate: {
+    card: 'border-b-slate-500 shadow-slate-500/5 hover:shadow-slate-500/10',
+    icon: 'bg-slate-50 text-slate-600',
+    value: 'group-hover:text-slate-600',
+  },
+};
+
+// Dashboard tab source distribution bars — tokens from sourceColors[*]:
+// primary, purple, emerald, orange.
+const SOURCE_COLOR_CLASSES: Record<string, { label: string; bar: string }> = {
+  primary: { label: 'text-primary-600', bar: 'from-primary-500 to-primary-600' },
+  purple: { label: 'text-purple-600', bar: 'from-purple-500 to-purple-600' },
+  emerald: { label: 'text-emerald-600', bar: 'from-emerald-500 to-emerald-600' },
+  orange: { label: 'text-orange-600', bar: 'from-orange-500 to-orange-600' },
+};
+
+// Registry tab status-change dropdown icons — tokens from statusConfig[*].color.
+const STATUS_ICON_CLASSES: Record<string, string> = {
+  emerald: 'text-emerald-500',
+  amber: 'text-amber-500',
+  rose: 'text-rose-500',
+  slate: 'text-slate-500',
+};
+
 export default function ComplianceMatrix() {
   const { t } = useTranslation();
   const { formatNumber } = useFormat();
@@ -95,7 +185,7 @@ export default function ComplianceMatrix() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Stable close handler to prevent unnecessary re-renders cascading through Modal → FocusTrap
-  const handleModalClose = useCallback(() => { setIsModalOpen(false); }, []);
+  const handleModalClose = useCallback(() => { setIsModalOpen(false); setFile(null); }, []);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ComplianceItem | null>(null);
   const [formData, setFormData] = useState<Partial<ComplianceItem>>({ compliance_status: 'under_review' });
@@ -107,6 +197,7 @@ export default function ComplianceMatrix() {
 
   // Filters
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterSource, setFilterSource] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
 
@@ -114,10 +205,17 @@ export default function ComplianceMatrix() {
   const [users, setUsers] = useState<UserOption[]>([]);
   const { departments } = useDepartments();
 
+  // Debounce the search input so a burst of keystrokes collapses into a single
+  // refetch once typing pauses (Defect 2). Filter selects stay direct deps below.
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   useEffect(() => {
     fetchItems();
     fetchSummary();
-  }, [filterSource, filterStatus, search]);
+  }, [filterSource, filterStatus, debouncedSearch]);
 
   useEffect(() => {
     fetchUsers();
@@ -152,16 +250,29 @@ export default function ComplianceMatrix() {
   };
 
   const fetchUsers = async () => {
+    // Defect 5: request the canonical user-list endpoint (`/users/list`) instead
+    // of the statistics summary endpoint (`/users/summary`). Wrap the primary
+    // attempt in its own try/catch so a primary-call failure still reaches the
+    // `/users` fallback (rather than being swallowed before the fallback runs).
     try {
-      const uRes = await api.get('/users/summary');
-      const summaryUsers = toList<UserOption>(uRes.data);
-      if (summaryUsers.length > 0) {
-        setUsers(summaryUsers);
-      } else {
-        const uResFallback = await api.get('/users');
-        setUsers(toList<UserOption>(uResFallback.data));
+      const uRes = await api.get('/users/list');
+      const listUsers = toList<UserOption>(uRes.data);
+      if (listUsers.length > 0) {
+        setUsers(listUsers);
+        return;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Defect 4: log instead of silently swallowing, matching the other fetchers.
+      logger.error('Operation failed', e);
+    }
+
+    // Fallback to `/users` — reachable even when the primary request failed.
+    try {
+      const uResFallback = await api.get('/users');
+      setUsers(toList<UserOption>(uResFallback.data));
+    } catch (e) {
+      logger.error('Operation failed', e);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -386,7 +497,7 @@ export default function ComplianceMatrix() {
                                  onClick={() => updateStatus(item.id, k as ComplianceStatus)}
                                  className="px-4 py-2 text-[11px] font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] text-end flex items-center gap-2 transition-colors"
                                >
-                                 <v.icon size={12} className={`text-${v.color}-500`} />
+                                 <v.icon size={12} className={STATUS_ICON_CLASSES[v.color]} />
                                  {v.label}
                                </button>
                              ))}
@@ -446,6 +557,7 @@ export default function ComplianceMatrix() {
             const stItems = items.filter(i => i.compliance_status === status);
             const config = statusConfig[status];
             const Icon = config.icon;
+            const statusColor = STATUS_COLOR_CLASSES[config.color] ?? STATUS_COLOR_CLASSES['slate']!;
             
             return (
               <motion.div 
@@ -455,14 +567,14 @@ export default function ComplianceMatrix() {
                 key={status} 
                 className="flex flex-col h-[600px] bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)]/50 overflow-hidden shadow-inner"
               >
-                <div className={`p-4 border-b-2 flex justify-between items-center bg-[var(--color-card)] border-${config.color}-500/30`}>
+                <div className={`p-4 border-b-2 flex justify-between items-center bg-[var(--color-card)] ${statusColor.header}`}>
                   <div className="flex items-center gap-2.5">
-                    <div className={`p-2 bg-${config.color}-50 rounded-lg text-${config.color}-600 border border-${config.color}-100`}>
+                    <div className={`p-2 rounded-lg border ${statusColor.icon}`}>
                       <Icon size={16} strokeWidth={3} />
                     </div>
                     <span className="font-bold text-[var(--color-text-main)] text-[11px] uppercase tracking-wider">{config.label}</span>
                   </div>
-                  <span className={`bg-${config.color}-100 text-${config.color}-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono border border-${config.color}-200`}>
+                  <span className={`${statusColor.badge} px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono border`}>
                     {formatNumber(stItems.length)}
                   </span>
                 </div>
@@ -475,7 +587,7 @@ export default function ComplianceMatrix() {
                       onClick={() => { setSelectedItem(item); setFormData(item); setIsViewModalOpen(true); }}
                       className="group p-4 bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm hover:shadow-md hover:border-[var(--color-primary)]/30 transition-all cursor-pointer relative overflow-hidden"
                     >
-                      <div className={`absolute top-0 end-0 w-1 h-full bg-${config.color}-400/50 group-hover:bg-${config.color}-500 transition-colors`}></div>
+                      <div className={`absolute top-0 end-0 w-1 h-full ${statusColor.accentBar} transition-colors`}></div>
                       <div className="text-[9px] font-bold font-mono text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] mb-1 leading-none">{item.ref_number}</div>
                       <div className="font-bold text-[var(--color-text-main)] text-xs mb-2 leading-snug truncate-2-lines">{item.title}</div>
                       
@@ -521,23 +633,26 @@ export default function ComplianceMatrix() {
     return (
       <div className="space-y-8 pb-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-           {stats.map((stat, idx) => (
+           {stats.map((stat, idx) => {
+             const statColor = STAT_COLOR_CLASSES[stat.color] ?? STAT_COLOR_CLASSES['slate']!;
+             return (
              <motion.div 
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className={`glass-card p-5 border-b-4 border-b-${stat.color}-500 shadow-xl shadow-${stat.color}-500/5 hover:shadow-${stat.color}-500/10 transition-all group`}
+              className={`glass-card p-5 border-b-4 shadow-xl ${statColor.card} transition-all group`}
              >
                 <div className="flex justify-between items-start mb-3">
-                   <div className={`p-2 rounded-xl bg-${stat.color}-50 text-${stat.color}-600 group-hover:scale-110 transition-transform`}>
+                   <div className={`p-2 rounded-xl ${statColor.icon} group-hover:scale-110 transition-transform`}>
                       <stat.icon size={20} />
                    </div>
                    <span className="text-[10px] font-bold text-[var(--color-text-muted)] group-hover:text-[var(--color-text-muted)] uppercase tracking-widest">{stat.label}</span>
                 </div>
-                <div className={`text-3xl font-bold text-[var(--color-text-main)] group-hover:text-${stat.color}-600 transition-colors`}>{formatNumber(stat.value)}</div>
+                <div className={`text-3xl font-bold text-[var(--color-text-main)] ${statColor.value} transition-colors`}>{formatNumber(stat.value)}</div>
              </motion.div>
-           ))}
+           );
+           })}
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -606,6 +721,7 @@ export default function ComplianceMatrix() {
                   const count = items.filter(i => i.source_type === type).length;
                   const pct = total === 0 ? 0 : Math.round((count / total) * 100);
                   const color = sourceColors[type];
+                  const sourceColor = SOURCE_COLOR_CLASSES[color] ?? SOURCE_COLOR_CLASSES['primary']!;
                   
                   return (
                     <motion.div 
@@ -617,7 +733,7 @@ export default function ComplianceMatrix() {
                       <div className="flex justify-between items-end mb-2">
                         <div>
                           <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">{label}</span>
-                          <span className={`text-xs font-bold text-${color}-600`}>{formatNumber(pct)}% {t('complianceMatrix.ofTotal')}</span>
+                          <span className={`text-xs font-bold ${sourceColor.label}`}>{formatNumber(pct)}% {t('complianceMatrix.ofTotal')}</span>
                         </div>
                         <div className="text-end">
                           <span className="text-xl font-bold text-[var(--color-text-main)] leading-none">{formatNumber(count)}</span>
@@ -629,7 +745,7 @@ export default function ComplianceMatrix() {
                           initial={{ width: 0 }}
                           whileInView={{ width: `${pct}%` }}
                           transition={{ duration: 1, ease: 'easeOut' }}
-                          className={`h-full rounded-full bg-gradient-to-r from-${color}-500 to-${color}-600 shadow-sm`}
+                          className={`h-full rounded-full bg-gradient-to-r ${sourceColor.bar} shadow-sm`}
                         ></motion.div>
                       </div>
                     </motion.div>
@@ -756,9 +872,7 @@ export default function ComplianceMatrix() {
                     </div>
                   </div>
                </div>
-            </div>
 
-            <div className="space-y-6">
                <div className="p-6 bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)] shadow-inner">
                   <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <ShieldCheck size={14} /> {t('complianceMatrix.evalMatch')}
@@ -773,7 +887,7 @@ export default function ComplianceMatrix() {
                        </div>
                        <div>
                           <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 px-1">{t('complianceMatrix.maturityScoreLabel')}</label>
-                          <input type="number" min="0" max="100" className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.maturity_score || ''} onChange={e => setFormData({...formData, maturity_score: parseInt(e.target.value)})} />
+                          <input type="number" min="0" max="100" className="w-full bg-[var(--color-card)] px-4 py-3 rounded-2xl border border-[var(--color-border-soft)] text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" value={formData.maturity_score || ''} onChange={e => { const raw = e.target.value; const parsed = raw === '' ? null : Number(raw); setFormData({...formData, maturity_score: Number.isNaN(parsed as number) ? null : parsed}); }} />
                        </div>
                     </div>
                     <div>
@@ -782,7 +896,9 @@ export default function ComplianceMatrix() {
                     </div>
                   </div>
                </div>
+            </div>
 
+            <div className="space-y-6">
                <div className="p-6 bg-[var(--color-bg-soft)]/50 rounded-3xl border border-[var(--color-border-soft)] shadow-inner">
                   <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-[var(--color-border-soft)] pb-2">
                      <Calendar size={14} /> {t('complianceMatrix.importantDates')}
@@ -838,7 +954,7 @@ export default function ComplianceMatrix() {
           </div>
           
           <div className="flex justify-end items-center gap-4 mt-12 bg-[var(--color-card)]/50 backdrop-blur-md p-6 -mx-6 -mb-6 border-t border-[var(--color-border-soft)]">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 py-3 text-[var(--color-text-muted)] font-bold text-xs uppercase tracking-widest hover:text-[var(--color-text-main)] transition-colors">{t('complianceMatrix.cancel')}</button>
+            <button type="button" onClick={handleModalClose} className="px-8 py-3 text-[var(--color-text-muted)] font-bold text-xs uppercase tracking-widest hover:text-[var(--color-text-main)] transition-colors">{t('complianceMatrix.cancel')}</button>
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
