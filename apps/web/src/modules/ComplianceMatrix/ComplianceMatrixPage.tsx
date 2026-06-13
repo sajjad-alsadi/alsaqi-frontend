@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import api from '../../api/httpClient';
 import { toList, toData } from '../../api/utils/envelope';
 import Modal from '../../components/Modal';
-import { useDepartments } from '../../hooks/useDepartments';
+import { useDepartments } from '../../api/hooks/useDepartments';
 import { useFormat } from '../../utils/formatService';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';

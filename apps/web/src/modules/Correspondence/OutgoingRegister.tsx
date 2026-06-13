@@ -26,6 +26,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import Pagination from '../../components/Pagination';
 import { UserRole } from '../../constants';
 import logger from '../../utils/logger';
+import { buildCsv, downloadCsv } from '../../utils/csvExport';
 import Portal from '../../components/Portal';
 import { Button } from '@/components/ui/button';
 
@@ -100,6 +101,29 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
 
   const handlePreview = (fileUrl: string) => {
     setPreviewUrl(fileUrl);
+  };
+
+  const handleExport = () => {
+    const headers = [
+      t('correspondence.seqNumber'),
+      t('correspondence.date'),
+      t('correspondence.recipient'),
+      t('correspondence.subject'),
+      t('correspondence.classification'),
+      t('correspondence.sendingMethod')
+    ];
+
+    const csvData = items.map(item => [
+      item.sequence_number,
+      item.letter_date,
+      item.recipient_entity,
+      item.subject,
+      item.classification,
+      item.sending_method
+    ]);
+
+    const csv = buildCsv(headers, csvData);
+    downloadCsv(`outgoing_correspondence_${new Date().toISOString().split('T')[0]}.csv`, csv);
   };
 
   const filteredItems = items;
@@ -192,6 +216,16 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+
+        <Button 
+          onClick={handleExport}
+          variant="outline"
+          className="!py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm bg-[var(--color-card)]"
+          title={t('correspondence.exportToCSV')}
+        >
+          <Download size={18} />
+          {t('correspondence.export')}
+        </Button>
 
         {userRole !== UserRole.VIEWER && (
           <Button 

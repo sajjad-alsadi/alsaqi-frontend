@@ -37,9 +37,7 @@
     "src/**/*.test.tsx",
     "src/**/__tests__/**",
     "src/test/**",
-    "src/permissions/seeder.ts",
-    "src/permissions/__tests__/seeder.property.test.ts",
-    "src/components/FindingCard.test.tsx"
+    "src/permissions/seeder.ts"
   ],
   "references": [
     {

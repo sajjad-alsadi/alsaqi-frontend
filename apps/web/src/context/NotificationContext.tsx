@@ -30,6 +30,34 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+/**
+ * Authoritative unread count derived from a notification list.
+ *
+ * This is the single source of truth for "how many notifications are unread":
+ * the invariant `unreadCount === recomputeUnread(notifications)` must hold after
+ * every operation. (Requirement 8.5)
+ *
+ * Pure: depends only on its argument and has no side effects.
+ */
+export function recomputeUnread(list: Notification[]): number {
+  return list.reduce((count, n) => (n.is_read ? count : count + 1), 0);
+}
+
+/**
+ * Pure unread-counter delta between two notification lists.
+ *
+ * Returns the signed change in unread count when transitioning from `prev` to
+ * `next` (`next` unread total minus `prev` unread total). Computing the delta as
+ * a pure function of the two lists lets callers derive the change *before* and
+ * *outside* of any React state-updater callback, which keeps updates idempotent
+ * under React StrictMode double-invocation. (Requirements 8.3, 8.4)
+ *
+ * Pure: depends only on its arguments and has no side effects.
+ */
+export function unreadDelta(prev: Notification[], next: Notification[]): number {
+  return recomputeUnread(next) - recomputeUnread(prev);
+}
+
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useUser();
   const { isCheckingSession } = useAuth();
@@ -42,8 +70,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [bellShake, setBellShake] = useState(false);
   /** Resilient WebSocket client (exponential backoff + jitter + HTTP polling fallback). */
   const wsClientRef = useRef<WebSocketClient | null>(null);
-  /** Short-lived ws-token resolved once per connect cycle and exposed via getToken. */
-  const wsTokenRef = useRef<string | null>(null);
   const bellShakeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchNotifications = useCallback(async (reset = false) => {
@@ -108,8 +134,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   /**
    * Establish the real-time connection using the resilient WebSocketClient.
-   * Resolves a short-lived ws-token once per connect cycle (preserving the
-   * existing /auth/ws-token flow) and exposes it through the client's getToken.
+   * A fresh short-lived ws-token is fetched per connection attempt via the
+   * client's async `getToken` (Requirement 7.1, 7.2) — no token is cached across
+   * attempts, so each reconnect uses a newly issued, non-expired token.
    */
   const connect = useCallback(async () => {
     if (!user) return;
@@ -121,12 +148,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
 
     try {
-      // Fetch a short-lived WebSocket token from the server (once per connect cycle).
-      const res = await api.get('/auth/ws-token');
-      const wsToken = res.data?.token;
-      if (!wsToken) return;
-      wsTokenRef.current = wsToken;
-
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const env = (import.meta as any).env as Record<string, string> | undefined;
@@ -135,8 +156,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       const client = createWebSocketClient({
         wsUrl,
-        // Resolve once per connect cycle; reconnect attempts reuse the cached token.
-        getToken: () => wsTokenRef.current,
+        // Fetch a FRESH short-lived ws-token on every connection attempt (no caching).
+        getToken: async () => {
+          try {
+            const res = await api.get('/auth/ws-token');
+            return res.data?.token ?? null;
+          } catch {
+            return null;
+          }
+        },
         httpBaseUrl,
         onNotification: (payload) => {
           handleIncomingNotification(payload as unknown as Notification);
@@ -156,7 +184,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       wsClientRef.current = client;
       client.connect();
     } catch {
-      /* WebSocket not available or token fetch failed */
+      /* WebSocket not available */
     }
   }, [user, handleIncomingNotification]);
 
@@ -200,8 +228,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     try {
       await api.put(`/notifications/${id}/read`);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' } : n));
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      // Compute the next list and the unread delta OUTSIDE the state-updater path
+      // (no setUnreadCount inside the setNotifications callback) so the change is
+      // pure and React StrictMode double-invocation is harmless (Req 8.3, 8.4).
+      // The delta is non-zero only when the target was actually unread (Req 8.1, 8.2).
+      const next = notifications.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' as const } : n);
+      const delta = unreadDelta(notifications, next);
+      if (delta !== 0) setUnreadCount(c => Math.max(0, c + delta));
+      setNotifications(next);
     } catch (err) { logger.error('Failed to mark notification as read:', err); }
   };
 
@@ -218,13 +252,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     try {
       await api.delete(`/notifications/${id}`);
-      setNotifications(prev => {
-        const n = prev.find(x => x.id === id);
-        if (n && !n.is_read && n.status !== 'Read') {
-          setUnreadCount(c => Math.max(0, c - 1));
-        }
-        return prev.filter(x => x.id !== id);
-      });
+      // Compute the next list and the unread delta BEFORE calling the state
+      // updater (not inside the setNotifications callback), so the update is
+      // StrictMode-safe and idempotent (Req 8.3, 8.4).
+      const next = notifications.filter(x => x.id !== id);
+      const delta = unreadDelta(notifications, next);
+      if (delta !== 0) setUnreadCount(c => Math.max(0, c + delta));
+      setNotifications(next);
     } catch (err) { logger.error('Failed to dismiss notification:', err); }
   };
 

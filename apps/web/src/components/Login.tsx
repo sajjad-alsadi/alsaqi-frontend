@@ -4,6 +4,8 @@ import { usePreferences } from '../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { ResetStatus, Language } from '../constants';
+import { api } from '../api';
+import { mapAuthError, type AuthErrorCode } from '../api/modules/auth';
 
 import ChangePasswordModal from './auth/ChangePasswordModal';
 import ContactAdminModal from './auth/ContactAdminModal';
@@ -51,6 +53,30 @@ const Login: React.FC = () => {
     return;
   };
 
+  /**
+   * Map a stable {@link AuthErrorCode} to a localized, user-facing message.
+   *
+   * Error handling keys off the code returned by `mapAuthError` (derived from
+   * HTTP status + server `error.code`) rather than the server's message text,
+   * so wording changes on the backend never break the UI (Req 4.4, 4.5).
+   */
+  const authErrorMessage = (code: AuthErrorCode): string => {
+    switch (code) {
+      case 'invalid_credentials':
+        return t('auth.invalidCredentials');
+      case 'account_locked':
+        return t('auth.accountLocked');
+      case 'rate_limited':
+        return t('auth.tooManyAttempts');
+      case 'network_error':
+        return t('networkError', 'Network error');
+      case 'server_error':
+        return t('serverError', 'Server error');
+      default:
+        return t('auth.loginFailed');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Don't process login if change password modal is open
@@ -60,24 +86,13 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Use fetch for login because the response shape varies (normal login vs 2FA required)
-      const loginRes = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ usernameOrEmail: username, password, rememberMe }),
-      });
-      const loginData = await loginRes.json();
-      if (!loginRes.ok) {
-        const errorData = loginData?.error;
-        const errorMessage = typeof errorData === 'object' ? errorData.message : (errorData || 'Login failed');
-        throw new Error(errorMessage);
-      }
-      const result = loginData;
-      
+      // Route login through the consolidated Auth_Module (targets /v1/auth/login)
+      // instead of a raw fetch, so all callers share one validated auth flow (Req 4.1–4.3).
+      const result = await api.auth.login({ usernameOrEmail: username, password, rememberMe });
+
       // Handle 2FA required response
       if (result && result.requires2FA) {
-        setTwoFATempToken(result.tempToken);
+        setTwoFATempToken(result.tempToken ?? null);
         setShow2FA(true);
         setTwoFAError('');
         setTwoFACode('');
@@ -90,25 +105,18 @@ const Login: React.FC = () => {
         if (result.user.requires_password_change) {
           setError('');
           setChangeError('');
-          setPendingToken(result.token);
+          setPendingToken(result.token ?? result.accessToken ?? null);
           setPendingUser(result.user);
           setShowChangeModal(true);
           setLoading(false);
           return;
         }
-        login(result.user, result.token || 'authenticated'); 
+        login(result.user, result.token || result.accessToken || 'authenticated');
       }
-    } catch (err: any) {
-      const message = err.message || err.toString();
-      if (message === 'Invalid credentials') {
-        setError(t('auth.invalidCredentials'));
-      } else if (message === 'Account suspended') {
-        setError(t('auth.accountSuspended'));
-      } else if (message === 'Account locked') {
-        setError(t('auth.accountLocked'));
-      } else {
-        setError(message || t('auth.loginFailed'));
-      }
+    } catch (err: unknown) {
+      // Classify the error to a stable code, then localize it. Never branch on
+      // server message text (Req 4.4, 4.5).
+      setError(authErrorMessage(mapAuthError(err).code));
     } finally {
       setLoading(false);
     }

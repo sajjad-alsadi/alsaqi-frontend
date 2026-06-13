@@ -43,6 +43,7 @@ vi.mock('../../api', () => ({
       list: vi.fn(),
     },
   },
+  useAuditPlans: (...args: any[]) => mockUseAuditPlans(...args),
 }));
 
 vi.mock('../../api/httpClient', () => ({
@@ -54,10 +55,9 @@ vi.mock('../../api/httpClient', () => ({
   },
 }));
 
+// AuditPlan now consumes the canonical Query_Hook re-exported from `../api`
+// (mocked above). `mockUseAuditPlans` drives that hook's return value.
 const mockUseAuditPlans = vi.fn();
-vi.mock('../../hooks/useAuditPlans', () => ({
-  useAuditPlans: (...args: any[]) => mockUseAuditPlans(...args),
-}));
 
 const mockUseDebounce = vi.fn((value: string) => value);
 vi.mock('../../hooks/useDebounce', () => ({
@@ -110,6 +110,7 @@ vi.mock('lucide-react', () => {
   return {
     Plus: icon, Search: icon, Filter: icon, MoreVertical: icon,
     Calendar: icon, User: icon, Tag: icon, Edit: icon, Trash2: icon,
+    Archive: icon,
   };
 });
 
@@ -145,17 +146,23 @@ function createMockPlans(count: number = 3) {
 }
 
 function setupMock(plans: any[] = [], pagination?: any) {
+  const meta = pagination || {
+    total: plans.length,
+    totalPages: 1,
+    page: 1,
+    pageSize: 15,
+  };
   mockUseAuditPlans.mockReturnValue({
-    plans,
-    loading: false,
-    error: null,
-    pagination: pagination || {
-      total: plans.length,
-      totalPages: 1,
-      page: 1,
-      limit: 15,
+    data: {
+      items: plans,
+      total: meta.total,
+      totalPages: meta.totalPages,
+      page: meta.page ?? 1,
+      pageSize: meta.pageSize ?? meta.limit ?? 15,
     },
-    fetchPlans: vi.fn(),
+    isLoading: false,
+    isFetching: false,
+    refetch: vi.fn(),
   });
 }
 
@@ -211,11 +218,10 @@ describe('AuditPlan Module', () => {
 
   it('shows loading state while fetching plans', () => {
     mockUseAuditPlans.mockReturnValue({
-      plans: [],
-      loading: true,
-      error: null,
-      pagination: { total: 0, totalPages: 0, page: 1, limit: 15 },
-      fetchPlans: vi.fn(),
+      data: { items: [], total: 0, totalPages: 0, page: 1, pageSize: 15 },
+      isLoading: true,
+      isFetching: false,
+      refetch: vi.fn(),
     });
 
     render(<AuditPlanModule />);

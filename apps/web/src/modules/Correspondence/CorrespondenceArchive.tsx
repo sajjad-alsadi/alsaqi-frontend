@@ -15,9 +15,11 @@ import api from '../../api/httpClient';
 import { toList, toPagination } from '../../api/utils/envelope';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
+import { buildCsv, downloadCsv } from '../../utils/csvExport';
 import Pagination from '../../components/Pagination';
 import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
+import { Button } from '@/components/ui/button';
 
 interface CorrespondenceArchiveProps {
   language: 'ar' | 'en';
@@ -59,6 +61,27 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExport = () => {
+    const headers = [
+      t('correspondence.type'),
+      t('correspondence.seqNumber'),
+      t('correspondence.subject'),
+      t('correspondence.entity'),
+      t('correspondence.archiveDate')
+    ];
+
+    const csvData = items.map(item => [
+      item.type,
+      item.sequence_number,
+      item.subject,
+      item.entity,
+      item.updated_at || ''
+    ]);
+
+    const csv = buildCsv(headers, csvData);
+    downloadCsv(`correspondence_archive_${new Date().toISOString().split('T')[0]}.csv`, csv);
   };
 
   return (
@@ -107,6 +130,16 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
             {t('correspondence.outgoing')}
           </button>
         </div>
+
+        <Button 
+          onClick={handleExport}
+          variant="outline"
+          className="!py-2.5 flex items-center justify-center gap-2 whitespace-nowrap text-sm bg-[var(--color-card)]"
+          title={t('correspondence.exportToCSV')}
+        >
+          <Download size={18} />
+          {t('correspondence.export')}
+        </Button>
       </div>
 
       <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] overflow-hidden shadow-sm">

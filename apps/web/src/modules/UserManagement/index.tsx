@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useUserManagement } from '../../api/hooks/useUserManagement';
 import { api } from '../../api';
 import { ROLES } from '../../permissions';
 import { UserManagementTab, AccessScope } from '../../constants';

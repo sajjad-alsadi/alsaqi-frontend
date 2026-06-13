@@ -93,7 +93,7 @@ function deferred<T>() {
 // 1. Dashboard (StatsSkeleton, hook-driven)
 // ===========================================================================
 const mockUseDashboardStats = vi.fn();
-vi.mock('../../hooks/useDashboardStats', () => ({
+vi.mock('../../api/hooks/useDashboardStats', () => ({
   useDashboardStats: (...a: any[]) => mockUseDashboardStats(...a),
 }));
 vi.mock('../../context/PreferencesContext', () => ({
@@ -161,7 +161,7 @@ describe('Dashboard loading states (Req 5.1, 5.2, 5.3)', () => {
 // ===========================================================================
 // 2. ComplianceMatrix (TableSkeleton, api-driven)
 // ===========================================================================
-vi.mock('../../hooks/useDepartments', () => ({
+vi.mock('../../api/hooks/useDepartments', () => ({
   useDepartments: () => ({ departments: [{ id: '1', name: 'Finance' }] }),
 }));
 vi.mock('../../hooks/useFileUploadValidation', () => ({

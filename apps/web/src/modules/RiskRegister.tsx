@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { RiskItem } from '../types';
 import { Plus, Search, ShieldAlert, Activity, ArrowRight, Info, Upload, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useRisks } from '../hooks/useRisks';
+import { useRisks } from '../api/hooks/useRisks';
 import { api } from '../api';
 import InteractiveIcon from '../components/InteractiveIcon';
 import { useFormat } from '../utils/formatService';

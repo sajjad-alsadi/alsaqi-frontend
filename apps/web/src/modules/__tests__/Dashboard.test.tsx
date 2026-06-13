@@ -19,7 +19,7 @@ vi.mock('../../utils/formatService', () => ({
 }));
 
 const mockUseDashboardStats = vi.fn();
-vi.mock('../../hooks/useDashboardStats', () => ({
+vi.mock('../../api/hooks/useDashboardStats', () => ({
   useDashboardStats: (...args: any[]) => mockUseDashboardStats(...args),
 }));
 

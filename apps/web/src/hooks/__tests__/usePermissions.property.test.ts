@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook as baseRenderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import fc from 'fast-check';
 import { usePermissions } from '../usePermissions';
+import { PermissionsProvider } from '../../context/PermissionsContext';
 import { UserRole } from '../../constants';
-import { DEFAULT_PERMISSIONS, MODULES, Module, Role } from '../../permissions';
+import { DEFAULT_PERMISSIONS, MODULES, Module } from '../../permissions';
 import { PermissionAction, UserPermissionSet } from '../../permissions/types';
 
 /**
@@ -35,6 +38,29 @@ vi.mock('../../api/httpClient', () => ({
     get: (...args: any[]) => mockApiGet(...args),
   },
 }));
+
+/**
+ * After the single-source-of-truth refactor (Req 11), `usePermissions` reads from
+ * {@link PermissionsProvider}. This wrapper supplies a fresh, isolated QueryClient +
+ * PermissionsProvider per mount so each property iteration resolves from the
+ * provider's single shared fetch.
+ */
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
+  const [client] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false, gcTime: 0, staleTime: 0 } },
+      })
+  );
+  return React.createElement(
+    QueryClientProvider,
+    { client },
+    React.createElement(PermissionsProvider, null, children)
+  );
+};
+
+const renderHook: typeof baseRenderHook = ((cb: any, opts?: any) =>
+  baseRenderHook(cb, { wrapper: Wrapper, ...opts })) as typeof baseRenderHook;
 
 // ─── Arbitraries ─────────────────────────────────────────────────────────────
 
@@ -130,14 +156,29 @@ beforeEach(() => {
 
 describe('Property 11: Frontend Fallback Correctness', () => {
   /**
-   * When the API is unavailable (network error, timeout, or 5xx),
-   * the hook's hasPermission results SHALL match the Static_Matrix
-   * (DEFAULT_PERMISSIONS) for the user's role.
+   * Narrowing fallback (Requirement 9 — SECURITY-002, no privilege escalation).
    *
-   * **Validates: Requirements 6.2, 6.5**
+   * When the API is unavailable (network error, timeout, or 5xx) AND there is no
+   * confirmed permission set cached, the hook SHALL fall back to the READ-ONLY
+   * permission set (see {@link READ_ONLY_PERMISSION_SET} in
+   * `src/permissions/fallback.ts`). That set grants only `View` on every module
+   * in MODULES and no write actions, so the fallback can never widen access
+   * beyond what the server last confirmed.
+   *
+   * Therefore, for any non-Admin role with no confirmed cache:
+   *   - hasPermission(module, 'View')   === true  for every module
+   *   - hasPermission(module, writeAction) === false for Create/Edit/Delete/Approve
+   *
+   * This replaces the superseded full static-matrix (DEFAULT_PERMISSIONS)
+   * expectation from the old Requirements 6.2/6.5 behavior.
+   *
+   * **Validates: Requirement 9 (narrowing read-only fallback, no privilege escalation)**
    */
 
-  it('when API fails with network error, permissions match Static_Matrix for any non-Admin role and module/action', async () => {
+  /** Read-only fallback grants ONLY 'View'; everything else is a write action denied on failure. */
+  const expectedReadOnly = (action: PermissionAction) => action === 'View';
+
+  it('when API fails with network error and no confirmed cache, fallback is READ-ONLY (View granted, writes denied) for any non-Admin role', async () => {
     await fc.assert(
       fc.asyncProperty(
         nonAdminRoleArb,
@@ -145,7 +186,7 @@ describe('Property 11: Frontend Fallback Correctness', () => {
         actionArb,
         userIdArb,
         async (role, module, action, userId) => {
-          // Reset state
+          // Reset state — no confirmed permission set is cached
           store = {};
           mockApiGet.mockReset();
           mockApiGet.mockRejectedValue({ code: 'ERR_NETWORK', message: 'Network Error' });
@@ -157,25 +198,22 @@ describe('Property 11: Frontend Fallback Correctness', () => {
             expect(result.current.isLoading).toBe(false);
           });
 
-          // Expected from static matrix
-          const rolePerms = DEFAULT_PERMISSIONS[role as Role];
-          const modulePerms = rolePerms?.[module as Module] ?? [];
-          const expected = modulePerms.includes(action as any);
-
-          expect(result.current.hasPermission(module, action)).toBe(expected);
+          // Read-only fallback: View on every module, no write actions.
+          expect(result.current.hasPermission(module, action)).toBe(expectedReadOnly(action));
         }
       ),
       { numRuns: 50 }
     );
   });
 
-  it('when API fails with 500 error, permissions match Static_Matrix for any non-Admin role', async () => {
+  it('when API fails with 500 error and no confirmed cache, fallback is READ-ONLY (View granted, writes denied) for any non-Admin role', async () => {
     await fc.assert(
       fc.asyncProperty(
         nonAdminRoleArb,
         moduleArb,
         actionArb,
         async (role, module, action) => {
+          // No confirmed permission set is cached
           store = {};
           mockApiGet.mockReset();
           mockApiGet.mockRejectedValue({ response: { status: 500 } });
@@ -187,24 +225,22 @@ describe('Property 11: Frontend Fallback Correctness', () => {
             expect(result.current.isLoading).toBe(false);
           });
 
-          const rolePerms = DEFAULT_PERMISSIONS[role as Role];
-          const modulePerms = rolePerms?.[module as Module] ?? [];
-          const expected = modulePerms.includes(action as any);
-
-          expect(result.current.hasPermission(module, action)).toBe(expected);
+          // Read-only fallback: View on every module, no write actions.
+          expect(result.current.hasPermission(module, action)).toBe(expectedReadOnly(action));
         }
       ),
       { numRuns: 50 }
     );
   });
 
-  it('when API fails with timeout, permissions match Static_Matrix for any non-Admin role', async () => {
+  it('when API fails with timeout and no confirmed cache, fallback is READ-ONLY (View granted, writes denied) for any non-Admin role', async () => {
     await fc.assert(
       fc.asyncProperty(
         nonAdminRoleArb,
         moduleArb,
         actionArb,
         async (role, module, action) => {
+          // No confirmed permission set is cached
           store = {};
           mockApiGet.mockReset();
           mockApiGet.mockRejectedValue({ code: 'ECONNABORTED', message: 'timeout' });
@@ -216,11 +252,8 @@ describe('Property 11: Frontend Fallback Correctness', () => {
             expect(result.current.isLoading).toBe(false);
           });
 
-          const rolePerms = DEFAULT_PERMISSIONS[role as Role];
-          const modulePerms = rolePerms?.[module as Module] ?? [];
-          const expected = modulePerms.includes(action as any);
-
-          expect(result.current.hasPermission(module, action)).toBe(expected);
+          // Read-only fallback: View on every module, no write actions.
+          expect(result.current.hasPermission(module, action)).toBe(expectedReadOnly(action));
         }
       ),
       { numRuns: 50 }
@@ -391,8 +424,12 @@ describe('Property 13: Frontend Cache Validity', () => {
       fc.asyncProperty(
         nonAdminRoleArb,
         userIdArb,
-        // Generate a timestamp within the last 5 minutes (0 to 299999 ms ago)
-        fc.integer({ min: 0, max: 299_999 }),
+        // Generate a timestamp comfortably within the 5-minute TTL. The upper
+        // bound is kept ~10s below the 300_000ms boundary so that wall-clock time
+        // elapsing between building the cache entry and the hook reading it (which
+        // can be non-trivial under full-suite load) cannot push a "valid" entry
+        // across the expiry boundary and cause a flaky API call.
+        fc.integer({ min: 0, max: 290_000 }),
         async (role, userId, msAgo) => {
           store = {};
           mockApiGet.mockReset();

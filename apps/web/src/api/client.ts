@@ -17,7 +17,7 @@ import axios, {
 } from 'axios';
 import { z } from 'zod';
 import { API_VERSION, type ApiError } from '@alsaqi/shared';
-import { unwrapEnvelope } from './utils/envelope';
+import { unwrapEnvelope, readEnvelopeMeta, type EnvelopeMeta } from './utils/envelope';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,20 +36,71 @@ export interface ApiClientError {
   status?: number | undefined;
 }
 
+/**
+ * Config flag that opts a mutation into idempotency-safe retries. When `true`,
+ * the client attaches a stable `Idempotency-Key` (reused across attempts) so the
+ * mutation becomes retry-eligible. Mutations without a key are attempted once.
+ */
+export type MutationRequestConfig = AxiosRequestConfig & { idempotent?: boolean };
+
 export interface ApiClient {
   /** The underlying Axios instance (for module sub-clients to use) */
   readonly http: AxiosInstance;
   /** Make a typed GET request with Zod validation */
   get<T>(url: string, schema: z.ZodType<T>, config?: AxiosRequestConfig): Promise<T>;
+  /**
+   * Make a typed GET request with Zod validation that ALSO surfaces the server
+   * `Response_Envelope` meta block (e.g. `meta.pagination`). The response
+   * interceptor discards `meta` from `response.data` after unwrapping; this
+   * method returns it alongside the validated payload so callers can drive
+   * pagination from server totals rather than the page array length.
+   */
+  getWithMeta<T>(
+    url: string,
+    schema: z.ZodType<T>,
+    config?: AxiosRequestConfig
+  ): Promise<{ data: T; meta: EnvelopeMeta | undefined }>;
   /** Make a typed POST request with Zod validation */
-  post<T>(url: string, schema: z.ZodType<T>, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  post<T>(url: string, schema: z.ZodType<T>, data?: unknown, config?: MutationRequestConfig): Promise<T>;
   /** Make a typed PUT request with Zod validation */
-  put<T>(url: string, schema: z.ZodType<T>, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  put<T>(url: string, schema: z.ZodType<T>, data?: unknown, config?: MutationRequestConfig): Promise<T>;
   /** Make a typed PATCH request with Zod validation */
-  patch<T>(url: string, schema: z.ZodType<T>, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  patch<T>(url: string, schema: z.ZodType<T>, data?: unknown, config?: MutationRequestConfig): Promise<T>;
   /** Make a typed DELETE request with Zod validation */
-  delete<T>(url: string, schema: z.ZodType<T>, config?: AxiosRequestConfig): Promise<T>;
+  delete<T>(url: string, schema: z.ZodType<T>, config?: MutationRequestConfig): Promise<T>;
 }
+
+/**
+ * Fields stored on a request config so a retried request reuses the same stable
+ * identifiers across every attempt. Stored under `__`-prefixed keys so they are
+ * carried through Axios's config merge but never collide with real options.
+ */
+export interface CorrelationFields {
+  /** x-correlation-id, generated once and stable across all attempts. */
+  __correlationId?: string;
+  /** Idempotency-Key for mutations, stable across all attempts when present. */
+  __idempotencyKey?: string;
+  /** 0-based count of retries already performed; bounded by MAX_RETRY_ATTEMPTS. */
+  __retryCount?: number;
+  /**
+   * Marks a request that has already been retried once after a 401 token
+   * refresh, so the response interceptor never enters an infinite refresh loop.
+   */
+  __isRetryAfterRefresh?: boolean;
+}
+
+/** An in-flight (internal) request config carrying stable correlation identifiers. */
+export interface CorrelatedRequestConfig extends InternalAxiosRequestConfig, CorrelationFields {}
+
+/**
+ * An Axios response augmented with the captured envelope `meta` block. The
+ * success interceptor stashes `meta` here before unwrapping `response.data`, so
+ * `getWithMeta` can return server pagination totals to callers.
+ */
+type MetaCarryingResponse = AxiosResponse & { meta?: EnvelopeMeta | undefined };
+
+/** A caller-supplied request config augmented with correlation identifiers. */
+type CorrelatedClientConfig = AxiosRequestConfig & CorrelationFields;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -79,6 +130,32 @@ function generateCorrelationId(): string {
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+/**
+ * Generate a stable Idempotency-Key for a mutation. Uses the same UUID v4
+ * generator as correlation IDs; the value is generated once per logical request
+ * and reused on every retry attempt so the server can deduplicate retries.
+ */
+function generateIdempotencyKey(): string {
+  return generateCorrelationId();
+}
+
+/** HTTP methods that mutate server state and therefore require an idempotency key to be retried. */
+const MUTATION_METHODS = new Set(['post', 'put', 'patch', 'delete']);
+
+/**
+ * Determine whether a request may be retried.
+ *
+ * GET/HEAD (and any non-mutation method) are always retry-eligible because they
+ * are inherently idempotent. Mutations (POST/PUT/PATCH/DELETE) are only eligible
+ * when they carry a stable `Idempotency-Key`, so a retried mutation can be safely
+ * deduplicated by the server and never creates duplicate records (Req 1.1, 1.2).
+ */
+function isRetryEligible(config: CorrelatedClientConfig): boolean {
+  const method = (config.method ?? 'get').toLowerCase();
+  if (!MUTATION_METHODS.has(method)) return true;
+  return typeof config.__idempotencyKey === 'string';
 }
 
 /**
@@ -149,10 +226,47 @@ function sleep(ms: number): Promise<void> {
 let versionMismatchShown = false;
 
 /**
- * Display a non-dismissible notification when API version mismatch is detected.
+ * DOM event name broadcast immediately before any version-mismatch reload.
+ *
+ * Form components driven by `useFormAutosave` listen for this event and flush a
+ * `draft_*` snapshot of their current (possibly still-debounced) data to
+ * localStorage synchronously, so unsaved work survives the reload (Req 25.2).
+ */
+export const PERSIST_DRAFTS_EVENT = 'app:persist-drafts';
+
+/**
+ * Ask any listening form to persist its unsaved data as a `draft_*` snapshot
+ * before the page reloads. `useFormAutosave` debounces its writes, so a snapshot
+ * may not yet exist in localStorage when the user chooses to reload; dispatching
+ * this event lets each autosave-backed form flush synchronously first (Req 25.2).
+ */
+function persistDraftsBeforeReload(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(PERSIST_DRAFTS_EVENT));
+}
+
+/**
+ * Remove the version-mismatch overlay from the DOM and reset the shown flag so a
+ * subsequent mismatch can surface the overlay again. Backs the "later" option,
+ * which lets the user keep working instead of being forced to reload (Req 25.1).
+ */
+function dismissVersionMismatchOverlay(): void {
+  if (typeof document === 'undefined') return;
+  const existing = document.getElementById('api-version-mismatch-overlay');
+  existing?.remove();
+  versionMismatchShown = false;
+}
+
+/**
+ * Display a notification when API version mismatch is detected.
  * This uses a DOM-based approach to avoid dependency on specific UI libraries.
  *
- * Exported (named) so the security behavior of the reload button — built with
+ * The overlay offers two non-destructive choices: reload now (which first
+ * broadcasts {@link PERSIST_DRAFTS_EVENT} so unsaved form data is snapshotted to
+ * a `draft_*` key before navigation), or "later" — which dismisses the overlay
+ * and lets the user keep working (Req 25.1, 25.2).
+ *
+ * Exported (named) so the security behavior of the buttons — built with
  * `document.createElement` + `addEventListener` rather than `innerHTML` with an
  * inline `onclick` — can be unit tested directly without an HTTP round-trip.
  */
@@ -206,11 +320,43 @@ export function showVersionMismatchNotification(): void {
     font-weight: 500;
   `;
   reloadButton.textContent = 'تحديث الصفحة';
-  reloadButton.addEventListener('click', () => window.location.reload());
+  reloadButton.addEventListener('click', () => {
+    // Persist any unsaved form data as a draft_* snapshot BEFORE navigating away,
+    // so an update notice never discards work in progress (Req 25.2).
+    persistDraftsBeforeReload();
+    window.location.reload();
+  });
+
+  // "Later" option: dismiss the overlay and keep working instead of reloading
+  // (Req 25.1). Resets the shown flag so a future mismatch can surface again.
+  const laterButton = document.createElement('button');
+  laterButton.style.cssText = `
+    background: transparent;
+    color: #555;
+    border: none;
+    padding: 10px 24px;
+    margin-right: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  `;
+  laterButton.textContent = 'لاحقًا';
+  laterButton.addEventListener('click', () => {
+    // Snapshot unsaved work even when dismissing, in case the user reloads later
+    // by other means before saving (Req 25.2).
+    persistDraftsBeforeReload();
+    dismissVersionMismatchOverlay();
+  });
+
+  const actions = document.createElement('div');
+  actions.style.cssText = 'display: flex; justify-content: center; gap: 0;';
+  actions.appendChild(laterButton);
+  actions.appendChild(reloadButton);
 
   dialog.appendChild(heading);
   dialog.appendChild(message);
-  dialog.appendChild(reloadButton);
+  dialog.appendChild(actions);
 
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
@@ -262,14 +408,29 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   // ─── Request Interceptor ──────────────────────────────────────────────────
 
   http.interceptors.request.use((requestConfig) => {
+    const cfg = requestConfig as CorrelatedRequestConfig;
+
     // Attach CSRF token
     const csrfToken = getCsrfToken();
     if (csrfToken) {
-      requestConfig.headers['x-csrf-token'] = csrfToken;
+      cfg.headers['x-csrf-token'] = csrfToken;
     }
 
-    // Attach correlation ID
-    requestConfig.headers['x-correlation-id'] = generateCorrelationId();
+    // Attach a stable correlation ID. Reuse the value stored on the config (set
+    // by requestWithRetry before the first attempt) so every retry of the same
+    // logical request carries the same x-correlation-id. Direct callers that
+    // bypass requestWithRetry get a fresh ID generated here.
+    if (!cfg.__correlationId) {
+      cfg.__correlationId = generateCorrelationId();
+    }
+    cfg.headers['x-correlation-id'] = cfg.__correlationId;
+
+    // For mutations opted into idempotent retry, attach the stable
+    // Idempotency-Key. The same value is reused on every attempt so the server
+    // can deduplicate retried mutations (Req 1.3, 1.5).
+    if (cfg.__idempotencyKey) {
+      cfg.headers['Idempotency-Key'] = cfg.__idempotencyKey;
+    }
 
     return requestConfig;
   });
@@ -280,6 +441,10 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     (response: AxiosResponse) => {
       // Check X-API-Version header for mismatch
       checkVersionMismatch(response);
+
+      // Capture the envelope meta (e.g. meta.pagination) BEFORE unwrapping, since
+      // unwrapEnvelope replaces response.data with the inner data and discards meta.
+      (response as MetaCarryingResponse).meta = readEnvelopeMeta(response.data);
 
       // Unwrap the response envelope: { success: true, data: T, meta: ... } → T
       response.data = unwrapEnvelope(response.data);
@@ -304,7 +469,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         error.response?.status === 401 &&
         originalRequest &&
         !isRefreshRequest(originalRequest) &&
-        !(originalRequest as any).__isRetryAfterRefresh
+        !(originalRequest as CorrelatedRequestConfig).__isRetryAfterRefresh
       ) {
         if (isRefreshing) {
           // Wait for the in-progress refresh to complete, then retry
@@ -323,7 +488,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
           onRefreshComplete(null);
 
           // Retry the original request exactly once
-          (originalRequest as any).__isRetryAfterRefresh = true;
+          (originalRequest as CorrelatedRequestConfig).__isRetryAfterRefresh = true;
           return http(originalRequest);
         } catch (refreshError) {
           onRefreshComplete(refreshError);
@@ -350,18 +515,32 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   // ─── Retry Logic with Exponential Backoff ─────────────────────────────────
 
   async function requestWithRetry<T>(
-    requestFn: () => Promise<AxiosResponse<T>>
+    config: CorrelatedClientConfig,
+    requestFn: (config: CorrelatedClientConfig) => Promise<AxiosResponse<T>>
   ): Promise<AxiosResponse<T>> {
     let lastError: unknown;
 
+    // Generate the correlation ID once, on the persistent config object, so the
+    // request interceptor reuses it on every attempt (Req 1.4). The config is
+    // the same object passed to Axios on each retry, so the value is stable.
+    if (!config.__correlationId) {
+      config.__correlationId = generateCorrelationId();
+    }
+
+    // A mutation is only retried when it carries an idempotency key; GET/HEAD are
+    // always eligible. Evaluated once: eligibility does not change across attempts.
+    const eligible = isRetryEligible(config);
+
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+      config.__retryCount = attempt - 1;
       try {
-        return await requestFn();
+        return await requestFn(config);
       } catch (error) {
         lastError = error;
 
-        // Only retry on network errors or 5xx
-        if (!isRetriableError(error)) {
+        // Retry only when the request is retry-eligible AND the error is retriable
+        // (network error or 5xx). A non-eligible mutation is attempted exactly once.
+        if (!eligible || !isRetriableError(error)) {
           throw error;
         }
 
@@ -401,23 +580,56 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     return schema.parse(data);
   }
 
+  // ─── Config Preparation ───────────────────────────────────────────────────
+
+  /**
+   * Build a correlated config for a request, tagging it with the HTTP method so
+   * retry eligibility can be evaluated. For idempotent mutations, generate a
+   * stable Idempotency-Key (stored on the config and reused across attempts).
+   */
+  function prepareConfig(
+    method: string,
+    reqConfig?: MutationRequestConfig
+  ): CorrelatedClientConfig {
+    const { idempotent, ...rest } = reqConfig ?? {};
+    const cfg: CorrelatedClientConfig = { ...rest, method };
+    if (idempotent && MUTATION_METHODS.has(method)) {
+      cfg.__idempotencyKey = generateIdempotencyKey();
+    }
+    return cfg;
+  }
+
   // ─── Typed Request Methods ────────────────────────────────────────────────
 
   const client: ApiClient = {
     http,
 
     async get<T>(url: string, schema: z.ZodType<T>, reqConfig?: AxiosRequestConfig): Promise<T> {
-      const response = await requestWithRetry(() => http.get(url, reqConfig));
+      const cfg = prepareConfig('get', reqConfig);
+      const response = await requestWithRetry(cfg, (c) => http.get(url, c));
       return validateResponse(response.data, schema);
+    },
+
+    async getWithMeta<T>(
+      url: string,
+      schema: z.ZodType<T>,
+      reqConfig?: AxiosRequestConfig
+    ): Promise<{ data: T; meta: EnvelopeMeta | undefined }> {
+      const cfg = prepareConfig('get', reqConfig);
+      const response = await requestWithRetry(cfg, (c) => http.get(url, c));
+      const data = validateResponse(response.data, schema);
+      const meta = (response as MetaCarryingResponse).meta;
+      return { data, meta };
     },
 
     async post<T>(
       url: string,
       schema: z.ZodType<T>,
       data?: unknown,
-      reqConfig?: AxiosRequestConfig
+      reqConfig?: MutationRequestConfig
     ): Promise<T> {
-      const response = await requestWithRetry(() => http.post(url, data, reqConfig));
+      const cfg = prepareConfig('post', reqConfig);
+      const response = await requestWithRetry(cfg, (c) => http.post(url, data, c));
       return validateResponse(response.data, schema);
     },
 
@@ -425,9 +637,10 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       url: string,
       schema: z.ZodType<T>,
       data?: unknown,
-      reqConfig?: AxiosRequestConfig
+      reqConfig?: MutationRequestConfig
     ): Promise<T> {
-      const response = await requestWithRetry(() => http.put(url, data, reqConfig));
+      const cfg = prepareConfig('put', reqConfig);
+      const response = await requestWithRetry(cfg, (c) => http.put(url, data, c));
       return validateResponse(response.data, schema);
     },
 
@@ -435,14 +648,16 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       url: string,
       schema: z.ZodType<T>,
       data?: unknown,
-      reqConfig?: AxiosRequestConfig
+      reqConfig?: MutationRequestConfig
     ): Promise<T> {
-      const response = await requestWithRetry(() => http.patch(url, data, reqConfig));
+      const cfg = prepareConfig('patch', reqConfig);
+      const response = await requestWithRetry(cfg, (c) => http.patch(url, data, c));
       return validateResponse(response.data, schema);
     },
 
-    async delete<T>(url: string, schema: z.ZodType<T>, reqConfig?: AxiosRequestConfig): Promise<T> {
-      const response = await requestWithRetry(() => http.delete(url, reqConfig));
+    async delete<T>(url: string, schema: z.ZodType<T>, reqConfig?: MutationRequestConfig): Promise<T> {
+      const cfg = prepareConfig('delete', reqConfig);
+      const response = await requestWithRetry(cfg, (c) => http.delete(url, c));
       return validateResponse(response.data, schema);
     },
   };

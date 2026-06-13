@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AuditFinding } from '../types';
 import { Plus, AlertTriangle, FileText, CheckCircle2, MoreVertical, Search, Eye } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useAuditFindings } from '../hooks/useAuditFindings';
+import { useFindings } from '../api';
 import InteractiveIcon from '../components/InteractiveIcon';
 import { RiskLevel } from '../constants';
 import toast from 'react-hot-toast';
@@ -21,7 +21,14 @@ const AuditFindings: React.FC = () => {
   const { token } = useAuth();
   const { t, i18n } = useTranslation();
   
-  const { findings, loading, fetchFindings } = useAuditFindings();
+  const findingsQuery = useFindings();
+  // Surface the Legacy_Hook's convenience shape from the canonical typed
+  // Query_Hook so behavior is preserved after migration (Req 3.2).
+  const findings = findingsQuery.data ?? [];
+  const loading = findingsQuery.isLoading || findingsQuery.isFetching;
+  const fetchFindings = () => {
+    findingsQuery.refetch();
+  };
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFinding, setEditingFinding] = useState<AuditFinding | null>(null);

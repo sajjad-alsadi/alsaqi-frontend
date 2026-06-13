@@ -24,6 +24,68 @@ export interface PaginationFallback {
 }
 
 /**
+ * Server `Response_Envelope` meta block (`{ requestId, timestamp, version,
+ * pagination? }`). Only the `pagination` sub-block is consumed by the client;
+ * the rest is preserved opaquely.
+ */
+export interface EnvelopeMeta {
+  pagination?: {
+    total?: number;
+    totalPages?: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Read the `meta` block from a raw success envelope BEFORE it is unwrapped.
+ *
+ * The response interceptor replaces `response.data` with the inner `data`
+ * payload, discarding the sibling `meta`. This helper lets the interceptor
+ * capture `meta` (including `meta.pagination`) off the still-enveloped body so
+ * consumers can surface server-driven pagination instead of recomputing it from
+ * the page array length.
+ *
+ * @param payload - The raw `response.data` body (the full envelope).
+ * @returns The `meta` object when present, otherwise `undefined`.
+ */
+export function readEnvelopeMeta(payload: unknown): EnvelopeMeta | undefined {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'meta' in payload &&
+    typeof (payload as { meta?: unknown }).meta === 'object' &&
+    (payload as { meta?: unknown }).meta !== null
+  ) {
+    return (payload as { meta: EnvelopeMeta }).meta;
+  }
+  return undefined;
+}
+
+/**
+ * Derive `{ total, totalPages }` from server pagination meta.
+ *
+ * Server-provided `meta.pagination.total` / `meta.pagination.totalPages` always
+ * take precedence (Req 21.1, 21.2). `itemCount` is used ONLY as a degraded
+ * fallback when the server omits pagination meta entirely — never to override a
+ * value the server supplied, and never as the primary source.
+ *
+ * @param meta - The envelope meta captured by {@link readEnvelopeMeta}.
+ * @param itemCount - The loaded item count, used only when meta is absent.
+ * @returns A `{ total, totalPages }` object sourced from server meta when available.
+ */
+export function metaPagination(
+  meta: EnvelopeMeta | undefined,
+  itemCount: number
+): PaginationFallback {
+  const p = meta?.pagination;
+  return {
+    total: typeof p?.total === 'number' ? p.total : itemCount,
+    totalPages: typeof p?.totalPages === 'number' ? p.totalPages : 1,
+  };
+}
+
+/**
  * Extract a list from either response shape.
  *
  * - If the payload is already an array (unwrapped), return it as-is.

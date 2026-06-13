@@ -16,7 +16,7 @@ import AuditProgramGrid from './AuditProgram/AuditProgramGrid';
 import AuditProgramEditor from './AuditProgram/AuditProgramEditor';
 import AuditProgramProceduresModal from './AuditProgram/AuditProgramProceduresModal';
 import Modal from '../components/Modal';
-import { useDepartments } from '../hooks/useDepartments';
+import { useDepartments } from '../api/hooks/useDepartments';
 
 const AuditProgramLibrary: React.FC = () => {
   const { token } = useAuth();

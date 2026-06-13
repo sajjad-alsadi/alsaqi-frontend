@@ -7,7 +7,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { usePreferences } from '../../context/PreferencesContext';
-import { useDashboardStats } from '../../hooks/useDashboardStats';
+import { useDashboardStats } from '../../api/hooks/useDashboardStats';
 import { Language } from '../../constants';
 import { StatsSkeleton } from '../../components/SkeletonLoader';
 

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { useCorrespondence } from '../../hooks/useCorrespondence';
+import { useCorrespondence } from '../../api/hooks/useCorrespondence';
 import toast from 'react-hot-toast';
 import IncomingRegister from './IncomingRegister';
 import CorrespondenceDetails from './CorrespondenceDetails';

@@ -44,8 +44,12 @@ describe('version-mismatch reload button', () => {
   function getReloadButton(): HTMLButtonElement {
     const overlay = document.getElementById('api-version-mismatch-overlay');
     expect(overlay).not.toBeNull();
-    const button = overlay!.querySelector('button');
-    expect(button).not.toBeNull();
+    // The overlay now offers two buttons — "later" (dismiss) and "reload". Select
+    // the reload button by its label rather than position so the test is robust
+    // to button ordering (Req 25.1 added the non-destructive "later" option).
+    const buttons = Array.from(overlay!.querySelectorAll('button'));
+    const button = buttons.find((b) => b.textContent === 'تحديث الصفحة');
+    expect(button).not.toBeUndefined();
     return button as HTMLButtonElement;
   }
 

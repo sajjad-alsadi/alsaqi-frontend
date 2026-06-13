@@ -80,7 +80,7 @@ vi.mock('../../utils/errorService', () => ({
 }));
 
 const mockUseUserManagement = vi.fn();
-vi.mock('../../hooks/useUserManagement', () => ({
+vi.mock('../../api/hooks/useUserManagement', () => ({
   useUserManagement: (...args: any[]) => mockUseUserManagement(...args),
 }));
 

@@ -9,7 +9,7 @@ import api from '../api/httpClient';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { FormField } from './ui/FormField';
-import { useDepartments } from '../hooks/useDepartments';
+import { useDepartments } from '../api/hooks/useDepartments';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 

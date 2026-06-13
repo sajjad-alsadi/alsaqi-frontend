@@ -180,10 +180,12 @@ describe('NotificationContext wiring', () => {
     expect(hoisted.clients).toHaveLength(1);
     expect(hoisted.clients[0].connect).toHaveBeenCalledTimes(1);
 
-    // The ws-token was fetched and exposed through the client's getToken.
-    expect(hoisted.apiGet).toHaveBeenCalledWith('/auth/ws-token');
+    // The ws-token is fetched lazily via the client's async `getToken` (a fresh
+    // short-lived token per connection attempt — no eager or cached fetch). Invoking
+    // getToken() is what triggers the GET /auth/ws-token request.
     const config = hoisted.clients[0].config;
-    expect(config.getToken()).toBe('ws-token-123');
+    await expect(config.getToken()).resolves.toBe('ws-token-123');
+    expect(hoisted.apiGet).toHaveBeenCalledWith('/auth/ws-token');
 
     // The notification callback is wired to the live sound util.
     expect(typeof config.onNotification).toBe('function');

@@ -171,6 +171,10 @@ const FindingCard: React.FC<FindingCardProps> = React.memo(({
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.criteria}</p>
         </div>
         <div className="space-y-3">
+          <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.cause')}</p>
+          <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.cause}</p>
+        </div>
+        <div className="space-y-3">
           <p className="text-[10px] text-[var(--color-primary)] uppercase font-bold tracking-[0.2em]">{t('findings.consequence')}</p>
           <p className="text-sm text-[var(--color-text-main)] leading-relaxed font-medium">{finding.consequence}</p>
         </div>

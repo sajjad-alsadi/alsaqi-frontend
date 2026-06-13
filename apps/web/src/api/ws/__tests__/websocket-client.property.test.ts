@@ -77,7 +77,7 @@ function baseDelay(attempt: number): number {
 describe('Feature: web-production-readiness-remediation, Property 1: Reconnection backoff is bounded, capped, and jittered', () => {
   const baseConfig: WebSocketClientConfig = {
     wsUrl: 'ws://localhost:3000/ws',
-    getToken: () => 'test-token',
+    getToken: async () => 'test-token',
     httpBaseUrl: 'http://localhost:3000/api',
   };
 
@@ -168,19 +168,20 @@ describe('Feature: web-production-readiness-remediation, Property 1: Reconnectio
       vi.unstubAllGlobals();
     });
 
-    it('schedules no more than MAX_RECONNECT_ATTEMPTS reconnects, then enters failed state', () => {
-      fc.assert(
-        fc.property(
+    it('schedules no more than MAX_RECONNECT_ATTEMPTS reconnects, then enters failed state', async () => {
+      await fc.assert(
+        fc.asyncProperty(
           // Vary the jitter source so timing varies across runs
           fc.double({ min: 0, max: 1, noNaN: true }),
-          (rand) => {
+          async (rand) => {
             mockWsInstances = [];
             const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(rand);
             const onReconnectionFailed = vi.fn();
             const onStateChange = vi.fn();
             const client = createWebSocketClient({
               wsUrl: 'ws://localhost:3000/ws',
-              getToken: () => 'test-token',
+              // `getToken` is async (Requirement 7); awaited per attempt.
+              getToken: async () => 'test-token',
               httpBaseUrl: 'http://localhost:3000/api',
               onReconnectionFailed,
               onStateChange,
@@ -188,14 +189,17 @@ describe('Feature: web-production-readiness-remediation, Property 1: Reconnectio
 
             try {
               client.connect();
+              // Flush the awaited per-attempt token so the socket is constructed.
+              await vi.advanceTimersByTimeAsync(0);
               mockWsInstances[0].simulateOpen();
 
               // Drive MAX_RECONNECT_ATTEMPTS reconnection cycles
               for (let i = 0; i < MAX_RECONNECT_ATTEMPTS; i++) {
                 const lastIdx = mockWsInstances.length - 1;
                 mockWsInstances[lastIdx].simulateClose();
-                // Advance well past the maximum possible jittered delay
-                vi.advanceTimersByTime(MAX_RECONNECT_DELAY_MS * 2);
+                // Advance well past the maximum possible jittered delay (also
+                // flushes the awaited token for the scheduled reconnect attempt).
+                await vi.advanceTimersByTimeAsync(MAX_RECONNECT_DELAY_MS * 2);
               }
 
               // Final close after attempts are exhausted -> failed state
@@ -210,9 +214,10 @@ describe('Feature: web-production-readiness-remediation, Property 1: Reconnectio
               expect(client.getState()).toBe('failed');
               expect(onReconnectionFailed).toHaveBeenCalledTimes(1);
 
-              // No further reconnects after failed state
+              // No further WebSocket reconnects within a polling interval after
+              // entering the failed state (polling drives any later attempts).
               const countAtFailure = mockWsInstances.length;
-              vi.advanceTimersByTime(MAX_RECONNECT_DELAY_MS * 4);
+              await vi.advanceTimersByTimeAsync(29000);
               expect(mockWsInstances.length).toBe(countAtFailure);
             } finally {
               client.disconnect();

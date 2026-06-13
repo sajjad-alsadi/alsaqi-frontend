@@ -89,7 +89,7 @@ vi.mock('../../api/httpClient', () => ({
 }));
 
 // Mock useDepartments hook
-vi.mock('../../hooks/useDepartments', () => ({
+vi.mock('../../api/hooks/useDepartments', () => ({
   useDepartments: () => ({
     departments: [
       { id: 'dept-1', name: 'Finance' },

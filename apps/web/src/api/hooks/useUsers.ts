@@ -7,6 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CreateUserInput, UpdateUserInput } from '@alsaqi/shared';
 import { api } from '../index';
+import { withMutationFeedback, type MutationFeedbackOptions } from '../mutationFeedback';
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -52,12 +53,18 @@ export function useUser(id: string) {
 
 /**
  * Create a new user. Invalidates the users list cache on success.
+ *
+ * Failures are routed through the Mutation_Feedback_Policy (Req 18): the error
+ * is surfaced to the user and re-thrown so the form stays open.
  */
-export function useCreateUser() {
+export function useCreateUser(feedback?: MutationFeedbackOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateUserInput) => api.users.create(data),
+    mutationFn: withMutationFeedback(
+      (data: CreateUserInput) => api.users.create(data),
+      feedback,
+    ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
     },
@@ -67,12 +74,19 @@ export function useCreateUser() {
 /**
  * Update an existing user. Invalidates both list and detail caches.
  */
-export function useUpdateUser() {
+export function useUpdateUser(feedback?: MutationFeedbackOptions) {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateUserInput }) =>
-      api.users.update(id, data),
+  return useMutation<
+    Awaited<ReturnType<typeof api.users.update>>,
+    Error,
+    { id: string; data: UpdateUserInput }
+  >({
+    mutationFn: withMutationFeedback(
+      ({ id, data }: { id: string; data: UpdateUserInput }) =>
+        api.users.update(id, data),
+      feedback,
+    ),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: usersKeys.detail(variables.id) });
@@ -83,11 +97,14 @@ export function useUpdateUser() {
 /**
  * Delete a user. Invalidates the users list cache on success.
  */
-export function useDeleteUser() {
+export function useDeleteUser(feedback?: MutationFeedbackOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.users.delete(id),
+    mutationFn: withMutationFeedback(
+      (id: string) => api.users.delete(id),
+      feedback,
+    ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
     },

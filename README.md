@@ -2,9 +2,13 @@
 
 # الساقي — AL-SAQI
 
-## نظام إدارة التدقيق الداخلي
+## واجهة نظام إدارة التدقيق الداخلي (Frontend)
 
-نظام متكامل لإدارة التدقيق الداخلي مصمم للمؤسسات العربية. يوفر النظام إدارة شاملة لـ:
+يحتوي هذا المستودع على **الواجهة الأمامية (Frontend)** لنظام الساقي لإدارة التدقيق الداخلي، وهو تطبيق صفحة واحدة (SPA) مبني بـ React وموجَّه للمؤسسات العربية مع دعم كامل للعربية (RTL) والإنجليزية.
+
+> **ملاحظة عن النطاق:** هذا المستودع يضم الواجهة الأمامية فقط. يتصل التطبيق بخدمة **واجهة برمجية خلفية (Backend API)** منفصلة عبر REST و WebSocket (المنفذ الافتراضي للتطوير: `3000`). راجع `docs/architecture.md` لوصف المعمارية الكاملة للنظام.
+
+يغطي التطبيق الوحدات الوظيفية التالية:
 
 - **برامج وخطط التدقيق** — إنشاء ومتابعة برامج التدقيق السنوية وخطط العمل
 - **مهام التدقيق** — توزيع وتتبع مهام فريق التدقيق
@@ -14,7 +18,47 @@
 - **مصفوفة الامتثال** — متابعة الالتزام بالأنظمة والتشريعات
 - **كشف الاحتيال** — أدوات تحليل ورصد حالات الاحتيال المحتملة
 - **تضارب المصالح** — إدارة إفصاحات تضارب المصالح
-- **التقارير التنفيذية** — لوحات معلومات وتقارير للإدارة العليا
+- **التقارير التنفيذية ولوحات المعلومات** — رسوم بيانية وتقارير للإدارة العليا
+
+---
+
+## البنية التقنية
+
+| الطبقة | التقنيات |
+|--------|----------|
+| إطار الواجهة | React 19 + TypeScript 5.9 |
+| أداة البناء | Vite 7 |
+| التنسيق | Tailwind CSS v4 |
+| التوجيه (Routing) | React Router 7 |
+| جلب البيانات وحالة الخادم | TanStack React Query 5 + Axios |
+| النماذج والتحقق | React Hook Form + Zod 4 |
+| التدويل (i18n) | i18next + react-i18next (عربي/RTL + إنجليزي) |
+| الرسوم البيانية | Recharts |
+| التصدير والمستندات | jsPDF + jspdf-autotable + docx + ExcelJS + react-pdf |
+| محرر الأكواد | CodeMirror 6 |
+| مراقبة الأخطاء | Sentry (اختياري، في الإنتاج فقط) |
+| الاختبارات | Vitest + fast-check (PBT) + Testing Library + vitest-axe + Playwright |
+| التكامل المستمر | GitHub Actions |
+
+---
+
+## بنية المستودع (npm workspaces)
+
+```
+alsaqi/
+├── apps/
+│   └── web/              # تطبيق الواجهة الأمامية (@alsaqi/web)
+│       ├── src/          # شيفرة المصدر (React + TypeScript)
+│       ├── e2e/          # اختبارات Playwright الطرفية (E2E)
+│       └── vite.config.ts
+├── packages/
+│   └── shared/           # أنواع وأدوات مشتركة (@alsaqi/shared) — مُجمَّدة
+├── docs/                 # توثيق المعمارية وواجهة الـ API والميزات
+├── scripts/              # سكربتات الفحص والحماية في البناء
+└── .github/workflows/    # خط أنابيب GitHub Actions
+```
+
+> **حِزمة `packages/shared` مُجمَّدة:** يمنع حارس التجميد في خط الأنابيب أي تعديل عليها دون موافقة موثَّقة (راجع `scripts/check-shared-freeze.mjs`).
 
 ---
 
@@ -23,12 +67,9 @@
 | المتطلب | الإصدار | ملاحظات |
 |---------|---------|---------|
 | Node.js | 20+ | LTS مطلوب |
-| npm | 9+ | يأتي مع Node.js |
-| PostgreSQL | 14+ | لبيئة الإنتاج |
-| Docker | 24+ | للنشر في الإنتاج |
-| Docker Compose | 2.20+ | لتنسيق الحاويات |
+| npm | 9+ | يأتي مع Node.js (يدعم workspaces) |
 
-> **ملاحظة:** في بيئة التطوير، يمكن استخدام PGlite (قاعدة بيانات مدمجة) بدلاً من PostgreSQL — لا حاجة لتثبيت خادم قاعدة بيانات منفصل.
+> يتطلب التشغيل الكامل وجود خدمة الـ Backend API على المنفذ `3000`. يمكن تطوير الواجهة بمعزل عنها، لكن استدعاءات البيانات الحية تحتاج إلى الخادم الخلفي.
 
 ---
 
@@ -37,11 +78,13 @@
 ### 1. استنساخ المستودع
 
 ```bash
-git clone https://gitlab.com/your-org/alsaqi.git
+git clone https://github.com/your-org/alsaqi.git
 cd alsaqi
 ```
 
 ### 2. تثبيت الاعتماديات
+
+يُثبِّت الأمر الواحد اعتماديات جميع الـ workspaces:
 
 ```bash
 npm install
@@ -50,10 +93,10 @@ npm install
 ### 3. إعداد المتغيرات البيئية
 
 ```bash
-cp .env.example .env
+cp apps/web/.env.example apps/web/.env
 ```
 
-افتح ملف `.env` وعدّل القيم حسب بيئتك. في بيئة التطوير، يمكنك ترك `DATABASE_URL` فارغاً لاستخدام PGlite.
+عدّل القيم حسب بيئتك (راجع جدول المتغيرات أدناه).
 
 ### 4. تشغيل خادم التطوير
 
@@ -61,250 +104,141 @@ cp .env.example .env
 npm run dev
 ```
 
-سيعمل التطبيق على: http://localhost:3000
+يعمل التطبيق على: http://localhost:5173
+
+خادم Vite يوجِّه (proxy) المسارات `/api` و `/uploads` تلقائياً إلى الخادم الخلفي على `http://localhost:3000`، كما يتولى ترقية اتصال WebSocket.
 
 ---
 
-## النشر في بيئة الإنتاج
+## المتغيرات البيئية للواجهة
 
-### بناء صورة Docker
-
-```bash
-docker build -t alsaqi .
-```
-
-### التشغيل باستخدام Docker Compose
-
-```bash
-cd deploy
-docker compose up -d
-```
-
-يتضمن ملف `deploy/docker-compose.yml` تنسيق الحاويات التالية:
-- **app** — تطبيق AL-SAQI (Express.js + React)
-- **nginx** — Reverse Proxy مع TLS و WebSocket
-
-### قائمة المتغيرات البيئية المطلوبة للإنتاج
-
-تأكد من تعيين جميع المتغيرات التالية قبل النشر (راجع `.env.example` للتفاصيل):
+جميع متغيرات الواجهة المكشوفة للمتصفح تبدأ بـ `VITE_` (راجع `apps/web/.env.example`):
 
 | المتغير | مطلوب | الوصف |
 |---------|-------|-------|
-| `NODE_ENV` | ✅ | يجب أن يكون `production` |
-| `DATABASE_URL` | ✅ | رابط اتصال PostgreSQL مع SSL |
-| `JWT_SECRET` | ✅ | مفتاح توقيع JWT (64 حرف كحد أدنى) |
-| `VITE_STORAGE_SECRET` | ✅ | مفتاح تشفير التخزين المحلي (32 حرف كحد أدنى) |
-| `VITE_NETWORK_SECRET` | ✅ | مفتاح HMAC للشبكة |
-| `CORS_ORIGIN` | ✅ | النطاقات المسموح بها |
-| `FILE_ENCRYPTION_KEY` | موصى | مفتاح تشفير الملفات (AES-256-GCM) |
-| `DB_SSL_REJECT_UNAUTHORIZED` | ✅ | `true` — فرض SSL لاتصال قاعدة البيانات |
+| `VITE_API_URL` | اختياري | رابط الـ API الأساسي. اتركه فارغاً للاعتماد على نفس الأصل (`/api`) |
+| `VITE_WS_URL` | اختياري | رابط WebSocket (`ws://` أو `wss://`) |
+| `VITE_ERROR_REPORT_URL` | اختياري | مسار الإبلاغ عن الأخطاء (افتراضي: `/api/system-errors`) |
+| `VITE_APP_VERSION` | اختياري | إصدار التطبيق (يُعيَّن أثناء البناء) |
+| `VITE_SENTRY_DSN` | اختياري | مفتاح Sentry. يُفعَّل في الإنتاج فقط وعند وجوده — غيابه لا يكسر البناء |
 
-### إعداد Nginx و SSL
+**متغيرات وقت البناء (تُعيَّن عادةً في الـ CI لرفع خرائط المصدر إلى Sentry):**
 
-يتوفر نموذج إعداد Nginx جاهز في:
+| المتغير | الوصف |
+|---------|-------|
+| `SENTRY_AUTH_TOKEN` | رمز مصادقة Sentry |
+| `SENTRY_ORG` | اسم المؤسسة في Sentry |
+| `SENTRY_PROJECT` | اسم المشروع في Sentry |
 
-```
-deploy/nginx/nginx.conf.example
-```
-
-يتضمن النموذج:
-- TLS 1.2+ مع cipher suites قوية
-- دعم WebSocket upgrade للمسار `/ws`
-- ضغط Brotli و gzip
-- Rate limiting
-- رؤوس أمان إضافية (تكمل Helmet.js)
-
-لإعداد شهادة SSL، استخدم Let's Encrypt:
-
-```bash
-certbot certonly --webroot -w /var/www/certbot -d your-domain.com
-```
+> ترفع إضافة Sentry خرائط المصدر ثم تحذفها من `dist/`، فلا تُنشَر أي ملفات `.map` إطلاقاً.
 
 ---
 
-## إعدادات الأمان
+## الأوامر المتاحة
 
-### التحقق من الأسرار عند بدء التشغيل (SecretsValidator)
+تُشغَّل من جذر المستودع:
 
-عند تشغيل الخادم في بيئة الإنتاج (`NODE_ENV=production`)، يتحقق `SecretsValidator` تلقائياً من صحة وقوة جميع المتغيرات البيئية الحرجة. إذا كانت أي قيمة ضعيفة أو افتراضية، يرفض الخادم البدء ويسجل الأخطاء بدون كشف قيم الأسرار.
-
-في بيئة التطوير، يسجل تحذيرات فقط بدون إيقاف التشغيل.
-
-### المتغيرات المطلوبة (Required)
-
-جميع الأسرار يجب توليدها باستخدام:
-
-```bash
-openssl rand -hex 32
-```
-
-| المتغير | الحد الأدنى | الوصف |
-|---------|-------------|-------|
-| `JWT_SECRET` | 64 حرف | مفتاح توقيع JSON Web Tokens |
-| `VITE_STORAGE_SECRET` | 32 حرف | تشفير localStorage في المتصفح |
-| `VITE_NETWORK_SECRET` | — | مفتاح HMAC لتوقيع الطلبات |
-| `DATABASE_URL` | — | رابط PostgreSQL مع SSL |
-
-### المتغيرات الاختيارية (Optional)
-
-| المتغير | الافتراضي | الوصف |
-|---------|-----------|-------|
-| `FILE_ENCRYPTION_KEY` | — | تشفير الملفات المرفوعة (AES-256-GCM). إذا لم يُعيَّن، تُخزَّن الملفات بدون تشفير |
-| `TOTP_ENCRYPTION_KEY` | — | مفتاح تشفير أسرار TOTP (يستخدم `FILE_ENCRYPTION_KEY` كبديل) |
-| `CORS_ORIGIN` | — | النطاقات المسموح بها (مفصولة بفاصلة) |
-| `DB_SSL_CA_PATH` | — | مسار شهادة CA مخصصة لاتصال قاعدة البيانات |
-| `DB_SSL_REJECT_UNAUTHORIZED` | `true` | فرض التحقق من شهادة SSL في الإنتاج |
-| `BACKUP_RETENTION_DAYS` | `30` | عدد أيام الاحتفاظ بالنسخ الاحتياطية |
-| `BACKUP_DIR` | `./backups` | مسار تخزين النسخ الاحتياطية |
-| `ENCRYPT_BACKUPS` | `false` | تشفير ملفات النسخ الاحتياطي |
-| `AUDIT_TRAIL_RETENTION_MONTHS` | `24` | عدد أشهر الاحتفاظ بأقسام سجل التدقيق |
-
-### تشفير الملفات أثناء السكون (FileEncryptionService)
-
-جميع الملفات المرفوعة (أدلة التدقيق، تقارير الاحتيال، إفصاحات تضارب المصالح) تُشفَّر باستخدام AES-256-GCM مع IV عشوائي لكل ملف. يُشتق مفتاح التشفير من `FILE_ENCRYPTION_KEY` عبر HKDF-SHA256.
-
-- الملفات المشفرة تُخزَّن بصلاحيات `0o600` (owner read/write فقط)
-- يُحسب checksum SHA-256 للملف الأصلي للتحقق من السلامة
-- يدعم تدوير المفاتيح (Key Rotation) بدون فقدان البيانات
-
-> **تحذير:** لا تغيّر `FILE_ENCRYPTION_KEY` بعد التعيين بدون تنفيذ عملية تدوير المفاتيح.
-
-### المصادقة الثنائية (2FA/TOTP)
-
-يدعم النظام المصادقة الثنائية عبر TOTP (Time-based One-Time Password) متوافق مع Google Authenticator و Authy:
-
-- يُفرض على الأدوار الحساسة (Admin, Audit Manager)
-- أسرار TOTP تُخزَّن مشفرة في قاعدة البيانات (AES-256-GCM)
-- 10 رموز احتياطية (Backup Codes) تُولد عند التفعيل
-- نافذة تحقق ±30 ثانية لمراعاة فروقات الساعة
-- مقارنة آمنة زمنياً (timing-safe) لمنع هجمات التوقيت
-
-### مصادقة WebSocket (WebSocket Auth Guard)
-
-يعمل WebSocket في وضع `noServer` مع التحقق الفوري من JWT عند طلب الترقية (upgrade):
-
-- يجب تمرير token كـ query parameter: `ws://host/ws?token=<JWT>`
-- يُرفض الاتصال فوراً بـ HTTP 401 إذا لم يوجد token أو كان غير صالح
-- لا يبقى أي اتصال غير مصادق مفتوحاً
-- آلية heartbeat (ping/pong) تعمل للاتصالات المصادقة
-
-### فرض SSL لقاعدة البيانات
-
-في بيئة الإنتاج، يُفرض اتصال SSL مشفر بين التطبيق و PostgreSQL:
-
-- `rejectUnauthorized: true` — يرفض الشهادات غير الموثقة
-- يدعم شهادة CA مخصصة عبر `DB_SSL_CA_PATH`
-- يرفض بدء التشغيل إذا فشل اتصال SSL
-
-### رؤوس الأمان (Helmet.js)
-
-يستخدم `Helmet.js` لإضافة رؤوس أمان شاملة تلقائياً:
-
-- Content-Security-Policy مُهيأ لـ React SPA
-- Strict-Transport-Security (HSTS) في الإنتاج
-- X-Frame-Options: DENY (منع Clickjacking)
-- X-Content-Type-Options: nosniff
-- Referrer-Policy: strict-origin-when-cross-origin
-- Cross-Origin-Opener-Policy و Cross-Origin-Resource-Policy
-
-### ضغط الاستجابات (Response Compression)
-
-جميع الاستجابات النصية (JSON, HTML, CSS, JavaScript) تُضغط تلقائياً باستخدام gzip:
-
-- الحد الأدنى للحجم: 1KB (الاستجابات الأصغر لا تُضغط)
-- الملفات المضغوطة مسبقاً (صور، PDF) لا تُضغط مجدداً
-- ضغط Brotli إضافي متوفر عبر Nginx
+| الأمر | الوصف |
+|------|-------|
+| `npm run dev` | تشغيل خادم تطوير Vite (المنفذ 5173) |
+| `npm run build` | بناء الإنتاج مع فحوصات الأمان |
+| `npm run preview` | معاينة مخرجات البناء محلياً |
+| `npm run typecheck` | فحص أنواع TypeScript (`tsc --noEmit`) |
+| `npm run lint` | فحص ESLint |
+| `npm run format` | تنسيق الشيفرة بـ Prettier |
+| `npm run format:check` | التحقق من التنسيق دون تعديل |
+| `npm run test` | تشغيل اختبارات الوحدة (Vitest) |
+| `npm run test:e2e` | تشغيل اختبارات Playwright الطرفية |
+| `npm run test:e2e:ui` | تشغيل اختبارات Playwright بواجهة رسومية |
+| `npm run ci` | التحقق الكامل: typecheck + lint + test مع التغطية |
+| `npm run check:shared-freeze` | حارس تجميد حزمة `packages/shared` |
+| `npm run build:shared` | بناء حزمة `@alsaqi/shared` |
 
 ---
 
-## النسخ الاحتياطي والاستعادة
-
-يوفر النظام نسخاً احتياطياً تلقائياً عبر `BackupScheduler`:
-
-### النسخ الاحتياطي التلقائي
-
-- **الجدولة:** يومياً الساعة 02:00 صباحاً (توقيت الخادم)
-- **الآلية:** `pg_dump` مع ضغط gzip لقواعد PostgreSQL الخارجية
-- **الاحتفاظ:** حذف تلقائي للنسخ الأقدم من `BACKUP_RETENTION_DAYS` (افتراضي: 30 يوم)
-- **التشفير:** اختياري عبر `ENCRYPT_BACKUPS=true` (AES-256-GCM)
-- **السلامة:** التحقق من حجم الملف وتسجيل checksum
-- **الإشعارات:** إشعار تلقائي للمسؤولين عند فشل النسخ الاحتياطي
-
-### النسخ الاحتياطي اليدوي
+## البناء للإنتاج
 
 ```bash
-# تنفيذ نسخة احتياطية فورية (يتطلب صلاحيات Admin)
-curl -X POST http://localhost:3000/api/admin/backup \
-  -H "Authorization: Bearer <token>"
-
-# عرض سجل النسخ الاحتياطي
-curl http://localhost:3000/api/admin/backup/history \
-  -H "Authorization: Bearer <token>"
+npm run build
 ```
 
-### متغيرات الإعداد
+يتضمن البناء فحوصات أمان آلية قبل النشر وبعده:
 
-| المتغير | الافتراضي | الوصف |
-|---------|-----------|-------|
-| `BACKUP_RETENTION_DAYS` | `30` | عدد أيام الاحتفاظ بالنسخ الاحتياطية |
-| `BACKUP_DIR` | `./backups` | مسار تخزين النسخ الاحتياطية |
-| `ENCRYPT_BACKUPS` | `false` | تشفير ملفات النسخ الاحتياطي (AES-256-GCM) |
+- **`check-security-types`** — يتحقق من سلامة الأنواع الأمنية الحرجة
+- **`check-dist-sourcemaps`** — يضمن عدم تسرّب خرائط المصدر إلى `dist/`
+- **`check-bundle-secrets`** — يفحص الحزمة الناتجة بحثاً عن أسرار مُسرَّبة
 
-### الاستعادة
+إعدادات البناء البارزة (`apps/web/vite.config.ts`):
 
-لاستعادة نسخة احتياطية من PostgreSQL:
-
-```bash
-gunzip -c backups/backup_2024-01-15_020000.sql.gz | psql $DATABASE_URL
-```
+- تصغير بـ **Terser** مع حذف `console` و `debugger` في الإنتاج
+- تعطيل خرائط المصدر افتراضياً (لا تُنشَر أي ملفات `.map`)
+- تقسيم الحزم يدوياً (`manualChunks`) لفصل المكتبات (React، Query، الرسوم، PDF، Excel، المحرر، i18n، النماذج) لتحميل كسول أمثل
+- تحليل حجم الحزمة عبر `ANALYZE=true npm run build` (تقرير في `dist/bundle-stats.html`)
 
 ---
 
-## تقسيم سجل التدقيق (Audit Trail Partitioning)
+## الاختبارات
 
-جدول `audit_trail` مُقسَّم حسب الشهر (Range Partitioning) لمنع النمو غير المحدود وتحسين أداء الاستعلامات:
+### اختبارات الوحدة والخصائص (Unit & Property-Based)
 
-- أقسام شهرية بتسمية `audit_trail_yYYYYmMM`
-- إنشاء تلقائي لـ 3 أقسام مستقبلية
-- cron job شهري لإنشاء الأقسام الجديدة
-- حذف تلقائي للأقسام الأقدم من `AUDIT_TRAIL_RETENTION_MONTHS` (افتراضي: 24 شهر)
-- شفافية كاملة — جميع الاستعلامات تعمل بدون تعديل
+يستخدم المشروع **Vitest** مع **fast-check** لاختبارات قائمة على الخصائص (Property-Based Testing)، إضافةً إلى **Testing Library** و **vitest-axe** لاختبارات إمكانية الوصول:
 
-> **ملاحظة:** التقسيم يعمل فقط مع PostgreSQL الخارجي. PGlite لا يدعم Partitioning.
+```bash
+npm run test                 # تشغيل مرة واحدة
+npm run test -- --coverage   # مع تقرير التغطية
+```
+
+### الاختبارات الطرفية (End-to-End)
+
+تعمل اختبارات **Playwright** على متصفح Chromium مقابل `http://localhost:5173`. شغّل خادم التطوير أولاً في طرفية منفصلة:
+
+```bash
+npm run dev          # طرفية أولى
+npm run test:e2e     # طرفية ثانية
+```
+
+تشمل السيناريوهات: تسجيل الدخول، خطة التدقيق، المراسلات، والملاحظات (`apps/web/e2e/`).
 
 ---
 
 ## خط أنابيب CI/CD
 
-يتوفر خط أنابيب GitLab CI/CD في ملف `.gitlab-ci.yml` بأربع مراحل:
+يُعرَّف خط الأنابيب في `.github/workflows/ci.yml` (**GitHub Actions**)، ويعمل عند كل `push` و `pull_request` على فرعَي `main`/`master`، عبر الخطوات التالية:
 
-| المرحلة | المهام |
-|---------|--------|
-| **validate** | ESLint + Prettier check, TypeScript typecheck (`tsc --noEmit`), `npm audit` |
-| **test** | `vitest --run --coverage` مع تقرير التغطية |
-| **build** | بناء Docker image وتوسيمها بـ commit SHA |
-| **deploy** | نشر يدوي (manual trigger) لبيئة الإنتاج |
+| الخطوة | الوصف |
+|--------|-------|
+| **Install** | `npm ci` بسجل كامل (`fetch-depth: 0`) لتمكين حارس التجميد |
+| **Shared freeze guard** | يفشل إذا تغيّر أي سطر تحت `packages/shared` دون موافقة موثَّقة |
+| **Typecheck** | `tsc --noEmit` على `@alsaqi/web` |
+| **Lint** | ESLint على `@alsaqi/web` |
+| **Test + Coverage** | Vitest مع حد أدنى للتغطية **70%** — يفشل الدمج إذا قلّت |
+| **Coverage summary** | تقرير ملخص التغطية في خلاصة التشغيل |
 
-- يُخزَّن `node_modules` مؤقتاً (cache) بين عمليات التشغيل
-- يستخدم Node.js 20 Alpine كصورة أساسية
-- يفشل الـ pipeline إذا فشلت أي مرحلة validate أو test
+يستخدم خط الأنابيب Node.js 20 مع تخزين مؤقت لـ npm.
 
 ---
 
-## البنية التقنية
+## التدويل ودعم العربية (RTL)
 
-| الطبقة | التقنيات |
-|--------|----------|
-| Frontend | React 18 + Vite + TypeScript + Tailwind CSS |
-| Backend | Express.js + TypeScript |
-| Database | PostgreSQL 14+ / PGlite (تطوير) |
-| Auth | JWT (RS256) + 2FA (TOTP) |
-| Security | Helmet.js + SecretsValidator + AES-256-GCM + DB SSL |
-| Realtime | WebSocket (ws) مع Auth Guard فوري |
-| CI/CD | GitLab CI/CD + Docker |
-| Proxy | Nginx + TLS 1.2+ + Brotli + Rate Limiting |
-| Backup | BackupScheduler + pg_dump + gzip |
-| Performance | Response Compression + Audit Trail Partitioning |
+- دعم كامل للعربية (RTL) والإنجليزية عبر **i18next** / **react-i18next**
+- كشف لغة المتصفح تلقائياً وتحميل ملفات الترجمة عند الطلب
+- مكوّنات واجهة مهيأة للاتجاه من اليمين إلى اليسار
+
+---
+
+## التوثيق
+
+يتوفر توثيق إضافي في مجلد `docs/`:
+
+| الملف | المحتوى |
+|------|---------|
+| `architecture.md` | معمارية النظام الكاملة (واجهة + خادم) |
+| `api.md` / `openapi.yaml` | توصيف واجهة الـ API |
+| `auth.md` | المصادقة والصلاحيات |
+| `database.md` | طبقة قاعدة البيانات |
+| `features.md` | تفصيل الميزات الوظيفية |
+| `uiux.md` | إرشادات واجهة وتجربة المستخدم |
+| `GUIDE.md` | دليل عام |
 
 ---
 

@@ -7,6 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CreateAuditPlanInput, UpdateAuditPlanInput } from '@alsaqi/shared';
 import { api } from '../index';
+import { withMutationFeedback, type MutationFeedbackOptions } from '../mutationFeedback';
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -25,12 +26,21 @@ export interface AuditPlansListParams {
   pageSize?: number;
   status?: string;
   department?: string;
+  type?: string;
+  search?: string;
 }
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 
 /**
  * Fetch a paginated/filtered list of audit plans.
+ *
+ * The returned `data` is a {@link PaginatedAuditPlans} object whose `total` and
+ * `totalPages` come straight from the server `Response_Envelope` meta — never
+ * computed from the current page's array length (Req 21.1, 21.2). Page and
+ * page-size params are forwarded to the server (Req 21.3).
+ *
+ * Validates: Requirements 21.1, 21.2, 21.3
  */
 export function useAuditPlans(params?: AuditPlansListParams) {
   return useQuery({
@@ -52,12 +62,18 @@ export function useAuditPlan(id: string) {
 
 /**
  * Create a new audit plan. Invalidates the plans list cache on success.
+ *
+ * Failures are routed through the Mutation_Feedback_Policy (Req 18): the error
+ * is surfaced to the user and re-thrown so the form stays open.
  */
-export function useCreateAuditPlan() {
+export function useCreateAuditPlan(feedback?: MutationFeedbackOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateAuditPlanInput) => api.auditPlans.create(data),
+    mutationFn: withMutationFeedback(
+      (data: CreateAuditPlanInput) => api.auditPlans.create(data),
+      feedback,
+    ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: auditPlansKeys.lists() });
     },
@@ -67,12 +83,19 @@ export function useCreateAuditPlan() {
 /**
  * Update an existing audit plan. Invalidates both list and detail caches.
  */
-export function useUpdateAuditPlan() {
+export function useUpdateAuditPlan(feedback?: MutationFeedbackOptions) {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateAuditPlanInput }) =>
-      api.auditPlans.update(id, data),
+  return useMutation<
+    Awaited<ReturnType<typeof api.auditPlans.update>>,
+    Error,
+    { id: string; data: UpdateAuditPlanInput }
+  >({
+    mutationFn: withMutationFeedback(
+      ({ id, data }: { id: string; data: UpdateAuditPlanInput }) =>
+        api.auditPlans.update(id, data),
+      feedback,
+    ),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: auditPlansKeys.lists() });
       queryClient.invalidateQueries({ queryKey: auditPlansKeys.detail(variables.id) });
@@ -83,11 +106,14 @@ export function useUpdateAuditPlan() {
 /**
  * Delete an audit plan. Invalidates the plans list cache on success.
  */
-export function useDeleteAuditPlan() {
+export function useDeleteAuditPlan(feedback?: MutationFeedbackOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.auditPlans.delete(id),
+    mutationFn: withMutationFeedback(
+      (id: string) => api.auditPlans.delete(id),
+      feedback,
+    ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: auditPlansKeys.lists() });
     },

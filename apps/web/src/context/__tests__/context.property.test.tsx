@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fc from 'fast-check';
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProvider } from '../UserContext';
 import { AuthProvider, useAuth } from '../AuthContext';
 import { PreferencesProvider, usePreferences } from '../PreferencesContext';
@@ -87,19 +88,27 @@ function AuthController() {
 
 /**
  * Full provider tree matching the app's nesting order:
- * UserProvider > AuthProvider > PreferencesProvider > AppProvider
+ * QueryClientProvider > UserProvider > AuthProvider > PreferencesProvider > AppProvider
+ *
+ * AuthProvider calls `useQueryClient()` (to clear the cache on logout), so a
+ * QueryClientProvider must enclose the tree.
  */
 function TestProviderTree({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  );
   return (
-    <UserProvider>
-      <AuthProvider>
-        <PreferencesProvider>
-          <AppProvider>
-            {children}
-          </AppProvider>
-        </PreferencesProvider>
-      </AuthProvider>
-    </UserProvider>
+    <QueryClientProvider client={queryClient}>
+      <UserProvider>
+        <AuthProvider>
+          <PreferencesProvider>
+            <AppProvider>
+              {children}
+            </AppProvider>
+          </PreferencesProvider>
+        </AuthProvider>
+      </UserProvider>
+    </QueryClientProvider>
   );
 }
 

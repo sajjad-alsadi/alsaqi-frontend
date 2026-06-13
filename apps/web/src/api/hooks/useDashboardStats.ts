@@ -1,5 +1,13 @@
+/**
+ * React Query hook for the Dashboard summary statistics.
+ *
+ * Thin Query_Hook in the canonical Query_Hooks layer (`src/api/hooks/*`) and the
+ * migration target for consumers that previously imported the Legacy_Hook at
+ * `src/hooks/useDashboardStats` (Req 3.2, 3.3). Routes through the composed,
+ * typed `api` (single HTTP_Client) — behavior is preserved exactly.
+ */
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../api';
+import { api } from '../index';
 
 export const useDashboardStats = (department?: string) => {
   const statsQuery = useQuery({
@@ -49,10 +57,10 @@ export const useDashboardStats = (department?: string) => {
     activity: rawStats.activity ?? []
   } : null;
 
-  return { 
-    stats, 
-    loading: statsQuery.isLoading, 
-    error: statsQuery.error ? (statsQuery.error as any).message : null, 
-    refresh: () => statsQuery.refetch() 
+  return {
+    stats,
+    loading: statsQuery.isLoading,
+    error: statsQuery.error ? (statsQuery.error as any).message : null,
+    refresh: () => statsQuery.refetch()
   };
 };

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuditPlans } from '../hooks/useAuditPlans';
-import { api } from '../api';
+import { api, useAuditPlans } from '../api';
 import { AuditPlan } from '../types';
 import { Plus, Search, Calendar, Edit, Trash2, Archive } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -31,7 +30,23 @@ const AuditPlanModule: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const { plans, loading, pagination, fetchPlans } = useAuditPlans({ page, pageSize, search: debouncedSearchTerm || undefined });
+  const plansQuery = useAuditPlans({
+    page,
+    pageSize,
+    ...(debouncedSearchTerm ? { search: debouncedSearchTerm } : {}),
+  });
+  // Surface the Legacy_Hook's convenience shape from the canonical typed
+  // Query_Hook so behavior is preserved after migration (Req 3.2). Totals come
+  // straight from the server Response_Envelope meta (Req 21.1, 21.2).
+  const plans = plansQuery.data?.items ?? [];
+  const loading = plansQuery.isLoading || plansQuery.isFetching;
+  const pagination = {
+    total: plansQuery.data?.total ?? 0,
+    totalPages: plansQuery.data?.totalPages ?? 0,
+  };
+  const fetchPlans = (_params?: unknown) => {
+    plansQuery.refetch();
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<AuditPlan | null>(null);

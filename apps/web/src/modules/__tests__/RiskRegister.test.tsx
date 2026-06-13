@@ -124,7 +124,7 @@ vi.mock('../../components/InteractiveIcon', () => ({
 }));
 
 const mockUseRisks = vi.fn();
-vi.mock('../../hooks/useRisks', () => ({
+vi.mock('../../api/hooks/useRisks', () => ({
   useRisks: (...args: any[]) => mockUseRisks(...args),
 }));
 

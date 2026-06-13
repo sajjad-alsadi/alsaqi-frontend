@@ -4,7 +4,7 @@ import { AuditProgram, AuditProcedure } from '../../types';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../utils/formatService';
 import { AuditStatus, AuditType, ControlTestType, UserRole } from '../../constants';
-import { useDepartments } from '../../hooks/useDepartments';
+import { useDepartments } from '../../api/hooks/useDepartments';
 import api from '../../api/httpClient';
 import { Button } from '@/components/ui/button';
 

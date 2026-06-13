@@ -37,6 +37,16 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
   const dashboardLayoutRef = useRef(dashboardLayout);
   dashboardLayoutRef.current = dashboardLayout;
 
+  // Track the stored `notifications_enabled` value so preference updates that
+  // concern theme/language/layout never overwrite the user's notification
+  // setting with a hardcoded value (Requirement 19.1-19.3). Seeded from
+  // localStorage and defaults to `true` when unset.
+  const notificationsEnabledRef = useRef<boolean>(
+    localStorage.getItem('audit_notifications') === null
+      ? true
+      : localStorage.getItem('audit_notifications') === 'true'
+  );
+
   // NOTE: Document direction (`document.documentElement.dir`/`lang`) is intentionally
   // NOT set here. `i18n.ts` is the single source of truth for direction: it listens to
   // i18next's `languageChanged` event and updates the document direction whenever the
@@ -62,7 +72,7 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     // Persist to server - API uses cookie-based auth, so no token check needed.
     // The request will simply fail with 401 if not authenticated (handled by api interceptor).
     try {
-      await api.put('/preferences', { language: lang, theme: themeRef.current, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: true });
+      await api.put('/preferences', { language: lang, theme: themeRef.current, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: notificationsEnabledRef.current });
     } catch (err) {
       // Silently fail - local state is already updated
     }
@@ -79,7 +89,7 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
       document.documentElement.classList.remove('dark');
     }
     try {
-      await api.put('/preferences', { language: languageRef.current, theme: newTheme, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: true });
+      await api.put('/preferences', { language: languageRef.current, theme: newTheme, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: notificationsEnabledRef.current });
     } catch (err) {
       // Silently fail - local state is already updated
     }
@@ -91,7 +101,7 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
       localStorage.setItem('audit_layout', layout);
     } catch (e) {}
     try {
-      await api.put('/preferences', { language: languageRef.current, theme: themeRef.current, dashboard_layout: layout, notifications_enabled: true });
+      await api.put('/preferences', { language: languageRef.current, theme: themeRef.current, dashboard_layout: layout, notifications_enabled: notificationsEnabledRef.current });
     } catch (err) {
       // Silently fail - local state is already updated
     }

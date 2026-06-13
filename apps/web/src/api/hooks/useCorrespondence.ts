@@ -1,6 +1,14 @@
+/**
+ * React Query hook for the Correspondence module.
+ *
+ * Thin Query_Hook in the canonical Query_Hooks layer (`src/api/hooks/*`) and the
+ * migration target for consumers that previously imported the Legacy_Hook at
+ * `src/hooks/useCorrespondence` (Req 3.2, 3.3). Routes through the composed,
+ * typed `api` (single HTTP_Client) — behavior is preserved exactly.
+ */
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '../api';
+import { api } from '../index';
 
 export const useCorrespondence = (initialParams: any = {}) => {
   const queryClient = useQueryClient();
@@ -47,6 +55,6 @@ export const useCorrespondence = (initialParams: any = {}) => {
     fetchIncoming: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-incoming', params], queryFn: () => api.correspondence.getIncoming(params) }),
     fetchOutgoing: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-outgoing', params], queryFn: () => api.correspondence.getOutgoing(params) }),
     fetchArchive: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-archive', params], queryFn: () => api.correspondence.getArchive(params) }),
-    refreshAll
+    refreshAll,
   };
 };

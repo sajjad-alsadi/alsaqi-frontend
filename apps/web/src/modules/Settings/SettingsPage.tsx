@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import AboutSection from '../../components/AboutSection';
 import { useFileUploadValidation } from '../../hooks/useFileUploadValidation';
 import PDFSettingsSection from '../../components/PDFSettingsSection';
-import { useDepartments } from '../../hooks/useDepartments';
+import { useDepartments } from '../../api/hooks/useDepartments';
 import { PdfTemplateManagement } from '../../components/PdfTemplateManagement';
 import logger from '../../utils/logger';
 import Portal from '../../components/Portal';

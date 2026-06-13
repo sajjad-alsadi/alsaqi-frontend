@@ -1,10 +1,37 @@
 // @vitest-environment jsdom
+import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook as baseRenderHook, waitFor, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePermissions } from '../usePermissions';
+import { PermissionsProvider } from '../../context/PermissionsContext';
 import { UserRole } from '../../constants';
 import { MODULES, PERMISSIONS, DEFAULT_PERMISSIONS, Module, Permission } from '../../permissions';
 import { UserPermissionSet } from '../../permissions/types';
+
+/**
+ * After the single-source-of-truth refactor (Req 11), `usePermissions` is a thin
+ * selector over {@link PermissionsProvider} and must be rendered within it. This
+ * wrapper supplies a fresh, isolated QueryClient + PermissionsProvider per mount,
+ * so every `renderHook(() => usePermissions())` below resolves from the provider's
+ * single shared fetch.
+ */
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
+  const [client] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false, gcTime: 0, staleTime: 0 } },
+      })
+  );
+  return React.createElement(
+    QueryClientProvider,
+    { client },
+    React.createElement(PermissionsProvider, null, children)
+  );
+};
+
+const renderHook: typeof baseRenderHook = ((cb: any, opts?: any) =>
+  baseRenderHook(cb, { wrapper: Wrapper, ...opts })) as typeof baseRenderHook;
 
 // Mock the UserContext
 const mockUser = { user: null as any };

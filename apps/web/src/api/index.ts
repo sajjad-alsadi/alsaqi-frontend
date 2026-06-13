@@ -10,6 +10,7 @@
  *   const user = await api.auth.login({ usernameOrEmail: '...', password: '...' });
  */
 import { createApiClient, type ApiClientConfig } from './client';
+import { dispatchUnauthorized } from './navigationEvents';
 import { createAuthApi, type AuthApi } from './modules/auth';
 import { createFindingsApi, type FindingsApi } from './modules/findings';
 import { createAuditPlansApi, type AuditPlansApi } from './modules/audit-plans';
@@ -84,7 +85,10 @@ export const api: ComposedApiClient = createComposedApiClient({
   baseUrl: env?.['VITE_API_URL'] || '/api',
   timeout: 30000,
   onUnauthorized: () => {
-    window.location.href = '/login';
+    // SPA-internal redirect (Req 23.2): dispatch an in-app navigation event
+    // consumed by a top-level listener that calls `navigate('/login')`,
+    // instead of reloading the document via `window.location.href`.
+    dispatchUnauthorized();
   },
   onError: (error) => {
     console.error('[API Error]', error.type, error.url, error.reason);
@@ -95,6 +99,7 @@ export const api: ComposedApiClient = createComposedApiClient({
 
 export { createApiClient } from './client';
 export type { ApiClient, ApiClientConfig, ApiClientError } from './client';
+export { UNAUTHORIZED_EVENT, dispatchUnauthorized } from './navigationEvents';
 export type { AuthApi } from './modules/auth';
 export type { FindingsApi } from './modules/findings';
 export type { AuditPlansApi } from './modules/audit-plans';
@@ -117,3 +122,7 @@ export * from './hooks/useTasks';
 export * from './hooks/useUsers';
 export * from './hooks/useAuth';
 export * from './hooks/useNotifications';
+
+// ─── Mutation Feedback Policy (Req 18) ────────────────────────────────────────
+
+export { withMutationFeedback, type MutationFeedbackOptions } from './mutationFeedback';

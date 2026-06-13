@@ -7,13 +7,14 @@
  * New code should prefer the typed API client (import { api } from '@/api')
  * or React Query hooks (import { useFindings } from '@/api/hooks/useFindings').
  *
- * Resilience: this raw instance now carries an idempotent, bounded response
- * interceptor that retries transient failures (network errors and 5xx) with
- * exponential backoff (1s, 2s — capped at MAX_RETRY_ATTEMPTS total tries),
- * delegates 401 handling to the client's existing token-refresh flow, and never
- * retries other 4xx responses. Final failures (and the client `onError` hook)
- * are routed through the structured `errorReporter` instead of `console.error`,
- * so they remain visible in production where console output is stripped.
+ * Resilience: retries are owned exclusively by the typed client's
+ * `requestWithRetry` (a single bounded, idempotency-aware Retry_Layer in
+ * `client.ts`). This module no longer installs its own response-interceptor
+ * retry loop, so requests are never retried twice. It keeps base-URL
+ * resolution, delegates 401 handling to the client's existing token-refresh
+ * flow, and routes the client `onError` hook through the structured
+ * `errorReporter` instead of `console.error`, so failures remain visible in
+ * production where console output is stripped.
  *
  * @example
  * // Legacy pattern (still supported):
@@ -24,11 +25,8 @@
  * import { api } from '../api';
  * const findings = await api.findings.list();
  */
-import axios, {
-  type AxiosError,
-  type InternalAxiosRequestConfig,
-} from 'axios';
-import { createApiClient, isRetriableError, MAX_RETRY_ATTEMPTS } from './client';
+import { createApiClient } from './client';
+import { dispatchUnauthorized } from './navigationEvents';
 import { errorReporter, type ErrorSeverity } from '../utils/errorReporter';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,58 +50,14 @@ export function resolveBaseUrl(value?: string): string {
   return '/api';
 }
 
-// ─── Retry Constants (mirror client.ts) ─────────────────────────────────────────
-// Kept in sync with the typed client's `requestWithRetry`: 1s → 2s → 4s base,
-// bounded by the shared MAX_RETRY_ATTEMPTS.
-const RETRY_BASE_DELAY_MS = 1000;
-const RETRY_MULTIPLIER = 2;
-
-/** Axios request config tagged with a retry counter to bound retries and avoid double-retry. */
-interface RetryableRequestConfig extends InternalAxiosRequestConfig {
-  __retryCount?: number;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Exponential backoff delay for a given zero-based retry index.
- * index 0 → 1000ms, index 1 → 2000ms, index 2 → 4000ms.
- */
-function getRetryDelay(retryIndex: number): number {
-  return RETRY_BASE_DELAY_MS * Math.pow(RETRY_MULTIPLIER, retryIndex);
-}
-
-/**
- * Route a failed raw-axios request through the structured error reporter.
- */
-function reportApiError(error: AxiosError, attempts: number): void {
-  const status = error.response?.status;
-  const url = error.config?.url ?? 'unknown';
-  const type: 'timeout' | 'connection' | 'server_error' = !error.response
-    ? error.code === 'ECONNABORTED'
-      ? 'timeout'
-      : 'connection'
-    : 'server_error';
-  const severity: ErrorSeverity = type === 'server_error' ? 'high' : 'medium';
-
-  errorReporter.report({
-    module: 'api',
-    message: `[API Error] ${type} ${url} (status: ${status ?? 'none'}, attempts: ${attempts}): ${error.message}`,
-    severity,
-    type: 'uncaught',
-    stack: error.stack,
-  });
-}
-
 const client = createApiClient({
   baseUrl: resolveBaseUrl(env?.['VITE_API_URL']),
   timeout: 30000,
   onUnauthorized: () => {
-    if (window.location.pathname !== '/login') {
-      window.location.href = '/login';
-    }
+    // SPA-internal redirect (Req 23.2): dispatch an in-app navigation event
+    // consumed by a top-level listener that calls `navigate('/login')`,
+    // instead of reloading the document via `window.location.href`.
+    dispatchUnauthorized();
   },
   onError: (error) => {
     const severity: ErrorSeverity = error.type === 'server_error' ? 'high' : 'medium';
@@ -116,45 +70,12 @@ const client = createApiClient({
   },
 });
 
-// ─── Bounded Retry Interceptor ──────────────────────────────────────────────────
-// Runs after the client's built-in response interceptor (which owns 401 → refresh,
-// version-mismatch detection, and envelope unwrapping). This handler only sees
-// errors that the refresh flow did not resolve. It retries network errors and 5xx
-// responses with exponential backoff up to MAX_RETRY_ATTEMPTS total attempts,
-// tracking the count on the request config so the bound is never exceeded
-// (idempotent — safe even when the request is re-dispatched). All other errors,
-// including non-401 4xx, are rejected without retry. After exhausting retries the
-// failure is reported through `errorReporter.report()`.
-client.http.interceptors.response.use(
-  (response) => response,
-  async (error: unknown) => {
-    if (!axios.isAxiosError(error)) {
-      return Promise.reject(error);
-    }
-
-    const config = error.config as RetryableRequestConfig | undefined;
-
-    // Non-retriable (e.g. 4xx other than the refresh-handled 401) or no config to retry.
-    if (!config || !isRetriableError(error)) {
-      return Promise.reject(error);
-    }
-
-    const previousRetries = config.__retryCount ?? 0;
-    // previousRetries counts retries already performed; the initial attempt is implicit.
-    // Total attempts = 1 (initial) + previousRetries. Stop once we would exceed the bound.
-    if (previousRetries >= MAX_RETRY_ATTEMPTS - 1) {
-      reportApiError(error, MAX_RETRY_ATTEMPTS);
-      return Promise.reject(error);
-    }
-
-    config.__retryCount = previousRetries + 1;
-    await sleep(getRetryDelay(previousRetries));
-    return client.http(config);
-  }
-);
-
 /**
  * The raw Axios instance with all interceptors configured.
+ *
+ * Retries are handled solely by the typed client's `requestWithRetry`; this
+ * instance installs no additional retry interceptor.
+ *
  * Drop-in replacement for the old services/api.ts default export.
  */
 const api = client.http;

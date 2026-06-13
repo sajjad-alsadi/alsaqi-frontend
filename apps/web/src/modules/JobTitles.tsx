@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Briefcase, Search, Plus, Edit2, Trash2, Archive } from 'lucide-react';
 import { motion } from 'motion/react';
 import api from '../api/httpClient';
-import { useDepartments } from '../hooks/useDepartments';
+import { useDepartments } from '../api/hooks/useDepartments';
 import logger from '../utils/logger';
 
 import Modal from '../components/Modal';

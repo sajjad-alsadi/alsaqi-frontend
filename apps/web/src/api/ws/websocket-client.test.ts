@@ -4,6 +4,11 @@
  * 'failed' state after exhaustion, missed notification sync with 30-min window,
  * and connection state transitions.
  *
+ * NOTE: `getToken` is async (Requirement 7) and `attemptConnection` awaits it
+ * before constructing the socket, so the socket is created in a microtask. Tests
+ * use fake timers and flush the awaited token with `vi.advanceTimersByTimeAsync(0)`
+ * (or the reconnect-delay async advance) before touching `mockWsInstances`.
+ *
  * Requirements: 3.2, 3.3, 3.4, 9.2, 9.3, 9.4, 9.5
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -11,7 +16,6 @@ import {
   WebSocketClient,
   createWebSocketClient,
   type WebSocketClientConfig,
-  type ConnectionState,
 } from './websocket-client';
 import type { Notification } from '@alsaqi/shared';
 
@@ -54,9 +58,9 @@ class MockWebSocket {
     this.onmessage?.(event);
   }
 
-  simulateClose(): void {
+  simulateClose(code?: number): void {
     this.readyState = MockWebSocket.CLOSED;
-    this.onclose?.(new CloseEvent('close'));
+    this.onclose?.(new CloseEvent('close', code !== undefined ? { code } : undefined));
   }
 
   simulateError(): void {
@@ -66,6 +70,18 @@ class MockWebSocket {
 
 // Store references to created WebSocket instances for test assertions
 let mockWsInstances: MockWebSocket[] = [];
+
+/** Flush the awaited per-attempt token fetch so the socket gets constructed. */
+function flush(): Promise<void> {
+  return vi.advanceTimersByTimeAsync(0);
+}
+
+/** Parse the messages a socket has sent and return only those of a given type. */
+function sentOfType(ws: MockWebSocket, type: string): Array<Record<string, unknown>> {
+  return ws.sentMessages
+    .map((m) => JSON.parse(m) as Record<string, unknown>)
+    .filter((m) => m['type'] === type);
+}
 
 // ─── Test Setup ───────────────────────────────────────────────────────────────
 
@@ -101,7 +117,7 @@ describe('WebSocketClient', () => {
 
     config = {
       wsUrl: 'ws://localhost:3000/ws',
-      getToken: () => 'test-jwt-token',
+      getToken: async () => 'test-jwt-token',
       httpBaseUrl: 'http://localhost:3000/api',
       onNotification,
       onStateChange,
@@ -118,47 +134,50 @@ describe('WebSocketClient', () => {
   // ─── Connection ─────────────────────────────────────────────────────────────
 
   describe('Connection', () => {
-    it('should connect to the WebSocket server with JWT token', () => {
+    it('should connect to the WebSocket server using the bare wsUrl (no token in URL)', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
 
       expect(mockWsInstances).toHaveLength(1);
-      expect(mockWsInstances[0].url).toBe(
-        'ws://localhost:3000/ws?token=test-jwt-token'
-      );
+      expect(mockWsInstances[0].url).toBe('ws://localhost:3000/ws');
     });
 
-    it('should URL-encode the token parameter', () => {
-      config.getToken = () => 'token with spaces&special=chars';
+    it('should never place the token in the connection URL', async () => {
+      config.getToken = async () => 'token with spaces&special=chars';
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
 
-      expect(mockWsInstances[0].url).toContain(
-        '?token=token%20with%20spaces%26special%3Dchars'
-      );
+      expect(mockWsInstances[0].url).toBe('ws://localhost:3000/ws');
+      expect(mockWsInstances[0].url).not.toContain('token');
+      expect(mockWsInstances[0].url).not.toContain('?');
     });
 
-    it('should set state to connected on successful WebSocket open', () => {
+    it('should set state to connected on successful WebSocket open', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       expect(client.getState()).toBe('connected');
       expect(onStateChange).toHaveBeenCalledWith('connected');
     });
 
-    it('should not connect if token is null', () => {
-      config.getToken = () => null;
+    it('should not connect if token is null', async () => {
+      config.getToken = async () => null;
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
 
       expect(mockWsInstances).toHaveLength(0);
       expect(client.getState()).toBe('disconnected');
     });
 
-    it('should set state to disconnected when disconnect is called', () => {
+    it('should set state to disconnected when disconnect is called', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       client.disconnect();
@@ -171,9 +190,10 @@ describe('WebSocketClient', () => {
   // ─── Notification Handling ──────────────────────────────────────────────────
 
   describe('Notification Handling', () => {
-    it('should emit notification on valid message', () => {
+    it('should emit notification on valid message', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       const notification = {
@@ -193,9 +213,10 @@ describe('WebSocketClient', () => {
       expect(onNotification).toHaveBeenCalledWith(notification, 42);
     });
 
-    it('should update lastSequenceId on notification', () => {
+    it('should update lastSequenceId on notification', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       mockWsInstances[0].simulateMessage({
@@ -207,9 +228,10 @@ describe('WebSocketClient', () => {
       expect(client.getLastSequenceId()).toBe(10);
     });
 
-    it('should track lastMessageTimestamp on notification', () => {
+    it('should track lastMessageTimestamp on notification', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       const before = Date.now();
@@ -226,9 +248,10 @@ describe('WebSocketClient', () => {
       expect(timestamp).toBeLessThanOrEqual(after);
     });
 
-    it('should not decrease lastSequenceId for older notifications', () => {
+    it('should not decrease lastSequenceId for older notifications', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       mockWsInstances[0].simulateMessage({
@@ -246,9 +269,10 @@ describe('WebSocketClient', () => {
       expect(client.getLastSequenceId()).toBe(10);
     });
 
-    it('should ignore malformed messages', () => {
+    it('should ignore malformed messages', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Message without type
@@ -263,17 +287,18 @@ describe('WebSocketClient', () => {
   // ─── Reconnection with Exponential Backoff ──────────────────────────────────
 
   describe('Reconnection (Requirement 3.2)', () => {
-    it('should attempt reconnection on disconnect', () => {
+    it('should attempt reconnection on disconnect', async () => {
       // Mock Math.random to return 0.5 (no jitter effect)
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
       mockWsInstances[0].simulateClose();
 
       // Should schedule reconnection — advance 1s for first attempt (base delay)
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
 
       // A new WebSocket instance should have been created
       expect(mockWsInstances).toHaveLength(2);
@@ -327,12 +352,13 @@ describe('WebSocketClient', () => {
       expect(client.calculateReconnectDelay(6)).toBe(36000);
     });
 
-    it('should enter failed state after 10 reconnection attempts (Requirement 3.3)', () => {
+    it('should enter failed state after 10 reconnection attempts (Requirement 3.3)', async () => {
       // Use no jitter for predictable timing
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Simulate 10 failed reconnections
@@ -340,9 +366,9 @@ describe('WebSocketClient', () => {
         const lastIdx = mockWsInstances.length - 1;
         mockWsInstances[lastIdx].simulateClose();
 
-        // Advance past the reconnect delay
+        // Advance past the reconnect delay (also flushes the awaited token)
         const baseDelay = 1000 * Math.pow(2, i);
-        vi.advanceTimersByTime(Math.min(baseDelay, 30000));
+        await vi.advanceTimersByTimeAsync(Math.min(baseDelay, 30000));
       }
 
       // After the 10th attempt fails
@@ -355,16 +381,17 @@ describe('WebSocketClient', () => {
       expect(onReconnectionFailed).toHaveBeenCalledTimes(1);
     });
 
-    it('should reset reconnect counter on successful connection', () => {
+    it('should reset reconnect counter on successful connection', async () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
       mockWsInstances[0].simulateClose();
 
       // First reconnect attempt
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
       expect(mockWsInstances).toHaveLength(2);
 
       // Success!
@@ -376,13 +403,14 @@ describe('WebSocketClient', () => {
       mockWsInstances[1].simulateClose();
 
       // Should start fresh with 1s delay (not 2s)
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
       expect(mockWsInstances).toHaveLength(3);
     });
 
-    it('should track disconnectedAt timestamp on first close', () => {
+    it('should track disconnectedAt timestamp on first close', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       expect(client.getDisconnectedAt()).toBeNull();
@@ -395,17 +423,18 @@ describe('WebSocketClient', () => {
       expect(client.getDisconnectedAt()).toBeLessThanOrEqual(after);
     });
 
-    it('should clear disconnectedAt on successful reconnection', () => {
+    it('should clear disconnectedAt on successful reconnection', async () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
       mockWsInstances[0].simulateClose();
 
       expect(client.getDisconnectedAt()).not.toBeNull();
 
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
       mockWsInstances[1].simulateOpen();
 
       expect(client.getDisconnectedAt()).toBeNull();
@@ -415,10 +444,11 @@ describe('WebSocketClient', () => {
   // ─── Failed State (Requirement 3.3) ────────────────────────────────────────
 
   describe('Failed State (Requirement 3.3)', () => {
-    function exhaustReconnectionAttempts(client: WebSocketClient): void {
+    async function exhaustReconnectionAttempts(client: WebSocketClient): Promise<void> {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Exhaust all 10 reconnection attempts
@@ -426,7 +456,7 @@ describe('WebSocketClient', () => {
         const lastIdx = mockWsInstances.length - 1;
         mockWsInstances[lastIdx].simulateClose();
         const baseDelay = 1000 * Math.pow(2, i);
-        vi.advanceTimersByTime(Math.min(baseDelay, 30000));
+        await vi.advanceTimersByTimeAsync(Math.min(baseDelay, 30000));
       }
 
       // Final close triggers failed mode
@@ -434,30 +464,35 @@ describe('WebSocketClient', () => {
       mockWsInstances[lastIdx].simulateClose();
     }
 
-    it('should display failed state after all reconnection attempts exhausted', () => {
+    it('should display failed state after all reconnection attempts exhausted', async () => {
       const client = createWebSocketClient(config);
-      exhaustReconnectionAttempts(client);
+      await exhaustReconnectionAttempts(client);
 
       expect(client.getState()).toBe('failed');
       expect(onStateChange).toHaveBeenCalledWith('failed');
     });
 
-    it('should call onReconnectionFailed callback when all attempts exhausted', () => {
+    it('should call onReconnectionFailed callback when all attempts exhausted', async () => {
       const client = createWebSocketClient(config);
-      exhaustReconnectionAttempts(client);
+      await exhaustReconnectionAttempts(client);
 
       expect(onReconnectionFailed).toHaveBeenCalledTimes(1);
     });
 
-    it('should not attempt further reconnections after entering failed state', () => {
+    it('should not attempt further WebSocket reconnections (only polling-driven) after entering failed state', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ success: true, data: [] }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
       const client = createWebSocketClient(config);
-      exhaustReconnectionAttempts(client);
+      await exhaustReconnectionAttempts(client);
 
       const instanceCount = mockWsInstances.length;
 
-      // Wait a long time — no new attempts should be made
-      vi.advanceTimersByTime(120000);
-
+      // Within a single polling interval there are no extra socket attempts.
+      await vi.advanceTimersByTimeAsync(29000);
       expect(mockWsInstances.length).toBe(instanceCount);
     });
   });
@@ -465,34 +500,26 @@ describe('WebSocketClient', () => {
   // ─── HTTP Polling Fallback ──────────────────────────────────────────────────
 
   describe('HTTP Polling Fallback (Requirement 9.3)', () => {
-    it('should include authorization header in polling requests', () => {
+    it('should remain connected and not poll while the socket is healthy', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ success: true, data: [] }),
       });
       vi.stubGlobal('fetch', mockFetch);
 
-      // Manually trigger polling by using the polling fallback
-      // (This tests that the polling path still works if invoked)
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
-      // Process notifications via polling endpoint would use auth headers
-      // This test ensures the internal pollNotifications method uses correct auth
-      // We'll test indirectly by verifying the degraded state transition exists
       expect(client.getState()).toBe('connected');
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
-    it('should pass lastSequenceId in polling request URL', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ success: true, data: [] }),
-      });
-      vi.stubGlobal('fetch', mockFetch);
-
+    it('should track lastSequenceId used by the polling request URL', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Receive a notification to set lastSequenceId
@@ -509,11 +536,12 @@ describe('WebSocketClient', () => {
   // ─── Missed Notification Sync (Requirement 3.4) ─────────────────────────────
 
   describe('Missed Notification Sync (Requirement 3.4)', () => {
-    it('should send sync request on reconnection with last sequence ID', () => {
+    it('should send sync request on reconnection with last sequence ID', async () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Receive a notification to set lastSequenceId
@@ -525,22 +553,22 @@ describe('WebSocketClient', () => {
 
       // Disconnect and reconnect
       mockWsInstances[0].simulateClose();
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
       mockWsInstances[1].simulateOpen();
 
-      // Should have sent a sync message
-      expect(mockWsInstances[1].sentMessages).toHaveLength(1);
-      const syncMsg = JSON.parse(mockWsInstances[1].sentMessages[0]);
-      expect(syncMsg.type).toBe('sync');
-      expect(syncMsg.lastSequenceId).toBe(25);
-      expect(syncMsg.limit).toBe(100);
+      // The auth message is sent first, then the sync request.
+      const syncMessages = sentOfType(mockWsInstances[1], 'sync');
+      expect(syncMessages).toHaveLength(1);
+      expect(syncMessages[0]['lastSequenceId']).toBe(25);
+      expect(syncMessages[0]['limit']).toBe(100);
     });
 
-    it('should include since timestamp in sync request when available', () => {
+    it('should include since timestamp in sync request when available', async () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Receive a notification to set lastSequenceId and lastMessageTimestamp
@@ -552,28 +580,30 @@ describe('WebSocketClient', () => {
 
       // Disconnect and reconnect
       mockWsInstances[0].simulateClose();
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
       mockWsInstances[1].simulateOpen();
 
-      const syncMsg = JSON.parse(mockWsInstances[1].sentMessages[0]);
-      expect(syncMsg.since).toBeDefined();
+      const syncMsg = sentOfType(mockWsInstances[1], 'sync')[0];
+      expect(syncMsg['since']).toBeDefined();
       // since should be a valid ISO string
-      expect(new Date(syncMsg.since).toISOString()).toBe(syncMsg.since);
+      expect(new Date(syncMsg['since'] as string).toISOString()).toBe(syncMsg['since']);
     });
 
-    it('should not send sync request on first connection (no lastSequenceId)', () => {
+    it('should not send sync request on first connection (no lastSequenceId)', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
-      expect(mockWsInstances[0].sentMessages).toHaveLength(0);
+      expect(sentOfType(mockWsInstances[0], 'sync')).toHaveLength(0);
     });
 
-    it('should request max 100 missed notifications', () => {
+    it('should request max 100 missed notifications', async () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Set lastSequenceId
@@ -585,18 +615,19 @@ describe('WebSocketClient', () => {
 
       // Reconnect
       mockWsInstances[0].simulateClose();
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
       mockWsInstances[1].simulateOpen();
 
-      const syncMsg = JSON.parse(mockWsInstances[1].sentMessages[0]);
-      expect(syncMsg.limit).toBe(100);
+      const syncMsg = sentOfType(mockWsInstances[1], 'sync')[0];
+      expect(syncMsg['limit']).toBe(100);
     });
 
-    it('should NOT sync notifications if disconnected for more than 30 minutes', () => {
+    it('should NOT sync notifications if disconnected for more than 30 minutes', async () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Set lastSequenceId
@@ -609,23 +640,23 @@ describe('WebSocketClient', () => {
       // Disconnect
       mockWsInstances[0].simulateClose();
 
-      // Advance time past 30 minutes
-      vi.advanceTimersByTime(31 * 60 * 1000);
+      // Advance time past 30 minutes (also fires reconnect timers + flushes tokens)
+      await vi.advanceTimersByTimeAsync(31 * 60 * 1000);
 
-      // Manually reconnect (simulating a later reconnection)
-      // The reconnect timers would have fired but let's just simulate the open
+      // Manually open the latest socket (simulating a later reconnection)
       const lastIdx = mockWsInstances.length - 1;
       mockWsInstances[lastIdx].simulateOpen();
 
       // Should NOT have sent a sync message because disconnection > 30 min
-      expect(mockWsInstances[lastIdx].sentMessages).toHaveLength(0);
+      expect(sentOfType(mockWsInstances[lastIdx], 'sync')).toHaveLength(0);
     });
 
-    it('should sync notifications if disconnected for less than 30 minutes', () => {
+    it('should sync notifications if disconnected for less than 30 minutes', async () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Set lastSequenceId
@@ -639,35 +670,35 @@ describe('WebSocketClient', () => {
       mockWsInstances[0].simulateClose();
 
       // Advance only 1 second (within 30-min window)
-      vi.advanceTimersByTime(1000);
+      await vi.advanceTimersByTimeAsync(1000);
 
       // Reconnect
       mockWsInstances[1].simulateOpen();
 
       // Should have sent sync message
-      expect(mockWsInstances[1].sentMessages).toHaveLength(1);
-      const syncMsg = JSON.parse(mockWsInstances[1].sentMessages[0]);
-      expect(syncMsg.type).toBe('sync');
-      expect(syncMsg.lastSequenceId).toBe(50);
+      const syncMessages = sentOfType(mockWsInstances[1], 'sync');
+      expect(syncMessages).toHaveLength(1);
+      expect(syncMessages[0]['lastSequenceId']).toBe(50);
     });
   });
 
   // ─── Disconnect & Cleanup ───────────────────────────────────────────────────
 
   describe('Cleanup', () => {
-    it('should not attempt reconnection after disconnect()', () => {
+    it('should not attempt reconnection after disconnect()', async () => {
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       client.disconnect();
-      vi.advanceTimersByTime(60000);
+      await vi.advanceTimersByTimeAsync(60000);
 
       // Should only have the initial instance
       expect(mockWsInstances).toHaveLength(1);
     });
 
-    it('should clear polling timer on disconnect', () => {
+    it('should clear polling timer on disconnect', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ success: true, data: [] }),
@@ -676,11 +707,12 @@ describe('WebSocketClient', () => {
 
       const client = createWebSocketClient(config);
       client.connect();
+      await flush();
       mockWsInstances[0].simulateOpen();
 
       // Disconnect should clean up everything
       client.disconnect();
-      vi.advanceTimersByTime(60000);
+      await vi.advanceTimersByTimeAsync(60000);
 
       expect(client.getState()).toBe('disconnected');
     });

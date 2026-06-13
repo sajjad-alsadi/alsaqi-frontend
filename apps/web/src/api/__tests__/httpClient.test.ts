@@ -8,11 +8,12 @@
  *      carry credentials (cookie-based auth via `withCredentials`) and the
  *      CSRF token from the `csrf-token` cookie as the `x-csrf-token` header,
  *      plus a per-request correlation id.
- *   2. 401 redirect behavior — when a request returns 401 and the token
- *      refresh fails, the configured `onUnauthorized` handler redirects the
- *      browser to `/login` (unless already on `/login`).
+ *   2. 401 navigation behavior — when a request returns 401 and the token
+ *      refresh fails, the configured `onUnauthorized` handler dispatches the
+ *      SPA-internal `app:unauthorized` navigation event (consumed by a
+ *      top-level in-Router listener) instead of a full-document redirect.
  *
- * Validates: Requirements 10.2
+ * Validates: Requirements 10.2, 23.2
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
@@ -26,6 +27,7 @@ vi.mock('../../utils/errorReporter', () => ({
 
 // Import AFTER the mock so the singleton client is built against it.
 import api from '../httpClient';
+import { UNAUTHORIZED_EVENT } from '../navigationEvents';
 
 // ─── window.location helper ─────────────────────────────────────────────────────
 // httpClient's onUnauthorized reads/writes window.location, so we replace it with
@@ -137,28 +139,41 @@ describe('httpClient backward-compatible raw axios export', () => {
     });
   });
 
-  describe('401 redirect behavior', () => {
-    it('redirects to /login when a 401 occurs and refresh fails', async () => {
-      const loc = installMockLocation('/dashboard');
+  describe('401 unauthorized navigation', () => {
+    it('dispatches the in-app unauthorized event when a 401 occurs and refresh fails', async () => {
+      installMockLocation('/dashboard');
       mock.onGet('/protected').reply(401, { message: 'Unauthorized' });
       // The refresh attempt uses the base axios.post; make it fail so the
       // onUnauthorized handler runs.
       vi.spyOn(axios, 'post').mockRejectedValueOnce(new Error('refresh failed'));
 
-      await expect(api.get('/protected')).rejects.toBeTruthy();
+      const onUnauthorized = vi.fn();
+      window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+      try {
+        await expect(api.get('/protected')).rejects.toBeTruthy();
+      } finally {
+        window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+      }
 
-      expect(loc.href).toBe('/login');
+      // SPA-internal navigation (Req 23.2): a DOM event is dispatched instead of
+      // a full-document `window.location` redirect, so the top-level in-Router
+      // listener can perform a client-side navigate('/login').
+      expect(onUnauthorized).toHaveBeenCalledTimes(1);
     });
 
-    it('does not redirect when the user is already on /login', async () => {
-      const loc = installMockLocation('/login');
-      mock.onGet('/protected').reply(401, { message: 'Unauthorized' });
-      vi.spyOn(axios, 'post').mockRejectedValueOnce(new Error('refresh failed'));
+    it('does not dispatch the unauthorized event for a successful request', async () => {
+      installMockLocation('/dashboard');
+      mock.onGet('/ok').reply(200, envelope('ok'));
 
-      await expect(api.get('/protected')).rejects.toBeTruthy();
+      const onUnauthorized = vi.fn();
+      window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+      try {
+        await api.get('/ok');
+      } finally {
+        window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+      }
 
-      // Still on the login page; href untouched (no redirect loop).
-      expect(loc.href).toBe('http://localhost/login');
+      expect(onUnauthorized).not.toHaveBeenCalled();
     });
   });
 });

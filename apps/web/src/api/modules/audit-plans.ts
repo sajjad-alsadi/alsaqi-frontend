@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import type { ApiClient } from '../client';
 import type { AuditPlan, CreateAuditPlanInput, UpdateAuditPlanInput } from '@alsaqi/shared';
+import { metaPagination } from '../utils/envelope';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
@@ -32,6 +33,20 @@ const DeleteResponseSchema = z.object({
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+/**
+ * A page of audit plans plus the server-driven pagination totals.
+ *
+ * `total` and `totalPages` are read from the `Response_Envelope` `meta.pagination`
+ * block, NOT computed from `items.length` (Req 21.1, 21.2). This lets paginated
+ * screens report the true server record count even when the current page holds
+ * fewer rows than `pageSize`.
+ */
+export interface PaginatedAuditPlans {
+  items: AuditPlan[];
+  total: number;
+  totalPages: number;
+}
+
 export interface AuditPlansApi {
   list(query?: {
     page?: number;
@@ -40,7 +55,7 @@ export interface AuditPlansApi {
     department?: string;
     type?: string;
     search?: string;
-  }): Promise<AuditPlan[]>;
+  }): Promise<PaginatedAuditPlans>;
   getById(id: string): Promise<AuditPlan>;
   create(data: CreateAuditPlanInput): Promise<AuditPlan>;
   update(id: string, data: UpdateAuditPlanInput): Promise<AuditPlan>;
@@ -51,8 +66,15 @@ export interface AuditPlansApi {
 
 export function createAuditPlansApi(client: ApiClient): AuditPlansApi {
   return {
-    list(query) {
-      return client.get('/v1/audit-plans', AuditPlanListSchema, { params: query }) as Promise<AuditPlan[]>;
+    async list(query) {
+      // Forward page/pageSize (and filters) to the server (Req 21.3) and read
+      // the pagination totals from the envelope meta rather than the page length.
+      const { data, meta } = await client.getWithMeta('/v1/audit-plans', AuditPlanListSchema, {
+        params: query,
+      });
+      const items = data as AuditPlan[];
+      const { total, totalPages } = metaPagination(meta, items.length);
+      return { items, total, totalPages };
     },
 
     getById(id) {

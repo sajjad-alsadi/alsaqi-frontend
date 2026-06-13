@@ -45,8 +45,8 @@ describe('auditPlansKeys', () => {
 });
 
 describe('useAuditPlans', () => {
-  it('fetches the list of audit plans', async () => {
-    const data = [{ id: 'p1' }];
+  it('fetches the list of audit plans with server pagination metadata', async () => {
+    const data = { items: [{ id: 'p1' }], total: 42, totalPages: 3 };
     auditPlansMock.list.mockResolvedValue(data);
     const { wrapper } = createWrapper();
 
@@ -55,6 +55,9 @@ describe('useAuditPlans', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(auditPlansMock.list).toHaveBeenCalledWith({ department: 'IT' });
     expect(result.current.data).toEqual(data);
+    // total/totalPages are surfaced from server meta, not derived from items.length
+    expect(result.current.data?.total).toBe(42);
+    expect(result.current.data?.totalPages).toBe(3);
   });
 
   it('surfaces errors from the list request', async () => {

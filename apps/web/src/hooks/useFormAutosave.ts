@@ -36,6 +36,41 @@ export function useFormAutosave<T extends Record<string, any>>(
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const storageKey = `draft_${key}`;
 
+  // Keep a ref to the latest data/enabled so the persist-now listener can flush
+  // the current values synchronously without re-subscribing on every change.
+  const dataRef = useRef(data);
+  const enabledRef = useRef(enabled);
+  dataRef.current = data;
+  enabledRef.current = enabled;
+
+  /** Synchronously write the current data as a draft snapshot (no debounce). */
+  const flushDraft = useCallback(() => {
+    if (!enabledRef.current) return;
+    try {
+      const current = dataRef.current;
+      const hasData = Object.values(current).some(
+        (v) => v !== '' && v !== null && v !== undefined
+      );
+      if (hasData) {
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({ data: current, timestamp: Date.now() })
+        );
+      }
+    } catch {
+      // localStorage might be full or unavailable
+    }
+  }, [storageKey]);
+
+  // Flush immediately when the app is about to reload (e.g. the version-mismatch
+  // overlay broadcasts 'app:persist-drafts' before reloading) so debounced,
+  // not-yet-written form data survives the navigation (Req 25.2).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.addEventListener('app:persist-drafts', flushDraft);
+    return () => window.removeEventListener('app:persist-drafts', flushDraft);
+  }, [flushDraft]);
+
   // Debounced save to localStorage
   useEffect(() => {
     if (!enabled) return;

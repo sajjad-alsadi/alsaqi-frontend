@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import api from '../api/httpClient';
 import { extractErrorMessage } from '../utils/errorService';
 import toast from 'react-hot-toast';
-import { useDepartments } from '../hooks/useDepartments';
+import { useDepartments } from '../api/hooks/useDepartments';
 import JobTitles from './JobTitles';
 import logger from '../utils/logger';
 import Portal from '../components/Portal';

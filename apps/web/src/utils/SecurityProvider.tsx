@@ -8,7 +8,7 @@ import { securityLogger } from './SecurityLogger';
 
 interface SecurityContextType {
     isReady: boolean;
-    reportEvent: (type: string, details: any) => void;
+    reportEvent: (type: string, details: unknown) => void;
 }
 
 const SecurityContext = createContext<SecurityContextType | null>(null);
@@ -47,7 +47,7 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         initializeSecurity();
     }, []);
 
-    const reportEvent = (type: string, details: any) => {
+    const reportEvent = (type: string, details: unknown) => {
         securityLogger.warn(`Security Event: ${type}`, details);
     };
 

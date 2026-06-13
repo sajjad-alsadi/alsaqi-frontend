@@ -1,5 +1,15 @@
+/**
+ * React Query hook for the Departments lookup.
+ *
+ * Thin Query_Hook that lives in the canonical Query_Hooks layer
+ * (`src/api/hooks/*`). It is the migration target for consumers that previously
+ * imported the Legacy_Hook at `src/hooks/useDepartments` (Req 3.2, 3.3).
+ *
+ * Behavior is preserved exactly: the list is fetched from `/departments` via the
+ * shared HTTP client and cached for 30 minutes.
+ */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../api/httpClient';
+import api from '../httpClient';
 
 export interface Department {
   id: string;
@@ -35,10 +45,10 @@ export function useDepartments() {
     queryClient.invalidateQueries({ queryKey: ['departments'] });
   };
 
-  return { 
-    departments: (deptQuery.data || []) as Department[], 
-    loading: deptQuery.isLoading || deptQuery.isFetching, 
-    error: deptQuery.error ? (deptQuery.error as any).message : null, 
-    refresh 
+  return {
+    departments: (deptQuery.data || []) as Department[],
+    loading: deptQuery.isLoading || deptQuery.isFetching,
+    error: deptQuery.error ? (deptQuery.error as any).message : null,
+    refresh,
   };
 }

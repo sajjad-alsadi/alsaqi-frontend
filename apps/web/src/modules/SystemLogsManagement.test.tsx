@@ -25,8 +25,16 @@ vi.mock('../api/httpClient', () => ({
   },
 }));
 
+// Mock the structured logger so error logging can be asserted directly without
+// depending on the dev-mode console formatting (which prefixes %c style tokens).
+vi.mock('../utils/logger', () => ({
+  default: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
+}));
+
 import api from '../api/httpClient';
 const mockedApi = vi.mocked(api);
+import logger from '../utils/logger';
+const mockedLogger = vi.mocked(logger);
 
 // Helper to create mock API responses
 function createMockAuditResponse(totalItems: number, paginationTotal?: number) {
@@ -498,7 +506,6 @@ describe('Preservation Property: Non-Health Display Behavior', () => {
         fc.constantFrom('network', 'timeout', 'server', '500', '403', '404'),
         async (errorType) => {
           vi.clearAllMocks();
-          const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
           const error = new Error(`API ${errorType} error`);
 
@@ -513,16 +520,14 @@ describe('Preservation Property: Non-Health Display Behavior', () => {
             expect(mockedApi.get).toHaveBeenCalled();
           });
 
-          // Wait for the error to be caught and logged
-          // logger.error prepends [ERROR] prefix to messages
+          // Wait for the error to be caught and logged through the structured logger.
           await waitFor(() => {
-            expect(consoleSpy).toHaveBeenCalledWith('[ERROR] Error fetching logs stats:', error);
+            expect(mockedLogger.error).toHaveBeenCalledWith('Error fetching logs stats:', error);
           });
 
           // Component should still be rendered (not crashed)
           expect(screen.getByText('SystemLogsManagement')).toBeInTheDocument();
 
-          consoleSpy.mockRestore();
           unmount();
         }
       ),

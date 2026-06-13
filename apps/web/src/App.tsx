@@ -1,20 +1,22 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { UserProvider, useUser } from './context/UserContext';
 import { PreferencesProvider, usePreferences } from './context/PreferencesContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { PermissionsProvider } from './context/PermissionsContext';
 import { useIdleTimeout } from './hooks/useIdleTimeout';
-import { usePermissions } from './hooks/usePermissions';
 import { MODULES } from './permissions';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ModuleErrorBoundary } from './components/ModuleErrorBoundary';
+import { RequirePermission } from './components/RequirePermission';
 import { SkipToContent } from './components/SkipToContent';
 import { LiveRegion } from './components/LiveRegion';
 import Login from './components/Login';
 import Layout from './components/Layout';
+import { UNAUTHORIZED_EVENT } from './api';
 import { Toaster } from 'react-hot-toast';
 import NotificationToast from './components/NotificationToast';
 
@@ -52,12 +54,28 @@ const AppContent: React.FC = () => {
   const { user } = useUser();
   const { language } = usePreferences();
   const { isCheckingSession } = useAuth();
-  const { canView } = usePermissions();
   const location = useLocation();
+  const navigate = useNavigate();
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
-  
+
   // Initialize idle timeout
   useIdleTimeout();
+
+  // SPA-internal unauthorized handling (Req 23): the API client dispatches an
+  // in-app `app:unauthorized` event instead of reloading the document via
+  // `window.location.href`. Listen here (inside the Router context) and perform
+  // a client-side navigation to the reachable `/login` route.
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      if (location.pathname !== '/login') {
+        navigate('/login');
+      }
+    };
+    window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
+    return () => {
+      window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
+    };
+  }, [navigate, location.pathname]);
 
   // Announce route changes to screen readers
   useEffect(() => {
@@ -102,11 +120,11 @@ const AppContent: React.FC = () => {
           <Route path="/departments" element={<DepartmentManagement />} />
           
           {/* Permission-gated Routes */}
-          <Route path="/system-logs" element={canView(MODULES.SYSTEM_LOGS) ? <SystemLogsManagement /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/system-errors" element={canView(MODULES.SYSTEM_LOGS) ? <Navigate to="/system-logs" replace /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/error-logs" element={canView(MODULES.SYSTEM_LOGS) ? <SystemErrorLogs /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/trail" element={canView(MODULES.SYSTEM_LOGS) ? <AuditTrail /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/users" element={canView(MODULES.USER_MANAGEMENT) ? <ModuleErrorBoundary moduleName="UserManagement"><UserManagement /></ModuleErrorBoundary> : <Navigate to="/dashboard" replace />} />
+          <Route path="/system-logs" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><SystemLogsManagement /></RequirePermission>} />
+          <Route path="/system-errors" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><Navigate to="/system-logs" replace /></RequirePermission>} />
+          <Route path="/error-logs" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><SystemErrorLogs /></RequirePermission>} />
+          <Route path="/trail" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><AuditTrail /></RequirePermission>} />
+          <Route path="/users" element={<RequirePermission module={MODULES.USER_MANAGEMENT}><ModuleErrorBoundary moduleName="UserManagement"><UserManagement /></ModuleErrorBoundary></RequirePermission>} />
           <Route path="/job-titles" element={<Navigate to="/departments" replace />} />
           
           <Route path="/settings" element={<Settings />} />
@@ -142,9 +160,11 @@ export default function App() {
           <AuthProvider>
             <PreferencesProvider>
               <AppProvider>
-                <NotificationProvider>
-                  <AppContent />
-                </NotificationProvider>
+                <PermissionsProvider>
+                  <NotificationProvider>
+                    <AppContent />
+                  </NotificationProvider>
+                </PermissionsProvider>
               </AppProvider>
             </PreferencesProvider>
           </AuthProvider>

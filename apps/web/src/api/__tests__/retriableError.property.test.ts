@@ -14,10 +14,10 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fc from 'fast-check';
-import { AxiosError, type AxiosInstance } from 'axios';
+import { AxiosError } from 'axios';
+import { z } from 'zod';
 import MockAdapter from 'axios-mock-adapter';
-import { isRetriableError, MAX_RETRY_ATTEMPTS } from '../client';
-import { errorReporter } from '../../utils/errorReporter';
+import { createApiClient, isRetriableError, MAX_RETRY_ATTEMPTS, type ApiClient } from '../client';
 
 // ─── Part A: Classification ──────────────────────────────────────────────────
 //
@@ -87,32 +87,31 @@ describe('Property 3 (classification): isRetriableError is true iff network erro
   });
 });
 
-// ─── Part B: Bounded retry on the raw-axios path ─────────────────────────────
+// ─── Part B: Bounded retry on the typed client's Retry_Layer ─────────────────
 //
-// For a sequence of retriable failures, the raw `httpClient` instance attempts
-// the request at most MAX_RETRY_ATTEMPTS times, then reports via errorReporter.
+// Retries live exclusively in the typed client's `requestWithRetry` (the raw
+// `httpClient` axios instance installs no retry interceptor). For a sequence of
+// retriable failures, `client.get` attempts the request at most
+// MAX_RETRY_ATTEMPTS times, then routes the final failure through `onError`.
 
-describe('Property 3 (bounded retry): raw-axios path retries at most MAX_RETRY_ATTEMPTS times', () => {
-  let api: AxiosInstance;
+describe('Property 3 (bounded retry): typed client retries at most MAX_RETRY_ATTEMPTS times', () => {
+  let client: ApiClient;
   let mock: MockAdapter;
-  let reportSpy: ReturnType<typeof vi.spyOn>;
+  let onError: ReturnType<typeof vi.fn>;
 
-  beforeEach(async () => {
-    // Fake timers so the interceptor's exponential backoff (1s, 2s, ...) does
-    // not actually delay the test; we flush pending timers explicitly.
+  beforeEach(() => {
+    // Fake timers so the retry path's exponential backoff (1s, 2s, ...) does not
+    // actually delay the test; we flush pending timers explicitly.
     vi.useFakeTimers();
-    // Mock the error reporter so no real fetch/network is attempted on final
-    // failure and so we can assert it is invoked exactly once.
-    reportSpy = vi.spyOn(errorReporter, 'report').mockImplementation(() => {});
-
-    // Import the raw axios instance (default export) fresh; it is a singleton.
-    api = (await import('../httpClient')).default;
-    mock = new MockAdapter(api);
+    onError = vi.fn();
+    // Build a typed client whose internal axios instance we can mock. The
+    // `onError` hook is what `httpClient.ts` wires to the structured reporter.
+    client = createApiClient({ baseUrl: '/api', onError });
+    mock = new MockAdapter(client.http);
   });
 
   afterEach(() => {
     mock.restore();
-    reportSpy.mockRestore();
     vi.useRealTimers();
     vi.clearAllTimers();
   });
@@ -124,7 +123,7 @@ describe('Property 3 (bounded retry): raw-axios path retries at most MAX_RETRY_A
         fc.integer({ min: 500, max: 599 }),
         async (status) => {
           mock.reset();
-          reportSpy.mockClear();
+          onError.mockClear();
 
           let attempts = 0;
           mock.onAny().reply(() => {
@@ -133,7 +132,7 @@ describe('Property 3 (bounded retry): raw-axios path retries at most MAX_RETRY_A
           });
 
           // The request must ultimately reject after exhausting retries.
-          const pending = api.get('/retry-target').then(
+          const pending = client.get('/retry-target', z.unknown()).then(
             () => 'resolved',
             () => 'rejected'
           );
@@ -147,8 +146,8 @@ describe('Property 3 (bounded retry): raw-axios path retries at most MAX_RETRY_A
           expect(attempts).toBeLessThanOrEqual(MAX_RETRY_ATTEMPTS);
           // For an always-failing retriable response it uses the full budget.
           expect(attempts).toBe(MAX_RETRY_ATTEMPTS);
-          // The final failure is routed through the structured error reporter.
-          expect(reportSpy).toHaveBeenCalledTimes(1);
+          // The final failure is routed through the configured error hook.
+          expect(onError).toHaveBeenCalledTimes(1);
         }
       ),
       { numRuns: 100 }
@@ -162,7 +161,7 @@ describe('Property 3 (bounded retry): raw-axios path retries at most MAX_RETRY_A
         fc.integer({ min: 400, max: 499 }).filter((s) => s !== 401),
         async (status) => {
           mock.reset();
-          reportSpy.mockClear();
+          onError.mockClear();
 
           let attempts = 0;
           mock.onAny().reply(() => {
@@ -170,7 +169,7 @@ describe('Property 3 (bounded retry): raw-axios path retries at most MAX_RETRY_A
             return [status, { error: 'client-error' }];
           });
 
-          const pending = api.get('/no-retry-target').then(
+          const pending = client.get('/no-retry-target', z.unknown()).then(
             () => 'resolved',
             () => 'rejected'
           );
@@ -181,7 +180,7 @@ describe('Property 3 (bounded retry): raw-axios path retries at most MAX_RETRY_A
           expect(outcome).toBe('rejected');
           // Non-retriable: a single attempt, no retry-path error report.
           expect(attempts).toBe(1);
-          expect(reportSpy).not.toHaveBeenCalled();
+          expect(onError).not.toHaveBeenCalled();
         }
       ),
       { numRuns: 100 }

@@ -8,7 +8,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';
 import { extractErrorMessage } from '../../utils/errorService';
-import { useDepartments, Department } from '../../hooks/useDepartments';
+import { useDepartments, Department } from '../../api/hooks/useDepartments';
 import { useFormat } from '../../utils/formatService';
 import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';

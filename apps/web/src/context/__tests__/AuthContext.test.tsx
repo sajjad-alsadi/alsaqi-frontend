@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProvider } from '../UserContext';
 import { AuthProvider, useAuth } from '../AuthContext';
 
@@ -60,15 +61,22 @@ function AuthConsumer() {
 }
 
 /**
- * Wrapper that provides UserProvider + AuthProvider (matching app nesting order).
+ * Wrapper that provides QueryClientProvider + UserProvider + AuthProvider
+ * (matching app nesting order). AuthProvider uses `useQueryClient()` to clear the
+ * React Query cache on logout, so a QueryClientProvider must enclose it.
  */
 function TestWrapper({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  );
   return (
-    <UserProvider>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </UserProvider>
+    <QueryClientProvider client={queryClient}>
+      <UserProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </UserProvider>
+    </QueryClientProvider>
   );
 }
 

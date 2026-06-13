@@ -38,7 +38,7 @@ vi.mock('../../api', () => ({
 }));
 
 const mockUseCorrespondence = vi.fn();
-vi.mock('../../hooks/useCorrespondence', () => ({
+vi.mock('../../api/hooks/useCorrespondence', () => ({
   useCorrespondence: (...args: any[]) => mockUseCorrespondence(...args),
 }));
 

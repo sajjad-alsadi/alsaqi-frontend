@@ -6,7 +6,7 @@ import { ROLES } from '../../permissions';
 import { ChevronDown } from 'lucide-react';
 
 import { useFormat } from '../../utils/formatService';
-import { useDepartments } from '../../hooks/useDepartments';
+import { useDepartments } from '../../api/hooks/useDepartments';
 import { Button } from '@/components/ui/button';
 
 interface UserFormProps {

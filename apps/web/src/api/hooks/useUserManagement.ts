@@ -1,6 +1,15 @@
-import { useCallback, useMemo } from 'react';
+/**
+ * React Query hook for the User Management screen.
+ *
+ * Thin/composite Query_Hook in the canonical Query_Hooks layer
+ * (`src/api/hooks/*`) and the migration target for consumers that previously
+ * imported the Legacy_Hook at `src/hooks/useUserManagement` (Req 3.2, 3.3).
+ * Routes through the composed, typed `api` (single HTTP_Client) — behavior is
+ * preserved exactly.
+ */
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../api';
+import { api } from '../index';
 import toast from 'react-hot-toast';
 
 export const useUserManagement = (initialParams: any = {}) => {

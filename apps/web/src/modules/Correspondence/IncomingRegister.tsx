@@ -25,6 +25,7 @@ import Pagination from '../../components/Pagination';
 import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import logger from '../../utils/logger';
+import { buildCsv, downloadCsv } from '../../utils/csvExport';
 import Portal from '../../components/Portal';
 import { Button } from '@/components/ui/button';
 
@@ -120,16 +121,8 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
       item.priority
     ]);
 
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `incoming_correspondence_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
+    const csv = buildCsv(headers, csvData);
+    downloadCsv(`incoming_correspondence_${new Date().toISOString().split('T')[0]}.csv`, csv);
   };
 
   const getStatusColor = (status: string) => {

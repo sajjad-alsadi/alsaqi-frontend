@@ -31,7 +31,7 @@ describe('useOptimisticUpdate', () => {
         resolveAction = resolve;
       });
 
-      const optimisticUpdate = (items: TestItem[]) =>
+      const applyOptimistic = (items: TestItem[]) =>
         items.map((item) => (item.id === 1 ? { ...item, status: 'completed' } : item));
 
       // Start execution but don't resolve the action yet
@@ -39,8 +39,8 @@ describe('useOptimisticUpdate', () => {
         result.current.execute(
           {
             action: () => action,
-            optimisticUpdate,
-            rollback: (items) => items,
+            applyOptimistic,
+            revertItem: (items) => items,
           },
           initialItems,
           setItems
@@ -79,8 +79,8 @@ describe('useOptimisticUpdate', () => {
         result.current.execute(
           {
             action: () => action,
-            optimisticUpdate: (items) => items,
-            rollback: (items) => items,
+            applyOptimistic: (items) => items,
+            revertItem: (items) => items,
           },
           initialItems,
           setItems
@@ -99,15 +99,15 @@ describe('useOptimisticUpdate', () => {
     it('should apply the optimistic update function to the current items', async () => {
       const { result } = renderHook(() => useOptimisticUpdate<TestItem>());
 
-      const optimisticUpdate = (items: TestItem[]) =>
+      const applyOptimistic = (items: TestItem[]) =>
         items.filter((item) => item.id !== 2);
 
       await act(async () => {
         await result.current.execute(
           {
             action: () => Promise.resolve(),
-            optimisticUpdate,
-            rollback: (items) => items,
+            applyOptimistic,
+            revertItem: (items) => items,
           },
           initialItems,
           setItems
@@ -122,22 +122,25 @@ describe('useOptimisticUpdate', () => {
     });
   });
 
-  describe('التراجع (rollback) عند فشل الطلب', () => {
-    it('should rollback to previous items when action fails', async () => {
+  describe('التراجع الدقيق (revertItem) عند فشل الطلب', () => {
+    it('should revert only the affected item when action fails', async () => {
       const { result } = renderHook(() => useOptimisticUpdate<TestItem>());
 
       const error = new Error('Server error');
       const onError = vi.fn();
 
-      const optimisticUpdate = (items: TestItem[]) =>
+      const applyOptimistic = (items: TestItem[]) =>
         items.map((item) => (item.id === 1 ? { ...item, status: 'completed' } : item));
+      // Invert only item 1 back to its original status against the current list
+      const revertItem = (items: TestItem[]) =>
+        items.map((item) => (item.id === 1 ? { ...item, status: 'draft' } : item));
 
       await act(async () => {
         await result.current.execute(
           {
             action: () => Promise.reject(error),
-            optimisticUpdate,
-            rollback: (items) => items,
+            applyOptimistic,
+            revertItem,
             onError,
           },
           initialItems,
@@ -152,8 +155,69 @@ describe('useOptimisticUpdate', () => {
         { id: 3, name: 'Item 3', status: 'in_progress' },
       ]);
 
-      // Second call: rollback to original items
+      // Second call: only the affected item is reverted (effectively original)
       expect(setItems).toHaveBeenNthCalledWith(2, initialItems);
+    });
+
+    it('should preserve concurrent updates to other items on rollback (lost-update-safe)', async () => {
+      const { result } = renderHook(() => useOptimisticUpdate<TestItem>());
+
+      // Optimistic change targets item 1. revertItem only ever touches item 1,
+      // so any concurrent change present on other items survives the rollback.
+      const applyOptimistic = (items: TestItem[]) =>
+        items.map((item) => (item.id === 1 ? { ...item, status: 'completed' } : item));
+      const revertItem = (items: TestItem[]) =>
+        items.map((item) => (item.id === 1 ? { ...item, status: 'draft' } : item));
+
+      // Simulate that item 2 was concurrently updated before the action failed
+      const itemsWithConcurrentUpdate: TestItem[] = [
+        { id: 1, name: 'Item 1', status: 'draft' },
+        { id: 2, name: 'Item 2', status: 'approved' }, // concurrent update
+        { id: 3, name: 'Item 3', status: 'in_progress' },
+      ];
+
+      await act(async () => {
+        await result.current.execute(
+          {
+            action: () => Promise.reject(new Error('fail')),
+            applyOptimistic,
+            revertItem,
+          },
+          itemsWithConcurrentUpdate,
+          setItems
+        );
+      });
+
+      // The rollback must NOT wipe out the concurrent update to item 2
+      expect(setItems).toHaveBeenLastCalledWith([
+        { id: 1, name: 'Item 1', status: 'draft' },
+        { id: 2, name: 'Item 2', status: 'approved' },
+        { id: 3, name: 'Item 3', status: 'in_progress' },
+      ]);
+    });
+
+    it('should refetch when revertItem cannot invert precisely (returns null)', async () => {
+      const { result } = renderHook(() => useOptimisticUpdate<TestItem>());
+
+      const refetch = vi.fn();
+
+      await act(async () => {
+        await result.current.execute(
+          {
+            action: () => Promise.reject(new Error('fail')),
+            applyOptimistic: (items) =>
+              items.map((item) => ({ ...item, status: 'completed' })),
+            revertItem: () => null, // cannot invert precisely
+            refetch,
+          },
+          initialItems,
+          setItems
+        );
+      });
+
+      // Only the optimistic update was set; rollback falls back to refetch
+      expect(setItems).toHaveBeenCalledTimes(1);
+      expect(refetch).toHaveBeenCalledTimes(1);
     });
 
     it('should call onError callback with the error when action fails', async () => {
@@ -166,8 +230,8 @@ describe('useOptimisticUpdate', () => {
         await result.current.execute(
           {
             action: () => Promise.reject(error),
-            optimisticUpdate: (items) => items,
-            rollback: (items) => items,
+            applyOptimistic: (items) => items,
+            revertItem: (items) => items,
             onError,
           },
           initialItems,
@@ -186,8 +250,8 @@ describe('useOptimisticUpdate', () => {
         await result.current.execute(
           {
             action: () => Promise.reject(new Error('fail')),
-            optimisticUpdate: (items) => items,
-            rollback: (items) => items,
+            applyOptimistic: (items) => items,
+            revertItem: (items) => items,
           },
           initialItems,
           setItems
@@ -195,31 +259,6 @@ describe('useOptimisticUpdate', () => {
       });
 
       expect(result.current.isLoading).toBe(false);
-    });
-
-    it('should restore the exact previous state on rollback', async () => {
-      const { result } = renderHook(() => useOptimisticUpdate<TestItem>());
-
-      const complexItems: TestItem[] = [
-        { id: 10, name: 'Complex A', status: 'review' },
-        { id: 20, name: 'Complex B', status: 'approved' },
-      ];
-
-      await act(async () => {
-        await result.current.execute(
-          {
-            action: () => Promise.reject(new Error('timeout')),
-            optimisticUpdate: (items) =>
-              items.map((item) => ({ ...item, status: 'cancelled' })),
-            rollback: (items) => items,
-          },
-          complexItems,
-          setItems
-        );
-      });
-
-      // Rollback should restore the original items exactly
-      expect(setItems).toHaveBeenLastCalledWith(complexItems);
     });
   });
 
@@ -229,15 +268,15 @@ describe('useOptimisticUpdate', () => {
 
       const onSuccess = vi.fn();
 
-      const optimisticUpdate = (items: TestItem[]) =>
+      const applyOptimistic = (items: TestItem[]) =>
         items.map((item) => (item.id === 2 ? { ...item, status: 'approved' } : item));
 
       await act(async () => {
         await result.current.execute(
           {
             action: () => Promise.resolve({ success: true }),
-            optimisticUpdate,
-            rollback: (items) => items,
+            applyOptimistic,
+            revertItem: (items) => items,
             onSuccess,
           },
           initialItems,
@@ -263,8 +302,8 @@ describe('useOptimisticUpdate', () => {
         await result.current.execute(
           {
             action: () => Promise.resolve(),
-            optimisticUpdate: (items) => items,
-            rollback: (items) => items,
+            applyOptimistic: (items) => items,
+            revertItem: (items) => items,
             onSuccess,
           },
           initialItems,
@@ -285,8 +324,8 @@ describe('useOptimisticUpdate', () => {
         await result.current.execute(
           {
             action: () => Promise.resolve(),
-            optimisticUpdate: (items) => items,
-            rollback: (items) => items,
+            applyOptimistic: (items) => items,
+            revertItem: (items) => items,
             onSuccess,
             onError,
           },
@@ -306,8 +345,8 @@ describe('useOptimisticUpdate', () => {
         await result.current.execute(
           {
             action: () => Promise.resolve(),
-            optimisticUpdate: (items) => items,
-            rollback: (items) => items,
+            applyOptimistic: (items) => items,
+            revertItem: (items) => items,
           },
           initialItems,
           setItems
