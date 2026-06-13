@@ -7,7 +7,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { z } from 'zod';
-import { createApiClient, type ApiClientConfig, type ApiClientError } from './client';
+import {
+  createApiClient,
+  showVersionMismatchNotification,
+  PERSIST_DRAFTS_EVENT,
+  type ApiClientConfig,
+  type ApiClientError,
+} from './client';
 
 // We need to mock axios.create to return our own instance so we can intercept
 // Since createApiClient creates its own instance, we'll test behavior through it.
@@ -445,5 +451,398 @@ describe('createApiClient', () => {
       });
       expect(client.http.defaults.timeout).toBe(10000);
     });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Additional coverage for critical-path branches (Task 7.2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const UUID_V4 =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function successEnvelope(data: unknown, meta?: Record<string, unknown>) {
+  return {
+    success: true,
+    data,
+    meta: {
+      requestId: '550e8400-e29b-41d4-a716-446655440000',
+      timestamp: '2024-01-01T00:00:00Z',
+      version: '1.0.0',
+      ...meta,
+    },
+  };
+}
+
+describe('createApiClient — getWithMeta', () => {
+  let mockAdapter: MockAdapter;
+
+  beforeEach(() => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: '' });
+  });
+
+  afterEach(() => {
+    mockAdapter?.restore();
+    vi.restoreAllMocks();
+  });
+
+  it('returns both the validated data and the envelope meta (pagination)', async () => {
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api' });
+    mockAdapter = new MockAdapter(client.http);
+
+    mockAdapter.onGet('/items').reply(
+      200,
+      successEnvelope([{ id: 1 }, { id: 2 }], {
+        pagination: { total: 57, totalPages: 6 },
+      })
+    );
+
+    const schema = z.array(z.object({ id: z.number() }));
+    const { data, meta } = await client.getWithMeta('/items', schema);
+
+    expect(data).toEqual([{ id: 1 }, { id: 2 }]);
+    expect(meta?.pagination?.total).toBe(57);
+    expect(meta?.pagination?.totalPages).toBe(6);
+  });
+});
+
+describe('createApiClient — idempotent mutation retries', () => {
+  let mockAdapter: MockAdapter;
+
+  beforeEach(() => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: '' });
+  });
+
+  afterEach(() => {
+    mockAdapter?.restore();
+    vi.restoreAllMocks();
+  });
+
+  it('attaches a UUID v4 Idempotency-Key header to an idempotent mutation', async () => {
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api' });
+    mockAdapter = new MockAdapter(client.http);
+
+    let capturedKey: string | undefined;
+    mockAdapter.onPost('/items').reply((reqConfig) => {
+      capturedKey = reqConfig.headers?.['Idempotency-Key'] as string;
+      return [200, successEnvelope({ id: 1 })];
+    });
+
+    await client.post('/items', z.object({ id: z.number() }), { name: 'x' }, { idempotent: true });
+
+    expect(capturedKey).toMatch(UUID_V4);
+  });
+
+  it('does NOT attach an Idempotency-Key when the mutation is not opted in', async () => {
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api' });
+    mockAdapter = new MockAdapter(client.http);
+
+    let capturedKey: string | undefined = 'sentinel';
+    mockAdapter.onPost('/items').reply((reqConfig) => {
+      capturedKey = reqConfig.headers?.['Idempotency-Key'] as string | undefined;
+      return [200, successEnvelope({ id: 1 })];
+    });
+
+    await client.post('/items', z.object({ id: z.number() }), { name: 'x' });
+
+    expect(capturedKey).toBeUndefined();
+  });
+
+  it('reuses the same Idempotency-Key across retries of an idempotent mutation', async () => {
+    vi.useFakeTimers();
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api' });
+    mockAdapter = new MockAdapter(client.http);
+
+    const keys: Array<string | undefined> = [];
+    let callCount = 0;
+    mockAdapter.onPut('/items/1').reply((reqConfig) => {
+      keys.push(reqConfig.headers?.['Idempotency-Key'] as string | undefined);
+      callCount++;
+      if (callCount < 2) return [500, { message: 'Server Error' }];
+      return [200, successEnvelope({ id: 1 })];
+    });
+
+    const promise = client.put('/items/1', z.object({ id: z.number() }), { v: 1 }, { idempotent: true });
+    await vi.advanceTimersByTimeAsync(1000); // first backoff delay
+
+    const result = await promise;
+    expect(result).toEqual({ id: 1 });
+    expect(callCount).toBe(2);
+    expect(keys[0]).toBeDefined();
+    expect(keys[0]).toBe(keys[1]); // stable across attempts
+
+    vi.useRealTimers();
+  });
+});
+
+describe('createApiClient — onError classification', () => {
+  let mockAdapter: MockAdapter;
+
+  beforeEach(() => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: '' });
+  });
+
+  afterEach(() => {
+    mockAdapter?.restore();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('reports a timeout error type when the request aborts (ECONNABORTED)', async () => {
+    vi.useFakeTimers();
+    const onError = vi.fn();
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api', onError });
+    mockAdapter = new MockAdapter(client.http);
+
+    mockAdapter.onGet('/slow').timeout();
+
+    const promise = client.get('/slow', z.string()).catch(() => undefined);
+    await vi.advanceTimersByTimeAsync(1000);
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(4000);
+    await promise;
+
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'timeout', attempts: 3 })
+    );
+  });
+
+  it('reports a connection error type on a network error with no response', async () => {
+    vi.useFakeTimers();
+    const onError = vi.fn();
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api', onError });
+    mockAdapter = new MockAdapter(client.http);
+
+    mockAdapter.onGet('/offline').networkError();
+
+    const promise = client.get('/offline', z.string()).catch(() => undefined);
+    await vi.advanceTimersByTimeAsync(1000);
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(4000);
+    await promise;
+
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'connection', attempts: 3 })
+    );
+  });
+});
+
+describe('createApiClient — correlation id generation', () => {
+  let mockAdapter: MockAdapter;
+
+  beforeEach(() => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: '' });
+  });
+
+  afterEach(() => {
+    mockAdapter?.restore();
+    vi.restoreAllMocks();
+  });
+
+  it('falls back to manual UUID generation when crypto.randomUUID is unavailable', async () => {
+    const original = globalThis.crypto.randomUUID;
+    Object.defineProperty(globalThis.crypto, 'randomUUID', {
+      configurable: true,
+      value: undefined,
+    });
+
+    try {
+      const client = createApiClient({ baseUrl: 'http://localhost:3000/api' });
+      mockAdapter = new MockAdapter(client.http);
+
+      let correlationId: string | undefined;
+      mockAdapter.onGet('/x').reply((reqConfig) => {
+        correlationId = reqConfig.headers?.['x-correlation-id'] as string;
+        return [200, successEnvelope('ok')];
+      });
+
+      await client.get('/x', z.string());
+      expect(correlationId).toMatch(UUID_V4);
+    } finally {
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        configurable: true,
+        value: original,
+      });
+    }
+  });
+
+  it('generates a correlation id for a direct http call that bypasses requestWithRetry', async () => {
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api' });
+    mockAdapter = new MockAdapter(client.http);
+
+    let correlationId: string | undefined;
+    mockAdapter.onGet('/direct').reply((reqConfig) => {
+      correlationId = reqConfig.headers?.['x-correlation-id'] as string;
+      return [200, successEnvelope('ok')];
+    });
+
+    await client.http.get('/direct');
+    expect(correlationId).toMatch(UUID_V4);
+  });
+});
+
+describe('createApiClient — concurrent 401 shared refresh', () => {
+  let mockAdapter: MockAdapter;
+
+  beforeEach(() => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: '' });
+  });
+
+  afterEach(() => {
+    mockAdapter?.restore();
+    vi.restoreAllMocks();
+  });
+
+  it('shares a single /auth/refresh across two concurrent 401 responses', async () => {
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api' });
+    mockAdapter = new MockAdapter(client.http);
+
+    mockAdapter.onGet('/a').replyOnce(401, { message: 'Unauthorized' });
+    mockAdapter.onGet('/a').reply(200, successEnvelope({ which: 'a' }));
+    mockAdapter.onGet('/b').replyOnce(401, { message: 'Unauthorized' });
+    mockAdapter.onGet('/b').reply(200, successEnvelope({ which: 'b' }));
+
+    // Hold the refresh open so both 401s land while a refresh is in flight.
+    let resolveRefresh!: () => void;
+    const refreshGate = new Promise<{ data: unknown }>((resolve) => {
+      resolveRefresh = () => resolve({ data: { success: true } });
+    });
+    const postSpy = vi.spyOn(axios, 'post').mockReturnValue(refreshGate as never);
+
+    const schema = z.object({ which: z.string() });
+    const pA = client.get('/a', schema);
+    const pB = client.get('/b', schema);
+
+    // Let both requests reach the 401 interceptor before unblocking the refresh.
+    await new Promise((r) => setTimeout(r, 20));
+    resolveRefresh();
+
+    const [a, b] = await Promise.all([pA, pB]);
+    expect(a).toEqual({ which: 'a' });
+    expect(b).toEqual({ which: 'b' });
+    expect(postSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a waiting request when the shared /auth/refresh fails', async () => {
+    const onUnauthorized = vi.fn();
+    const client = createApiClient({ baseUrl: 'http://localhost:3000/api', onUnauthorized });
+    mockAdapter = new MockAdapter(client.http);
+
+    mockAdapter.onGet('/a').reply(401, { message: 'Unauthorized' });
+    mockAdapter.onGet('/b').reply(401, { message: 'Unauthorized' });
+
+    let rejectRefresh!: (reason: unknown) => void;
+    const refreshGate = new Promise<{ data: unknown }>((_resolve, reject) => {
+      rejectRefresh = (reason) => reject(reason);
+    });
+    vi.spyOn(axios, 'post').mockReturnValue(refreshGate as never);
+
+    const schema = z.object({ which: z.string() });
+    const pA = client.get('/a', schema).then(
+      () => 'resolved',
+      () => 'rejected'
+    );
+    const pB = client.get('/b', schema).then(
+      () => 'resolved',
+      () => 'rejected'
+    );
+
+    await new Promise((r) => setTimeout(r, 20));
+    rejectRefresh(new Error('refresh failed'));
+
+    const [a, b] = await Promise.all([pA, pB]);
+    expect(a).toBe('rejected');
+    expect(b).toBe('rejected');
+    expect(onUnauthorized).toHaveBeenCalled();
+  });
+});
+
+describe('showVersionMismatchNotification — overlay interactions', () => {
+  let reloadSpy: ReturnType<typeof vi.fn>;
+  let originalLocation: Location;
+
+  beforeEach(() => {
+    // Fresh module state per test so `versionMismatchShown` starts false.
+    vi.resetModules();
+    const existing = document.getElementById('api-version-mismatch-overlay');
+    existing?.remove();
+
+    originalLocation = window.location;
+    reloadSpy = vi.fn();
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: { ...originalLocation, reload: reloadSpy },
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: originalLocation,
+    });
+    const existing = document.getElementById('api-version-mismatch-overlay');
+    existing?.remove();
+    vi.restoreAllMocks();
+  });
+
+  it('renders the overlay once and ignores repeat calls while shown', async () => {
+    const mod = await import('./client');
+    mod.showVersionMismatchNotification();
+    mod.showVersionMismatchNotification(); // guarded — should be a no-op
+
+    const overlays = document.querySelectorAll('#api-version-mismatch-overlay');
+    expect(overlays).toHaveLength(1);
+  });
+
+  it('reload button persists drafts then reloads the page', async () => {
+    const mod = await import('./client');
+    const persistListener = vi.fn();
+    window.addEventListener(mod.PERSIST_DRAFTS_EVENT, persistListener);
+
+    mod.showVersionMismatchNotification();
+
+    const overlay = document.getElementById('api-version-mismatch-overlay');
+    const reloadButton = Array.from(overlay!.querySelectorAll('button')).find(
+      (b) => b.textContent === 'تحديث الصفحة'
+    );
+    reloadButton?.click();
+
+    expect(persistListener).toHaveBeenCalledTimes(1);
+    expect(reloadSpy).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener(mod.PERSIST_DRAFTS_EVENT, persistListener);
+  });
+
+  it('later button persists drafts, dismisses the overlay, and re-arms the notice', async () => {
+    const mod = await import('./client');
+    const persistListener = vi.fn();
+    window.addEventListener(mod.PERSIST_DRAFTS_EVENT, persistListener);
+
+    mod.showVersionMismatchNotification();
+
+    const overlay = document.getElementById('api-version-mismatch-overlay');
+    const laterButton = Array.from(overlay!.querySelectorAll('button')).find(
+      (b) => b.textContent === 'لاحقًا'
+    );
+    laterButton?.click();
+
+    expect(persistListener).toHaveBeenCalledTimes(1);
+    expect(document.getElementById('api-version-mismatch-overlay')).toBeNull();
+
+    // After dismissal the notice can surface again (flag reset).
+    mod.showVersionMismatchNotification();
+    expect(document.getElementById('api-version-mismatch-overlay')).not.toBeNull();
+
+    window.removeEventListener(mod.PERSIST_DRAFTS_EVENT, persistListener);
+  });
+});
+
+// Reference the statically imported symbols so they are exercised/validated too.
+describe('client module exports', () => {
+  it('exposes the persist-drafts event name and notification helper', () => {
+    expect(PERSIST_DRAFTS_EVENT).toBe('app:persist-drafts');
+    expect(typeof showVersionMismatchNotification).toBe('function');
   });
 });

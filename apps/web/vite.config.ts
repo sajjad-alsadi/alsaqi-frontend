@@ -5,6 +5,7 @@ import { defineConfig, loadEnv } from 'vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { envValidatorPlugin } from './src/plugins/envValidator';
+import { isSentrySourceMapUploadEnabled } from './src/build/sourcemap-release';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
@@ -16,8 +17,12 @@ export default defineConfig(({ mode }) => {
   const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
   const sentryOrg = process.env.SENTRY_ORG;
   const sentryProject = process.env.SENTRY_PROJECT;
-  const sentryUploadEnabled =
-    mode === 'production' && !!sentryAuthToken && !!sentryOrg && !!sentryProject;
+  const sentryUploadEnabled = isSentrySourceMapUploadEnabled({
+    mode,
+    authToken: sentryAuthToken,
+    org: sentryOrg,
+    project: sentryProject,
+  });
 
   return {
     plugins: [

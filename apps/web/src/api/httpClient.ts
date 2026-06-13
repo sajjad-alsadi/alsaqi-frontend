@@ -29,8 +29,7 @@ import { createApiClient } from './client';
 import { dispatchUnauthorized } from './navigationEvents';
 import { errorReporter, type ErrorSeverity } from '../utils/errorReporter';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const env = (import.meta as any).env as Record<string, string> | undefined;
+const env = import.meta.env as unknown as Record<string, string> | undefined;
 
 /**
  * Resolve the HTTP client base URL from a configured `VITE_API_URL` value.

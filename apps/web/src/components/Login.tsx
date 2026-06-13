@@ -37,6 +37,17 @@ const Login: React.FC = () => {
   const [twoFACode, setTwoFACode] = useState('');
   const [twoFATempToken, setTwoFATempToken] = useState<string | null>(null);
   const [twoFAError, setTwoFAError] = useState('');
+  const twoFACodeRef = React.useRef<HTMLInputElement>(null);
+
+  // Move focus to the 2FA code field when the verification step appears.
+  // Done programmatically (instead of the `autoFocus` attribute) so focus is
+  // only stolen in response to an explicit user action, keeping the flow
+  // accessible (jsx-a11y/no-autofocus).
+  React.useEffect(() => {
+    if (show2FA) {
+      twoFACodeRef.current?.focus();
+    }
+  }, [show2FA]);
 
   React.useEffect(() => {
     try {
@@ -283,15 +294,16 @@ const Login: React.FC = () => {
 
             <form onSubmit={handle2FASubmit}>
               <input
+                ref={twoFACodeRef}
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 maxLength={6}
+                aria-label={t('auth.twoFactorTitle', 'Two-Factor Authentication')}
                 className="w-full px-4 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-mono text-center text-2xl tracking-[0.5em] text-[var(--color-text-main)]"
                 placeholder="000000"
                 value={twoFACode}
                 onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                autoFocus
               />
               <button
                 type="submit"

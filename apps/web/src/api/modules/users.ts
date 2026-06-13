@@ -25,7 +25,7 @@ import type { User, CreateUserInput, UpdateUserInput } from '@alsaqi/shared';
  *  - allow nullable/optional metadata fields,
  *  - `passthrough()` unknown keys so UI-only fields survive validation.
  */
-const UserSchema = z
+export const UserSchema = z
   .object({
     id: z.union([z.number(), z.string()]).optional(),
     username: z.string(),

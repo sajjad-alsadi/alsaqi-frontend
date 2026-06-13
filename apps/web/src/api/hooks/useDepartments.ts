@@ -48,7 +48,7 @@ export function useDepartments() {
   return {
     departments: (deptQuery.data || []) as Department[],
     loading: deptQuery.isLoading || deptQuery.isFetching,
-    error: deptQuery.error ? (deptQuery.error as any).message : null,
+    error: deptQuery.error ? deptQuery.error.message : null,
     refresh,
   };
 }

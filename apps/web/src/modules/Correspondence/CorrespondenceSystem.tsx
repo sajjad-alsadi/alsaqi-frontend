@@ -101,17 +101,18 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
               </p>
             ) : (
               recentIncoming.map((item) => (
-                <div 
-                  key={item.id} 
+                <button
+                  type="button"
+                  key={item.id}
                   onClick={() => setSelectedRecord({ type: CorrespondenceType.INCOMING, id: item.id })}
-                  className="p-3 border border-[var(--color-border-soft)] rounded-xl hover:bg-[var(--color-bg-main)] cursor-pointer transition-colors flex justify-between items-center"
+                  className="w-full text-start p-3 border border-[var(--color-border-soft)] rounded-xl hover:bg-[var(--color-bg-main)] cursor-pointer transition-colors flex justify-between items-center"
                 >
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-[var(--color-text-main)]">{formatNumber((item as { sequence_number?: number | string }).sequence_number || item.id)}</span>
                     <span className="text-xs text-[var(--color-text-muted)] truncate max-w-[200px]">{item.subject}</span>
                   </div>
                   <span className="text-xs text-[var(--color-text-muted)]/70">{item.receipt_date}</span>
-                </div>
+                </button>
               ))
             )}
           </div>

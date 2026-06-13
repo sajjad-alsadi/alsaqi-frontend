@@ -9,10 +9,31 @@
  */
 import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UpdateUserInput } from '@alsaqi/shared';
 import { api } from '../index';
 import toast from 'react-hot-toast';
 
-export const useUserManagement = (initialParams: any = {}) => {
+/**
+ * Query params accepted by the User Management screen. Combines the `/v1/users`
+ * list query with the screen-specific pagination cursors (`historyPage`,
+ * `auditPage`) read directly off the params object.
+ */
+interface UserManagementParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: string | undefined;
+  status?: string | undefined;
+  department?: string | undefined;
+  historyPage?: number;
+  auditPage?: number;
+}
+
+type UsersQuery = NonNullable<Parameters<typeof api.users.list>[0]>;
+type LoginHistoryQuery = NonNullable<Parameters<typeof api.userManagement.getLoginHistory>[0]>;
+type AuditTrailQuery = NonNullable<Parameters<typeof api.userManagement.getAuditTrail>[0]>;
+
+export const useUserManagement = (initialParams: UserManagementParams = {}) => {
   const queryClient = useQueryClient();
 
   const usersQuery = useQuery({
@@ -25,7 +46,7 @@ export const useUserManagement = (initialParams: any = {}) => {
       } catch {
         /* non-fatal: proceed to load the list regardless */
       }
-      return api.users.list(initialParams);
+      return api.users.list(initialParams as UsersQuery);
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -86,12 +107,12 @@ export const useUserManagement = (initialParams: any = {}) => {
 
   // Mutations
   const updateUserMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => api.users.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateUserInput }) => api.users.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User updated successfully');
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(`Failed to update user: ${err.message}`);
     }
   });
@@ -116,13 +137,13 @@ export const useUserManagement = (initialParams: any = {}) => {
     departments: Array.isArray(departmentsQuery.data) ? departmentsQuery.data : [],
     jobTitles: Array.isArray(jobTitlesQuery.data) ? jobTitlesQuery.data : [],
     loading: usersQuery.isLoading || summaryQuery.isLoading,
-    error: usersQuery.error ? (usersQuery.error as any).message : null,
+    error: usersQuery.error ? usersQuery.error.message : null,
     pagination: { total: Array.isArray(usersQuery.data) ? usersQuery.data.length : 0, page: 1, pageSize: 10, totalPages: 0 },
     historyPagination: { total: 0, page: 1, pageSize: 50, totalPages: 0 },
     activityPagination: { total: 0, page: 1, pageSize: 50, totalPages: 0 },
-    fetchUsers: (params: any) => queryClient.prefetchQuery({ queryKey: ['users', params], queryFn: () => api.users.list(params) }),
-    fetchLoginHistory: (params: any) => queryClient.prefetchQuery({ queryKey: ['login-history', params], queryFn: () => api.userManagement.getLoginHistory(params) }),
-    fetchAuditTrail: (params: any) => queryClient.prefetchQuery({ queryKey: ['audit-trail', params], queryFn: () => api.userManagement.getAuditTrail(params) }),
+    fetchUsers: (params: UsersQuery) => queryClient.prefetchQuery({ queryKey: ['users', params], queryFn: () => api.users.list(params) }),
+    fetchLoginHistory: (params: LoginHistoryQuery) => queryClient.prefetchQuery({ queryKey: ['login-history', params], queryFn: () => api.userManagement.getLoginHistory(params) }),
+    fetchAuditTrail: (params: AuditTrailQuery) => queryClient.prefetchQuery({ queryKey: ['audit-trail', params], queryFn: () => api.userManagement.getAuditTrail(params) }),
     refreshAll,
     updateUser: updateUserMutation.mutateAsync
   };

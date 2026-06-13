@@ -9,7 +9,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../index';
 
-export const useRisks = (initialParams: any = {}) => {
+type RisksQuery = NonNullable<Parameters<typeof api.riskRegister.list>[0]>;
+
+export const useRisks = (initialParams: RisksQuery = {}) => {
   const queryClient = useQueryClient();
 
   const risksQuery = useQuery({
@@ -27,7 +29,7 @@ export const useRisks = (initialParams: any = {}) => {
   return {
     risks,
     loading: risksQuery.isLoading || risksQuery.isFetching,
-    error: risksQuery.error ? (risksQuery.error as any).message : null,
+    error: risksQuery.error ? risksQuery.error.message : null,
     fetchRisks,
   };
 };

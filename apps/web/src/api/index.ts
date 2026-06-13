@@ -78,8 +78,7 @@ export function createComposedApiClient(config: ApiClientConfig): ComposedApiCli
  * Uses `/api` as the base URL (the Vite dev server proxy will forward to the API).
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const env = (import.meta as any).env as Record<string, string> | undefined;
+const env = import.meta.env as unknown as Record<string, string> | undefined;
 
 export const api: ComposedApiClient = createComposedApiClient({
   baseUrl: env?.['VITE_API_URL'] || '/api',

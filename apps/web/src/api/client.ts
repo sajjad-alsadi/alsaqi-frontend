@@ -16,7 +16,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { z } from 'zod';
-import { API_VERSION, type ApiError } from '@alsaqi/shared';
+import { API_VERSION } from '@alsaqi/shared';
 import { unwrapEnvelope, readEnvelopeMeta, type EnvelopeMeta } from './utils/envelope';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

@@ -42,11 +42,72 @@ jobs:
       - name: Lint
         run: npm run lint --workspace=@alsaqi/web
 
+      - name: Lint warning ratchet (Stream 3, req 3.1)
+        run: npm run lint:ratchet --workspace=@alsaqi/web
+        # One-way, monotonically non-increasing ESLint warning gate. The committed
+        # ceiling lives in apps/web/.lint-ceiling.json (single source of truth) and
+        # scripts/lint-ratchet.mjs runs `eslint src/` and compares the measured
+        # warning count against it:
+        #   • measured > ceiling  → FAIL (a regression added warnings)
+        #   • measured < ceiling  → FAIL (an improvement was made; lower the ceiling
+        #                                  with `--write` so the change is reviewable)
+        #   • measured === ceiling → PASS
+        # The ceiling can only ever ratchet down, so type-safety debt cannot grow.
+
       - name: Test with coverage
         run: npm run test --workspace=@alsaqi/web -- --coverage
-        # Vitest is configured with coverage thresholds (70% line coverage minimum).
-        # If coverage falls below 70%, Vitest exits with non-zero code and reports
-        # the current coverage percentage. This step will fail and block the merge.
+        # Vitest is configured with coverage thresholds (70% global floor for
+        # lines/functions/branches/statements, plus >=90% line coverage per-file for
+        # the security/observability-critical modules). If any threshold is not met,
+        # Vitest exits non-zero and reports the offending paths and percentages,
+        # failing the build.
+
+      - name: Coverage gate — critical-path per-file thresholds (Stream 7, req 7.1/7.4)
+        run: npm run coverage:gate --workspace=@alsaqi/web
+        # Complements the Vitest thresholds: Vitest's glob thresholds SILENTLY PASS
+        # when a per-file target is missing/absent from the report (an empty glob match
+        # reports "Unknown" coverage). This gate reads the json-summary report and fails
+        # when src/api/client.ts, src/api/ws/websocket-client.ts, or src/utils/sentry.ts
+        # is below threshold, missing, or absent — so per-file gates cannot be skipped.
+
+      - name: Production build + source-map release guard (Stream 6, req 6.2/6.4/6.5)
+        run: npm run build --workspace=@alsaqi/web
+        env:
+          # Source-map upload/delete is credential-gated (vite.config.ts):
+          #   • When SENTRY_AUTH_TOKEN + SENTRY_ORG + SENTRY_PROJECT are ALL present
+          #     and non-empty, the production build sets `sourcemap: 'hidden'`, uploads
+          #     the maps to Sentry, then deletes the emitted `.map` files via the
+          #     plugin's `filesToDeleteAfterUpload: ['./dist/**/*.map']` (req 6.4).
+          #   • When ANY of the three is absent/empty (the default when the repository
+          #     secrets are not configured), the Sentry plugin is skipped entirely,
+          #     `sourcemap` falls back to `false`, and no `.map` files are emitted at
+          #     all — the build still succeeds (req 6.5).
+          # Either way the build chain's `check-dist-sourcemaps.mjs` guard runs after
+          # `vite build` and FAILS the build unless `dist/` ships zero `.map` files,
+          # surfacing the release-hardening invariant in CI (req 6.2).
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          # Required, build-time env vars validated by envValidatorPlugin (command=build).
+          # These are non-secret build inputs; the air-gapped runtime values are injected
+          # at deploy time, not baked into CI artifacts.
+          VITE_API_URL: '/api'
+          VITE_APP_VERSION: ${{ github.sha }}
+          VITE_ERROR_REPORT_URL: '/api/system-errors'
+          VITE_WS_URL: '/ws'
+
+      - name: Bundle-size budget check (Stream 4, req 4.1/4.5/4.6)
+        run: node apps/web/scripts/check-bundle-budget.mjs
+        # Runs immediately after the production build so `apps/web/dist/` exists.
+        # Measures the gzip size of every budgeted `manualChunks` group against the
+        # committed per-group ceilings in apps/web/scripts/bundle-budget.json and
+        # FAILS the build when:
+        #   • any group's measured gzip size exceeds its committed ceiling, listing
+        #     each offender with its measured and committed sizes (req 4.1);
+        #   • the committed ceilings break the eager-vs-lazy invariant — every eager
+        #     chunk (vendor-react, vendor-ui, vendor-query) ceiling must be <= every
+        #     lazy group ceiling (req 4.5);
+        #   • a budgeted group's output file cannot be resolved in dist/ (req 4.6).
 
       - name: Report coverage summary
         if: always()

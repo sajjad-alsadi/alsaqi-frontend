@@ -10,7 +10,17 @@ import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../index';
 
-export const useCorrespondence = (initialParams: any = {}) => {
+/**
+ * Query params accepted by the Correspondence hook. Mirrors the shared
+ * incoming/outgoing/archive query shape and additionally tolerates a `limit`
+ * hint used by the dashboard summary view; the value is forwarded to the API
+ * as a query parameter, preserving prior behavior.
+ */
+type CorrespondenceQuery = NonNullable<Parameters<typeof api.correspondence.getIncoming>[0]> & {
+  limit?: number;
+};
+
+export const useCorrespondence = (initialParams: CorrespondenceQuery = {}) => {
   const queryClient = useQueryClient();
 
   const statsQuery = useQuery({
@@ -52,9 +62,9 @@ export const useCorrespondence = (initialParams: any = {}) => {
     loading: statsQuery.isLoading || incomingQuery.isLoading || outgoingQuery.isLoading,
     error: (statsQuery.error || incomingQuery.error || outgoingQuery.error) ? 'Failed to fetch correspondence data' : null,
     fetchStats: () => queryClient.refetchQueries({ queryKey: ['correspondence-stats'] }),
-    fetchIncoming: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-incoming', params], queryFn: () => api.correspondence.getIncoming(params) }),
-    fetchOutgoing: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-outgoing', params], queryFn: () => api.correspondence.getOutgoing(params) }),
-    fetchArchive: (params: any) => queryClient.prefetchQuery({ queryKey: ['correspondence-archive', params], queryFn: () => api.correspondence.getArchive(params) }),
+    fetchIncoming: (params: CorrespondenceQuery) => queryClient.prefetchQuery({ queryKey: ['correspondence-incoming', params], queryFn: () => api.correspondence.getIncoming(params) }),
+    fetchOutgoing: (params: CorrespondenceQuery) => queryClient.prefetchQuery({ queryKey: ['correspondence-outgoing', params], queryFn: () => api.correspondence.getOutgoing(params) }),
+    fetchArchive: (params: CorrespondenceQuery) => queryClient.prefetchQuery({ queryKey: ['correspondence-archive', params], queryFn: () => api.correspondence.getArchive(params) }),
     refreshAll,
   };
 };

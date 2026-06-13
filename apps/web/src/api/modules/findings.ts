@@ -9,7 +9,7 @@ import type { AuditFinding, CreateFindingInput, UpdateFindingInput } from '@alsa
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
 // @ts-expect-error -- Zod .optional() produces T | undefined which conflicts with exactOptionalPropertyTypes
-const FindingSchema: z.ZodType<AuditFinding> = z.object({
+export const FindingSchema: z.ZodType<AuditFinding> = z.object({
   id: z.union([z.number(), z.string()]).optional(),
   audit_id: z.union([z.number(), z.string()]),
   finding_number: z.string().optional(),

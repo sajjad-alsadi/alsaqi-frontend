@@ -14,7 +14,7 @@ import type {
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
-const CorrespondenceSchema = z.object({
+export const CorrespondenceSchema = z.object({
   id: z.string(),
   type: z.string(),
   letter_number: z.string(),

@@ -1,0 +1,13 @@
+{
+  "_comment": "Committed per-manualChunks gzip ceilings (KB) for the production dist/. Enforced by scripts/check-bundle-budget.mjs (Requirements 4.1, 4.5, 4.6, design Property 8). 'eager' marks chunks loaded on initial page load (vendor-react, vendor-ui, vendor-query); per Req 4.5 every eager ceiling MUST be <= every lazy ceiling, which is why the lazy ceilings share the 185 KB floor set by the largest eager chunk (vendor-react). Ceilings are seeded from the measured production build with ~15% headroom. Only chunks actually emitted by manualChunks are budgeted; vendor-editor is intentionally omitted because codemirror is not currently bundled into the production output, and budgeting a group with no resolvable file would (correctly) fail the check per Req 4.6.",
+  "budgets": [
+    { "chunk": "vendor-react", "eager": true, "maxGzipKb": 185 },
+    { "chunk": "vendor-ui", "eager": true, "maxGzipKb": 25 },
+    { "chunk": "vendor-query", "eager": true, "maxGzipKb": 15 },
+    { "chunk": "vendor-charts", "eager": false, "maxGzipKb": 185 },
+    { "chunk": "vendor-pdf", "eager": false, "maxGzipKb": 185 },
+    { "chunk": "vendor-excel", "eager": false, "maxGzipKb": 295 },
+    { "chunk": "vendor-i18n", "eager": false, "maxGzipKb": 185 },
+    { "chunk": "vendor-forms", "eager": false, "maxGzipKb": 185 }
+  ]
+}

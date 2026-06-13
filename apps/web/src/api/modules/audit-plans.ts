@@ -9,7 +9,7 @@ import { metaPagination } from '../utils/envelope';
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
-const AuditPlanSchema = z.object({
+export const AuditPlanSchema = z.object({
   id: z.string().optional(),
   plan_code: z.string().optional(),
   title: z.string(),

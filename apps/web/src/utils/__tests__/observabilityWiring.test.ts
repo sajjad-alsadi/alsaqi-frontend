@@ -72,6 +72,19 @@ describe('observability wiring — Sentry init at startup', () => {
     expect(result).toBe(false);
     expect(Sentry.init).not.toHaveBeenCalled();
   });
+
+  it('returns false (without throwing) when Sentry.init throws for a malformed DSN', () => {
+    vi.stubEnv('PROD', true);
+    vi.stubEnv('VITE_SENTRY_DSN', 'not-a-valid-dsn');
+    vi.mocked(Sentry.init).mockImplementationOnce(() => {
+      throw new Error('Invalid Sentry Dsn');
+    });
+
+    const result = initSentry();
+
+    expect(result).toBe(false);
+    expect(Sentry.init).toHaveBeenCalledTimes(1);
+  });
 });
 
 // ─── 2. Web Vital POSTed to /api/metrics/web-vitals — Req 17.1 ──────────────────

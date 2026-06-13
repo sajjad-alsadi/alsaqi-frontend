@@ -19,6 +19,11 @@ import {
 } from './websocket-client';
 import type { Notification } from '@alsaqi/shared';
 
+// Mock the error reporter so an auth-failure report never performs real I/O.
+vi.mock('../../utils/errorReporter', () => ({
+  errorReporter: { report: vi.fn() },
+}));
+
 // ─── Mock WebSocket ───────────────────────────────────────────────────────────
 
 class MockWebSocket {
@@ -729,6 +734,241 @@ describe('WebSocketClient', () => {
     it('should start in disconnected state', () => {
       const client = createWebSocketClient(config);
       expect(client.getState()).toBe('disconnected');
+    });
+  });
+
+  // ─── Additional coverage for critical-path branches (Task 7.2) ───────────────
+
+  /** Drive the client through all 10 reconnection attempts into the failed state. */
+  async function exhaustToFailed(client: WebSocketClient): Promise<void> {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    client.connect();
+    await flush();
+    mockWsInstances[0].simulateOpen();
+
+    for (let i = 0; i < 10; i++) {
+      const lastIdx = mockWsInstances.length - 1;
+      mockWsInstances[lastIdx].simulateClose();
+      await vi.advanceTimersByTimeAsync(Math.min(1000 * Math.pow(2, i), 30000));
+    }
+    const lastIdx = mockWsInstances.length - 1;
+    mockWsInstances[lastIdx].simulateClose();
+  }
+
+  describe('Lifecycle guards', () => {
+    it('ignores connect() after the client has been destroyed', async () => {
+      const client = createWebSocketClient(config);
+      client.disconnect();
+      client.connect();
+      await flush();
+
+      expect(mockWsInstances).toHaveLength(0);
+    });
+
+    it('aborts the connection if destroyed while awaiting the token', async () => {
+      let resolveToken!: (t: string | null) => void;
+      config.getToken = () =>
+        new Promise<string | null>((resolve) => {
+          resolveToken = resolve;
+        });
+
+      const client = createWebSocketClient(config);
+      client.connect();
+      // The token fetch is pending; destroy before it resolves.
+      client.disconnect();
+      resolveToken('late-token');
+      await flush();
+
+      expect(mockWsInstances).toHaveLength(0);
+    });
+
+    it('handles a WebSocket constructor throw by scheduling a reconnect', async () => {
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
+      let shouldThrow = true;
+      vi.stubGlobal(
+        'WebSocket',
+        class extends MockWebSocket {
+          constructor(url: string) {
+            super(url);
+            if (shouldThrow) {
+              shouldThrow = false;
+              throw new Error('construct failed');
+            }
+            mockWsInstances.push(this);
+          }
+          static override CONNECTING = 0;
+          static override OPEN = 1;
+          static override CLOSING = 2;
+          static override CLOSED = 3;
+        }
+      );
+
+      const client = createWebSocketClient(config);
+      client.connect();
+      await flush(); // first attempt throws → handleConnectionFailure → scheduleReconnect
+
+      expect(mockWsInstances).toHaveLength(0);
+      expect(client.getDisconnectedAt()).not.toBeNull();
+
+      // The scheduled retry (1s) succeeds since the constructor no longer throws.
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(mockWsInstances).toHaveLength(1);
+    });
+  });
+
+  describe('Authentication failure (Requirement 5.3)', () => {
+    it('treats an auth_error message as an authentication failure', async () => {
+      const onAuthFailure = vi.fn();
+      config.onAuthFailure = onAuthFailure;
+
+      const client = createWebSocketClient(config);
+      client.connect();
+      await flush();
+      mockWsInstances[0].simulateOpen();
+
+      mockWsInstances[0].simulateMessage({ type: 'auth_error', message: 'bad token' });
+      // A second auth_error must not re-trigger the callback (authFailed guard).
+      mockWsInstances[0].simulateMessage({ type: 'auth_error' });
+
+      expect(onAuthFailure).toHaveBeenCalledTimes(1);
+      expect(client.getState()).toBe('disconnected');
+    });
+
+    it('treats an auth-coded close as an authentication failure and stops reconnecting', async () => {
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
+      const onAuthFailure = vi.fn();
+      config.onAuthFailure = onAuthFailure;
+
+      const client = createWebSocketClient(config);
+      client.connect();
+      await flush();
+      mockWsInstances[0].simulateOpen();
+
+      mockWsInstances[0].simulateClose(1008); // policy violation → auth failure
+
+      expect(onAuthFailure).toHaveBeenCalledTimes(1);
+      expect(client.getState()).toBe('disconnected');
+
+      // No reconnection is scheduled after an auth failure.
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(mockWsInstances).toHaveLength(1);
+    });
+  });
+
+  describe('HTTP polling delivery after failure (Requirement 6.1, 6.2)', () => {
+    it('polls /notifications/recent and delivers notifications when no sequence is known', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: [
+              {
+                id: 1,
+                event_type: 't',
+                description: 'x',
+                related_module: 'm',
+                date: 'd',
+                sequenceId: 7,
+              },
+            ],
+          }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const client = createWebSocketClient(config);
+      await exhaustToFailed(client);
+      expect(client.getState()).toBe('failed');
+
+      // Flush the immediate poll (await getToken → fetch → json).
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(mockFetch).toHaveBeenCalled();
+      const calledUrl = mockFetch.mock.calls[0][0] as string;
+      expect(calledUrl).toContain('/notifications/recent');
+      expect(onNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ sequenceId: 7 }),
+        7
+      );
+      expect(client.getLastSequenceId()).toBe(7);
+    });
+
+    it('polls /notifications/since when a last sequence id is known', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ success: true, data: [] }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const client = createWebSocketClient(config);
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
+      client.connect();
+      await flush();
+      mockWsInstances[0].simulateOpen();
+
+      // Receive a notification so lastSequenceId becomes 3.
+      mockWsInstances[0].simulateMessage({
+        type: 'notification',
+        payload: { event_type: 't', description: 'x', related_module: 'm', date: 'd' },
+        sequenceId: 3,
+      });
+
+      // Now exhaust reconnection to enter polling.
+      for (let i = 0; i < 10; i++) {
+        const lastIdx = mockWsInstances.length - 1;
+        mockWsInstances[lastIdx].simulateClose();
+        await vi.advanceTimersByTimeAsync(Math.min(1000 * Math.pow(2, i), 30000));
+      }
+      mockWsInstances[mockWsInstances.length - 1].simulateClose();
+
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(0);
+
+      const calledUrl = mockFetch.mock.calls[0][0] as string;
+      expect(calledUrl).toContain('/notifications/since?sequenceId=3');
+    });
+
+    it('skips delivery when the polling response is not ok', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        json: () => Promise.resolve({ success: true, data: [] }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const client = createWebSocketClient(config);
+      await exhaustToFailed(client);
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(mockFetch).toHaveBeenCalled();
+      expect(onNotification).not.toHaveBeenCalled();
+    });
+
+    it('re-establishes the WebSocket from polling mode and stops polling on reopen', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ success: true, data: [] }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const client = createWebSocketClient(config);
+      await exhaustToFailed(client);
+      expect(client.getState()).toBe('failed');
+
+      const countAfterFailed = mockWsInstances.length;
+
+      // One polling interval triggers a WebSocket reconnect attempt.
+      await vi.advanceTimersByTimeAsync(30000);
+      expect(mockWsInstances.length).toBe(countAfterFailed + 1);
+
+      // Opening the new socket stops polling and restores the connected state.
+      mockWsInstances[mockWsInstances.length - 1].simulateOpen();
+      expect(client.getState()).toBe('connected');
+
+      const fetchCallsAtReconnect = mockFetch.mock.calls.length;
+      await vi.advanceTimersByTimeAsync(90000);
+      expect(mockFetch.mock.calls.length).toBe(fetchCallsAtReconnect);
     });
   });
 });

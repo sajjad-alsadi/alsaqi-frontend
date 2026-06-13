@@ -9,6 +9,41 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../index';
 
+/**
+ * Permissive view of the dashboard-stats payload as actually consumed by this
+ * hook. The backend response is wider than the strict `DashboardStats` model
+ * (it includes transient fields such as `audits.in_progress`, `audits.delayed`,
+ * `findings.summary.total`, `findings.byRisk`, and `recommendations.total`), so
+ * every field is treated as optional here and normalised with safe defaults
+ * below. Numeric leaves are read as numbers; collection leaves stay `unknown[]`
+ * and are narrowed by the presentational components that render them.
+ */
+interface RawDashboardStats {
+  audits?: {
+    total?: number;
+    completed?: number;
+    in_progress?: number;
+    delayed?: number;
+    progress_by_type?: unknown[];
+  };
+  findings?: {
+    summary?: { total?: number; open?: number; high_risk_open?: number };
+    byRisk?: unknown[];
+  };
+  recommendations?: { total?: number; open?: number; overdue?: number };
+  risks?: {
+    summary?: { total?: number; high?: number };
+    byLevel?: unknown[] | undefined;
+  };
+  correspondence?: {
+    incoming_total?: number;
+    outgoing_total?: number;
+    pending_responses?: number;
+  };
+  compliance?: { total?: number };
+  activity?: unknown[];
+}
+
 export const useDashboardStats = (department?: string) => {
   const statsQuery = useQuery({
     queryKey: ['dashboard-stats', department],
@@ -17,7 +52,7 @@ export const useDashboardStats = (department?: string) => {
   });
 
   // Ensure stats has the expected structure with safe defaults
-  const rawStats = statsQuery.data as any;
+  const rawStats: RawDashboardStats | undefined = statsQuery.data;
   const stats = rawStats ? {
     audits: {
       total: rawStats.audits?.total ?? 0,
@@ -60,7 +95,7 @@ export const useDashboardStats = (department?: string) => {
   return {
     stats,
     loading: statsQuery.isLoading,
-    error: statsQuery.error ? (statsQuery.error as any).message : null,
+    error: statsQuery.error ? statsQuery.error.message : null,
     refresh: () => statsQuery.refetch()
   };
 };
