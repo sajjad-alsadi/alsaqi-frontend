@@ -37,6 +37,12 @@ const Login: React.FC = () => {
   const [twoFACode, setTwoFACode] = useState('');
   const [twoFATempToken, setTwoFATempToken] = useState<string | null>(null);
   const [twoFAError, setTwoFAError] = useState('');
+  // Forced 2FA enrollment (requires2FASetup) state
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [setupQr, setSetupQr] = useState<string | null>(null);
+  const [setupBackupCodes, setSetupBackupCodes] = useState<string[]>([]);
+  const [setupCode, setSetupCode] = useState('');
+  const [setupError, setSetupError] = useState('');
   const twoFACodeRef = React.useRef<HTMLInputElement>(null);
 
   // Move focus to the 2FA code field when the verification step appears.
@@ -111,6 +117,34 @@ const Login: React.FC = () => {
         return;
       }
 
+      // Handle forced 2FA enrollment response: fetch the TOTP secret/QR, then show setup modal
+      if (result && result.requires2FASetup) {
+        const tempToken = result.tempToken ?? null;
+        setTwoFATempToken(tempToken);
+        setSetupError('');
+        setSetupCode('');
+        try {
+          const res = await fetch('/api/auth/2fa/setup-pending', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ tempToken }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error?.message || data.error || t('auth.loginFailed'));
+          }
+          setSetupQr(data.qrCodeDataUrl ?? null);
+          setSetupBackupCodes(Array.isArray(data.backupCodes) ? data.backupCodes : []);
+          setShow2FASetup(true);
+        } catch (err: any) {
+          setError(err.message || t('auth.loginFailed'));
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
       if (result && result.user) {
         // Check if user needs to change password before granting access
         if (result.user.requires_password_change) {
@@ -156,6 +190,44 @@ const Login: React.FC = () => {
     } catch (err: any) {
       const message = err.message || t('auth.loginFailed');
       setTwoFAError(typeof message === 'object' ? message.message : message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handle2FASetupComplete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!twoFATempToken || setupCode.length !== 6) return;
+    setSetupError('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/2fa/setup-complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ tempToken: twoFATempToken, token: setupCode }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error?.message || result.error || t('auth.loginFailed'));
+      }
+      if (result && result.user) {
+        // A newly enrolled user may still be required to change their password.
+        if (result.user.requires_password_change) {
+          setPendingToken(result.token ?? null);
+          setPendingUser(result.user);
+          setShow2FASetup(false);
+          setShowChangeModal(true);
+          setLoading(false);
+          return;
+        }
+        setShow2FASetup(false);
+        login(result.user, result.token || 'authenticated');
+      }
+    } catch (err: any) {
+      const message = err.message || t('auth.loginFailed');
+      setSetupError(typeof message === 'object' ? message.message : message);
     } finally {
       setLoading(false);
     }
@@ -269,6 +341,82 @@ const Login: React.FC = () => {
       </div>
 
       <LoginIllustration />
+
+      {/* 2FA Enrollment Modal (forced setup) */}
+      {show2FASetup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[var(--color-card)] rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl border border-[var(--color-border-soft)]"
+            dir={language === Language.AR ? 'rtl' : 'ltr'}
+          >
+            <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2">
+              {t('auth.twoFactorSetupTitle', 'Set up Two-Factor Authentication')}
+            </h3>
+            <p className="text-sm text-[var(--color-text-muted)] mb-4">
+              {t('auth.twoFactorSetupDescription', 'Scan the QR code with your authenticator app, then enter the 6-digit code to confirm')}
+            </p>
+
+            {setupQr && (
+              <img
+                src={setupQr}
+                alt={t('auth.twoFactorSetupTitle', 'Set up Two-Factor Authentication')}
+                className="mx-auto mb-4 w-44 h-44 bg-white p-2 rounded-lg"
+              />
+            )}
+
+            {setupBackupCodes.length > 0 && (
+              <div className="mb-4 p-3 bg-[var(--color-bg-main)] rounded-lg text-xs font-mono grid grid-cols-2 gap-1 text-[var(--color-text-main)]">
+                {setupBackupCodes.map((c) => (
+                  <span key={c}>{c}</span>
+                ))}
+              </div>
+            )}
+
+            {setupError && (
+              <div className="p-3 mb-4 bg-[var(--color-danger-light)] border border-[var(--color-danger)]/20 rounded-xl text-[var(--color-danger)] text-sm" role="alert">
+                {setupError}
+              </div>
+            )}
+
+            <form onSubmit={handle2FASetupComplete}>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                aria-label={t('auth.twoFactorSetupTitle', 'Set up Two-Factor Authentication')}
+                className="w-full px-4 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-mono text-center text-2xl tracking-[0.5em] text-[var(--color-text-main)]"
+                placeholder="000000"
+                value={setupCode}
+                onChange={(e) => setSetupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              />
+              <button
+                type="submit"
+                disabled={loading || setupCode.length !== 6}
+                className="w-full py-3.5 mt-4 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 uppercase tracking-widest text-sm"
+              >
+                {loading ? '...' : t('auth.verify', 'Verify')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShow2FASetup(false);
+                  setSetupCode('');
+                  setTwoFATempToken(null);
+                  setSetupError('');
+                  setSetupQr(null);
+                  setSetupBackupCodes([]);
+                }}
+                className="w-full py-3 mt-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] font-medium transition-colors text-sm"
+              >
+                {t('common.cancel', 'Cancel')}
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {/* 2FA Verification Modal */}
       {show2FA && (

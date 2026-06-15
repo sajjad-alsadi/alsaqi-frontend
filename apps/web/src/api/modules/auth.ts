@@ -185,6 +185,7 @@ const LoginResponseSchema = z
     accessToken: z.string().optional(),
     refreshToken: z.string().optional(),
     requires2FA: z.boolean().optional(),
+    requires2FASetup: z.boolean().optional(),
     tempToken: z.string().optional(),
   })
   .passthrough();
@@ -224,6 +225,7 @@ export interface LoginResponse {
   accessToken?: string;
   refreshToken?: string;
   requires2FA?: boolean;
+  requires2FASetup?: boolean;
   tempToken?: string;
 }
 
