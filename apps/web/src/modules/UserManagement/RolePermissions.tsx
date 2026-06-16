@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Shield, Save, CheckCircle, ChevronRight } from 'lucide-react';
+import { Shield, Save, CheckCircle, ChevronRight, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '../../permissions';
 import { ModuleRegistry } from '../../permissions/registry';
@@ -112,7 +112,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
               onClick={() => setSelectedRoleId(role.id)}
               className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300 ${
                 selectedRoleId === role.id 
-                  ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/10 translate-x-1' 
+                  ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/10' 
                   : 'bg-[var(--color-card)] text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)] border border-[var(--color-border-soft)]'
               }`}
             >
@@ -155,7 +155,12 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
                         className="hover:bg-[var(--color-bg-soft)]/50 transition-colors"
                       >
                         <td className="px-5 py-3">
-                          <span className="text-xs font-bold text-[var(--color-text-main)]">{t(`modules.${module}`)}</span>
+                          <span className="text-xs font-bold text-[var(--color-text-main)] inline-flex items-center gap-1.5">
+                            {t(`modules.${module}`)}
+                            <span className="kiro-tooltip" data-tooltip={t(`modules.${module}.description`, '')} data-tooltip-side="bottom">
+                              <Info size={12} className="text-[var(--color-text-muted)] opacity-50 hover:opacity-100 transition-opacity cursor-help" />
+                            </span>
+                          </span>
                         </td>
                         {actions.map(action => {
                           const perm = allPermissions.find(p => p.module === module && p.action === action);
@@ -175,7 +180,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
                                   disabled={disabled}
                                   onChange={(e) => perm && handleToggle(selectedRoleId!, perm.id, e.target.checked)}
                                 />
-                                <div className="w-9 h-5 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-card)] after:border-[var(--color-border-strong)] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)] group-hover:shadow-sm transition-all"></div>
+                                <div className="w-9 h-5 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-[var(--color-card)] after:border-[var(--color-border-strong)] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)] group-hover:shadow-sm transition-all"></div>
                               </label>
                             </td>
                           );

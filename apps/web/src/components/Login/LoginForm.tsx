@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User as UserIcon, Lock, Eye, EyeOff, AlertCircle, ShieldCheck, Loader2 } from 'lucide-react';
+import { User as UserIcon, Lock, Eye, EyeOff, AlertCircle, ShieldCheck, Loader2, Info } from 'lucide-react';
 
 interface LoginFormProps {
   onSubmit: (e: React.FormEvent) => void;
@@ -15,10 +15,7 @@ interface LoginFormProps {
   error: string;
   success: string;
   loading: boolean;
-  resetStatus: string;
   onForgotPassword: () => void;
-  onContactClick: () => void;
-  checkResetStatus: (user: string) => void;
   t: any;
 }
 
@@ -35,10 +32,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   error,
   success,
   loading,
-  resetStatus,
   onForgotPassword,
-  onContactClick,
-  checkResetStatus,
   t
 }) => {
   return (
@@ -65,6 +59,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <input
             id="login-username"
             type="text"
+            required
             autoComplete="username"
             maxLength={255}
             className={`w-full ps-12 pe-4 py-3.5 bg-[var(--color-card)] border ${error ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/20 focus:border-[var(--color-danger)]' : 'border-[var(--color-border-soft)] focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]'} rounded-xl focus:ring-2 outline-none transition-all font-medium text-[var(--color-text-main)]`}
@@ -74,17 +69,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
             aria-describedby={error ? 'login-error' : undefined}
             onChange={(e) => {
               setUsername(e.target.value);
-              if (e.target.value.length > 2) checkResetStatus(e.target.value);
             }}
           />
         </div>
       </div>
-
-      {resetStatus === 'Approved' && (
-        <div className="p-4 bg-[var(--color-success-light)] border border-[var(--color-success)]/20 rounded-xl text-[var(--color-success)] text-xs font-bold">
-          {t('auth.resetApprovedMsg')}
-        </div>
-      )}
 
       <div className="space-y-2">
         <label htmlFor="login-password" className="input-label">
@@ -135,7 +123,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </AnimatePresence>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <label className="flex items-center gap-2 cursor-pointer group">
           <input 
             type="checkbox" 
@@ -143,32 +131,28 @@ const LoginForm: React.FC<LoginFormProps> = ({
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
           />
-          <span className="text-sm font-medium text-[var(--color-text-muted)] group-hover:text-[var(--color-text-main)] transition-colors">{t('auth.rememberMe')}</span>
+          <span className="text-sm text-[var(--color-text-muted)] group-hover:text-[var(--color-text-main)] transition-colors">{t('auth.rememberMe')}</span>
         </label>
 
-        <div className="flex items-center gap-3 text-sm">
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
-          >
-            {t('auth.forgotPassword')}
-          </button>
-          <span className="text-[var(--color-border-strong)]" aria-hidden="true">·</span>
-          <button 
-            type="button"
-            onClick={onContactClick}
-            className="font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
-          >
-            {t('auth.needHelp')}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onForgotPassword}
+          className="text-sm font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
+        >
+          {t('auth.forgotPassword')}
+        </button>
+      </div>
+
+      {/* 2FA hint — reduces surprise when the modal appears post-submit */}
+      <div className="flex items-start gap-2 text-xs text-[var(--color-text-muted)]">
+        <Info size={13} className="shrink-0 mt-0.5" aria-hidden="true" />
+        <span>{t('auth.twoFactorHint', 'Your organization may require two-step verification after sign-in.')}</span>
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3.5 mt-2 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 active:scale-[0.98] uppercase tracking-widest text-sm inline-flex items-center justify-center gap-2"
+        className="w-full py-3.5 mt-2 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 active:scale-[0.98] text-sm inline-flex items-center justify-center gap-2"
       >
         {loading ? (
           <>

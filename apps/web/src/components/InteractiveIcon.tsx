@@ -39,7 +39,7 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
     if (tooltip) {
       timeoutRef.current = setTimeout(() => {
         setShowTooltip(true);
-      }, 1000);
+      }, 350);
     }
   };
 
@@ -74,11 +74,9 @@ const InteractiveIcon: React.FC<InteractiveIconProps> = ({
     <div className="relative inline-flex items-center">
       <motion.button
         whileHover={{ 
-          scale: 1.05,
-          y: -1,
-          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
+          scale: 1.04
         }}
-        whileTap={{ scale: 0.95, y: 0 }}
+        whileTap={{ scale: 0.95 }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={onClick}

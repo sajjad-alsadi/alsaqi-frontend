@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { Mail, Shield, Building, Edit, Trash2, Unlock } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Mail, Shield, Building, Edit, Trash2, Unlock, KeyRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../utils/formatService';
 
@@ -25,15 +25,17 @@ const UserList: React.FC<UserListProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const { translateStatus, formatDateTime, formatNumber, translateName } = useFormat();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {users.map((user, idx) => (
         <motion.div 
           key={user.id}
-          initial={{ opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: idx * 0.05 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: idx * 0.05, duration: 0.3 }}
+          style={{ willChange: 'opacity, transform' }}
           className="glass-card group hover:shadow-xl hover:shadow-[var(--color-primary)]/5 transition-all duration-500 overflow-hidden flex flex-col"
         >
           <div className="p-4 sm:p-5 space-y-4 flex-1">
@@ -97,6 +99,7 @@ const UserList: React.FC<UserListProps> = ({
               <button 
                 onClick={() => onEdit(user)}
                 className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-card)] rounded-lg transition-all"
+                aria-label={t('common.edit')}
                 title={t('common.edit')}
               >
                 <Edit size={16} />
@@ -104,13 +107,15 @@ const UserList: React.FC<UserListProps> = ({
               <button 
                 onClick={() => onResetPassword(user.id)}
                 className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-warning)] hover:bg-[var(--color-card)] rounded-lg transition-all"
+                aria-label={t('userManagement.resetPassword')}
                 title={t('userManagement.resetPassword')}
               >
-                <Shield size={16} />
+                <KeyRound size={16} />
               </button>
               <button 
                 onClick={() => onDelete(user.id)}
                 className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-card)] rounded-lg transition-all"
+                aria-label={t('common.delete')}
                 title={t('common.delete')}
               >
                 <Trash2 size={16} />

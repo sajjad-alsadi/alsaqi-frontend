@@ -28,12 +28,12 @@ const SystemErrorAnalytics: React.FC<Props> = ({ data }) => {
   }, []);
 
   return (
-    <div className="bg-[var(--color-card)] p-8 rounded-2xl border border-[var(--color-border-soft)] shadow-sm flex flex-col group transition-all hover:shadow-xl hover:shadow-[var(--color-border-soft)]/50">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-bg-soft)] flex items-center justify-center text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors">
-          <BarChartIcon size={20} />
+    <div className="bg-[var(--color-card)] p-6 rounded-2xl border border-[var(--color-border-soft)] shadow-sm flex flex-col transition-shadow hover:shadow-md">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-soft)] flex items-center justify-center text-[var(--color-text-muted)]">
+          <BarChartIcon size={18} />
         </div>
-        <h2 className="text-xl font-bold text-[var(--color-text-main)] tracking-tight">{t('systemErrorLogs.errorTrends')}</h2>
+        <h2 className="text-base font-semibold text-[var(--color-text-main)]">{t('systemErrorLogs.errorTrends')}</h2>
       </div>
       
       {data.length > 0 ? (
@@ -41,33 +41,33 @@ const SystemErrorAnalytics: React.FC<Props> = ({ data }) => {
           <ChartContainer debugName="SystemErrorAnalyticsChart" minHeight={250}>
             {(width, height) => (
               <BarChart width={width} height={height} data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-soft)" />
                 <XAxis 
                   dataKey="date" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 500 }}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 500 }}
                 />
                 <Tooltip 
-                  contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }}
+                  contentStyle={{ borderRadius: '0.75rem', border: '1px solid var(--color-border-soft)', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', fontWeight: 500 }}
                 />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontWeight: 'bold', fontSize: '12px' }} />
-                <Bar radius={[4, 4, 0, 0]} dataKey="error" fill="#ef4444" name={t('systemErrorLogs.error')} />
-                <Bar radius={[4, 4, 0, 0]} dataKey="warning" fill="#f59e0b" name={t('systemErrorLogs.warning')} />
-                <Bar radius={[4, 4, 0, 0]} dataKey="info" fill="#3b82f6" name={t('systemErrorLogs.info')} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '16px', fontWeight: 500, fontSize: '12px' }} />
+                <Bar radius={[4, 4, 0, 0]} dataKey="error" fill="var(--color-danger)" name={t('systemErrorLogs.error')} />
+                <Bar radius={[4, 4, 0, 0]} dataKey="warning" fill="var(--color-warning)" name={t('systemErrorLogs.warning')} />
+                <Bar radius={[4, 4, 0, 0]} dataKey="info" fill="var(--color-info)" name={t('systemErrorLogs.info')} />
               </BarChart>
             )}
           </ChartContainer>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-[var(--color-border-strong)] font-bold border-2 border-dashed border-slate-50 rounded-3xl">
-          <Activity size={48} className="mb-4 opacity-20" />
-          {t('systemErrorLogs.noAnalyticsData')}
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--color-text-muted)] border-2 border-dashed border-[var(--color-border-soft)] rounded-xl">
+          <Activity size={40} className="mb-3 opacity-30" />
+          <span className="text-sm">{t('systemErrorLogs.noAnalyticsData')}</span>
         </div>
       )}
     </div>

@@ -1,0 +1,686 @@
+﻿
+Running 27 tests using 11 workers
+
+[1A[2K[1/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:80:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 2. Audit Tasks - ┘à┘ç╪º┘à ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit task
+[1A[2K[2/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:253:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 6. Risk Register - ╪│╪¼┘ä ╪º┘ä┘à╪«╪º╪╖╪▒ ΓÇ║ should open add form and submit new risk
+[1A[2K[3/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:360:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 8. Correspondence - ╪º┘ä┘à╪▒╪º╪│┘ä╪º╪¬ ΓÇ║ should open compose form and send new correspondence
+[1A[2K[4/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:163:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 4. Audit Evidence - ╪º┘ä╪ú╪»┘ä╪⌐ ΓÇ║ should open add form and submit new evidence
+[1A[2K[5/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:118:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 3. Audit Findings - ╪º┘ä┘à┘ä╪º╪¡╪╕╪º╪¬ ΓÇ║ should open add form and submit new finding
+[1A[2K[6/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:408:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 9a. Integrity - Fraud Log - ╪│╪¼┘ä ╪º┘ä╪º╪¡╪¬┘è╪º┘ä ΓÇ║ should navigate to fraud tab and open add form
+[1A[2K[7/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:36:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 1. Audit Plans - ╪«╪╖╪╖ ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit plan
+[1A[2K[8/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:462:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 9b. Integrity - Conflict of Interest - ╪¬╪╢╪º╪▒╪¿ ╪º┘ä┘à╪╡╪º┘ä╪¡ ΓÇ║ should navigate to COI tab and submit new declaration
+[1A[2K[9/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:208:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 5. Recommendations - ╪º┘ä╪¬┘ê╪╡┘è╪º╪¬ ΓÇ║ should open add form and submit new recommendation
+[1A[2K[10/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:315:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 7. Org Structure - ╪º┘ä┘ç┘è┘â┘ä ╪º┘ä╪¬┘å╪╕┘è┘à┘è ΓÇ║ should open add form and submit new organizational unit
+[1A[2K[11/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:515:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 10. Compliance Matrix - ┘à╪╡┘ü┘ê┘ü╪⌐ ╪º┘ä╪º┘à╪¬╪½╪º┘ä ΓÇ║ should open add form and submit new compliance item
+[1A[2K  1) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:118:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 3. Audit Findings - ╪º┘ä┘à┘ä╪º╪¡╪╕╪º╪¬ ΓÇ║ should open add form and submit new finding 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-2c5e3-form-and-submit-new-finding-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-2c5e3-form-and-submit-new-finding-chromium\error-context.md
+
+
+[1A[2K  2) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:253:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 6. Risk Register - ╪│╪¼┘ä ╪º┘ä┘à╪«╪º╪╖╪▒ ΓÇ║ should open add form and submit new risk 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-061e2-dd-form-and-submit-new-risk-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-061e2-dd-form-and-submit-new-risk-chromium\error-context.md
+
+
+[1A[2K[12/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:560:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 11. User Management - ╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä┘à╪│╪¬╪«╪»┘à┘è┘å ΓÇ║ should open add form and submit new user
+[1A[2K[13/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:621:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 12. Departments - ╪º┘ä╪ú┘é╪│╪º┘à ┘ê╪º┘ä╪Ñ╪»╪º╪▒╪º╪¬ ΓÇ║ should add a new department
+[1A[2K  3) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:315:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 7. Org Structure - ╪º┘ä┘ç┘è┘â┘ä ╪º┘ä╪¬┘å╪╕┘è┘à┘è ΓÇ║ should open add form and submit new organizational unit 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-b1053-mit-new-organizational-unit-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-b1053-mit-new-organizational-unit-chromium\error-context.md
+
+
+[1A[2K[14/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:665:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 13. Audit Program Library - ┘à┘â╪¬╪¿╪⌐ ╪¿╪▒╪º┘à╪¼ ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit program
+[1A[2K  4) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:36:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 1. Audit Plans - ╪«╪╖╪╖ ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit plan 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-6b4dc-m-and-submit-new-audit-plan-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-6b4dc-m-and-submit-new-audit-plan-chromium\error-context.md
+
+
+[1A[2K  5) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:80:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 2. Audit Tasks - ┘à┘ç╪º┘à ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit task 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5173/login"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-a244b-m-and-submit-new-audit-task-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-a244b-m-and-submit-new-audit-task-chromium\error-context.md
+
+
+[1A[2K  6) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:208:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 5. Recommendations - ╪º┘ä╪¬┘ê╪╡┘è╪º╪¬ ΓÇ║ should open add form and submit new recommendation 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5173/login"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-1ab3b-d-submit-new-recommendation-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-1ab3b-d-submit-new-recommendation-chromium\error-context.md
+
+
+[1A[2K  7) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:515:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 10. Compliance Matrix - ┘à╪╡┘ü┘ê┘ü╪⌐ ╪º┘ä╪º┘à╪¬╪½╪º┘ä ΓÇ║ should open add form and submit new compliance item 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5173/login"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-bc13d--submit-new-compliance-item-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-bc13d--submit-new-compliance-item-chromium\error-context.md
+
+
+[1A[2K  8) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:163:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 4. Audit Evidence - ╪º┘ä╪ú╪»┘ä╪⌐ ΓÇ║ should open add form and submit new evidence 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5173/login"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-85f86-orm-and-submit-new-evidence-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-85f86-orm-and-submit-new-evidence-chromium\error-context.md
+
+
+[1A[2K  9) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:408:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 9a. Integrity - Fraud Log - ╪│╪¼┘ä ╪º┘ä╪º╪¡╪¬┘è╪º┘ä ΓÇ║ should navigate to fraud tab and open add form 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5173/login"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-8e066-fraud-tab-and-open-add-form-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-8e066-fraud-tab-and-open-add-form-chromium\error-context.md
+
+
+[1A[2K  10) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:462:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 9b. Integrity - Conflict of Interest - ╪¬╪╢╪º╪▒╪¿ ╪º┘ä┘à╪╡╪º┘ä╪¡ ΓÇ║ should navigate to COI tab and submit new declaration 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5173/login"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-4eecf--and-submit-new-declaration-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-4eecf--and-submit-new-declaration-chromium\error-context.md
+
+
+[1A[2K  11) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:360:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 8. Correspondence - ╪º┘ä┘à╪▒╪º╪│┘ä╪º╪¬ ΓÇ║ should open compose form and send new correspondence 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5173/login"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-9142e-and-send-new-correspondence-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-9142e-and-send-new-correspondence-chromium\error-context.md
+
+
+[1A[2K[15/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Plans (/plan) should load without errors
+[1A[2K[16/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Tasks (/tasks) should load without errors
+[1A[2K[17/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Findings (/findings) should load without errors
+[1A[2K[18/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Evidence (/evidence) should load without errors
+[1A[2K[19/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Recommendations (/recommendations) should load without errors
+[1A[2K[20/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Risk Register (/risks) should load without errors
+[1A[2K[21/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Org Structure (/org-structure) should load without errors
+[1A[2K[22/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Correspondence (/cms) should load without errors
+[1A[2K  12) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:560:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 11. User Management - ╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä┘à╪│╪¬╪«╪»┘à┘è┘å ΓÇ║ should open add form and submit new user 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-3d6b3-dd-form-and-submit-new-user-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-3d6b3-dd-form-and-submit-new-user-chromium\error-context.md
+
+
+[1A[2K  13) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:621:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 12. Departments - ╪º┘ä╪ú┘é╪│╪º┘à ┘ê╪º┘ä╪Ñ╪»╪º╪▒╪º╪¬ ΓÇ║ should add a new department 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-0c6c9-should-add-a-new-department-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-0c6c9-should-add-a-new-department-chromium\error-context.md
+
+
+[1A[2K[23/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Integrity (/integrity) should load without errors
+[1A[2K[24/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Compliance Matrix (/compliance-matrix) should load without errors
+[1A[2K  14) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:665:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 13. Audit Program Library - ┘à┘â╪¬╪¿╪⌐ ╪¿╪▒╪º┘à╪¼ ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit program 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-35776-nd-submit-new-audit-program-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-35776-nd-submit-new-audit-program-chromium\error-context.md
+
+
+[1A[2K[25/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ User Management (/users) should load without errors
+[1A[2K  15) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Plans (/plan) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-ed8b8--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-ed8b8--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  16) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Findings (/findings) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-3f6ce--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-3f6ce--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  17) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Tasks (/tasks) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-7bbb2--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-7bbb2--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K[26/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Departments (/departments) should load without errors
+[1A[2K  18) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Evidence (/evidence) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-0c6da--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-0c6da--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  19) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Recommendations (/recommendations) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-cdff5--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-cdff5--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K[27/27] [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Program Library (/library) should load without errors
+[1A[2K  20) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Org Structure (/org-structure) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-4ef09--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-4ef09--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  21) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Correspondence (/cms) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-ae971--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-ae971--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  22) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Integrity (/integrity) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-2087d--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-2087d--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  23) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Compliance Matrix (/compliance-matrix) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-5c4b9--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-5c4b9--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  24) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Risk Register (/risks) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-9ef54--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-9ef54--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  25) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ User Management (/users) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-bd605--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-bd605--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  26) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Departments (/departments) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-deb4f--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-deb4f--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  27) [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Program Library (/library) should load without errors 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      27 |     await page.locator('#login-password').fill('admin123');
+      28 |     await page.locator('button[type="submit"]').click();
+    > 29 |     await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |                ^
+      30 |   });
+      31 |
+      32 |   // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+        at C:\Users\sajjad.abdulbaqi\Documents\GitHub\alsaqi\apps\web\e2e\add-feature-all-sections.spec.ts:29:16
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\add-feature-all-sections-A-34085--should-load-without-errors-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\add-feature-all-sections-A-34085--should-load-without-errors-chromium\error-context.md
+
+
+[1A[2K  27 failed
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:36:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 1. Audit Plans - ╪«╪╖╪╖ ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit plan 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:80:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 2. Audit Tasks - ┘à┘ç╪º┘à ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit task 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:118:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 3. Audit Findings - ╪º┘ä┘à┘ä╪º╪¡╪╕╪º╪¬ ΓÇ║ should open add form and submit new finding 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:163:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 4. Audit Evidence - ╪º┘ä╪ú╪»┘ä╪⌐ ΓÇ║ should open add form and submit new evidence 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:208:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 5. Recommendations - ╪º┘ä╪¬┘ê╪╡┘è╪º╪¬ ΓÇ║ should open add form and submit new recommendation 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:253:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 6. Risk Register - ╪│╪¼┘ä ╪º┘ä┘à╪«╪º╪╖╪▒ ΓÇ║ should open add form and submit new risk 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:315:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 7. Org Structure - ╪º┘ä┘ç┘è┘â┘ä ╪º┘ä╪¬┘å╪╕┘è┘à┘è ΓÇ║ should open add form and submit new organizational unit 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:360:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 8. Correspondence - ╪º┘ä┘à╪▒╪º╪│┘ä╪º╪¬ ΓÇ║ should open compose form and send new correspondence 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:408:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 9a. Integrity - Fraud Log - ╪│╪¼┘ä ╪º┘ä╪º╪¡╪¬┘è╪º┘ä ΓÇ║ should navigate to fraud tab and open add form 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:462:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 9b. Integrity - Conflict of Interest - ╪¬╪╢╪º╪▒╪¿ ╪º┘ä┘à╪╡╪º┘ä╪¡ ΓÇ║ should navigate to COI tab and submit new declaration 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:515:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 10. Compliance Matrix - ┘à╪╡┘ü┘ê┘ü╪⌐ ╪º┘ä╪º┘à╪¬╪½╪º┘ä ΓÇ║ should open add form and submit new compliance item 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:560:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 11. User Management - ╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä┘à╪│╪¬╪«╪»┘à┘è┘å ΓÇ║ should open add form and submit new user 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:621:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 12. Departments - ╪º┘ä╪ú┘é╪│╪º┘à ┘ê╪º┘ä╪Ñ╪»╪º╪▒╪º╪¬ ΓÇ║ should add a new department 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:665:5 ΓÇ║ Add Feature - All Sections ΓÇ║ 13. Audit Program Library - ┘à┘â╪¬╪¿╪⌐ ╪¿╪▒╪º┘à╪¼ ╪º┘ä╪¬╪»┘é┘è┘é ΓÇ║ should open add form and submit new audit program 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Plans (/plan) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Tasks (/tasks) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Findings (/findings) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Evidence (/evidence) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Recommendations (/recommendations) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Risk Register (/risks) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Org Structure (/org-structure) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Correspondence (/cms) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Integrity (/integrity) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Compliance Matrix (/compliance-matrix) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ User Management (/users) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Departments (/departments) should load without errors 
+    [chromium] ΓÇ║ apps\web\e2e\add-feature-all-sections.spec.ts:730:7 ΓÇ║ Add Feature - All Sections ΓÇ║ Cross-Section: All pages load without errors ΓÇ║ Audit Program Library (/library) should load without errors 

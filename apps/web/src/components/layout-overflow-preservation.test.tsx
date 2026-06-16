@@ -65,7 +65,13 @@ vi.mock('../hooks/usePermissions', () => ({
 
 vi.mock('../hooks/useNavigationItems', () => ({
   useNavigationItems: () => [
-    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: () => null },
+    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: () => null, section: 'audit', module: 'Dashboard', order: 1 },
+  ],
+  NAVIGATION_SECTIONS: [
+    { id: 'audit', label: { en: 'Audit Lifecycle', ar: 'دورة التدقيق' } },
+    { id: 'governance', label: { en: 'Risk & Compliance', ar: 'المخاطر والامتثال' } },
+    { id: 'organization', label: { en: 'Organization', ar: 'المؤسسة' } },
+    { id: 'system', label: { en: 'System', ar: 'النظام' } },
   ],
 }));
 
@@ -121,7 +127,7 @@ vi.mock('lucide-react', () => {
   return {
     LogOut: icon, Globe: icon, User: icon, ChevronRight: icon, ChevronLeft: icon,
     Moon: icon, Sun: icon, Menu: icon, X: icon, PanelTopClose: icon, PanelTop: icon,
-    LayoutDashboard: icon, ShieldCheck: icon,
+    LayoutDashboard: icon, ShieldCheck: icon, Settings2: icon,
   };
 });
 

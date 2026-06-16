@@ -19,7 +19,11 @@ interface SystemError {
   severity?: 'error' | 'warning' | 'info';
 }
 
-const SystemErrorLogs: React.FC = () => {
+interface SystemErrorLogsProps {
+  embedded?: boolean;
+}
+
+const SystemErrorLogs: React.FC<SystemErrorLogsProps> = ({ embedded = false }) => {
   const { t, i18n } = useTranslation();
   const { formatDate } = useFormat();
   const [logs, setLogs] = useState<SystemError[]>([]);
@@ -195,35 +199,42 @@ const SystemErrorLogs: React.FC = () => {
 
   const getSeverityColor = (severity?: string) => {
     switch (severity) {
-      case 'warning': return 'text-yellow-600 bg-yellow-100';
-      case 'info': return 'text-blue-600 bg-blue-100';
-      default: return 'text-red-600 bg-red-100';
+      case 'warning': return 'text-[var(--color-warning)] bg-[var(--color-warning)]/10';
+      case 'info': return 'text-[var(--color-info)] bg-[var(--color-info)]/10';
+      default: return 'text-[var(--color-danger)] bg-[var(--color-danger)]/10';
     }
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-soft)]/50 p-6 space-y-10" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="flex items-center gap-6">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/20">
-            <AlertCircle size={32} />
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('systemErrorLogs.title')}</h1>
-            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('common.stayUpdated')}</p>
+    <div className="space-y-6" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+      {!embedded && (
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-[var(--shadow-primary)]">
+              <AlertCircle size={22} />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-text-main)] tracking-tight">{t('systemErrorLogs.title')}</h1>
+              <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{t('common.stayUpdated')}</p>
+            </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button onClick={fetchLogs} title={t('common.refresh')} className="p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:bg-[var(--color-bg-main)] transition-colors shadow-sm">
-            <RefreshCw size={20} className="text-[var(--color-text-muted)]" />
-          </button>
-          <button onClick={exportLogs} title={t('common.export')} className="p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:bg-[var(--color-bg-main)] transition-colors shadow-sm">
-            <Download size={20} className="text-[var(--color-text-muted)]" />
-          </button>
-          <button onClick={() => setIsClearModalOpen(true)} title={t('common.clear')} className="p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:bg-[var(--color-bg-main)] transition-colors text-rose-500 shadow-sm">
-            <Trash2 size={20} />
-          </button>
-        </div>
+      )}
+
+      {/* Action buttons with labels */}
+      <div className="flex items-center gap-2">
+        <button onClick={fetchLogs} className="flex items-center gap-2 px-3.5 py-2 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl hover:bg-[var(--color-bg-soft)] transition-colors shadow-sm text-sm text-[var(--color-text-muted)] cursor-pointer">
+          <RefreshCw size={16} />
+          <span>{t('common.refresh')}</span>
+        </button>
+        <button onClick={exportLogs} className="flex items-center gap-2 px-3.5 py-2 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl hover:bg-[var(--color-bg-soft)] transition-colors shadow-sm text-sm text-[var(--color-text-muted)] cursor-pointer">
+          <Download size={16} />
+          <span>{t('common.export')}</span>
+        </button>
+        <button onClick={() => setIsClearModalOpen(true)} className="flex items-center gap-2 px-3.5 py-2 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl hover:bg-[var(--color-bg-soft)] transition-colors shadow-sm text-sm text-[var(--color-danger)] cursor-pointer">
+          <Trash2 size={16} />
+          <span>{t('common.clear')}</span>
+        </button>
       </div>
 
       {/* Confirmation Modal */}
@@ -233,29 +244,29 @@ const SystemErrorLogs: React.FC = () => {
         title={t('systemErrorLogs.confirmClearLogs')}
       >
         <div className="p-6 text-center">
-          <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShieldAlert size={32} />
+          <div className="w-14 h-14 bg-[var(--color-danger)]/10 text-[var(--color-danger)] rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert size={28} />
           </div>
-          <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('systemErrorLogs.importantAlert')}</h3>
-          <p className="text-[var(--color-text-muted)] font-bold mb-8 leading-relaxed">
+          <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2">{t('systemErrorLogs.importantAlert')}</h3>
+          <p className="text-sm text-[var(--color-text-muted)] mb-6 leading-relaxed">
             {t('systemErrorLogs.clearLogsWarning')}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setIsClearModalOpen(false)}
               disabled={isClearing}
-              className="px-6 py-3 rounded-xl font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] transition-colors border border-[var(--color-border-soft)]"
+              className="px-5 py-2.5 rounded-xl font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] transition-colors border border-[var(--color-border-soft)] cursor-pointer"
             >
               {t('common.cancel')}
             </button>
             <button
               onClick={handleClearLogs}
               disabled={isClearing}
-              className="px-6 py-3 rounded-xl font-bold bg-rose-500 text-white hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-5 py-2.5 rounded-xl font-medium bg-[var(--color-danger)] text-white hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {isClearing ? (
                 <>
-                  <RefreshCw size={18} className="animate-spin" />
+                  <RefreshCw size={16} className="animate-spin" />
                   {t('systemErrorLogs.clearing')}
                 </>
               ) : (
@@ -267,29 +278,30 @@ const SystemErrorLogs: React.FC = () => {
       </Modal>
 
       {/* Search & Filters Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 bg-[var(--color-bg-main)]/50 rounded-2xl border border-[var(--color-border-soft)]/50 shadow-inner">
-        <div className="relative group">
-          <input 
-            type="text" 
-            placeholder={t('systemErrorLogs.filterByModule')} 
-            value={moduleFilter} 
-            onChange={(e) => setModuleFilter(e.target.value)} 
-            className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none" 
-          />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 p-4 bg-[var(--color-bg-soft)]/50 rounded-xl border border-[var(--color-border-soft)]/50">
+        <input 
+          type="text" 
+          placeholder={t('systemErrorLogs.filterByModule')} 
+          value={moduleFilter} 
+          onChange={(e) => setModuleFilter(e.target.value)} 
+          className="w-full p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none"
+          aria-label={t('systemErrorLogs.filterByModule')}
+        />
         
         <input 
           type="text" 
           placeholder={t('systemErrorLogs.filterByUserId')} 
           value={userIdFilter} 
           onChange={(e) => setUserIdFilter(e.target.value)} 
-          className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none" 
+          className="w-full p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none"
+          aria-label={t('systemErrorLogs.filterByUserId')}
         />
         
         <select 
           value={severityFilter} 
           onChange={(e) => setSeverityFilter(e.target.value)} 
-          className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none cursor-pointer"
+          className="w-full p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none cursor-pointer"
+          aria-label={t('systemErrorLogs.severity')}
         >
           <option value="">{t('systemErrorLogs.allSeverities')}</option>
           <option value="error">{t('systemErrorLogs.error')}</option>
@@ -297,23 +309,23 @@ const SystemErrorLogs: React.FC = () => {
           <option value="info">{t('systemErrorLogs.info')}</option>
         </select>
 
-        <div className="relative">
-          <input 
-            type="date" 
-            value={startDate} 
-            onChange={(e) => setStartDate(e.target.value)} 
-            className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] outline-none" 
-          />
-        </div>
+        <input 
+          type="date" 
+          value={startDate} 
+          onChange={(e) => setStartDate(e.target.value)} 
+          max={endDate || undefined}
+          className="w-full p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm text-[var(--color-text-main)] outline-none"
+          aria-label={t('systemErrorLogs.startDate')}
+        />
 
-        <div className="relative">
-          <input 
-            type="date" 
-            value={endDate} 
-            onChange={(e) => setEndDate(e.target.value)} 
-            className="w-full p-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl text-sm font-bold text-[var(--color-text-main)] outline-none" 
-          />
-        </div>
+        <input 
+          type="date" 
+          value={endDate} 
+          onChange={(e) => setEndDate(e.target.value)} 
+          min={startDate || undefined}
+          className="w-full p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm text-[var(--color-text-main)] outline-none"
+          aria-label={t('systemErrorLogs.endDate')}
+        />
       </div>
       
       <SystemErrorAnalytics data={analytics} />
@@ -321,67 +333,66 @@ const SystemErrorLogs: React.FC = () => {
       {loading && (Array.isArray(logs) ? logs : []).length === 0 ? (
         <TableSkeleton rows={6} cols={5} />
       ) : error && (Array.isArray(logs) ? logs : []).length === 0 ? (
-        <div className="bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm rounded-2xl p-20 text-center" role="alert">
-          <AlertCircle className="text-[var(--color-danger)] mx-auto mb-4" size={48} />
-          <p className="text-[var(--color-text-muted)] font-bold">{error}</p>
+        <div className="bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm rounded-2xl p-16 text-center" role="alert">
+          <AlertCircle className="text-[var(--color-danger)] mx-auto mb-3" size={40} />
+          <p className="text-sm text-[var(--color-text-muted)]">{error}</p>
         </div>
       ) : (
       <div className="bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-slate-50">
-                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('common.time')}</th>
-                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('common.module')}</th>
-                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('systemErrorLogs.severity')}</th>
-                <th className="px-8 py-6 text-start text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('common.message')}</th>
-                <th className="px-8 py-6 text-start"></th>
+              <tr className="border-b border-[var(--color-border-soft)]">
+                <th className="px-6 py-4 text-start text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.time')}</th>
+                <th className="px-6 py-4 text-start text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.module')}</th>
+                <th className="px-6 py-4 text-start text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('systemErrorLogs.severity')}</th>
+                <th className="px-6 py-4 text-start text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('common.message')}</th>
+                <th className="px-6 py-4 text-start"><span className="sr-only">{t('common.expand')}</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]/50">
               {(Array.isArray(logs) ? logs : []).length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-20 text-center">
-                    <AlertCircle className="text-slate-200 mx-auto mb-4" size={48} />
-                    <p className="text-[var(--color-text-muted)] font-bold">{t('systemErrorLogs.noErrorsLogged')}</p>
+                  <td colSpan={5} className="px-6 py-16 text-center">
+                    <AlertCircle className="text-[var(--color-border-strong)] mx-auto mb-3" size={40} />
+                    <p className="text-sm text-[var(--color-text-muted)]">{t('systemErrorLogs.noErrorsLogged')}</p>
                   </td>
                 </tr>
               ) : (Array.isArray(logs) ? logs : []).map(log => (
                 <React.Fragment key={log.id}>
                   <tr 
-                    className="hover:bg-[var(--color-bg-soft)]/50 cursor-pointer transition-all duration-200 group" 
+                    className="hover:bg-[var(--color-bg-soft)]/50 cursor-pointer transition-colors group" 
                     onClick={() => toggleRow(log.id)}
+                    aria-expanded={expandedRows.includes(log.id)}
                   >
-                    <td className="px-8 py-5 text-sm font-bold text-[var(--color-text-muted)] font-mono">{formatDate(log.timestamp)}</td>
-                    <td className="px-8 py-5">
-                      <span className="px-3 py-1 bg-[var(--color-bg-main)] text-[var(--color-text-muted)] rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                    <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] font-mono whitespace-nowrap">{formatDate(log.timestamp)}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2.5 py-0.5 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] rounded-md text-[10px] font-semibold uppercase tracking-wider">
                         {log.module}
                       </span>
                     </td>
-                    <td className="px-8 py-5">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getSeverityColor(log.severity)}`}>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${getSeverityColor(log.severity)}`}>
                         {t(`systemErrorLogs.${log.severity || 'error'}`)}
                       </span>
                     </td>
-                    <td className="px-8 py-5">
-                      <span className="text-sm font-bold text-[var(--color-text-main)] line-clamp-1 group-hover:text-rose-600 transition-colors">{log.message}</span>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-[var(--color-text-main)] line-clamp-1 group-hover:text-[var(--color-danger)] transition-colors">{log.message}</span>
                     </td>
-                    <td className="px-8 py-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-text-muted)]">
-                      {expandedRows.includes(log.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    <td className="px-6 py-4 text-[var(--color-text-muted)]">
+                      {expandedRows.includes(log.id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </td>
                   </tr>
                   {expandedRows.includes(log.id) && (
                     <tr className="bg-[var(--color-bg-soft)]/30">
-                      <td colSpan={5} className="px-8 py-6">
-                        <div className="bg-[var(--color-card)] p-6 rounded-2xl border border-[var(--color-border-soft)] shadow-sm space-y-6">
+                      <td colSpan={5} className="px-6 py-5">
+                        <div className="bg-[var(--color-card)] p-5 rounded-xl border border-[var(--color-border-soft)] space-y-4">
                           {log.stack && (
                             <div className="flex flex-col gap-2">
-                              <h4 className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('systemErrorLogs.stackTrace')}</h4>
-                              <div className="relative group">
-                                <pre className="text-xs font-mono text-[var(--color-text-muted)] bg-slate-900/95 p-6 rounded-2xl overflow-x-auto leading-relaxed border-l-4 border-rose-500">
-                                  {log.stack}
-                                </pre>
-                              </div>
+                              <h4 className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('systemErrorLogs.stackTrace')}</h4>
+                              <pre className="text-xs font-mono text-[var(--color-text-muted)] bg-[var(--color-bg-soft)] p-5 rounded-xl overflow-x-auto leading-relaxed border border-[var(--color-border-soft)]">
+                                {log.stack}
+                              </pre>
                             </div>
                           )}
                           {!log.stack && (
@@ -397,7 +408,7 @@ const SystemErrorLogs: React.FC = () => {
           </table>
         </div>
 
-        <div className="p-8 border-t border-slate-50 bg-[var(--color-bg-soft)]/20">
+        <div className="p-6 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-soft)]/20">
           <Pagination 
             currentPage={pagination.page}
             totalPages={pagination.totalPages}

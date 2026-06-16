@@ -4,6 +4,7 @@ import api from '../api/httpClient';
 import { useUser } from './UserContext';
 import logger from '../utils/logger';
 import { clearAppStorage } from '../utils/clearAppStorage';
+import { markAuthenticated, markUnauthenticated } from '../utils/authGate';
 
 interface AuthContextType {
   token: string | null;
@@ -40,6 +41,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (profileRes.data) {
             setUser(profileRes.data);
             setToken('authenticated');
+            markAuthenticated();
           }
           setIsCheckingSession(false);
         } catch (err: unknown) {
@@ -84,6 +86,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       clearAppStorage(queryClient);
       setUser(null);
       setToken(null);
+      markUnauthenticated();
     }
   }, [setUser, queryClient]);
 

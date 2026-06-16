@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { CheckCircle, XCircle, Clock, Search, Filter, MessageSquare, User, Mail, FileText } from 'lucide-react';
 import { getContactAdminRequests, updateContactAdminRequestStatus, ContactAdminRequest } from '../../utils/contactAdminService';
 import logger from '../../utils/logger';

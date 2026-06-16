@@ -11,6 +11,8 @@
  * Requirements: 6.3, 6.4, 1.2
  */
 
+import { isAuthenticated } from './authGate';
+
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export interface LogEntry {
@@ -231,8 +233,14 @@ function postEntry(url: string, entry: LogEntry): Promise<void> {
  * Forward a structured entry to the configured aggregation destination, falling
  * back to `/api/system-errors` when the destination is unset or unavailable
  * (Req 18.2, 18.4). Fire-and-forget — never throws or surfaces errors.
+ *
+ * Gated by authentication: entries are silently dropped when the user has not
+ * yet signed in, preventing unauthenticated POST requests to the backend.
  */
 function forwardToPipeline(entry: LogEntry): void {
+  // Do not transmit log entries when the user is not authenticated.
+  if (!isAuthenticated()) return;
+
   const { destination } = forwardingConfig;
   // Redact caller-supplied context to the allowlist and strip the query string
   // from the forwarded location before anything leaves the client (Req 10.1–10.4).

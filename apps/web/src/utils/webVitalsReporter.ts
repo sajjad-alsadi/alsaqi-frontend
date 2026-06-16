@@ -10,6 +10,7 @@
  */
 
 import { webVitalsMonitor, type WebVitalMetric } from './webVitalsMonitor';
+import { isAuthenticated } from './authGate';
 
 /** Maximum number of metric entries retained in the retry buffer */
 const MAX_BUFFER_SIZE = 50;
@@ -150,6 +151,10 @@ class WebVitalsReporter {
   // ─── Private Methods ────────────────────────────────────────────────────────
 
   private sendMetrics(): void {
+    // Do not send metrics if the user is not authenticated — avoids
+    // unauthenticated POST requests to the backend (security gate).
+    if (!isAuthenticated()) return;
+
     // Gather all metrics to send: buffered retries + newly pending
     const metricsToSend: WebVitalMetric[] = [
       ...this.buffer.map((b) => b.metric),

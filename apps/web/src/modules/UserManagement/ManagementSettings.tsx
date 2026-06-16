@@ -97,7 +97,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
                    checked={!!settings.password_require_symbols}
                    onChange={(e) => setLocalSettings({ ...settings, password_require_symbols: e.target.checked ? 1 : 0 })}
                  />
-                 <div className="w-11 h-6 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-card)] after:border-[var(--color-border-strong)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
+                 <div className="w-11 h-6 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-[var(--color-card)] after:border-[var(--color-border-strong)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
                </label>
              </div>
  
@@ -170,7 +170,7 @@ const ManagementSettings: React.FC<ManagementSettingsProps> = ({
                    checked={!!settings.two_factor_auth}
                    onChange={(e) => setLocalSettings({ ...settings, two_factor_auth: e.target.checked ? 1 : 0 })}
                  />
-                 <div className="w-11 h-6 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-card)] after:border-[var(--color-border-strong)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
+                 <div className="w-11 h-6 bg-[var(--color-border-soft)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-[var(--color-card)] after:border-[var(--color-border-strong)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
                </label>
              </div>
            </div>

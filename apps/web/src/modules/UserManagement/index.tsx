@@ -489,13 +489,20 @@ const UserManagement: React.FC = () => {
         error={resetError}
         success={resetSuccess}
       >
-        <input 
-          type="password"
-          placeholder={t('userManagement.enterNewPassword')}
-          className="input-field mb-4"
-          value={resetPasswordValue}
-          onChange={(e) => setResetPasswordValue(e.target.value)}
-        />
+        <div className="space-y-1 mb-4">
+          <label htmlFor="reset-password-input" className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
+            {t('userManagement.enterNewPassword')}
+          </label>
+          <input 
+            id="reset-password-input"
+            type="password"
+            placeholder={t('userManagement.enterNewPassword')}
+            className="input-field"
+            value={resetPasswordValue}
+            onChange={(e) => setResetPasswordValue(e.target.value)}
+            aria-label={t('userManagement.enterNewPassword')}
+          />
+        </div>
       </ConfirmationModal>
 
       <ConfirmationModal 

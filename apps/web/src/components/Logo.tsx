@@ -10,7 +10,7 @@ const Logo: React.FC<LogoProps> = ({ className = '', size = 40 }) => {
   return (
     <img
       src="/logo.png"
-      alt="App Logo"
+      alt="Al-Saqi"
       width={size}
       height={size}
       decoding="async"

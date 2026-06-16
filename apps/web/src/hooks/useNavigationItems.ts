@@ -84,7 +84,48 @@ export interface MenuItemResolved {
   parent?: string;
   /** Sort order */
   order: number;
+  /** Navigation section for grouped display */
+  section: NavigationSection;
 }
+
+/** Navigation sections for sidebar grouping */
+export type NavigationSection = 'audit' | 'governance' | 'organization' | 'system';
+
+/** Section metadata for rendering */
+export interface NavigationSectionMeta {
+  id: NavigationSection;
+  label: { en: string; ar: string };
+}
+
+/** Section definitions with bilingual labels */
+export const NAVIGATION_SECTIONS: NavigationSectionMeta[] = [
+  { id: 'audit', label: { en: 'Audit Lifecycle', ar: 'دورة التدقيق' } },
+  { id: 'governance', label: { en: 'Risk & Compliance', ar: 'المخاطر والامتثال' } },
+  { id: 'organization', label: { en: 'Organization', ar: 'المؤسسة' } },
+  { id: 'system', label: { en: 'System', ar: 'النظام' } },
+];
+
+/** Map module names to their navigation section */
+const MODULE_SECTION_MAP: Record<string, NavigationSection> = {
+  Dashboard: 'audit',
+  AuditCharter: 'audit',
+  AuditPlans: 'audit',
+  AuditTasks: 'audit',
+  AuditProgramLibrary: 'audit',
+  AuditFindings: 'audit',
+  AuditEvidence: 'audit',
+  Recommendations: 'audit',
+  RiskRegister: 'governance',
+  ComplianceMatrix: 'governance',
+  IntegrityManagement: 'governance',
+  Departments: 'organization',
+  Reports: 'organization',
+  Correspondence: 'organization',
+  Notifications: 'system',
+  UserManagement: 'system',
+  SystemLogs: 'system',
+  Settings: 'system',
+};
 
 /**
  * Derives the menu item ID from the route path.
@@ -127,6 +168,7 @@ export function useNavigationItems(): MenuItemResolved[] {
         path: nav.path,
         module: nav.module,
         order: nav.order,
+        section: MODULE_SECTION_MAP[nav.module] || 'system',
       };
 
       // Add notification badge for the Notifications module

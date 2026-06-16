@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { AccessScope } from '../../constants';
 import { ROLES } from '../../permissions';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, AlertCircle } from 'lucide-react';
 
 import { useFormat } from '../../utils/formatService';
 import { useDepartments } from '../../api/hooks/useDepartments';
@@ -42,6 +42,34 @@ const UserForm: React.FC<UserFormProps> = ({
 
   const isFormDisabled = isLoading;
 
+  // Inline validation
+  const fieldErrors = useMemo(() => {
+    const errors: Record<string, string> = {};
+    if (newUser.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newUser.email)) {
+      errors.email = t('userManagement.form.invalidEmail', 'Invalid email format');
+    }
+    if (!editingUser && newUser.password && newUser.password.length < 8) {
+      errors.password = t('userManagement.form.passwordMinLength', 'Minimum 8 characters');
+    }
+    return errors;
+  }, [newUser.email, newUser.password, editingUser, t]);
+
+  // Password strength calculation
+  const passwordStrength = useMemo(() => {
+    const pw = newUser.password || '';
+    if (!pw) return { level: 0, label: '' };
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    if (score <= 1) return { level: 1, label: t('userManagement.form.weak', 'Weak'), color: 'var(--color-danger)' };
+    if (score <= 2) return { level: 2, label: t('userManagement.form.fair', 'Fair'), color: 'var(--color-warning)' };
+    if (score <= 3) return { level: 3, label: t('userManagement.form.good', 'Good'), color: 'var(--color-info)' };
+    return { level: 4, label: t('userManagement.form.strong', 'Strong'), color: 'var(--color-success)' };
+  }, [newUser.password, t]);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: -20 }}
@@ -57,7 +85,18 @@ const UserForm: React.FC<UserFormProps> = ({
         {!editingUser && (
           <div className="space-y-1">
             <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.password')}</label>
-            <input className="input-field !py-2 !text-xs" type="password" placeholder={t('userManagement.form.password')} value={newUser.password || ''} onChange={e => onUpdateNewUser({ password: e.target.value })} disabled={isFormDisabled} />
+            <input className={`input-field !py-2 !text-xs ${fieldErrors.password ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30' : ''}`} type="password" placeholder={t('userManagement.form.password')} value={newUser.password || ''} onChange={e => onUpdateNewUser({ password: e.target.value })} disabled={isFormDisabled} aria-invalid={!!fieldErrors.password} />
+            {newUser.password && (
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex-1 h-1 rounded-full bg-[var(--color-border-soft)] overflow-hidden">
+                  <div className="h-full rounded-full transition-all duration-300" style={{ width: `${(passwordStrength.level / 4) * 100}%`, backgroundColor: passwordStrength.color }} />
+                </div>
+                <span className="text-[9px] font-bold" style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+              </div>
+            )}
+            {fieldErrors.password && (
+              <p className="text-[10px] text-[var(--color-danger)] font-bold flex items-center gap-1 mt-0.5"><AlertCircle size={10} />{fieldErrors.password}</p>
+            )}
           </div>
         )}
         <div className="space-y-1">
@@ -66,7 +105,10 @@ const UserForm: React.FC<UserFormProps> = ({
         </div>
         <div className="space-y-1">
           <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.email')}</label>
-          <input className="input-field !py-2 !text-xs" placeholder={t('userManagement.form.email')} value={newUser.email || ''} onChange={e => onUpdateNewUser({ email: e.target.value })} disabled={isFormDisabled} />
+          <input className={`input-field !py-2 !text-xs ${fieldErrors.email ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30' : ''}`} placeholder={t('userManagement.form.email')} value={newUser.email || ''} onChange={e => onUpdateNewUser({ email: e.target.value })} disabled={isFormDisabled} aria-invalid={!!fieldErrors.email} />
+          {fieldErrors.email && (
+            <p className="text-[10px] text-[var(--color-danger)] font-bold flex items-center gap-1 mt-0.5"><AlertCircle size={10} />{fieldErrors.email}</p>
+          )}
         </div>
         <div className="space-y-1">
           <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.phoneNumber')}</label>
@@ -128,7 +170,7 @@ const UserForm: React.FC<UserFormProps> = ({
                 ))
               )}
             </select>
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-muted)]">
+            <div className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-muted)]">
               <ChevronDown size={14} />
             </div>
           </div>

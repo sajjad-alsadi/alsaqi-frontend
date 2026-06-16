@@ -160,6 +160,7 @@ vi.mock('lucide-react', () => {
     Terminal: iconComponent,
     PanelTopClose: iconComponent,
     PanelTop: iconComponent,
+    Settings2: iconComponent,
   };
 });
 
@@ -309,16 +310,22 @@ describe('Layout Component Tests', () => {
       expect(activeItem).toBeInTheDocument();
     });
 
-    it('should call logout when logout button is clicked', () => {
+    it('should call logout when logout button is clicked and confirmed', () => {
       render(
         <Layout>
           <div>Content</div>
         </Layout>
       );
 
-      // Find the logout button (contains "common.logout" text)
+      // Find the logout button (contains "common.logout" text) — this now shows the confirmation
       const logoutButton = screen.getByText('common.logout');
       fireEvent.click(logoutButton);
+
+      // Now the confirmation should appear — click the confirm logout button
+      // There will be two elements with "common.logout" text: the sidebar button and the confirm button
+      const logoutButtons = screen.getAllByText('common.logout');
+      const confirmButton = logoutButtons[logoutButtons.length - 1];
+      fireEvent.click(confirmButton);
 
       expect(mockLogout).toHaveBeenCalledTimes(1);
     });
@@ -391,27 +398,33 @@ describe('Layout Component Tests', () => {
   });
 
   describe('Theme and Language', () => {
-    it('should render theme toggle button', () => {
+    it('should render preferences button in header', () => {
       render(
         <Layout>
           <div>Content</div>
         </Layout>
       );
 
-      // Theme toggle should be present (dark mode tooltip when in light mode)
-      const themeButton = screen.getByTestId('interactive-icon-common.darkMode');
-      expect(themeButton).toBeInTheDocument();
+      // Preferences button should be present (with tooltip "Preferences")
+      const prefsButton = screen.getByTestId('interactive-icon-common.preferences');
+      expect(prefsButton).toBeInTheDocument();
     });
 
-    it('should render language toggle button', () => {
+    it('should show preferences popover options when clicked', () => {
       render(
         <Layout>
           <div>Content</div>
         </Layout>
       );
 
-      // Language toggle should show "AR" when in English mode
-      expect(screen.getByText('AR')).toBeInTheDocument();
+      // Click the preferences button to open popover
+      const prefsButton = screen.getByTestId('interactive-icon-common.preferences');
+      fireEvent.click(prefsButton);
+
+      // Language option should show switch text
+      expect(screen.getByText('common.switchToArabic')).toBeInTheDocument();
+      // Theme option should show dark mode text  
+      expect(screen.getByText('common.darkMode')).toBeInTheDocument();
     });
   });
 });
