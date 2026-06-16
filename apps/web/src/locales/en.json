@@ -1170,6 +1170,7 @@
     "ruleSymbolRequired": "Password must contain at least one special character",
     "loginTitle": "Login to System",
     "loginFailed": "Login failed. Please check your credentials.",
+    "serverError": "A server error occurred. Please try again or contact support.",
     "resetPassword": "Reset Password",
     "invalidCredentials": "Invalid username or password",
     "accountSuspended": "Your account has been suspended. Please contact the administrator.",
@@ -1201,8 +1202,21 @@
         "requestDetailsRequired": "Request Details are required"
       }
     },
-    "needHelp": "Forgot Password or Need Help?",
-    "tooManyAttempts": "Too many login attempts, please try again later."
+    "needHelp": "Need Help?",
+    "tooManyAttempts": "Too many login attempts, please try again later.",
+    "twoFAStep": "Step {{current}} of {{total}}",
+    "forgotPasswordModal": {
+      "title": "Reset Password",
+      "description": "Enter your username or email address. Your request will be reviewed by a system administrator.",
+      "label": "Username or Email",
+      "placeholder": "Username or email address",
+      "submit": "Submit Request",
+      "successTitle": "Request Sent",
+      "successDesc": "Your password reset request has been sent to the administrator. You will be contacted shortly.",
+      "backToSignIn": "Back to Sign In",
+      "validationRequired": "Please enter your username or email address.",
+      "errorGeneral": "Something went wrong. Please try again."
+    }
   },
   "dashboard": {
     "riskOverview": "Risk Overview",

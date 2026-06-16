@@ -13,48 +13,31 @@ const LoginIllustration: React.FC = () => {
         style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1920&q=80")' }}
       ></div>
       
-      {/* Primary Color Overlay */}
-      <div className="absolute inset-0 bg-[var(--color-primary)]/85 mix-blend-multiply"></div>
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/50 to-slate-900/80"></div>
+      {/* Teal brand overlay — no gradient, no gimmicks */}
+      <div className="absolute inset-0 bg-[var(--color-primary-800)] opacity-80"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
 
       {/* Content Container */}
       <div className="relative z-10 w-full h-full flex flex-col justify-center px-16 xl:px-24">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-xl"
         >
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)]/10 backdrop-blur-md rounded-full border border-white/20 mb-8">
-            <ShieldCheck size={16} className="text-teal-300" />
-            <span className="text-xs font-bold text-white uppercase tracking-widest">{t('auth.secureAccess')}</span>
+          {/* Security indicator — simple, no blur, no border decoration */}
+          <div className="inline-flex items-center gap-2 mb-8">
+            <ShieldCheck size={16} className="text-[var(--color-primary-300)]" />
+            <span className="text-sm font-semibold text-white/80">{t('auth.secureAccess')}</span>
           </div>
 
-          {/* Titles */}
-          <h2 className="text-5xl xl:text-6xl font-bold text-white leading-tight mb-6">
+          {/* Headline */}
+          <h2 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-5" style={{ textWrap: 'balance' }}>
             {t('auth.precisionTitle')}
           </h2>
-          <p className="text-lg text-slate-200 leading-relaxed max-w-md">
+          <p className="text-base text-white/70 leading-relaxed max-w-sm">
             {t('auth.precisionDesc')}
           </p>
-        </motion.div>
-
-        {/* Stats Cards */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute bottom-16 start-16 xl:start-24 flex gap-4 max-w-[calc(100%-4rem)] xl:max-w-[calc(100%-6rem)]"
-        >
-          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-5 min-w-[160px] flex-1 shadow-2xl border border-white/20">
-            <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('auth.systemUptime')}</div>
-            <div className="text-3xl font-bold text-[var(--color-text-main)]">99.98%</div>
-          </div>
-          <div className="bg-[var(--color-card)]/90 backdrop-blur-sm rounded-xl p-5 min-w-[160px] flex-1 shadow-2xl border border-white/20">
-            <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('auth.auditsToday')}</div>
-            <div className="text-3xl font-bold text-[var(--color-text-main)]">1,240+</div>
-          </div>
         </motion.div>
       </div>
     </div>

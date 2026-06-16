@@ -1,0 +1,8 @@
+{
+  "collectionFile": "postman/alsaqi-api.postman_collection.json",
+  "environmentFile": "postman/alsaqi-local.postman_environment.json",
+  "postmanCollectionId": null,
+  "postmanWorkspaceId": null,
+  "postmanEnvironmentId": null,
+  "note": "Run 'kiro_powers postman getAuthenticatedUser' after OAuth sign-in to sync IDs. Collection and environment live in postman/ folder."
+}

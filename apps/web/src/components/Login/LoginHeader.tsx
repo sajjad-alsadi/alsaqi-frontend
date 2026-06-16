@@ -15,10 +15,11 @@ const LoginHeader: React.FC<LoginHeaderProps> = ({ language, setLanguage, t }) =
       <div className="flex justify-end mb-8">
         <button 
           onClick={() => setLanguage(language === 'en' ? Language.AR : Language.EN)}
-          className="p-2.5 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] rounded-xl hover:bg-[var(--color-bg-main)] transition-all border border-[var(--color-border-soft)]"
-          title={t('common.language')}
+          className="flex items-center gap-1.5 px-3 py-2 bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] rounded-xl hover:bg-[var(--color-bg-main)] hover:text-[var(--color-text-main)] transition-all border border-[var(--color-border-soft)] text-sm font-semibold"
+          aria-label={t('common.language')}
         >
-          <Languages size={20} />
+          <Languages size={16} aria-hidden="true" />
+          <span>{language === 'en' ? 'AR' : 'EN'}</span>
         </button>
       </div>
 

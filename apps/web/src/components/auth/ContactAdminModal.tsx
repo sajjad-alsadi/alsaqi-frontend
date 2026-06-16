@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, User, Mail, FileText, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
 import { submitContactAdminRequest, ContactAdminRequest } from '../../utils/contactAdminService';
 import { extractErrorMessage } from '../../utils/errorService';
-import api from '../../api/httpClient';
 import Portal from '../Portal';
 
 interface ContactAdminModalProps {
@@ -63,8 +62,8 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
       newErrors.requestType = t('auth.contactAdminModal.validation.requestTypeRequired');
     }
     
-    // Request details are optional for password reset
-    if (formData.requestType !== 'passwordReset' && !formData.requestDetails.trim()) {
+    // Request details are required for all request types
+    if (!formData.requestDetails.trim()) {
       newErrors.requestDetails = t('auth.contactAdminModal.validation.requestDetailsRequired');
     }
 
@@ -81,18 +80,12 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
     setErrorMessage('');
     
     try {
-      if (formData.requestType === 'passwordReset') {
-        // Call the actual forgot-password API to preserve functionality
-        await api.post('/auth/forgot-password', { username: formData.contactInfo });
+      const response = await submitContactAdminRequest(formData);
+      if (response.success) {
         setStatus('success');
       } else {
-        const response = await submitContactAdminRequest(formData);
-        if (response.success) {
-          setStatus('success');
-        } else {
-          setStatus('error');
-          setErrorMessage(response.message || t('auth.contactAdminModal.errorMessage'));
-        }
+        setStatus('error');
+        setErrorMessage(response.message || t('auth.contactAdminModal.errorMessage'));
       }
     } catch (error: any) {
       setStatus('error');
@@ -234,7 +227,6 @@ const ContactAdminModal: React.FC<ContactAdminModalProps> = ({ isOpen, onClose, 
                         <option value="" disabled>--</option>
                         <option value="newAccount">{t('auth.contactAdminModal.requestTypes.newAccount')}</option>
                         <option value="loginProblem">{t('auth.contactAdminModal.requestTypes.loginProblem')}</option>
-                        <option value="passwordReset">{t('auth.contactAdminModal.requestTypes.passwordReset')}</option>
                         <option value="permissionIssue">{t('auth.contactAdminModal.requestTypes.permissionIssue')}</option>
                         <option value="generalSupport">{t('auth.contactAdminModal.requestTypes.generalSupport')}</option>
                       </select>

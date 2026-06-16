@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-16T00:00:00.000Z",
+  "title": "Design System: Al-Saqi Audit Management",
+  "extensions": {
+    "colorMeta": {
+      "teal-primary": { "role": "primary", "displayName": "Deep Teal", "canonical": "#0a7d85", "tonalRamp": ["#012224", "#03363a", "#044a50", "#065f66", "#0a7d85", "#1abbc4", "#4dcad1", "#80d9de", "#b3e8eb", "#e6f7f8"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#111827", "tonalRamp": ["#0b0f17", "#111827", "#1f2937", "#374151", "#5b6b7a", "#8b9db3", "#b8c5cf", "#dce4ea", "#eef2f5", "#f4f7f9"] },
+      "bg-main": { "role": "neutral", "displayName": "Canvas", "canonical": "#f4f7f9", "tonalRamp": ["#0c1220", "#131d2e", "#1a2538", "#1f2d42", "#263347", "#374a63", "#b8c5cf", "#dce4ea", "#eef2f5", "#f4f7f9"] },
+      "success": { "role": "tertiary", "displayName": "Success Green", "canonical": "#059669", "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#ecfdf5"] },
+      "danger": { "role": "tertiary", "displayName": "Danger Red", "canonical": "#dc2626", "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca", "#fef2f2"] },
+      "warning": { "role": "tertiary", "displayName": "Warning Amber", "canonical": "#d97706", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fde68a", "#fffbeb"] },
+      "info": { "role": "tertiary", "displayName": "Info Blue", "canonical": "#0284c7", "tonalRamp": ["#082f49", "#0c4a6e", "#075985", "#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc", "#bae6fd", "#f0f9ff"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles and dashboard headers." },
+      "body": { "displayName": "Body", "purpose": "Default reading text and table cells; cap prose 65-75ch." },
+      "label": { "displayName": "Label", "purpose": "Table headers, badges, eyebrow metadata; uppercase tracked." }
+    },
+    "shadows": [
+      { "name": "xs", "value": "0 1px 2px rgba(0,0,0,0.03)", "purpose": "Hairline lift for subtle chips." },
+      { "name": "sm", "value": "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)", "purpose": "Resting state for cards, tables, inputs." },
+      { "name": "md", "value": "0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03)", "purpose": "Card hover." },
+      { "name": "lg", "value": "0 8px 24px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04)", "purpose": "Interactive-card hover, popovers." },
+      { "name": "xl", "value": "0 20px 40px rgba(0,0,0,0.12)", "purpose": "Modals and fullscreen overlays." },
+      { "name": "primary", "value": "0 4px 14px rgba(10,125,133,0.25)", "purpose": "Teal glow under primary buttons and active nav." }
+    ],
+    "motion": [
+      { "name": "duration-standard", "value": "200ms", "purpose": "Default state-transition duration." },
+      { "name": "fade-in-up", "value": "350ms ease-out", "purpose": "List/section entrance (translateY 12px → 0)." },
+      { "name": "scale-in", "value": "250ms ease-out", "purpose": "Modal/popover entrance (scale 0.95 → 1)." },
+      { "name": "reduced-motion", "value": "0.01ms", "purpose": "All animation collapses to near-instant under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single high-emphasis action; teal with a soft glow.",
+      "html": "<button class=\"ds-btn-primary\">حفظ التغييرات</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; height:2.5rem; padding:0.625rem 1.5rem; background:#0a7d85; color:#fff; font-weight:600; font-size:0.875rem; border:none; border-radius:0.75rem; box-shadow:0 4px 14px rgba(10,125,133,0.25); cursor:pointer; transition:background .2s, box-shadow .2s, transform .2s; } .ds-btn-primary:hover { background:#065f66; box-shadow:0 6px 20px rgba(10,125,133,0.35); } .ds-btn-primary:active { transform:scale(0.97); } .ds-btn-primary:focus-visible { outline:2px solid #0a7d85; outline-offset:2px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Medium-emphasis secondary action on a card surface.",
+      "html": "<button class=\"ds-btn-outline\">إلغاء</button>",
+      "css": ".ds-btn-outline { display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; height:2.5rem; padding:0.625rem 1.5rem; background:#fff; color:#111827; font-weight:600; font-size:0.875rem; border:1px solid #dce4ea; border-radius:0.75rem; cursor:pointer; transition:background .2s, transform .2s; } .ds-btn-outline:hover { background:#eef2f5; } .ds-btn-outline:active { transform:scale(0.97); } .ds-btn-outline:focus-visible { outline:2px solid #0a7d85; outline-offset:2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-emphasis toolbar/inline action.",
+      "html": "<button class=\"ds-btn-ghost\">المزيد</button>",
+      "css": ".ds-btn-ghost { display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; height:2.5rem; padding:0.625rem 1rem; background:transparent; color:#5b6b7a; font-weight:600; font-size:0.875rem; border:none; border-radius:0.75rem; cursor:pointer; transition:background .2s, color .2s; } .ds-btn-ghost:hover { background:#eef2f5; color:#0a7d85; } .ds-btn-ghost:focus-visible { outline:2px solid #0a7d85; outline-offset:2px; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Text input with teal focus ring; danger ring on error.",
+      "html": "<input class=\"ds-input\" placeholder=\"رقم المهمة\" aria-label=\"رقم المهمة\" />",
+      "css": ".ds-input { width:100%; padding:1rem 1.5rem; background:#fff; color:#111827; font-size:0.875rem; border:1px solid #dce4ea; border-radius:1rem; box-shadow:0 1px 3px rgba(0,0,0,0.04); outline:none; transition:border-color .2s, box-shadow .2s; } .ds-input::placeholder { color:rgba(91,107,122,0.6); } .ds-input:focus { border-color:#0a7d85; box-shadow:0 0 0 2px rgba(10,125,133,0.5); }"
+    },
+    {
+      "name": "Sidebar Item (active)",
+      "kind": "nav",
+      "refersTo": "sidebar-item-active",
+      "description": "Navigation row; muted at rest, teal-tint on hover, solid teal when active.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\">سجل المخاطر</a><a class=\"ds-nav-item ds-nav-item--active\">الملاحظات</a></nav>",
+      "css": ".ds-nav { display:flex; flex-direction:column; gap:0.25rem; } .ds-nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1.25rem; border-radius:0.75rem; color:#5b6b7a; font-weight:500; font-size:0.875rem; cursor:pointer; transition:background .2s, color .2s; } .ds-nav-item:hover { background:#e6f5f6; color:#0a7d85; } .ds-nav-item--active { background:#0a7d85; color:#fff; font-weight:600; box-shadow:0 4px 12px rgba(10,125,133,0.25); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Semantic status pill — color always paired with a text label.",
+      "html": "<span class=\"ds-badge ds-badge--success\">مكتمل</span>",
+      "css": ".ds-badge { display:inline-flex; align-items:center; padding:0.25rem 0.75rem; border-radius:0.5rem; font-size:0.75rem; font-weight:600; border:1px solid transparent; } .ds-badge--success { background:#ecfdf5; color:#059669; border-color:rgba(5,150,105,0.2); }"
+    },
+    {
+      "name": "Risk Pill",
+      "kind": "chip",
+      "refersTo": "badge-risk",
+      "description": "Risk-level marker; solid saturated fill with uppercase label.",
+      "html": "<span class=\"ds-risk ds-risk--critical\">CRITICAL</span>",
+      "css": ".ds-risk { display:inline-flex; align-items:center; padding:0.25rem 0.75rem; border-radius:0.5rem; font-size:10px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:#fff; } .ds-risk--critical { background:#e11d48; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Resting content surface; flat-bordered, lifts on hover.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">ملخص المهمة</h3><p class=\"ds-card-body\">تتبّع حالة مهام التدقيق والتوصيات المرتبطة بها.</p></div>",
+      "css": ".ds-card { background:#fff; border:1px solid #dce4ea; border-radius:1rem; padding:1.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:box-shadow .2s, transform .2s; } .ds-card:hover { box-shadow:0 8px 24px rgba(0,0,0,0.08); transform:translateY(-2px); } .ds-card-title { margin:0 0 0.5rem; color:#111827; font-weight:700; font-size:1.125rem; } .ds-card-body { margin:0; color:#5b6b7a; font-size:0.875rem; line-height:1.6; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Authority",
+    "overview": "Al-Saqi is the workspace of internal auditors, compliance officers, and the management who rely on their findings. It earns trust through restraint, consistency, and precision — never spectacle. A muted teal carries identity and primary action; everything else is disciplined neutral so the data stays the loudest thing on screen. The system is Arabic-first (RTL) and fully bilingual, with a light-mode home for dense reading and a fully tuned dark mode. Density is deliberate, not crowded: generous radii, soft layered shadows, and consistent spacing keep dense tables and long Arabic report text legible across long sessions.",
+    "keyCharacteristics": [
+      "One teal voice; neutrals do the rest.",
+      "Calm density — a lot of structured information, never crowded.",
+      "Bidirectional by default; RTL is primary, LTR fully supported.",
+      "Soft, generous geometry (xl/2xl radii) over hard edges.",
+      "Color always paired with text/icon for status — never the sole signal."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Teal is the only brand hue. Emphasis comes from weight, size, or a meaningful status color — never a second accent.", "section": "colors" },
+      { "name": "The Status-Plus-Label Rule", "body": "Color never carries status alone. Every badge, risk pill, and alert pairs color with a text label and usually an icon.", "section": "colors" },
+      { "name": "The Single-Family Rule", "body": "Tajawal carries headings and body alike. Hierarchy comes from weight (400-800) and size, not a second typeface.", "section": "typography" },
+      { "name": "The Lift-On-Intent Rule", "body": "Surfaces rest at shadow-sm. Shadow grows only on state — hover (md/lg) or overlay (xl).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep teal #0a7d85 as the single brand voice — emphasis comes from weight, size, and meaningful status color.",
+      "Do pair every status/risk color with a text label and icon (the Status-Plus-Label Rule).",
+      "Do use ink #111827 for body text; bump toward ink, never down to faded slate, when contrast is close (>=4.5:1 body, >=3:1 large).",
+      "Do mirror layout, motion, and iconography for RTL — Arabic is primary, not an afterthought.",
+      "Do rest surfaces at shadow-sm and lift only on hover/overlay.",
+      "Do keep cards flat-bordered with 16px radii; carry hierarchy with spacing rhythm."
+    ],
+    "donts": [
+      "Don't build flashy consumer-SaaS chrome: no gradient hero blocks, no background-clip:text gradient text, no decorative glassmorphism.",
+      "Don't drift into the playful-startup register: no bouncy/elastic motion, no mascots, no emoji used as UI icons (use Lucide SVGs).",
+      "Don't ship the cramped legacy-portal look: no inconsistent spacing, dated chrome, or buried actions; density must stay breathable.",
+      "Don't introduce a second accent hue for variety — it breaks the One Voice Rule.",
+      "Don't use a colored border-left/border-right stripe as an accent on cards or alerts; use full borders or a background tint.",
+      "Don't nest cards inside cards.",
+      "Don't let status rely on color alone, or let any animation run without a prefers-reduced-motion fallback."
+    ]
+  }
+}

@@ -42,6 +42,11 @@ const SERVER_CODE_TO_AUTH_CODE: Record<string, AuthErrorCode> = {
   RATE_LIMIT_EXCEEDED: 'rate_limited',
   INTERNAL_ERROR: 'server_error',
   DATABASE_ERROR: 'server_error',
+  // CSRF validation failure on login means the backend hasn't exempted the
+  // login endpoint from CSRF middleware — surface as a generic server error
+  // rather than leaking the raw "CSRF token missing" message to the user.
+  CSRF_VALIDATION_FAILED: 'server_error',
+  FORBIDDEN: 'server_error',
 };
 
 /**
@@ -52,6 +57,9 @@ function statusToAuthCode(status: number): AuthErrorCode {
   if (status === 401) return 'invalid_credentials';
   if (status === 423) return 'account_locked';
   if (status === 429) return 'rate_limited';
+  // 403 on the login endpoint means CSRF wasn't exempted on the backend — treat
+  // as a transient server error rather than exposing the raw CSRF message.
+  if (status === 403) return 'server_error';
   if (status >= 500 && status < 600) return 'server_error';
   return 'unknown';
 }

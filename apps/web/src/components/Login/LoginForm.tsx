@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { User as UserIcon, Lock, Eye, EyeOff, AlertCircle, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { User as UserIcon, Lock, Eye, EyeOff, AlertCircle, ShieldCheck, Loader2 } from 'lucide-react';
 
 interface LoginFormProps {
   onSubmit: (e: React.FormEvent) => void;
@@ -43,18 +43,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
-      {error && (
-        <motion.div 
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="p-4 bg-[var(--color-danger-light)] border border-[var(--color-danger)]/20 rounded-xl flex items-center gap-3 text-[var(--color-danger)] text-sm overflow-hidden"
-          role="alert"
-          aria-live="assertive"
-        >
-          <AlertCircle size={18} className="shrink-0" />
-          <span>{error}</span>
-        </motion.div>
-      )}
       {success && (
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
@@ -69,7 +57,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <div className="space-y-2">
-        <label htmlFor="login-username" className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
+        <label htmlFor="login-username" className="input-label">
           {t('auth.usernameOrEmail')}
         </label>
         <div className="relative group">
@@ -78,9 +66,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
             id="login-username"
             type="text"
             autoComplete="username"
-            className={`w-full ps-12 pe-4 py-3.5 bg-[var(--color-card)] border ${error ? 'border-[var(--color-danger)]' : 'border-[var(--color-border-soft)]'} rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-medium text-[var(--color-text-main)]`}
+            maxLength={255}
+            className={`w-full ps-12 pe-4 py-3.5 bg-[var(--color-card)] border ${error ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/20 focus:border-[var(--color-danger)]' : 'border-[var(--color-border-soft)] focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]'} rounded-xl focus:ring-2 outline-none transition-all font-medium text-[var(--color-text-main)]`}
             placeholder={t('auth.usernameOrEmail')}
             value={username}
+            aria-invalid={!!error}
+            aria-describedby={error ? 'login-error' : undefined}
             onChange={(e) => {
               setUsername(e.target.value);
               if (e.target.value.length > 2) checkResetStatus(e.target.value);
@@ -90,13 +81,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </div>
 
       {resetStatus === 'Approved' && (
-        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-xs font-bold">
+        <div className="p-4 bg-[var(--color-success-light)] border border-[var(--color-success)]/20 rounded-xl text-[var(--color-success)] text-xs font-bold">
           {t('auth.resetApprovedMsg')}
         </div>
       )}
 
       <div className="space-y-2">
-        <label htmlFor="login-password" className="block text-xs font-semibold text-[var(--color-text-main)] uppercase tracking-widest">
+        <label htmlFor="login-password" className="input-label">
           {t('common.password')}
         </label>
         <div className="relative group">
@@ -106,9 +97,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
             type={showPassword ? "text" : "password"}
             required
             autoComplete="current-password"
-            className="w-full ps-12 pe-12 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-medium text-[var(--color-text-main)]"
+            maxLength={128}
+            className={`w-full ps-12 pe-12 py-3.5 bg-[var(--color-card)] border ${error ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/20 focus:border-[var(--color-danger)]' : 'border-[var(--color-border-soft)] focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]'} rounded-xl focus:ring-2 outline-none transition-all font-medium text-[var(--color-text-main)]`}
             placeholder="••••••••"
             value={password}
+            aria-invalid={!!error}
+            aria-describedby={error ? 'login-error' : undefined}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button 
@@ -120,6 +114,25 @@ const LoginForm: React.FC<LoginFormProps> = ({
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
+
+        {/* Auth error sits here — adjacent to the last-touched field */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              id="login-error"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-start gap-2.5 pt-1 text-[var(--color-danger)] text-sm overflow-hidden"
+              role="alert"
+              aria-live="assertive"
+            >
+              <AlertCircle size={15} className="shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="flex items-center justify-between">
@@ -133,21 +146,36 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <span className="text-sm font-medium text-[var(--color-text-muted)] group-hover:text-[var(--color-text-main)] transition-colors">{t('auth.rememberMe')}</span>
         </label>
 
-        <button 
-          type="button"
-          onClick={onContactClick}
-          className="text-sm font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
-        >
-          {t('auth.needHelp')}
-        </button>
+        <div className="flex items-center gap-3 text-sm">
+          <button
+            type="button"
+            onClick={onForgotPassword}
+            className="font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
+          >
+            {t('auth.forgotPassword')}
+          </button>
+          <span className="text-[var(--color-border-strong)]" aria-hidden="true">·</span>
+          <button 
+            type="button"
+            onClick={onContactClick}
+            className="font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
+          >
+            {t('auth.needHelp')}
+          </button>
+        </div>
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3.5 mt-2 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 active:scale-[0.98] uppercase tracking-widest text-sm"
+        className="w-full py-3.5 mt-2 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 active:scale-[0.98] uppercase tracking-widest text-sm inline-flex items-center justify-center gap-2"
       >
-        {loading ? '...' : t('auth.login')}
+        {loading ? (
+          <>
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+            <span className="sr-only">{t('common.loading', 'Loading…')}</span>
+          </>
+        ) : t('auth.login')}
       </button>
     </form>
   );

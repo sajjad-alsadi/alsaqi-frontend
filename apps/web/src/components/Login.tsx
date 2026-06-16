@@ -3,12 +3,14 @@ import { useAppContext } from '../context/AppContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
+import { Loader2 } from 'lucide-react';
 import { ResetStatus, Language } from '../constants';
 import { api } from '../api';
 import { mapAuthError, type AuthErrorCode } from '../api/modules/auth';
 
 import ChangePasswordModal from './auth/ChangePasswordModal';
 import ContactAdminModal from './auth/ContactAdminModal';
+import ForgotPasswordModal from './auth/ForgotPasswordModal';
 import LoginIllustration from './Login/LoginIllustration';
 import LoginHeader from './Login/LoginHeader';
 import LoginForm from './Login/LoginForm';
@@ -30,6 +32,7 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [resetStatus, setResetStatus] = useState<ResetStatus>(ResetStatus.NONE);
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [pendingUser, setPendingUser] = useState<any>(null);
@@ -88,7 +91,7 @@ const Login: React.FC = () => {
       case 'network_error':
         return t('networkError', 'Network error');
       case 'server_error':
-        return t('serverError', 'Server error');
+        return t('auth.serverError', t('serverError', 'Server error'));
       default:
         return t('auth.loginFailed');
     }
@@ -330,7 +333,7 @@ const Login: React.FC = () => {
             success={success}
             loading={loading}
             resetStatus={resetStatus}
-            onForgotPassword={() => {}}
+            onForgotPassword={() => setShowForgotPasswordModal(true)}
             onContactClick={() => setShowContactModal(true)}
             checkResetStatus={checkResetStatus}
             t={t}
@@ -351,6 +354,23 @@ const Login: React.FC = () => {
             className="bg-[var(--color-card)] rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl border border-[var(--color-border-soft)]"
             dir={language === Language.AR ? 'rtl' : 'ltr'}
           >
+            {/* Step progress — step 2 of 3 */}
+            <div
+              className="flex items-center gap-1.5 mb-5"
+              role="status"
+              aria-label={t('auth.twoFAStep', { current: 2, total: 3 })}
+            >
+              {/* Step 1: credentials (complete) */}
+              <div className="h-1.5 w-8 rounded-full bg-[var(--color-primary)]" aria-hidden="true" />
+              {/* Step 2: scan QR / setup (active) */}
+              <div className="h-1.5 w-8 rounded-full bg-[var(--color-primary)]" aria-hidden="true" />
+              {/* Step 3: verify code (upcoming) */}
+              <div className="h-1.5 w-8 rounded-full bg-[var(--color-border-strong)]" aria-hidden="true" />
+              <span className="text-[11px] font-medium text-[var(--color-text-muted)] ms-1">
+                {t('auth.twoFAStep', { current: 2, total: 3 })}
+              </span>
+            </div>
+
             <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2">
               {t('auth.twoFactorSetupTitle', 'Set up Two-Factor Authentication')}
             </h3>
@@ -395,9 +415,14 @@ const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading || setupCode.length !== 6}
-                className="w-full py-3.5 mt-4 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 uppercase tracking-widest text-sm"
+                className="w-full py-3.5 mt-4 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 uppercase tracking-widest text-sm inline-flex items-center justify-center gap-2"
               >
-                {loading ? '...' : t('auth.verify', 'Verify')}
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                    <span className="sr-only">{t('common.loading', 'Loading…')}</span>
+                  </>
+                ) : t('auth.verify', 'Verify')}
               </button>
               <button
                 type="button"
@@ -427,6 +452,21 @@ const Login: React.FC = () => {
             className="bg-[var(--color-card)] rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl border border-[var(--color-border-soft)]"
             dir={language === Language.AR ? 'rtl' : 'ltr'}
           >
+            {/* Step progress — step 2 of 2 */}
+            <div
+              className="flex items-center gap-1.5 mb-5"
+              role="status"
+              aria-label={t('auth.twoFAStep', { current: 2, total: 2 })}
+            >
+              {/* Step 1: credentials (complete) */}
+              <div className="h-1.5 w-8 rounded-full bg-[var(--color-primary)]" aria-hidden="true" />
+              {/* Step 2: verify code (active) */}
+              <div className="h-1.5 w-8 rounded-full bg-[var(--color-primary)]" aria-hidden="true" />
+              <span className="text-[11px] font-medium text-[var(--color-text-muted)] ms-1">
+                {t('auth.twoFAStep', { current: 2, total: 2 })}
+              </span>
+            </div>
+
             <h3 className="text-lg font-bold text-[var(--color-text-main)] mb-2">
               {t('auth.twoFactorTitle', 'Two-Factor Authentication')}
             </h3>
@@ -456,9 +496,14 @@ const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading || twoFACode.length !== 6}
-                className="w-full py-3.5 mt-4 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 uppercase tracking-widest text-sm"
+                className="w-full py-3.5 mt-4 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 uppercase tracking-widest text-sm inline-flex items-center justify-center gap-2"
               >
-                {loading ? '...' : t('auth.verify', 'Verify')}
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                    <span className="sr-only">{t('common.loading', 'Loading…')}</span>
+                  </>
+                ) : t('auth.verify', 'Verify')}
               </button>
               <button
                 type="button"
@@ -476,6 +521,11 @@ const Login: React.FC = () => {
           </motion.div>
         </div>
       )}
+
+      <ForgotPasswordModal
+        isOpen={showForgotPasswordModal}
+        onClose={() => setShowForgotPasswordModal(false)}
+      />
 
       <ContactAdminModal 
         isOpen={showContactModal}

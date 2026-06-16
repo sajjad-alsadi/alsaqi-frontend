@@ -10,7 +10,7 @@ const LoginFooter: React.FC<LoginFooterProps> = ({ t, onContactClick }) => {
     <div className="mt-8 text-center">
       <div className="w-16 h-px bg-[var(--color-border-soft)] mx-auto mb-4"></div>
       
-      <p className="text-[10px] text-[var(--color-text-muted)] font-semibold uppercase tracking-widest">
+      <p className="text-xs text-[var(--color-text-muted)] font-medium">
         {t('auth.copyrightTextNew')}
       </p>
     </div>
