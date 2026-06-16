@@ -26,7 +26,7 @@
  *   node apps/web/scripts/check-coverage-thresholds.mjs
  *   node apps/web/scripts/check-coverage-thresholds.mjs <coverage-summary.json>
  *
- * Requirements: 7.1, 7.2, 7.3, 7.4
+ * Requirements: 7.1, 7.2, 7.3, 7.4, 30.1, 30.2, 30.3
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -51,6 +51,11 @@ export const PER_FILE_TARGETS = [
   { path: 'src/api/client.ts', minLines: 90 },
   { path: 'src/api/ws/websocket-client.ts', minLines: 90 },
   { path: 'src/utils/sentry.ts', minLines: 90 },
+  // Export utilities held to the higher per-file tier so critical export logic
+  // stays well tested. (Req 30.1: csvExport; Req 30.2: PDF & DOCX exports)
+  { path: 'src/utils/csvExport.ts', minLines: 90 },
+  { path: 'src/utils/pdfExport.ts', minLines: 90 },
+  { path: 'src/utils/docxExport.ts', minLines: 90 },
 ];
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────

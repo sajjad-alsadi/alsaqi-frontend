@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/httpClient';
+import toast from 'react-hot-toast';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
+import logger from '../utils/logger';
 
 interface LegalFormProps {
   onSuccess: () => void;
@@ -17,6 +19,7 @@ const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     type: '',
@@ -61,8 +64,18 @@ const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.post('/law-bank', formData);
-    onSuccess();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await api.post('/law-bank', formData);
+      onSuccess();
+    } catch (err) {
+      logger.error('Operation failed', err);
+      toast.error(t('errorOccurred'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -104,7 +117,7 @@ const LegalForm: React.FC<LegalFormProps> = ({ onSuccess, onClose }) => {
       )}
       <input className="input-field" placeholder={t('legal.relatedRiskArea')} value={formData.related_risk_area} onChange={e => setFormData({...formData, related_risk_area: e.target.value})} required />
       <input className="input-field" placeholder={t('legal.keywords')} value={formData.keywords} onChange={e => setFormData({...formData, keywords: e.target.value})} required />
-      <Button type="submit" className="w-full">{t('common.save')}</Button>
+      <Button type="submit" disabled={isSubmitting} className="w-full">{isSubmitting ? t('common.loading') : t('common.save')}</Button>
     </form>
   );
 };

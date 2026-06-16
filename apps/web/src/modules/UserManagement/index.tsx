@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUserManagement } from '../../api/hooks/useUserManagement';
 import { api } from '../../api';
@@ -296,7 +296,7 @@ const UserManagement: React.FC = () => {
         setSelectedUserId(null);
         setResetPasswordValue('');
       }, 2000);
-    } catch (err) { 
+    } catch {
       toast.error(t('userManagement.errorResettingPassword'));
     }
   };

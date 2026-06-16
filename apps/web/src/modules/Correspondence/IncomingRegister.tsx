@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, 
-  Filter, 
   Plus, 
   Eye, 
   Download, 
   MoreVertical,
-  Calendar,
-  User,
   Building,
   Tag,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  FileText,
   X,
   Mail
 } from 'lucide-react';

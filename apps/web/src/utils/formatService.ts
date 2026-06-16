@@ -1,16 +1,20 @@
 import { usePreferences } from '../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
+import {
+  formatDate as canonicalFormatDate,
+  formatDateTime as canonicalFormatDateTime,
+  formatNumber as canonicalFormatNumber,
+  formatCurrency as canonicalFormatCurrency,
+} from './formatting';
 
 /**
- * Canonical Arabic locale used for number formatting.
- * MUST stay in sync with `utils/format.ts` (`ARABIC_LOCALE`) so that
- * `formatNumber` output is identical between the two modules. `ar-EG` yields
- * Eastern Arabic numerals (٠١٢٣٤٥٦٧٨٩) with grouping separators.
- */
-const ARABIC_LOCALE = 'ar-EG';
-
-/**
- * Hook to provide localized formatting functions
+ * Hook to provide localized formatting functions.
+ *
+ * The date/number/currency helpers now route through the canonical
+ * Formatting_Module (`utils/formatting.ts`), which uses one canonical Arabic
+ * locale (`ar-EG`) via `Intl`. This replaces the previous divergent `ar-IQ`
+ * locale plus manual digit replacement that dropped grouping separators
+ * (Req 17.2, 17.3, 17.4). The hook's public surface is unchanged.
  */
 export const useFormat = () => {
   const { language: contextLanguage } = usePreferences();
@@ -25,20 +29,7 @@ export const useFormat = () => {
    */
   const formatDate = (date: string | Date | number | undefined) => {
     if (!date) return '';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return String(date);
-    
-    const formatted = d.toLocaleDateString(isArabic ? 'ar-IQ' : 'en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
-
-    if (isArabic) {
-      const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return formatted.replace(/[0-9]/g, (w) => id[+w] ?? w);
-    }
-    return formatted;
+    return canonicalFormatDate(date, { language });
   };
 
   /**
@@ -46,41 +37,17 @@ export const useFormat = () => {
    */
   const formatDateTime = (date: string | Date | number | undefined) => {
     if (!date) return '';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return String(date);
-    
-    const formatted = d.toLocaleString(isArabic ? 'ar-IQ' : 'en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-    if (isArabic) {
-      const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return formatted.replace(/[0-9]/g, (w) => id[+w] ?? w);
-    }
-    return formatted;
+    return canonicalFormatDateTime(date, { language });
   };
 
   /**
-   * Formats a number according to the current language. In the Arabic locale
-   * this delegates to `Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true })`,
-   * producing Eastern Arabic numerals with grouping separators instead of the
-   * previous manual digit replacement that dropped grouping.
+   * Formats a number according to the current language. Routes through the
+   * canonical module which, in Arabic, produces Eastern Arabic numerals with
+   * grouping separators via `Intl.NumberFormat`.
    */
   const formatNumber = (num: number | string | undefined) => {
     if (num === undefined || num === null) return isArabic ? '٠' : '0';
-
-    const n = typeof num === 'string' ? parseFloat(num) : num;
-    if (isNaN(n)) return String(num);
-
-    if (isArabic) {
-      return new Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true }).format(n);
-    }
-
-    return n.toLocaleString('en-US');
+    return canonicalFormatNumber(num, { language });
   };
 
   /**
@@ -99,20 +66,7 @@ export const useFormat = () => {
    */
   const formatCurrency = (amount: number | string | undefined, currency = 'IQD') => {
     if (amount === undefined || amount === null) return '';
-    const n = typeof amount === 'string' ? parseFloat(amount) : amount;
-    if (isNaN(n)) return String(amount);
-
-    const formatted = n.toLocaleString(isArabic ? 'ar-IQ' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      maximumFractionDigits: 0
-    });
-
-    if (isArabic) {
-      const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return formatted.replace(/[0-9]/g, (w) => id[+w] ?? w);
-    }
-    return formatted;
+    return canonicalFormatCurrency(amount, { language, currency });
   };
 
   /**

@@ -60,14 +60,29 @@ function buildSummary(targetPcts: Record<string, number | string | undefined>) {
   return summary;
 }
 
+/**
+ * A passing baseline that covers EVERY current `PER_FILE_TARGETS` path at a pct
+ * comfortably above the per-file threshold. Individual tests clone this and
+ * mutate a single target (omit it, set it below threshold, or mark it
+ * "Unknown") so the fixtures stay robust as the target set grows. (Without this
+ * every target absent from the report is a `missing` failure — see Req 7.4.)
+ */
+function allTargetsPassing(): Record<string, number | string | undefined> {
+  const pcts: Record<string, number | string | undefined> = {};
+  for (const target of PER_FILE_TARGETS as Target[]) {
+    pcts[target.path] = 95;
+  }
+  return pcts;
+}
+
 const opts = { webRoot: WEB_ROOT };
 
 describe('coverage gate — missing / absent per-file targets (requirement 7.4)', () => {
   it('passes when every per-file target is present and meets its threshold', () => {
     const summary = buildSummary({
-      'src/api/client.ts': 95,
-      'src/api/ws/websocket-client.ts': 91,
-      'src/utils/sentry.ts': 90, // exactly at the >= 90 threshold
+      ...allTargetsPassing(),
+      // sentry.ts exactly at the >= 90 threshold to exercise the inclusive boundary.
+      'src/utils/sentry.ts': 90,
     });
 
     const result = checkCoverageThresholds(summary, PER_FILE_TARGETS, opts);
@@ -82,9 +97,8 @@ describe('coverage gate — missing / absent per-file targets (requirement 7.4)'
     // src/utils/sentry.ts is omitted entirely — the glob would match zero files
     // and be silently skipped. The gate must catch this.
     const summary = buildSummary({
-      'src/api/client.ts': 95,
-      'src/api/ws/websocket-client.ts': 92,
-      // 'src/utils/sentry.ts' intentionally absent
+      ...allTargetsPassing(),
+      'src/utils/sentry.ts': undefined, // intentionally absent
     });
 
     const result = checkCoverageThresholds(summary, PER_FILE_TARGETS, opts);
@@ -103,9 +117,8 @@ describe('coverage gate — missing / absent per-file targets (requirement 7.4)'
     // Present in the report but with an unusable (non-finite) pct — this is the
     // exact "Unknown" < 90 === false trap requirement 7.4 forbids.
     const summary = buildSummary({
-      'src/api/client.ts': 95,
+      ...allTargetsPassing(),
       'src/api/ws/websocket-client.ts': 'Unknown',
-      'src/utils/sentry.ts': 93,
     });
 
     const result = checkCoverageThresholds(summary, PER_FILE_TARGETS, opts);
@@ -117,9 +130,11 @@ describe('coverage gate — missing / absent per-file targets (requirement 7.4)'
   });
 
   it('reports EVERY missing target, not just the first', () => {
+    // Two specific targets absent; the rest present and passing.
     const summary = buildSummary({
-      'src/api/client.ts': 95,
-      // both others absent
+      ...allTargetsPassing(),
+      'src/api/ws/websocket-client.ts': undefined,
+      'src/utils/sentry.ts': undefined,
     });
 
     const result = checkCoverageThresholds(summary, PER_FILE_TARGETS, opts);
@@ -135,8 +150,7 @@ describe('coverage gate — missing / absent per-file targets (requirement 7.4)'
     // Sanity contrast: a present file under threshold is a `below` failure (Req 7.1),
     // distinct from the missing/absent case (Req 7.4).
     const summary = buildSummary({
-      'src/api/client.ts': 95,
-      'src/api/ws/websocket-client.ts': 92,
+      ...allTargetsPassing(),
       'src/utils/sentry.ts': 80, // present but below the 90 threshold
     });
 

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import api from '../api/httpClient';
 import { Language } from '../types';
 import { useTranslation } from 'react-i18next';
-import logger from '../utils/logger';
 
 interface PreferencesContextType {
   language: Language;
@@ -68,12 +67,12 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     try {
       localStorage.setItem('audit_lang', lang);
       localStorage.setItem('i18nextLng', lang);
-    } catch (e) {}
+    } catch {}
     // Persist to server - API uses cookie-based auth, so no token check needed.
     // The request will simply fail with 401 if not authenticated (handled by api interceptor).
     try {
       await api.put('/preferences', { language: lang, theme: themeRef.current, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: notificationsEnabledRef.current });
-    } catch (err) {
+    } catch {
       // Silently fail - local state is already updated
     }
   }, [i18n]);
@@ -82,7 +81,7 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     setThemeState(newTheme);
     try {
       localStorage.setItem('audit_theme', newTheme);
-    } catch (e) {}
+    } catch {}
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -90,7 +89,7 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
     try {
       await api.put('/preferences', { language: languageRef.current, theme: newTheme, dashboard_layout: dashboardLayoutRef.current, notifications_enabled: notificationsEnabledRef.current });
-    } catch (err) {
+    } catch {
       // Silently fail - local state is already updated
     }
   }, []);
@@ -99,10 +98,10 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     setDashboardLayoutState(layout);
     try {
       localStorage.setItem('audit_layout', layout);
-    } catch (e) {}
+    } catch {}
     try {
       await api.put('/preferences', { language: languageRef.current, theme: themeRef.current, dashboard_layout: layout, notifications_enabled: notificationsEnabledRef.current });
-    } catch (err) {
+    } catch {
       // Silently fail - local state is already updated
     }
   }, []);

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { History, Search, Filter, Shield, Clock, User, Activity } from 'lucide-react';
+import { History, Clock, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import Pagination from '../../components/Pagination';

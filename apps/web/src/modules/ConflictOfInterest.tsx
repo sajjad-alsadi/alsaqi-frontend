@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
-import { ShieldAlert, Plus, Edit, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import Modal from '../components/Modal';
 import api from '../api/httpClient';

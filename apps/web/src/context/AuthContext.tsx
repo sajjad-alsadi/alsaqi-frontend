@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef, ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import api from '../api/httpClient';
-import { User } from '../types';
 import { useUser } from './UserContext';
 import logger from '../utils/logger';
 import { clearAppStorage } from '../utils/clearAppStorage';

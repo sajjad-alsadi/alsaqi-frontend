@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { AuditTrail } from '../types';
-import { History, Search, Filter, Clock, User, Activity, ArrowRight } from 'lucide-react';
+import { History, Search, Filter } from 'lucide-react';
 import { motion } from 'motion/react';
 import api from '../api/httpClient';
 import toast from 'react-hot-toast';

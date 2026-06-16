@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Users, Search, Plus, Edit2, Archive, ChevronRight, ChevronDown, 
+  Search, Plus, Edit2, Archive, ChevronRight, ChevronDown, 
   MapPin, User, Hash, Info, Building2, LayoutGrid, BarChart3, List,
-  Filter, AlertCircle, Network
+  AlertCircle, Network
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';

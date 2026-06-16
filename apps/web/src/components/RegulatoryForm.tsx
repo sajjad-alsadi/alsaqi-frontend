@@ -5,6 +5,7 @@ import api from '../api/httpClient';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
+import logger from '../utils/logger';
 
 interface RegulatoryFormProps {
   onSuccess: () => void;
@@ -19,6 +20,7 @@ const RegulatoryForm: React.FC<RegulatoryFormProps> = ({ onSuccess, onClose, ini
   const [instructions, setInstructions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     issue_date: initialData?.issue_date || '',
@@ -67,18 +69,36 @@ const RegulatoryForm: React.FC<RegulatoryFormProps> = ({ onSuccess, onClose, ini
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const url = initialData ? `/central-bank-instructions/${initialData.id}` : '/central-bank-instructions';
-    
-    if (initialData) {
-      await api.put(url, formData);
-    } else {
-      await api.post(url, formData);
+    if (isSubmitting) return;
+
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const url = initialData ? `/central-bank-instructions/${initialData.id}` : '/central-bank-instructions';
+
+      if (initialData) {
+        await api.put(url, formData);
+      } else {
+        await api.post(url, formData);
+      }
+
+      onSuccess();
+    } catch (err: any) {
+      logger.error('Operation failed', err);
+      const apiError = err.response?.data?.error;
+      setError(typeof apiError === 'string' ? apiError : apiError?.message || t('common.error'));
+    } finally {
+      setIsSubmitting(false);
     }
-    onSuccess();
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-100 dark:border-rose-900/30 font-bold text-sm">
+          {error}
+        </div>
+      )}
       <input className="input-field" placeholder={t('common.name')} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
       <input type="date" className="input-field" value={formData.issue_date} onChange={e => setFormData({...formData, issue_date: e.target.value})} required />
       <input className="input-field" placeholder={t('common.referenceNumber')} value={formData.reference_number} onChange={e => setFormData({...formData, reference_number: e.target.value})} required />
@@ -120,15 +140,15 @@ const RegulatoryForm: React.FC<RegulatoryFormProps> = ({ onSuccess, onClose, ini
       
       {loading ? (
         <p>{t('common.loading')}</p>
-      ) : error ? (
-        <p className="text-red-500">{t('common.error')} {error}</p>
       ) : (
         <select className="input-field" value={formData.related_department} onChange={e => setFormData({...formData, related_department: e.target.value})} required>
           <option value="">{t('common.selectDepartment')}</option>
           {(Array.isArray(departments) ? departments : []).map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
         </select>
       )}
-      <Button type="submit" className="w-full">{initialData ? t('common.update') : t('common.save')}</Button>
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? t('common.loading') : (initialData ? t('common.update') : t('common.save'))}
+      </Button>
     </form>
   );
 };

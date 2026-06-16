@@ -2,7 +2,6 @@ import React from 'react';
 import { LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { Language } from '../../constants';
 import { useFormat } from '../../utils/formatService';
 
 interface DashboardHeaderProps {

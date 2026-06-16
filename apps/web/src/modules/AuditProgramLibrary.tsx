@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { AuditProgram, AuditProcedure } from '../types';
-import { motion } from 'motion/react';
 import { useFormat } from '../utils/formatService';
 import api from '../api/httpClient';
 import { AuditStatus, AuditType, ControlTestType } from '../constants';

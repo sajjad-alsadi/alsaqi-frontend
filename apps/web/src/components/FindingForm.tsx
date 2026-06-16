@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,19 +14,17 @@ import { FormField } from './ui/FormField';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 
-const findingSchema = z.object({
-  audit_id: z.string().min(1, 'Field is required'),
-  title: z.string().min(1, 'Field is required'),
-  finding_type: z.enum(['control_design_deficiency', 'operational_design_deficiency']),
-  condition: z.string().min(1, 'Field is required'),
-  criteria: z.string().min(1, 'Field is required'),
-  consequence: z.string().min(1, 'Field is required'),
-  recommendation: z.string().min(1, 'Field is required'),
-  risk_level: z.nativeEnum(RiskLevel),
-  status: z.nativeEnum(AuditStatus),
-});
-
-type FindingFormValues = z.infer<typeof findingSchema>;
+interface FindingFormValues {
+  audit_id: string;
+  title: string;
+  finding_type: 'control_design_deficiency' | 'operational_design_deficiency';
+  condition: string;
+  criteria: string;
+  consequence: string;
+  recommendation: string;
+  risk_level: RiskLevel;
+  status: AuditStatus;
+}
 
 interface FindingFormProps {
   onSuccess: () => void;
@@ -35,15 +33,31 @@ interface FindingFormProps {
 }
 
 const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialData }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [plans, setPlans] = useState<AuditPlan[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Validation schema is defined inside the component so messages are localized via t(...)
+  const findingSchema = useMemo(
+    () =>
+      z.object({
+        audit_id: z.string().min(1, t('findings.fieldRequired')),
+        title: z.string().min(1, t('findings.fieldRequired')),
+        finding_type: z.enum(['control_design_deficiency', 'operational_design_deficiency']),
+        condition: z.string().min(1, t('findings.fieldRequired')),
+        criteria: z.string().min(1, t('findings.fieldRequired')),
+        consequence: z.string().min(1, t('findings.fieldRequired')),
+        recommendation: z.string().min(1, t('findings.fieldRequired')),
+        risk_level: z.nativeEnum(RiskLevel),
+        status: z.nativeEnum(AuditStatus),
+      }),
+    [t],
+  );
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FindingFormValues>({
     resolver: zodResolver(findingSchema),
@@ -60,9 +74,6 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
       status: AuditStatus.OPEN,
     },
   });
-
-  const condition = watch('condition');
-  const consequence = watch('consequence');
 
   useEffect(() => {
     if (initialData) {
@@ -89,22 +100,32 @@ const FindingForm: React.FC<FindingFormProps> = ({ onSuccess, onCancel, initialD
   };
 
   const onSubmit = async (data: FindingFormValues) => {
+    setSubmitError(null);
     try {
       const url = initialData?.id ? `/audit-findings/${initialData.id}` : '/audit-findings';
-      
+
       if (initialData?.id) {
         await api.put(url, data);
       } else {
         await api.post(url, data);
       }
       onSuccess();
-    } catch (err) {
+    } catch (err: any) {
       logger.error('Operation failed', err);
+      const apiError = err?.response?.data?.error;
+      setSubmitError(
+        typeof apiError === 'string' ? apiError : apiError?.message || t('findings.saveFailed'),
+      );
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      {submitError && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-100 dark:border-rose-900/30 font-bold text-sm">
+          {submitError}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <FormField label={t('common.auditPlan')} error={errors.audit_id?.message} required className="md:col-span-2">
           <Select {...register('audit_id')}>

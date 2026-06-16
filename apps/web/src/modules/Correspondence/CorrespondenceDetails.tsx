@@ -1,27 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
-  Mail, 
-  Send, 
   Clock, 
-  CheckCircle, 
   Archive, 
-  AlertCircle,
   FileText,
-  Link as LinkIcon,
   Paperclip,
   Share2,
   History,
   User,
   Building,
-  Calendar,
-  Tag,
   Download,
   Plus,
   X,
-  ChevronRight,
-  ChevronDown,
-  Search
+  ChevronRight
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';

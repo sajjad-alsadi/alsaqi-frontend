@@ -22,7 +22,10 @@ import { getAppVersion, getErrorReportUrl } from './env';
 function getCsrfToken(): string | undefined {
   if (typeof document === 'undefined') return undefined;
   const match = document.cookie.split('; ').find((row) => row.startsWith('csrf-token='));
-  return match?.split('=')[1];
+  if (!match) return undefined;
+  // Preserve every character after the first `=` (base64 `=` padding included)
+  // instead of truncating with `split('=')[1]`, then decode URL-encoding (Req 6.2, 6.3).
+  return decodeURIComponent(match.slice(match.indexOf('=') + 1));
 }
 
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';

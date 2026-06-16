@@ -117,7 +117,16 @@ class MockResizeObserver {
 
   constructor(_callback: ResizeObserverCallback) {}
 }
-Object.defineProperty(global, 'ResizeObserver', { value: MockResizeObserver });
+// configurable/writable so individual tests can swap in an instrumented
+// ResizeObserver via `vi.stubGlobal('ResizeObserver', ...)` and have it cleanly
+// restored by `vi.unstubAllGlobals()` (same capability the global WebSocket mock
+// has by virtue of Node providing a configurable WebSocket). The default mock is
+// unchanged for every other test.
+Object.defineProperty(global, 'ResizeObserver', {
+  value: MockResizeObserver,
+  configurable: true,
+  writable: true,
+});
 
 // Mock AudioContext for notification sounds
 const mockAudioContext = {

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { useUser } from '../../context/UserContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import api from '../../api/httpClient';
@@ -37,10 +36,9 @@ interface ProfileData {
 }
 
 const Settings: React.FC = () => {
-  const { token } = useAuth();
   const { user, updateUser } = useUser();
   const { language, setLanguage, theme, setTheme, dashboardLayout, setDashboardLayout } = usePreferences();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const { departments } = useDepartments();
@@ -171,7 +169,7 @@ const Settings: React.FC = () => {
         notifications_enabled: preferences.notifications
       });
       setMessage({ text: t('settings.profileUpdated'), type: 'success' });
-    } catch (err) {
+    } catch {
       setMessage({ text: t('settings.errorUpdatingPreferences'), type: 'error' });
     }
   };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import api from '../api/httpClient';
@@ -23,15 +23,39 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
   const [scale, setScale] = useState<number>(1.0);
   const [processedUrl, setProcessedUrl] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  // Tracks the most recently created object URL so it can be revoked
+  // reliably on the next `url` change, on unmount, or when a load that
+  // started before unmount finally completes (Req 25.1, 25.2, 25.3).
+  const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    let objectUrl = '';
+    let cancelled = false;
     setError(null);
-    
+
+    // Defensively revoke any previously tracked object URL before starting a
+    // new load so URLs never leak across loads (Req 25.3).
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+
     if (!url) {
       setProcessedUrl('');
       return;
     }
+
+    // Stores a freshly created object URL in the ref and surfaces it to the
+    // viewer. If the effect was already cleaned up (the `url` prop changed or
+    // the component unmounted before this async load completed), the URL is
+    // revoked immediately to avoid a leak (Req 25.1, 25.2).
+    const trackObjectUrl = (objUrl: string) => {
+      if (cancelled) {
+        URL.revokeObjectURL(objUrl);
+        return;
+      }
+      objectUrlRef.current = objUrl;
+      setProcessedUrl(objUrl);
+    };
 
     // Clean up the URL in case it has whitespaces
     const cleanUrl = url.replace(/\s/g, '');
@@ -74,13 +98,12 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
 
         if (hasMagicNumber) {
           const blob = new Blob([byteNumbers], { type: 'application/pdf' });
-          objectUrl = URL.createObjectURL(blob);
-          setProcessedUrl(objectUrl);
+          trackObjectUrl(URL.createObjectURL(blob));
         } else {
           setError(t('invalidPdfFormat'));
           setProcessedUrl('');
         }
-      } catch (e) {
+      } catch {
         setError(t('errorProcessingFile'));
         setProcessedUrl('');
       }
@@ -101,9 +124,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
             }
             
             if (hasMagicNumber) {
-              const objUrl = URL.createObjectURL(blob);
-              objectUrl = objUrl;
-              setProcessedUrl(objUrl);
+              trackObjectUrl(URL.createObjectURL(blob));
             } else {
               setError(t('invalidPdfFormat'));
               setProcessedUrl('');
@@ -112,15 +133,20 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
           // Read up to 1024 bytes to find the magic number
           reader.readAsArrayBuffer(blob.slice(0, 1024));
         })
-        .catch(e => {
+        .catch(() => {
           setError(t('errorLoadingFile'));
           setProcessedUrl('');
         });
     }
 
     return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
+      // Signal that any in-flight async load is stale, then revoke the
+      // tracked object URL so it is released on `url` change or on unmount —
+      // including when unmounting before a load completes (Req 25.2, 25.3).
+      cancelled = true;
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
       }
     };
   }, [url, t]);

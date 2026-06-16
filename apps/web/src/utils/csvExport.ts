@@ -9,8 +9,12 @@
 
 import logger from './logger';
 
-/** Leading characters a spreadsheet may interpret as the start of a formula. */
-const FORMULA_TRIGGERS = ['=', '+', '-', '@'] as const;
+/**
+ * Leading characters a spreadsheet may interpret as the start of a formula.
+ * Includes a leading tab (`\t`) and carriage return (`\r`), which some
+ * spreadsheet importers also treat as formula triggers (Req 28.1, 28.2, 28.3).
+ */
+const FORMULA_TRIGGERS = ['=', '+', '-', '@', '\t', '\r'] as const;
 
 /** Row separator used when serializing (RFC 4180 CRLF). */
 const ROW_SEPARATOR = '\r\n';

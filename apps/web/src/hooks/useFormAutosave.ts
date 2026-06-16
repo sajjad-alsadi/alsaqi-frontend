@@ -89,7 +89,7 @@ export function useFormAutosave<T extends Record<string, any>>(
             timestamp: Date.now()
           }));
         }
-      } catch (e) {
+      } catch {
         // localStorage might be full or unavailable
       }
     }, delay);

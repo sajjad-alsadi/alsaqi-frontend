@@ -21,6 +21,104 @@ export interface LogEntry {
   correlationId: string;
   componentStack?: string | undefined;
   context?: Record<string, unknown> | undefined;
+  /**
+   * The route the entry was produced on, derived from `location.pathname` only.
+   * The query string is intentionally excluded so query-string tokens are never
+   * forwarded to the Backend (Req 10.2, 10.3). Present only on transmitted entries.
+   */
+  routePath?: string | undefined;
+}
+
+/**
+ * Allowlist of caller-supplied `context` keys that may be forwarded to the
+ * Backend (Req 10.1, 10.4). Only these keys survive redaction; every other key
+ * is excluded before transmission so tokens and unvetted context are never
+ * leaked. Keys are limited to safe, structural diagnostic fields — identifiers,
+ * routing/structure hints, and standard error metadata — and deliberately omit
+ * free-form payloads (`data`, `payload`, `body`), credentials (`token`,
+ * `tokenId`, `password`), and raw network identifiers (`ip`, `username`).
+ */
+export const LOG_CONTEXT_ALLOWLIST: readonly string[] = [
+  'module',
+  'componentStack',
+  'correlationId',
+  'route',
+  'routePath',
+  'action',
+  'component',
+  'feature',
+  'status',
+  'statusCode',
+  'errorCode',
+  'code',
+  'name',
+  'type',
+  'severity',
+  'attempts',
+  'count',
+  'retries',
+  'duration',
+  'userId',
+  'message',
+  'filename',
+  'lineno',
+  'colno',
+  'stack',
+  'reason',
+];
+
+const ALLOWLIST_SET = new Set<string>(LOG_CONTEXT_ALLOWLIST);
+
+/**
+ * Apply the allowlist policy to a caller-supplied context object before it is
+ * forwarded to the Backend (Req 10.1, 10.4). Returns a new object containing
+ * only allowlisted keys; non-allowlisted keys are excluded entirely so their
+ * values are never transmitted. Returns `undefined` when given no context so
+ * the forwarded entry omits the field.
+ */
+export function redactContext(
+  context: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
+  if (!context) return undefined;
+  const redacted: Record<string, unknown> = {};
+  for (const key of Object.keys(context)) {
+    if (ALLOWLIST_SET.has(key)) {
+      redacted[key] = context[key];
+    }
+  }
+  return redacted;
+}
+
+/**
+ * Resolve the current route path with the query string stripped (Req 10.2,
+ * 10.3). Uses `location.pathname` only so query-string tokens in
+ * `window.location.href` are never forwarded. Returns `undefined` when the
+ * location is unavailable (e.g. SSR).
+ */
+function getRoutePath(): string | undefined {
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      return window.location.pathname;
+    }
+  } catch {
+    // location unavailable — omit the route path rather than throwing.
+  }
+  return undefined;
+}
+
+/**
+ * Produce a transmission-safe copy of a structured entry (Req 10.1–10.4):
+ * caller-supplied context is reduced to the allowlist, and the route path is
+ * attached as `location.pathname` only (no query string). The original entry
+ * (used for local dev console output) is left untouched.
+ */
+export function toTransmissionEntry(entry: LogEntry): LogEntry {
+  const routePath = getRoutePath();
+  return {
+    ...entry,
+    context: redactContext(entry.context),
+    ...(routePath !== undefined ? { routePath } : {}),
+  };
 }
 
 /**
@@ -136,18 +234,21 @@ function postEntry(url: string, entry: LogEntry): Promise<void> {
  */
 function forwardToPipeline(entry: LogEntry): void {
   const { destination } = forwardingConfig;
+  // Redact caller-supplied context to the allowlist and strip the query string
+  // from the forwarded location before anything leaves the client (Req 10.1–10.4).
+  const safeEntry = toTransmissionEntry(entry);
   try {
     if (destination && destination !== FALLBACK_DESTINATION) {
       // Forward to the configured destination; on failure, retain the
       // `/api/system-errors` delivery path as the fallback.
-      postEntry(destination, entry).catch(() => {
-        postEntry(FALLBACK_DESTINATION, entry).catch(() => {
+      postEntry(destination, safeEntry).catch(() => {
+        postEntry(FALLBACK_DESTINATION, safeEntry).catch(() => {
           // Fallback also failed — silently ignore (fire-and-forget).
         });
       });
     } else {
       // Destination unavailable/unset — use the fallback path directly.
-      postEntry(FALLBACK_DESTINATION, entry).catch(() => {
+      postEntry(FALLBACK_DESTINATION, safeEntry).catch(() => {
         // Silently ignore — errorReporter handles retries separately.
       });
     }

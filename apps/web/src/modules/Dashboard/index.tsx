@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Activity, AlertCircle, CheckCircle2, Clock, FileText, ShieldAlert, 
-  Inbox, Send, Briefcase, AlertTriangle, TrendingUp, FileSearch, History,
+  AlertCircle, CheckCircle2, Clock, FileText, ShieldAlert, 
+  Inbox, Send, Briefcase, AlertTriangle, TrendingUp, FileSearch,
   Plus, Scale
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -49,7 +49,7 @@ const Dashboard: React.FC = () => {
       { id: 'incoming', title: t('dashboard.incomingCorrespondence'), value: stats.correspondence.incoming_total, icon: Inbox, color: 'text-[var(--color-success)]', bg: 'bg-[var(--color-success)]/10', trend: t('dashboard.official'), trendUp: true, link: '/cms' },
       { id: 'outgoing', title: t('dashboard.outgoingCorrespondence'), value: stats.correspondence.outgoing_total, icon: Send, color: 'text-[var(--color-primary)]', bg: 'bg-[var(--color-primary)]/10', trend: t('dashboard.official'), trendUp: true, link: '/cms' },
       { id: 'pending-resp', title: t('dashboard.pendingResponses'), value: stats.correspondence.pending_responses, icon: Clock, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning)]/10', trend: t('dashboard.actionRequired'), trendUp: false, link: '/cms' },
-      { id: 'compliance', title: t('dashboard.activeInstructions'), value: stats.compliance.total, icon: Scale, color: 'text-[var(--color-primary)]', bg: 'bg-[var(--color-primary)]/10', trend: t('dashboard.regulatory'), trendUp: true, link: '/regulatory' },
+      { id: 'compliance', title: t('dashboard.activeInstructions'), value: stats.compliance.total, icon: Scale, color: 'text-[var(--color-primary)]', bg: 'bg-[var(--color-primary)]/10', trend: t('dashboard.regulatory'), trendUp: true, link: '/compliance-matrix' },
     ];
   }, [stats, t]);
 

@@ -156,29 +156,43 @@ beforeEach(() => {
 
 describe('Property 11: Frontend Fallback Correctness', () => {
   /**
-   * Narrowing fallback (Requirement 9 — SECURITY-002, no privilege escalation).
+   * Narrowing fallback (Requirement 7 / SECURITY-002, no privilege escalation).
    *
    * When the API is unavailable (network error, timeout, or 5xx) AND there is no
-   * confirmed permission set cached, the hook SHALL fall back to the READ-ONLY
-   * permission set (see {@link READ_ONLY_PERMISSION_SET} in
-   * `src/permissions/fallback.ts`). That set grants only `View` on every module
-   * in MODULES and no write actions, so the fallback can never widen access
-   * beyond what the server last confirmed.
+   * confirmed permission set cached, the hook SHALL compute the fallback as the
+   * intersection of the READ-ONLY permission set with the role's static default
+   * permissions (see `computeFallback`/`READ_ONLY_PERMISSION_SET` in
+   * `src/permissions/fallback.ts`). The read-only set grants only `View`, so the
+   * intersection grants at most `View`, and only on the modules the role's static
+   * defaults already include — it can never widen access beyond those defaults.
    *
    * Therefore, for any non-Admin role with no confirmed cache:
-   *   - hasPermission(module, 'View')   === true  for every module
+   *   - hasPermission(module, 'View')   === true  ONLY where the role's static
+   *     defaults (DEFAULT_PERMISSIONS) grant View on that module; otherwise false
+   *     (e.g. a low-privilege role is denied View on UserManagement/SystemLogs).
    *   - hasPermission(module, writeAction) === false for Create/Edit/Delete/Approve
    *
-   * This replaces the superseded full static-matrix (DEFAULT_PERMISSIONS)
-   * expectation from the old Requirements 6.2/6.5 behavior.
+   * This reflects the narrowed no-cache fallback (Req 7.1, 7.2, 7.3) that replaced
+   * the prior "View granted on every module" behavior.
    *
-   * **Validates: Requirement 9 (narrowing read-only fallback, no privilege escalation)**
+   * **Validates: Requirement 7 (narrowing fallback as READ-ONLY ∩ static defaults, no privilege escalation)**
    */
 
-  /** Read-only fallback grants ONLY 'View'; everything else is a write action denied on failure. */
-  const expectedReadOnly = (action: PermissionAction) => action === 'View';
+  /**
+   * Expected fallback grant: `View` only where the role's static defaults include
+   * `View` on that module; every write action is denied.
+   */
+  const expectedFallback = (
+    role: (typeof NON_ADMIN_ROLES)[number],
+    module: Module,
+    action: PermissionAction,
+  ) => {
+    if (action !== 'View') return false;
+    const roleDefaults = DEFAULT_PERMISSIONS[role as keyof typeof DEFAULT_PERMISSIONS];
+    return roleDefaults?.[module]?.includes('View') ?? false;
+  };
 
-  it('when API fails with network error and no confirmed cache, fallback is READ-ONLY (View granted, writes denied) for any non-Admin role', async () => {
+  it('when API fails with network error and no confirmed cache, fallback is READ-ONLY ∩ static defaults (View only where statically granted, writes denied) for any non-Admin role', async () => {
     await fc.assert(
       fc.asyncProperty(
         nonAdminRoleArb,
@@ -198,15 +212,17 @@ describe('Property 11: Frontend Fallback Correctness', () => {
             expect(result.current.isLoading).toBe(false);
           });
 
-          // Read-only fallback: View on every module, no write actions.
-          expect(result.current.hasPermission(module, action)).toBe(expectedReadOnly(action));
+          // Narrowed fallback: View only where static defaults grant it; writes denied.
+          expect(result.current.hasPermission(module, action)).toBe(
+            expectedFallback(role, module, action),
+          );
         }
       ),
       { numRuns: 50 }
     );
   });
 
-  it('when API fails with 500 error and no confirmed cache, fallback is READ-ONLY (View granted, writes denied) for any non-Admin role', async () => {
+  it('when API fails with 500 error and no confirmed cache, fallback is READ-ONLY ∩ static defaults (View only where statically granted, writes denied) for any non-Admin role', async () => {
     await fc.assert(
       fc.asyncProperty(
         nonAdminRoleArb,
@@ -225,15 +241,17 @@ describe('Property 11: Frontend Fallback Correctness', () => {
             expect(result.current.isLoading).toBe(false);
           });
 
-          // Read-only fallback: View on every module, no write actions.
-          expect(result.current.hasPermission(module, action)).toBe(expectedReadOnly(action));
+          // Narrowed fallback: View only where static defaults grant it; writes denied.
+          expect(result.current.hasPermission(module, action)).toBe(
+            expectedFallback(role, module, action),
+          );
         }
       ),
       { numRuns: 50 }
     );
   });
 
-  it('when API fails with timeout and no confirmed cache, fallback is READ-ONLY (View granted, writes denied) for any non-Admin role', async () => {
+  it('when API fails with timeout and no confirmed cache, fallback is READ-ONLY ∩ static defaults (View only where statically granted, writes denied) for any non-Admin role', async () => {
     await fc.assert(
       fc.asyncProperty(
         nonAdminRoleArb,
@@ -252,8 +270,10 @@ describe('Property 11: Frontend Fallback Correctness', () => {
             expect(result.current.isLoading).toBe(false);
           });
 
-          // Read-only fallback: View on every module, no write actions.
-          expect(result.current.hasPermission(module, action)).toBe(expectedReadOnly(action));
+          // Narrowed fallback: View only where static defaults grant it; writes denied.
+          expect(result.current.hasPermission(module, action)).toBe(
+            expectedFallback(role, module, action),
+          );
         }
       ),
       { numRuns: 50 }

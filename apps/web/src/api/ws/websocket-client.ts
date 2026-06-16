@@ -36,11 +36,21 @@ export interface WebSocketClientConfig {
   /** WebSocket server URL (e.g., ws://localhost:3000 or wss://example.com) */
   wsUrl: string;
   /**
-   * Fetch a JWT token for authentication. Called once per connection attempt so a
-   * FRESH token is obtained every time (no cross-attempt caching — Requirement 7.1, 7.2).
+   * Fetch a short-lived WebSocket token for authentication. Called once per
+   * connection attempt so a FRESH token is obtained every time (no cross-attempt
+   * caching — Requirement 7.1, 7.2).
+   *
+   * Token acquisition follows the cookie/ws-token model: the authenticated
+   * session lives in an HttpOnly cookie, and this callback exchanges that cookie
+   * (via `credentials: 'include'`) for a short-lived WS token from the backend.
    * The token is NEVER placed in the connection URL; it is sent as the first
-   * post-connect message (`{ type: 'auth', token }`).
-   * Resolve to `null` to rely on the cookie session / skip authentication.
+   * post-connect message (`{ type: 'auth', token }`). Do NOT read the token from
+   * `localStorage` — the cookie/ws-token model is the supported source.
+   *
+   * Resolve to `null` to rely on the cookie session / skip the token message. A
+   * `null` result during connect is treated as a TRANSIENT failure: the client
+   * schedules a reconnect/fallback rather than staying disconnected, and
+   * re-establishes once a token becomes available (Requirement 21.1, 21.2).
    */
   getToken: () => Promise<string | null>;
   /** HTTP base URL for polling fallback (e.g., http://localhost:3000/api) */
@@ -155,7 +165,14 @@ export class WebSocketClient {
     if (this.isDestroyed) return;
 
     if (!token) {
-      this.setState('disconnected');
+      // A null token during connect is a TRANSIENT token-fetch failure, not a
+      // permanent state (Requirement 21.1). Route it through the same
+      // reconnect/backoff path as any other connection failure so the client
+      // schedules another attempt instead of staying disconnected forever.
+      // Once getToken() resolves to a real token on a later attempt (or the
+      // polling fallback's WS-reconnect probe succeeds), the notification
+      // connection re-establishes (Requirement 21.2).
+      this.handleConnectionFailure();
       return;
     }
 
@@ -538,7 +555,20 @@ export class WebSocketClient {
  * ```ts
  * const wsClient = createWebSocketClient({
  *   wsUrl: 'wss://api.example.com/ws',
- *   getToken: async () => localStorage.getItem('token'),
+ *   // Token acquisition follows the cookie/ws-token model: the browser holds the
+ *   // authenticated session in an HttpOnly cookie, and a short-lived WebSocket
+ *   // token is fetched from the backend (with `credentials: 'include'`) once per
+ *   // connection attempt. The token is sent as the first post-connect message,
+ *   // never placed in the URL. Return null to rely solely on the cookie session.
+ *   getToken: async () => {
+ *     const res = await fetch('https://api.example.com/api/auth/ws-token', {
+ *       method: 'POST',
+ *       credentials: 'include', // send the session cookie
+ *     });
+ *     if (!res.ok) return null; // transient failure → fall back / retry
+ *     const { token } = await res.json();
+ *     return token;
+ *   },
  *   httpBaseUrl: 'https://api.example.com/api',
  *   onNotification: (notification, seqId) => {
  *     console.log('New notification:', notification, seqId);

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,16 +13,14 @@ import { FormField } from './ui/FormField';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 
-const recommendationSchema = z.object({
-  finding_id: z.string().min(1, 'Field is required'),
-  department: z.string().min(1, 'Field is required'),
-  responsible: z.string().min(1, 'Field is required'),
-  due_date: z.string().min(1, 'Field is required'),
-  status: z.nativeEnum(AuditStatus),
-  risk_level: z.nativeEnum(RiskLevel),
-});
-
-type RecommendationFormValues = z.infer<typeof recommendationSchema>;
+type RecommendationFormValues = {
+  finding_id: string;
+  department: string;
+  responsible: string;
+  due_date: string;
+  status: AuditStatus;
+  risk_level: RiskLevel;
+};
 
 interface RecommendationFormProps {
   onSuccess: () => void;
@@ -33,6 +31,20 @@ interface RecommendationFormProps {
 
 const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCancel, findings, initialData }) => {
   const { t } = useTranslation();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const recommendationSchema = useMemo(
+    () =>
+      z.object({
+        finding_id: z.string().min(1, t('recommendations.fieldRequired')),
+        department: z.string().min(1, t('recommendations.fieldRequired')),
+        responsible: z.string().min(1, t('recommendations.fieldRequired')),
+        due_date: z.string().min(1, t('recommendations.fieldRequired')),
+        status: z.nativeEnum(AuditStatus),
+        risk_level: z.nativeEnum(RiskLevel),
+      }),
+    [t],
+  );
 
   const {
     register,
@@ -68,6 +80,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCa
   }, [initialData, reset]);
 
   const onSubmit = async (data: RecommendationFormValues) => {
+    setSubmitError(null);
     try {
       const url = initialData?.id 
         ? `/recommendations/${initialData.id}`
@@ -81,11 +94,21 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onSuccess, onCa
       onSuccess();
     } catch (err) {
       logger.error('Operation failed', err);
+      const apiError = (err as { response?: { data?: { error?: string | { message?: string } } } })
+        .response?.data?.error;
+      setSubmitError(
+        typeof apiError === 'string' ? apiError : apiError?.message || t('recommendations.saveFailed'),
+      );
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      {submitError && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-100 dark:border-rose-900/30 font-bold text-sm">
+          {submitError}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <FormField label={t('recommendations.recommendation')} className="md:col-span-2">
           <div className="p-6 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/30 text-sm font-bold text-emerald-900 dark:text-emerald-400 leading-relaxed shadow-sm">

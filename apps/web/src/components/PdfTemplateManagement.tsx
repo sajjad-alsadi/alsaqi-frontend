@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/httpClient';
 import { motion, AnimatePresence } from 'motion/react';
-import { FileText, Plus, Edit2, Trash2, CheckCircle, X, Search, Globe, Layout, User } from 'lucide-react';
+import { FileText, Plus, Edit2, Trash2, CheckCircle, X, Search, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import logger from '../utils/logger';
 import Portal from './Portal';
@@ -127,7 +127,7 @@ export const PdfTemplateManagement: React.FC = () => {
         await api.delete(`/pdf-templates/${id}`);
         toast.success(t('pdfTemplates.deleteSuccess'));
         fetchTemplates();
-      } catch (err) {
+      } catch {
         toast.error(t('pdfTemplates.deleteError'));
       }
     }

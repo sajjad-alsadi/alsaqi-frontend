@@ -6,6 +6,7 @@ export class SecureStorage {
   private prefix: string;
   private encryptionKey: CryptoKey | null = null;
   private hmacKey: CryptoKey | null = null;
+  private hmacVerifyKey: CryptoKey | null = null;
   private tamperDetection: Map<string, number>;
   private ready: Promise<void>;
 
@@ -13,7 +14,11 @@ export class SecureStorage {
       this.prefix = prefix;
       this.tamperDetection = new Map();
       this.ready = this.initKeys();
-      this.initProtection();
+      // NOTE: We intentionally do NOT override Storage.prototype methods.
+      // Secure behavior is exposed only through the instance get/set/clearSession
+      // methods below. Overriding global Storage primitives breaks legitimate
+      // browser behavior and provides no real security (the client is not a
+      // trust boundary). The Backend remains the authoritative enforcer.
   }
 
   private async initKeys() {
@@ -21,10 +26,17 @@ export class SecureStorage {
       // fetch('/api/security/init').then(r => r.json())...
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const env = (import.meta as any).env as Record<string, string> | undefined;
-      const baseKey = env?.['VITE_STORAGE_SECRET'] || (typeof navigator !== 'undefined' ? `${navigator.userAgent.slice(0, 32)}-${window.location.origin}` : 'dev-only-storage-key');
-      
+      // Derive the key base from a STABLE source: VITE_STORAGE_SECRET + origin.
+      // We deliberately exclude navigator.userAgent so a browser update (which
+      // changes the user agent) does not invalidate the key and log the user out.
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'app';
+      const baseKey = env?.['VITE_STORAGE_SECRET']
+          ? `${env['VITE_STORAGE_SECRET']}-${origin}`
+          : `dev-only-storage-key-${origin}`;
+
       this.encryptionKey = await CryptoUtils.importKey(baseKey);
       this.hmacKey = await CryptoUtils.importHMACKey(baseKey);
+      this.hmacVerifyKey = this.hmacKey;
   }
 
   private async encrypt(data: string): Promise<string> {
@@ -45,60 +57,16 @@ export class SecureStorage {
       return await CryptoUtils.sign(data, this.hmacKey);
   }
 
-  private initProtection() {
-      // حماية التخزين الأصلي (نفس المنطق لكن مع دعم الوعود)
-      const original = {
-          getItem: Storage.prototype.getItem,
-          setItem: Storage.prototype.setItem,
-          removeItem: Storage.prototype.removeItem
-      };
-
-      const self = this;
-      
-      // ملاحظة: لا يمكن تغيير getItem لتكون async فعلياً لأنها خاصية موروثة تعتمد عليها المتصفحات
-      // لكن يمكننا كشف التلاعب عند الاستدعاء
-      Storage.prototype.getItem = function(key: string) {
-          const value = original.getItem.call(this, key);
-          
-          if (key && key.startsWith(self.prefix + '_')) {
-              const storedHash = original.getItem.call(this, key + '_hash');
-              if (storedHash && value) {
-                  // نتحقق بشكل غير متزامن في الخلفية لعدم تعطيل الـ UI
-                  self.hash(value).then(h => {
-                      if (h !== storedHash) {
-                          console.error(`[Security] Tampering detected on key: ${key}`);
-                          self.onTamperDetected(key, 'hash_mismatch');
-                      }
-                  });
-              }
-          }
-          
-          return value;
-      };
-
-      Storage.prototype.removeItem = function(key: string) {
-          if (key && key.startsWith(self.prefix + '_') && !key.endsWith('_hash')) {
-              const protectedKeys = ['user_token', 'session_data', 'config'];
-              const baseKey = key.replace(self.prefix + '_', '');
-              
-              if (protectedKeys.includes(baseKey)) {
-                  console.warn(`[Security] Blocked unauthorized removal of: ${key}`);
-                  self.onTamperDetected(key, 'removal_blocked');
-                  return;
-              }
-          }
-          return original.removeItem.call(this, key);
-      };
-  }
-
   private onTamperDetected(key: string, reason: string) {
+      // Report the failure (best-effort) but DO NOT clear the session. A failed
+      // HMAC/decrypt check is reported to the caller (get returns null); it must
+      // not log the user out or wipe their data.
       this.sendSecurityAlert({
           type: 'storage_tampering',
           key,
           reason,
           timestamp: new Date().toISOString()
       });
-      this.clearSession();
   }
 
   private async sendSecurityAlert(alert: any) {
@@ -108,7 +76,7 @@ export class SecureStorage {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(alert)
           });
-      } catch (e) {}
+      } catch {}
   }
 
   // ========== API عام ==========
@@ -122,7 +90,7 @@ export class SecureStorage {
 
       localStorage.setItem(fullKey, encrypted);
       localStorage.setItem(fullKey + '_hash', hash);
-      
+
       this.tamperDetection.set(fullKey, Date.now());
   }
 
@@ -130,12 +98,21 @@ export class SecureStorage {
       await this.ready;
       const fullKey = `${this.prefix}_${key}`;
       const encrypted = localStorage.getItem(fullKey);
-      
+
       if (!encrypted) return null;
 
-      const lastAccess = this.tamperDetection.get(fullKey);
-      if (lastAccess && Date.now() - lastAccess < 100) {
-          console.warn(`[Security] Rapid access detected on: ${key}`);
+      // Verify HMAC integrity. On failure, report and return null to the caller
+      // WITHOUT clearing the session.
+      const storedHash = localStorage.getItem(fullKey + '_hash');
+      if (storedHash) {
+          let valid = false;
+          if (this.hmacVerifyKey) {
+              valid = await CryptoUtils.verify(encrypted, storedHash, this.hmacVerifyKey);
+          }
+          if (!valid) {
+              this.onTamperDetected(fullKey, 'hash_mismatch');
+              return null;
+          }
       }
 
       const decrypted = await this.decrypt(encrypted);
@@ -156,7 +133,7 @@ export class SecureStorage {
       Object.keys(localStorage)
           .filter(k => k.startsWith(this.prefix + '_'))
           .forEach(k => localStorage.removeItem(k));
-      
+
       sessionStorage.clear();
   }
 }

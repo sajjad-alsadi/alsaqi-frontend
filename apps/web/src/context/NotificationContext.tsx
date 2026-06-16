@@ -228,14 +228,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     try {
       await api.put(`/notifications/${id}/read`);
-      // Compute the next list and the unread delta OUTSIDE the state-updater path
-      // (no setUnreadCount inside the setNotifications callback) so the change is
-      // pure and React StrictMode double-invocation is harmless (Req 8.3, 8.4).
-      // The delta is non-zero only when the target was actually unread (Req 8.1, 8.2).
-      const next = notifications.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' as const } : n);
-      const delta = unreadDelta(notifications, next);
+      // Unread delta is derived from a pure projection of THIS operation (marking
+      // one item read). It depends only on whether the target was unread, so it is
+      // unaffected by concurrently-arriving notifications and stays StrictMode-safe
+      // (Req 8.1–8.4).
+      const projected = notifications.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' as const } : n);
+      const delta = unreadDelta(notifications, projected);
       if (delta !== 0) setUnreadCount(c => Math.max(0, c + delta));
-      setNotifications(next);
+      // Apply the read flag with a FUNCTIONAL updater that reads the LATEST state so
+      // a notification that arrives via WebSocket during the awaited request is
+      // retained rather than clobbered by a stale snapshot (Req 13.1, 13.3).
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' as const } : n));
     } catch (err) { logger.error('Failed to mark notification as read:', err); }
   };
 
@@ -252,13 +255,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     try {
       await api.delete(`/notifications/${id}`);
-      // Compute the next list and the unread delta BEFORE calling the state
-      // updater (not inside the setNotifications callback), so the update is
-      // StrictMode-safe and idempotent (Req 8.3, 8.4).
-      const next = notifications.filter(x => x.id !== id);
-      const delta = unreadDelta(notifications, next);
+      // Derive the unread delta from a pure projection of THIS delete operation,
+      // outside the state-updater path, so it is StrictMode-safe and idempotent
+      // (Req 8.3, 8.4).
+      const projected = notifications.filter(x => x.id !== id);
+      const delta = unreadDelta(notifications, projected);
       if (delta !== 0) setUnreadCount(c => Math.max(0, c + delta));
-      setNotifications(next);
+      // Apply the removal with a FUNCTIONAL updater that reads the LATEST state so a
+      // notification arriving via WebSocket during the awaited request is retained
+      // rather than clobbered by a stale snapshot (Req 13.2, 13.3).
+      setNotifications(prev => prev.filter(x => x.id !== id));
     } catch (err) { logger.error('Failed to dismiss notification:', err); }
   };
 

@@ -42,7 +42,7 @@ interface JsPDFWithAutoTable {
 }
 
 // Use locally embedded font (no internet required)
-let cachedArabicFont: string | null = TAHOMA_FONT_BASE64;
+const cachedArabicFont: string | null = TAHOMA_FONT_BASE64;
 
 /**
  * generatePdf — Emergency fallback using jsPDF (client-side).

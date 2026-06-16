@@ -1,26 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Mail, 
   Send, 
   Clock, 
-  CheckCircle, 
   Archive, 
-  AlertCircle,
   FileText,
-  Link as LinkIcon,
-  Search,
   Plus,
-  Filter,
-  Download,
-  Eye,
-  ArrowRight,
-  User,
-  Building
+  ArrowRight
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { useCorrespondence } from '../../api/hooks/useCorrespondence';
-import toast from 'react-hot-toast';
 import IncomingRegister from './IncomingRegister';
 import CorrespondenceDetails from './CorrespondenceDetails';
 import CorrespondenceArchive from './CorrespondenceArchive';

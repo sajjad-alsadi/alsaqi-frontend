@@ -1,44 +1,27 @@
 import i18n from '../i18n';
+import {
+  formatNumber as canonicalFormatNumber,
+  formatDate as canonicalFormatDate,
+} from './formatting';
 
 /**
- * Canonical Arabic locale used for number formatting across the app.
- * `ar-EG` yields Eastern Arabic numerals (٠١٢٣٤٥٦٧٨٩) and grouping separators.
- * This MUST stay in sync with the locale used in `formatService.ts` so that
- * `formatNumber` output is identical between the two modules.
+ * Thin compatibility wrappers that route through the canonical Formatting_Module
+ * (`utils/formatting.ts`). The previous divergent `ar-EG` implementation has been
+ * removed so no second Arabic locale remains anywhere (Req 17.3, 17.4).
+ *
+ * @deprecated Prefer importing directly from `utils/formatting` or using the
+ * `useFormat` hook in `utils/formatService`.
  */
-const ARABIC_LOCALE = 'ar-EG';
+export const formatNumber = (num: number | string): string =>
+  canonicalFormatNumber(num, { language: i18n.language });
 
 /**
- * Formats numbers for display. In the Arabic locale this delegates to
- * `Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true })`, which produces
- * Eastern Arabic numerals with proper grouping separators (e.g. ١٬٢٣٤) instead
- * of the previous manual digit replacement that dropped grouping. Non-Arabic
- * locales use the en-US grouped representation.
+ * Formats a date according to the current language. Delegates to the canonical
+ * module; the long month / numeric day presentation is preserved for callers.
  */
-export const formatNumber = (num: number | string): string => {
-  const currentLng = i18n.language || 'ar';
-
-  const n = typeof num === 'string' ? parseFloat(num) : num;
-  if (isNaN(n)) return String(num);
-
-  if (currentLng.startsWith('ar')) {
-    return new Intl.NumberFormat(ARABIC_LOCALE, { useGrouping: true }).format(n);
-  }
-
-  return n.toLocaleString('en-US');
-};
-
-/**
- * Formats a date according to the current language.
- */
-export const formatDate = (date: Date | string): string => {
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return String(date);
-  
-  const currentLng = i18n.language || 'ar';
-  return new Intl.DateTimeFormat(currentLng.startsWith('ar') ? 'ar-EG' : 'en-US', {
-    year: 'numeric',
+export const formatDate = (date: Date | string): string =>
+  canonicalFormatDate(date, {
+    language: i18n.language,
     month: 'long',
     day: 'numeric',
-  }).format(d);
-};
+  });

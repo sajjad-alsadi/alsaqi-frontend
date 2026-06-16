@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { History, AlertCircle, LayoutDashboard, Terminal, Activity, ShieldCheck, Plus } from 'lucide-react';
+import { History, AlertCircle, LayoutDashboard, Terminal, Activity, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import api from '../api/httpClient';
 import logger from '../utils/logger';

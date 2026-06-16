@@ -100,23 +100,23 @@ const AppContent: React.FC = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/charter" element={<AuditCharter />} />
+          <Route path="/dashboard" element={<ModuleErrorBoundary moduleName="Dashboard"><Dashboard /></ModuleErrorBoundary>} />
+          <Route path="/charter" element={<ModuleErrorBoundary moduleName="AuditCharter"><AuditCharter /></ModuleErrorBoundary>} />
           <Route path="/plan" element={<ModuleErrorBoundary moduleName="AuditPlan"><AuditPlan /></ModuleErrorBoundary>} />
-          <Route path="/tasks" element={<AuditTasks />} />
-          <Route path="/library" element={<AuditProgramLibrary />} />
+          <Route path="/tasks" element={<ModuleErrorBoundary moduleName="AuditTasks"><AuditTasks /></ModuleErrorBoundary>} />
+          <Route path="/library" element={<ModuleErrorBoundary moduleName="AuditProgramLibrary"><AuditProgramLibrary /></ModuleErrorBoundary>} />
           <Route path="/findings" element={<ModuleErrorBoundary moduleName="AuditFindings"><AuditFindings /></ModuleErrorBoundary>} />
-          <Route path="/evidence" element={<AuditEvidence />} />
-          <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/evidence" element={<ModuleErrorBoundary moduleName="AuditEvidence"><AuditEvidence /></ModuleErrorBoundary>} />
+          <Route path="/recommendations" element={<ModuleErrorBoundary moduleName="Recommendations"><Recommendations /></ModuleErrorBoundary>} />
           <Route path="/risks" element={<ModuleErrorBoundary moduleName="RiskRegister"><RiskRegister /></ModuleErrorBoundary>} />
-          <Route path="/org-structure" element={<OrgStructure />} />
+          <Route path="/org-structure" element={<ModuleErrorBoundary moduleName="OrgStructure"><OrgStructure /></ModuleErrorBoundary>} />
           <Route path="/cms" element={<ModuleErrorBoundary moduleName="Correspondence"><CorrespondenceSystem language={language} /></ModuleErrorBoundary>} />
           <Route path="/reports" element={<ModuleErrorBoundary moduleName="Reports"><Reports /></ModuleErrorBoundary>} />
           <Route path="/integrity" element={<ModuleErrorBoundary moduleName="FraudLog"><IntegrityManagement /></ModuleErrorBoundary>} />
           <Route path="/fraud" element={<Navigate to="/integrity" replace />} />
           <Route path="/coi" element={<Navigate to="/integrity" replace />} />
           <Route path="/compliance-matrix" element={<ModuleErrorBoundary moduleName="ComplianceMatrix"><ComplianceMatrix /></ModuleErrorBoundary>} />
-          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/notifications" element={<ModuleErrorBoundary moduleName="Notifications"><Notifications /></ModuleErrorBoundary>} />
           <Route path="/departments" element={<DepartmentManagement />} />
           
           {/* Permission-gated Routes */}
@@ -127,7 +127,7 @@ const AppContent: React.FC = () => {
           <Route path="/users" element={<RequirePermission module={MODULES.USER_MANAGEMENT}><ModuleErrorBoundary moduleName="UserManagement"><UserManagement /></ModuleErrorBoundary></RequirePermission>} />
           <Route path="/job-titles" element={<Navigate to="/departments" replace />} />
           
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings" element={<ModuleErrorBoundary moduleName="Settings"><Settings /></ModuleErrorBoundary>} />
           
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

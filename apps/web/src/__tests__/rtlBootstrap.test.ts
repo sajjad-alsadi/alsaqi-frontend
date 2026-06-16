@@ -60,7 +60,6 @@ describe('RTL bootstrap in index.html (Requirement 11.2)', () => {
     };
     // Shadow the globals `document` and `localStorage` with our mocks by
     // passing them as function parameters, then execute the extracted snippet.
-    // eslint-disable-next-line no-new-func
     const fn = new Function('document', 'localStorage', script);
     fn(mockDocument, mockLocalStorage);
     return documentElement;
@@ -94,7 +93,6 @@ describe('RTL bootstrap in index.html (Requirement 11.2)', () => {
         throw new Error('localStorage unavailable');
       },
     };
-    // eslint-disable-next-line no-new-func
     const fn = new Function('document', 'localStorage', script);
     expect(() => fn(mockDocument, throwingLocalStorage)).not.toThrow();
     // Static defaults remain unchanged after a thrown access.

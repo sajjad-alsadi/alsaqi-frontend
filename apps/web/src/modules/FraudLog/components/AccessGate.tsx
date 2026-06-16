@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Lock, AlertCircle, EyeOff, Clock, XCircle, CheckCircle, X, Plus, Save, FileText } from 'lucide-react';
+import { ShieldAlert, Lock, AlertCircle, EyeOff, Clock, XCircle, CheckCircle, X, Plus, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import Modal from '../../../components/Modal';
@@ -44,7 +44,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
   savePolicy,
   fetchPolicy
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
   const [isEditingPolicy, setIsEditingPolicy] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
@@ -229,7 +229,7 @@ export const AccessGate: React.FC<AccessGateProps> = ({
                     <span className="font-bold text-[var(--color-text-main)]">{req.user_name}</span>
                     <span className="text-xs text-[var(--color-text-muted)]">({req.user_id})</span>
                   </div>
-                  <p className="text-sm text-[var(--color-text-muted)] italic">"{req.reason}"</p>
+                  <p className="text-sm text-[var(--color-text-muted)] italic">&quot;{req.reason}&quot;</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 

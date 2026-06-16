@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../context/PreferencesContext';
 import { useNotificationContext } from '../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
-import { Bell, Check, Trash2, Filter, Search, Calendar, FileText, Info, AlertTriangle, UserPlus, Shield } from 'lucide-react';
+import { Bell, Check, Trash2, Search, Calendar, FileText, Info, AlertTriangle, UserPlus, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Modal from '../components/Modal';
 import { getTranslatedNotificationMessage, getTranslatedNotificationModule } from '../utils/notificationHelpers';

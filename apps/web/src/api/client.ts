@@ -166,16 +166,36 @@ function getCsrfToken(): string | undefined {
   const match = document.cookie
     .split('; ')
     .find((row) => row.startsWith('csrf-token='));
-  return match?.split('=')[1];
+  if (!match) return undefined;
+  // Preserve all characters after the first '=' (including base64 '=' padding),
+  // then decode any URL-encoding applied to the cookie value.
+  return decodeURIComponent(match.slice(match.indexOf('=') + 1));
 }
 
 /**
  * Compare major.minor versions, ignoring patch.
- * Returns true if they match.
+ *
+ * Returns `true` when the major and minor components are equal. As a guard
+ * against malformed input, if any parsed operand is `NaN` (e.g. a non-numeric or
+ * missing component), the comparison is treated as a non-mismatch (returns
+ * `true`) so a spurious version-mismatch reload overlay is never forced on the
+ * user (Req 20.1, 20.2). Equal valid major/minor reports a match (Req 20.3).
+ *
+ * Exported so the malformed-input tolerance and equal-major/minor matching can
+ * be property-tested directly without an HTTP round-trip.
  */
-function isMajorMinorMatch(clientVersion: string, serverVersion: string): boolean {
+export function isMajorMinorMatch(clientVersion: string, serverVersion: string): boolean {
   const [cMajor, cMinor] = clientVersion.split('.').map(Number);
   const [sMajor, sMinor] = serverVersion.split('.').map(Number);
+  // Malformed input → treat as a non-mismatch so no reload overlay is forced.
+  if (
+    Number.isNaN(cMajor) ||
+    Number.isNaN(cMinor) ||
+    Number.isNaN(sMajor) ||
+    Number.isNaN(sMinor)
+  ) {
+    return true;
+  }
   return cMajor === sMajor && cMinor === sMinor;
 }
 
@@ -223,8 +243,6 @@ function sleep(ms: number): Promise<void> {
 
 // ─── Version Mismatch Notification ────────────────────────────────────────────
 
-let versionMismatchShown = false;
-
 /**
  * DOM event name broadcast immediately before any version-mismatch reload.
  *
@@ -246,15 +264,17 @@ function persistDraftsBeforeReload(): void {
 }
 
 /**
- * Remove the version-mismatch overlay from the DOM and reset the shown flag so a
- * subsequent mismatch can surface the overlay again. Backs the "later" option,
+ * Remove the version-mismatch overlay from the DOM. Backs the "later" option,
  * which lets the user keep working instead of being forced to reload (Req 25.1).
+ *
+ * The per-instance "shown" indicator that re-arms a subsequent mismatch lives in
+ * the {@link createApiClient} closure (Req 9.1); the caller passes an `onDismiss`
+ * callback to {@link showVersionMismatchNotification} to reset it.
  */
 function dismissVersionMismatchOverlay(): void {
   if (typeof document === 'undefined') return;
   const existing = document.getElementById('api-version-mismatch-overlay');
   existing?.remove();
-  versionMismatchShown = false;
 }
 
 /**
@@ -269,12 +289,20 @@ function dismissVersionMismatchOverlay(): void {
  * Exported (named) so the security behavior of the buttons — built with
  * `document.createElement` + `addEventListener` rather than `innerHTML` with an
  * inline `onclick` — can be unit tested directly without an HTTP round-trip.
+ *
+ * @param onDismiss - Optional callback invoked when the user chooses "later".
+ *   The {@link createApiClient} closure passes this to reset its per-instance
+ *   version-mismatch indicator so a future mismatch can surface again (Req 9.1).
  */
-export function showVersionMismatchNotification(): void {
-  if (versionMismatchShown) return;
-  versionMismatchShown = true;
-
+export function showVersionMismatchNotification(onDismiss?: () => void): void {
   if (typeof document === 'undefined') return;
+
+  // Singleton-overlay guard: build at most one overlay at a time regardless of
+  // how many client instances detect a mismatch or how many times this helper is
+  // called while shown. The per-instance "shown" indicator now lives in the
+  // createApiClient closure (Req 9.1, 9.4); this DOM-presence check preserves the
+  // show-once behavior for direct callers and across concurrent instances.
+  if (document.getElementById('api-version-mismatch-overlay')) return;
 
   const overlay = document.createElement('div');
   overlay.id = 'api-version-mismatch-overlay';
@@ -347,6 +375,9 @@ export function showVersionMismatchNotification(): void {
     // by other means before saving (Req 25.2).
     persistDraftsBeforeReload();
     dismissVersionMismatchOverlay();
+    // Re-arm the calling instance's indicator so a future mismatch can surface
+    // the overlay again (Req 9.1).
+    onDismiss?.();
   });
 
   const actions = document.createElement('div');
@@ -360,31 +391,6 @@ export function showVersionMismatchNotification(): void {
 
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
-}
-
-// ─── Token Refresh State ──────────────────────────────────────────────────────
-
-let isRefreshing = false;
-let refreshSubscribers: Array<{
-  resolve: (value: unknown) => void;
-  reject: (reason: unknown) => void;
-}> = [];
-
-function subscribeToTokenRefresh(): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    refreshSubscribers.push({ resolve, reject });
-  });
-}
-
-function onRefreshComplete(error: unknown): void {
-  refreshSubscribers.forEach((subscriber) => {
-    if (error) {
-      subscriber.reject(error);
-    } else {
-      subscriber.resolve(undefined);
-    }
-  });
-  refreshSubscribers = [];
 }
 
 // ─── Main Factory ─────────────────────────────────────────────────────────────
@@ -404,6 +410,41 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     timeout,
     withCredentials: true,
   });
+
+  // ─── Token Refresh State (per client instance) ────────────────────────────
+  //
+  // These coordinate a single in-flight token refresh across the concurrent
+  // requests of THIS client only. Keeping them inside the factory closure (rather
+  // than as module globals) isolates refresh coordination per instance, so two
+  // clients never cross-contaminate each other's refresh state (Req 9.1, 9.4).
+
+  let isRefreshing = false;
+  let refreshSubscribers: Array<{
+    resolve: (value: unknown) => void;
+    reject: (reason: unknown) => void;
+  }> = [];
+
+  function subscribeToTokenRefresh(): Promise<unknown> {
+    return new Promise((resolve, reject) => {
+      refreshSubscribers.push({ resolve, reject });
+    });
+  }
+
+  function onRefreshComplete(error: unknown): void {
+    refreshSubscribers.forEach((subscriber) => {
+      if (error) {
+        subscriber.reject(error);
+      } else {
+        subscriber.resolve(undefined);
+      }
+    });
+    refreshSubscribers = [];
+  }
+
+  // Per-instance version-mismatch indicator: tracks whether THIS client has
+  // surfaced the mismatch overlay, so it shows at most once per instance and a
+  // dismissal re-arms only this instance (Req 9.1, 9.4).
+  let versionMismatchShown = false;
 
   // ─── Request Interceptor ──────────────────────────────────────────────────
 
@@ -508,7 +549,14 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   function checkVersionMismatch(response: AxiosResponse): void {
     const serverVersion = response.headers['x-api-version'];
     if (serverVersion && !isMajorMinorMatch(API_VERSION, serverVersion)) {
-      showVersionMismatchNotification();
+      // Per-instance guard: surface the overlay at most once for this client.
+      if (versionMismatchShown) return;
+      versionMismatchShown = true;
+      // Re-arm this instance's indicator if the user dismisses the overlay, so a
+      // later genuine mismatch can surface it again (Req 9.1).
+      showVersionMismatchNotification(() => {
+        versionMismatchShown = false;
+      });
     }
   }
 

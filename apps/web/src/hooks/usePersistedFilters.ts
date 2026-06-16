@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 /**
  * Hook that persists filter/search state in sessionStorage.
@@ -50,35 +50,81 @@ export function usePersistedFilters<T>(key: string, defaultValue: T): [T, (value
  */
 export function useScrollRestore(key: string) {
   const storageKey = `scroll_${key}`;
-  const ref = useCallback((node: HTMLElement | null) => {
-    if (!node) return;
+  // Holds the teardown for the currently-attached node. Used to remove all
+  // observers/listeners on unmount or before re-attaching to a new node, so
+  // listeners never accumulate across re-renders (Req 15.3, 15.4).
+  const cleanupRef = useRef<(() => void) | null>(null);
 
-    // Restore scroll position
+  const readSavedScroll = useCallback((): number | null => {
     try {
       const saved = sessionStorage.getItem(storageKey);
-      if (saved) {
-        node.scrollTop = parseInt(saved, 10);
+      if (saved !== null) {
+        const parsed = parseInt(saved, 10);
+        return Number.isNaN(parsed) ? null : parsed;
       }
     } catch {}
+    return null;
+  }, [storageKey]);
 
-    // Save scroll position on scroll
+  const ref = useCallback((node: HTMLElement | null) => {
+    // Tear down any previous attachment first. React invokes the callback ref
+    // with `null` on unmount and with the new node when the ref target changes,
+    // so this guarantees a single set of observers/listeners at any time.
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+
+    if (!node) return;
+
+    // Capture the target scroll position once so the scroll handler cannot
+    // clobber it while async content is still loading.
+    const initialTarget = readSavedScroll();
+    let settled = initialTarget === null;
+
+    const applyTarget = () => {
+      if (settled || initialTarget === null) return;
+      node.scrollTop = initialTarget;
+      // Once the element is tall enough to honor the saved position, stop
+      // forcing it so the user's own scrolling is not overridden.
+      if (node.scrollTop >= initialTarget) {
+        settled = true;
+      }
+    };
+
+    // Restore scroll position on attach.
+    applyTarget();
+
+    // Save scroll position as the user scrolls. Ignore saves until the initial
+    // restore has settled so a transient (clamped) value can't overwrite the
+    // saved target while content is still loading.
     const handleScroll = () => {
+      if (!settled) return;
       try {
         sessionStorage.setItem(storageKey, String(node.scrollTop));
       } catch {}
     };
-
     node.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Cleanup on unmount via MutationObserver trick
-    const observer = new MutationObserver(() => {
-      if (!document.contains(node)) {
-        node.removeEventListener('scroll', handleScroll);
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  }, [storageKey]);
+
+    // Re-apply the saved position when the element's own content size changes
+    // (e.g. async data loads make it scrollable). Scoped to this element only —
+    // no document-wide observation (Req 15.1, 15.2).
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && !settled) {
+      resizeObserver = new ResizeObserver(() => {
+        applyTarget();
+        if (settled) {
+          resizeObserver?.disconnect();
+          resizeObserver = null;
+        }
+      });
+      resizeObserver.observe(node);
+    }
+
+    cleanupRef.current = () => {
+      node.removeEventListener('scroll', handleScroll);
+      resizeObserver?.disconnect();
+      resizeObserver = null;
+    };
+  }, [storageKey, readSavedScroll]);
 
   return ref;
 }

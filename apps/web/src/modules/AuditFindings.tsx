@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { AuditFinding } from '../types';
-import { Plus, AlertTriangle, FileText, CheckCircle2, MoreVertical, Search, Eye } from 'lucide-react';
+import { Plus, AlertTriangle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useFindings } from '../api';
-import InteractiveIcon from '../components/InteractiveIcon';
-import { RiskLevel } from '../constants';
 import toast from 'react-hot-toast';
 
 import Modal from '../components/Modal';
 import FindingForm from '../components/FindingForm';
-import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import FindingCard from '../components/FindingCard';
 

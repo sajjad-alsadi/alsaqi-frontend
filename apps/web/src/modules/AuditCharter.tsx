@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { BookOpen, Shield, Users, Target, FileText, CheckCircle, Scale, AlertTriangle, Briefcase, Building } from 'lucide-react';
+import { BookOpen, Shield, Users, Target, FileText, CheckCircle, Scale, Briefcase, Building } from 'lucide-react';
 
 const AuditCharter: React.FC = () => {
   const { t, i18n } = useTranslation();

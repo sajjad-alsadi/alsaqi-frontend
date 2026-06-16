@@ -1,5 +1,35 @@
 // ==================== SecurityLogger.ts ====================
 
+import { redactContext } from './logger';
+
+/**
+ * Apply the log allowlist/redaction policy to caller-supplied security-event
+ * details before they are forwarded to the Backend (Req 10.1, 10.4). Object
+ * details are reduced to allowlisted keys; non-object details (primitives) carry
+ * no allowlistable fields and are passed through unchanged.
+ */
+function redactDetailsForTransmission(details: unknown): unknown {
+  if (details !== null && typeof details === 'object' && !Array.isArray(details)) {
+    return redactContext(details as Record<string, unknown>);
+  }
+  return details;
+}
+
+/**
+ * Resolve the current route path with the query string stripped (Req 10.2,
+ * 10.3) so query-string tokens in `window.location.href` are never forwarded.
+ */
+function getRoutePath(): string {
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      return window.location.pathname;
+    }
+  } catch {
+    // location unavailable — fall through to a safe default.
+  }
+  return '/';
+}
+
 export interface SecurityLoggerConfig {
     endpoint?: string;
     flushInterval?: number;
@@ -69,10 +99,14 @@ export class SecurityLogger {
             timestamp: new Date().toISOString(),
             type: eventType,
             severity,
-            details: processedDetails,
+            // Allowlist/redact caller-supplied details before they are buffered for
+            // transmission so tokens and unvetted context are never forwarded (Req 10.1, 10.4).
+            details: redactDetailsForTransmission(processedDetails),
             sessionId: this.getSessionId(),
             userAgent: navigator.userAgent,
-            url: window.location.href,
+            // Forward only the path (no query string) so query-string tokens in
+            // window.location.href are never transmitted (Req 10.2, 10.3).
+            url: getRoutePath(),
             referrer: document.referrer
         };
 
@@ -144,7 +178,7 @@ export class SecurityLogger {
                 sessionStorage.setItem('security_session_id', sessionId);
             }
             return sessionId;
-        } catch (e) {
+        } catch {
             return crypto.randomUUID();
         }
     }

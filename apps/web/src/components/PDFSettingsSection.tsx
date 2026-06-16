@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../context/AuthContext';
 import { Save } from 'lucide-react';
 import api from '../api/httpClient';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 
 const PDFSettingsSection: React.FC = () => {
-  const { token } = useAuth();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
@@ -66,7 +64,7 @@ const PDFSettingsSection: React.FC = () => {
     try {
       await api.put('/pdf-settings', settings);
       setMessage({ text: t('pdf.settingsSavedSuccessfully'), type: 'success' });
-    } catch (err) {
+    } catch {
       setMessage({ text: t('pdf.errorSavingSettings'), type: 'error' });
     }
   };

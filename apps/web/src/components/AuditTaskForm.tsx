@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 import { AuditTask, AuditPlan } from '../types';
 import { AuditType } from '../constants';
 import api from '../api/httpClient';
@@ -17,10 +18,40 @@ interface AuditTaskFormProps {
 
 type TaskType = 'audit_plan' | 'routine';
 
+/** Option shape for the assignable-user picker (subset of the user record). */
+interface AssignableUser {
+  id: number | string;
+  name: string;
+  department?: string;
+  role?: string;
+}
+
+/** Option shape for the audited-unit picker (subset of the org-entity record). */
+interface OrgUnitOption {
+  id: number | string;
+  name?: string;
+  name_ar?: string;
+  name_en?: string | null;
+}
+
+/** Request body sent to the audit-task create/update endpoints. */
+interface AuditTaskPayload {
+  title: string;
+  audit_type: string;
+  status: string;
+  plan_id?: string;
+  audited_unit_id?: string;
+  planned_hours?: number;
+  period_from?: string;
+  period_to?: string;
+  due_date?: string;
+  assigned_to?: string;
+}
+
 const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plans, initialData }) => {
   const { t } = useTranslation();
-  const [users, setUsers] = useState<any[]>([]);
-  const [orgUnits, setOrgUnits] = useState<any[]>([]);
+  const [users, setUsers] = useState<AssignableUser[]>([]);
+  const [orgUnits, setOrgUnits] = useState<OrgUnitOption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -63,7 +94,8 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
         due_date: toDateInput(initialData.due_date),
       });
 
-      const assignedArr = (initialData as any).assigned_users || [];
+      const assignedArr =
+        (initialData as AuditTask & { assigned_users?: Array<string | number> }).assigned_users || [];
       if (assignedArr.length > 0) {
         setSelectedUsers(assignedArr.map(String));
       } else if (initialData.assigned_to) {
@@ -105,7 +137,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
 
     setIsSubmitting(true);
     try {
-      const payload: any = {
+      const payload: AuditTaskPayload = {
         title: form.title,
         audit_type: form.audit_type,
         status: form.status,
@@ -121,7 +153,8 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
       if (form.period_from) payload.period_from = form.period_from;
       if (form.period_to) payload.period_to = form.period_to;
       if (form.due_date) payload.due_date = form.due_date;
-      if (selectedUsers.length > 0) payload.assigned_to = selectedUsers[0];
+      const firstAssignee = selectedUsers[0];
+      if (firstAssignee) payload.assigned_to = firstAssignee;
 
       const url = initialData?.id ? `/audit-tasks/${initialData.id}` : '/audit-tasks';
       let taskId: string | number | undefined;
@@ -138,9 +171,11 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
       }
 
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Operation failed', err);
-      const apiError = err.response?.data?.error;
+      const apiError = axios.isAxiosError(err)
+        ? (err.response?.data as { error?: string | { message?: string } } | undefined)?.error
+        : undefined;
       setError(typeof apiError === 'string' ? apiError : apiError?.message || t('tasks.failedToSaveTask'));
     } finally {
       setIsSubmitting(false);
@@ -193,7 +228,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
             className={selectClass}
           >
             <option value="">{t('tasks.selectAuditPlan')}</option>
-            {plans.map((p: any) => (
+            {plans.map((p) => (
               <option key={String(p.id)} value={String(p.id)}>
                 {p.plan_code ? `${p.plan_code} - ` : ''}{p.title}
               </option>
@@ -227,7 +262,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
             className={selectClass}
           >
             <option value="">{t('tasks.selectAuditedUnit')}</option>
-            {orgUnits.map((u: any) => (
+            {orgUnits.map((u) => (
               <option key={String(u.id)} value={String(u.id)}>{u.name_ar || u.name_en || u.name}</option>
             ))}
           </select>
@@ -247,7 +282,7 @@ const AuditTaskForm: React.FC<AuditTaskFormProps> = ({ onSuccess, onCancel, plan
             {users.length === 0 && (
               <p className="text-center text-sm text-[var(--color-text-muted)] py-4">{t('common.loading') || 'جارٍ التحميل...'}</p>
             )}
-            {users.map((u: any) => (
+            {users.map((u) => (
               <label
                 key={String(u.id)}
                 className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-primary)]/5 ${selectedUsers.includes(String(u.id)) ? 'bg-[var(--color-primary)]/10' : ''}`}

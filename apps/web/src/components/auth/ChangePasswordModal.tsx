@@ -47,7 +47,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
     uppercase: /[A-Z]/.test(newPassword),
     lowercase: /[a-z]/.test(newPassword),
     number: /[0-9]/.test(newPassword),
-    symbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword),
+    symbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword),
   };
   const passedChecks = Object.values(checks).filter(Boolean).length;
   const strengthPercent = (passedChecks / 5) * 100;

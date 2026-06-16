@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar } from 'lucide-react';
 import Modal from '../../../components/Modal';
 import { ReportType } from '../types';
 

@@ -4,13 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslation } from 'react-i18next';
 import { AuditPlan } from '../types';
-import { AuditStatus, AuditType, RiskLevel, UserRole } from '../constants';
+import { AuditStatus, AuditType, RiskLevel } from '../constants';
 import api from '../api/httpClient';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { FormField } from './ui/FormField';
 import { useDepartments } from '../api/hooks/useDepartments';
 import logger from '../utils/logger';
+import { runBulkImport } from '../utils/bulkImport';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 
 interface AuditProgramOption {
@@ -149,12 +151,49 @@ const AuditPlanForm: React.FC<AuditPlanFormProps> = ({ onSuccess, onCancel, init
         const procs = Array.isArray(procRes.data) ? procRes.data : (procRes.data?.data || []);
         
         if (procs.length > 0) {
-          for (const proc of procs) {
-            await api.post('/audit-tasks', {
-              audit_id: savedPlan.id,
-              procedure: `${proc.procedure_number}: ${proc.audit_step}`,
-              responsible: data.lead_auditor,
-              status: 'Open'
+          // Import procedures with Promise.allSettled so one failed task does
+          // not abort the rest; show progress and a succeeded/failed summary
+          // and continue past individual failures (Req 24).
+          const progressToast = toast.loading(
+            t('bulkImport.progress', { completed: 0, total: procs.length }),
+          );
+
+          const summary = await runBulkImport(
+            procs,
+            (proc: { procedure_number: string; audit_step: string }) =>
+              api.post('/audit-tasks', {
+                audit_id: savedPlan.id,
+                procedure: `${proc.procedure_number}: ${proc.audit_step}`,
+                responsible: data.lead_auditor,
+                status: 'Open',
+              }),
+            (completed, total) => {
+              toast.loading(t('bulkImport.progress', { completed, total }), { id: progressToast });
+            },
+          );
+
+          if (summary.failed.length === 0) {
+            toast.success(t('bulkImport.allSucceeded', { count: summary.succeeded.length }), {
+              id: progressToast,
+            });
+          } else if (summary.succeeded.length === 0) {
+            toast.error(t('bulkImport.allFailed', { count: summary.failed.length }), {
+              id: progressToast,
+            });
+            logger.error('Procedure import failed for all records', {
+              failed: summary.failed.length,
+            });
+          } else {
+            toast.error(
+              t('bulkImport.partial', {
+                succeeded: summary.succeeded.length,
+                failed: summary.failed.length,
+              }),
+              { id: progressToast },
+            );
+            logger.error('Procedure import had failures', {
+              succeeded: summary.succeeded.length,
+              failed: summary.failed.length,
             });
           }
         }

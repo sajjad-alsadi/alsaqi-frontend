@@ -77,6 +77,40 @@ describe('createApiClient', () => {
 
       await client.get('/test', z.string());
     });
+
+    it('should preserve base64 = padding in the csrf token (no truncation)', async () => {
+      const token = 'YWJjZGVmZ2hpamtsbW5vcA==';
+      Object.defineProperty(document, 'cookie', {
+        writable: true,
+        value: `csrf-token=${token}`,
+      });
+      const client = createApiClient(config);
+      mockAdapter = new MockAdapter(client.http);
+
+      mockAdapter.onGet('/test').reply((reqConfig) => {
+        expect(reqConfig.headers?.['x-csrf-token']).toBe(token);
+        return [200, { success: true, data: 'ok', meta: { requestId: '123', timestamp: new Date().toISOString(), version: '1.0.0' } }];
+      });
+
+      await client.get('/test', z.string());
+    });
+
+    it('should decode a URL-encoded csrf token value', async () => {
+      const rawToken = 'a+b/c=d e';
+      Object.defineProperty(document, 'cookie', {
+        writable: true,
+        value: `csrf-token=${encodeURIComponent(rawToken)}`,
+      });
+      const client = createApiClient(config);
+      mockAdapter = new MockAdapter(client.http);
+
+      mockAdapter.onGet('/test').reply((reqConfig) => {
+        expect(reqConfig.headers?.['x-csrf-token']).toBe(rawToken);
+        return [200, { success: true, data: 'ok', meta: { requestId: '123', timestamp: new Date().toISOString(), version: '1.0.0' } }];
+      });
+
+      await client.get('/test', z.string());
+    });
   });
 
   describe('Correlation ID Generation', () => {

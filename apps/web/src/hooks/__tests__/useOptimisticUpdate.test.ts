@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import type { Dispatch, SetStateAction } from 'react';
 import { useOptimisticUpdate } from '../useOptimisticUpdate';
 
 interface TestItem {
@@ -16,10 +17,18 @@ describe('useOptimisticUpdate', () => {
     { id: 3, name: 'Item 3', status: 'in_progress' },
   ];
 
-  let setItems: (items: TestItem[]) => void;
+  let setItems: Dispatch<SetStateAction<TestItem[]>> & ReturnType<typeof vi.fn>;
+  // Resolved live state recorded for each setItems call. Supports both the
+  // value form (optimistic apply) and the functional form (live-state revert).
+  let appliedStates: TestItem[][];
 
   beforeEach(() => {
-    setItems = vi.fn();
+    appliedStates = [];
+    let live: TestItem[] = [];
+    setItems = vi.fn((u: SetStateAction<TestItem[]>) => {
+      live = typeof u === 'function' ? (u as (p: TestItem[]) => TestItem[])(live) : u;
+      appliedStates.push(live);
+    }) as Dispatch<SetStateAction<TestItem[]>> & ReturnType<typeof vi.fn>;
   });
 
   describe('تحديث الواجهة فوراً قبل استجابة الخادم', () => {
@@ -148,15 +157,16 @@ describe('useOptimisticUpdate', () => {
         );
       });
 
-      // First call: optimistic update
+      // First call: optimistic update (value form)
       expect(setItems).toHaveBeenNthCalledWith(1, [
         { id: 1, name: 'Item 1', status: 'completed' },
         { id: 2, name: 'Item 2', status: 'draft' },
         { id: 3, name: 'Item 3', status: 'in_progress' },
       ]);
 
-      // Second call: only the affected item is reverted (effectively original)
-      expect(setItems).toHaveBeenNthCalledWith(2, initialItems);
+      // Second call: revert is applied via a functional setter against the live
+      // state; the resolved state reverts only the affected item.
+      expect(appliedStates[1]).toEqual(initialItems);
     });
 
     it('should preserve concurrent updates to other items on rollback (lost-update-safe)', async () => {
@@ -188,8 +198,10 @@ describe('useOptimisticUpdate', () => {
         );
       });
 
-      // The rollback must NOT wipe out the concurrent update to item 2
-      expect(setItems).toHaveBeenLastCalledWith([
+      // The rollback must NOT wipe out the concurrent update to item 2.
+      // The revert runs against the live state via a functional setter, so the
+      // resolved state preserves item 2's concurrent value.
+      expect(appliedStates.at(-1)).toEqual([
         { id: 1, name: 'Item 1', status: 'draft' },
         { id: 2, name: 'Item 2', status: 'approved' },
         { id: 3, name: 'Item 3', status: 'in_progress' },

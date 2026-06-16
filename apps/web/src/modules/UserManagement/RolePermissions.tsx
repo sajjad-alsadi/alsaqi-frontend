@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Shield, Save, CheckCircle, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '../../permissions';
+import { ModuleRegistry } from '../../permissions/registry';
+// Side-effect import: registers every module (the single source of truth) into
+// the ModuleRegistry so the fallback module list matches the registry.
+import '../../permissions/modules';
 import { useFormat } from '../../utils/formatService';
 import { Button } from '@/components/ui/button';
 
@@ -63,8 +67,11 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
     setModifiedRoleIds(new Set());
   };
 
-  // Group permissions by module
-  const fallbackModules = ['Audit', 'Finding', 'Risk', 'Recommendation', 'Correspondence', 'User', 'Setting'];
+  // Group permissions by module. When no live permission objects are available,
+  // fall back to the canonical Module_Registry identifiers (single source of
+  // truth) so the listed identifiers match the registry and their translation
+  // keys (modules.<id>) resolve correctly.
+  const fallbackModules = ModuleRegistry.getModuleNames();
   const modules = allPermissions.length > 0 
     ? Array.from(new Set(allPermissions.map(p => p.module)))
     : fallbackModules;
@@ -181,7 +188,7 @@ const RolePermissions: React.FC<RolePermissionsProps> = ({
             </div>
           </div>
           {allPermissions.length === 0 && localRoles.length > 0 && (
-            <p className="mt-2 text-[9px] text-[var(--color-warning)] font-bold text-center italic">{t('userManagement.roles.matrix')} (Preview Mode)</p>
+            <p className="mt-2 text-[9px] text-[var(--color-warning)] font-bold text-center italic">{t('userManagement.roles.matrix')} {t('userManagement.roles.previewMode')}</p>
           )}
         </div>
       </div>

@@ -90,7 +90,9 @@ const globalPctArb = fc.oneof(
 );
 
 const stateArb = fc.record({ present: fc.boolean(), pct: pctArb });
-const statesArb = fc.tuple(stateArb, stateArb, stateArb); // exactly 3 critical targets
+// One state per current PER_FILE_TARGETS entry so `states[i]` is always defined
+// for every target the gate indexes (the target set has grown beyond 3).
+const statesArb = fc.tuple(...targets.map(() => stateArb));
 const globalArb = fc.record({
   lines: globalPctArb,
   functions: globalPctArb,

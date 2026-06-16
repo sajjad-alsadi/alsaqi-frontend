@@ -2,13 +2,12 @@ import React, { useState, Suspense } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/httpClient';
 import { useTranslation } from 'react-i18next';
-import { AuditTask, AuditPlan, AuditEvidence as AuditEvidenceType } from '../types';
-import { Plus, Search, MoreVertical, CheckCircle2, Clock, AlertCircle, Edit, Trash2, FileText, Eye } from 'lucide-react';
+import { AuditTask, AuditEvidence as AuditEvidenceType } from '../types';
+import { Plus, Search, CheckCircle2, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import toast from 'react-hot-toast';
 import { useFormat } from '../utils/formatService';
 import { useDebounce } from '../hooks/useDebounce';
-import { AuditStatus } from '../constants';
 import logger from '../utils/logger';
 
 import Modal from '../components/Modal';
@@ -23,8 +22,8 @@ import { Button } from '@/components/ui/button';
 const PdfViewer = React.lazy(() => import('../components/PdfViewer'));
 
 const AuditTasksModule: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  const { formatDate, formatNumber } = useFormat();
+  const { t } = useTranslation();
+  const { formatNumber } = useFormat();
   const queryClient = useQueryClient();
 
   const [searchTerm, setSearchTerm] = useState('');

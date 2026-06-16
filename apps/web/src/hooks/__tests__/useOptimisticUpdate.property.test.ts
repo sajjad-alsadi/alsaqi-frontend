@@ -13,6 +13,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import fc from 'fast-check';
+import type { Dispatch, SetStateAction } from 'react';
 import { useOptimisticUpdate } from '../useOptimisticUpdate';
 
 interface Item {
@@ -83,8 +84,13 @@ describe('Property 19: lost-update-safe optimistic rollback', () => {
           const { result } = renderHook(() => useOptimisticUpdate<Item>());
 
           const setItemsCalls: Item[][] = [];
-          const setItems = (items: Item[]) => {
-            setItemsCalls.push(items);
+          // Records the resolved live state for each update. Supports both the
+          // value form (optimistic apply) and the functional form (live-state
+          // revert) used by the hook.
+          let live: Item[] = [];
+          const setItems: Dispatch<SetStateAction<Item[]>> = (u) => {
+            live = typeof u === 'function' ? (u as (p: Item[]) => Item[])(live) : u;
+            setItemsCalls.push(live);
           };
           const refetch = vi.fn();
 
@@ -143,8 +149,10 @@ describe('Property 19: lost-update-safe optimistic rollback', () => {
           const { result } = renderHook(() => useOptimisticUpdate<Item>());
 
           const setItemsCalls: Item[][] = [];
-          const setItems = (items: Item[]) => {
-            setItemsCalls.push(items);
+          let live: Item[] = [];
+          const setItems: Dispatch<SetStateAction<Item[]>> = (u) => {
+            live = typeof u === 'function' ? (u as (p: Item[]) => Item[])(live) : u;
+            setItemsCalls.push(live);
           };
           const refetch = vi.fn().mockResolvedValue(undefined);
 

@@ -6,7 +6,7 @@ This plan follows the exploratory bugfix methodology: first surface counterexamp
 
 ## Tasks
 
-- [ ] 1. Write bug condition exploration test
+- [x] 1. Write bug condition exploration test
   - **Property 1: Bug Condition** - Affected Module Identifiers Resolve To Localized Labels
   - **CRITICAL**: This test MUST FAIL on the unfixed locale files - failure confirms the bug exists
   - **DO NOT attempt to fix the test or the code when it fails** - the failure is the expected outcome at this stage
@@ -22,7 +22,7 @@ This plan follows the exploratory bugfix methodology: first surface counterexamp
   - Mark task complete when test is written, run, and the failure is documented
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Existing Translation Keys Unchanged
   - **IMPORTANT**: Follow observation-first methodology - capture the actual behavior of the UNFIXED locale files first, then assert it
   - Mirror the existing `apps/web/src/locales/job-titles-i18n-preservation.test.ts` harness (isolated `createInstance`, `flattenKeys`, `isBugCondition`)
@@ -37,9 +37,9 @@ This plan follows the exploratory bugfix methodology: first surface counterexamp
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 3. Fix for missing module-name translation keys in the permissions matrix
+- [x] 3. Fix for missing module-name translation keys in the permissions matrix
 
-  - [ ] 3.1 Add the five missing keys to both locale files
+  - [x] 3.1 Add the five missing keys to both locale files
     - In `apps/web/src/locales/en.json`, add to the `modules` object: `"AuditEvidence": "Audit Evidence"`, `"AuditFindings": "Audit Findings"`, `"ComplianceMatrix": "Compliance Matrix"`, `"Notifications": "Notifications"`, `"SystemLogs": "System Logs"`
     - In `apps/web/src/locales/ar.json`, add to the `modules` object: `"AuditEvidence": "أدلة التدقيق"`, `"AuditFindings": "نتائج التدقيق"`, `"ComplianceMatrix": "مصفوفة الامتثال"`, `"Notifications": "الإشعارات"`, `"SystemLogs": "سجلات النظام"`
     - Only ADD the five new key/value pairs per file - do not modify, rename, reorder for semantic effect, or delete any existing key
@@ -50,7 +50,7 @@ This plan follows the exploratory bugfix methodology: first surface counterexamp
     - _Preservation: Preservation Requirements from design - all existing keys in modules and every other namespace resolve byte-for-byte identically; missing-key fallback intact_
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [ ] 3.2 Verify bug condition exploration test now passes
+  - [x] 3.2 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - Affected Module Identifiers Resolve To Localized Labels
     - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
     - The test from task 1 encodes the expected behavior; when it passes it confirms the affected identifiers now resolve to clean localized labels
@@ -58,7 +58,7 @@ This plan follows the exploratory bugfix methodology: first surface counterexamp
     - **EXPECTED OUTCOME**: Test PASSES (confirms the bug is fixed in both English and Arabic)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [ ] 3.3 Verify preservation tests still pass
+  - [x] 3.3 Verify preservation tests still pass
     - **Property 2: Preservation** - Existing Translation Keys Unchanged
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
     - Run the preservation property tests from step 2
@@ -66,7 +66,7 @@ This plan follows the exploratory bugfix methodology: first surface counterexamp
     - Confirm all tests still pass after the fix
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 4. Add unit and integration tests
+- [x] 4. Add unit and integration tests
   - Unit: resolve each of the five affected `modules.*` keys in English and assert the exact expected label (`Audit Evidence`, `Audit Findings`, `Compliance Matrix`, `Notifications`, `System Logs`)
   - Unit: resolve each of the five affected `modules.*` keys in Arabic and assert the exact expected label (`أدلة التدقيق`, `نتائج التدقيق`, `مصفوفة الامتثال`, `الإشعارات`, `سجلات النظام`)
   - Unit: assert none of the five resolved labels contain the `⚠️` marker, and that both `en.json` and `ar.json` parse as valid JSON and contain the five new keys
@@ -75,7 +75,7 @@ This plan follows the exploratory bugfix methodology: first surface counterexamp
   - Integration: render a mix of previously-correct and affected identifiers and assert previously-correct rows are unchanged
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 5. Checkpoint - Ensure all tests pass
+- [x] 5. Checkpoint - Ensure all tests pass
   - Run the full web test suite (`npx vitest --run`) and confirm the exploration test (now passing), preservation property tests, unit tests, and integration tests all pass
   - Ensure no regressions in the broader suite; ask the user if questions arise
 

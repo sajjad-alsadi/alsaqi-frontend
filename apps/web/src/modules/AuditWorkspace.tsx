@@ -15,8 +15,7 @@ import {
   User,
   ChevronRight,
   Search,
-  MessageSquare,
-  Link as LinkIcon
+  MessageSquare
 } from 'lucide-react';
 import api from '../api/httpClient';
 import { extractErrorMessage } from '../utils/errorService';
@@ -26,7 +25,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import FindingForm from '../components/FindingForm';
-import { AuditStatus, RiskLevel } from '../constants';
 import logger from '../utils/logger';
 import { Button } from '@/components/ui/button';
 import type { AuditFinding } from '../types';

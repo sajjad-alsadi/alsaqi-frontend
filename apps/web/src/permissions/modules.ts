@@ -205,12 +205,15 @@ ModuleRegistry.register({
 
 ModuleRegistry.register({
   name: 'Recommendations',
+  // Recommendations are derived automatically from findings and cannot be
+  // created manually by any role, so 'Create' is intentionally absent from both
+  // the supported actions and every role default.
   label: { en: 'Recommendations', ar: 'التوصيات' },
-  actions: ['View', 'Create', 'Edit', 'Delete', 'Approve'],
+  actions: ['View', 'Edit', 'Delete', 'Approve'],
   defaults: {
-    [UserRole.ADMIN]: ['View', 'Create', 'Edit', 'Delete', 'Approve'],
+    [UserRole.ADMIN]: ['View', 'Edit', 'Delete', 'Approve'],
     [UserRole.MANAGER]: ['View', 'Approve'],
-    [UserRole.INTERNAL_AUDITOR]: ['View', 'Create', 'Edit'],
+    [UserRole.INTERNAL_AUDITOR]: ['View', 'Edit'],
     [UserRole.COMPLIANCE_OFFICER]: ['View'],
     [UserRole.RISK_OFFICER]: ['View'],
     [UserRole.VIEWER]: ['View'],

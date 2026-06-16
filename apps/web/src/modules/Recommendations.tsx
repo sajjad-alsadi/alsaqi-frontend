@@ -10,6 +10,8 @@ import logger from '../utils/logger';
 import Modal from '../components/Modal';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import VirtualizedTable from '../components/VirtualizedTable';
+import { getStaggerDelay } from '../utils/animation';
 
 const RecommendationsModule: React.FC = () => {
   const { t } = useTranslation();
@@ -179,10 +181,18 @@ const RecommendationsModule: React.FC = () => {
         </div>
       ) : (
         <div className="glass-card overflow-hidden">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-start border-collapse">
-              <thead>
-                <tr className="bg-[var(--color-bg-main)] border-b border-[var(--color-border-soft)]">
+          <VirtualizedTable
+            items={filteredRecs}
+            rowHeight={73}
+            height={720}
+            threshold={30}
+            colSpan={9}
+            getKey={(rec, idx) => rec.id ?? idx}
+            containerClassName="overflow-x-auto custom-scrollbar"
+            tableClassName="w-full text-start border-collapse"
+            bodyClassName="divide-y divide-[var(--color-border-soft)]"
+            head={
+              <tr className="bg-[var(--color-bg-main)] border-b border-[var(--color-border-soft)]">
                   <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.id')}</th>
                   <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('findings.findingTitle')}</th>
                   <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.recommendation')}</th>
@@ -193,9 +203,8 @@ const RecommendationsModule: React.FC = () => {
                   <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.riskLevel')}</th>
                   <th className="px-8 py-6 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{t('recommendations.status')}</th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-border-soft)]">
-                {filteredRecs.map((rec, idx) => {
+            }
+            renderRow={(rec, idx) => {
                   const finding = getFinding(rec.finding_id);
                   const plan = getPlan(rec.plan_id || finding?.audit_id);
                   return (
@@ -203,7 +212,7 @@ const RecommendationsModule: React.FC = () => {
                       key={rec.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.03 }}
+                      transition={{ delay: getStaggerDelay(idx) }}
                       className="hover:bg-[var(--color-primary)]/5 transition-colors"
                     >
                       <td className="px-8 py-5 text-xs font-bold text-[var(--color-text-muted)] tracking-widest">{rec.rec_number || `#${formatNumber(rec.id)}`}</td>
@@ -221,17 +230,13 @@ const RecommendationsModule: React.FC = () => {
                       <td className="px-8 py-5"><Badge type="status" value={rec.status} /></td>
                     </motion.tr>
                   );
-                })}
-                {filteredRecs.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="px-8 py-20 text-center text-[var(--color-text-muted)] font-bold text-sm">
-                      {t('recommendations.noRecommendations') || 'لا توجد توصيات'}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                }}
+            emptyState={
+              <div className="px-8 py-20 text-center text-[var(--color-text-muted)] font-bold text-sm">
+                {t('recommendations.noRecommendations') || 'لا توجد توصيات'}
+              </div>
+            }
+          />
         </div>
       )}
     </div>

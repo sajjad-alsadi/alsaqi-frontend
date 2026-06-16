@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { Settings, Shield, Lock, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { Settings, Shield, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 

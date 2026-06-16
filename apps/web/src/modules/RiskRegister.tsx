@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { RiskItem } from '../types';
-import { Plus, Search, ShieldAlert, Activity, ArrowRight, Info, Upload, Edit, Trash2 } from 'lucide-react';
+import { Plus, ShieldAlert, Activity, ArrowRight, Info, Upload, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRisks } from '../api/hooks/useRisks';
 import { api } from '../api';
+import type { CreateRiskItemInput } from '../api/modules/risk-register';
 import InteractiveIcon from '../components/InteractiveIcon';
 import { useFormat } from '../utils/formatService';
 import toast from 'react-hot-toast';
@@ -15,7 +16,10 @@ import Modal from '../components/Modal';
 import RiskForm from '../components/RiskForm';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import VirtualizedList from '../components/VirtualizedList';
 import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
+import { getStaggerDelay } from '../utils/animation';
+import { runBulkImport } from '../utils/bulkImport';
 
 const RiskRegister: React.FC = () => {
   const { token } = useAuth();
@@ -37,6 +41,7 @@ const RiskRegister: React.FC = () => {
   const [editingRisk, setEditingRisk] = useState<RiskItem | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | number | null>(null);
+  const [importProgress, setImportProgress] = useState<{ completed: number; total: number } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const isRTL = language === 'ar';
 
@@ -119,7 +124,7 @@ const RiskRegister: React.FC = () => {
         };
 
         // Map Excel columns to our schema
-        const mappedData = data.map((row) => ({
+        const mappedData: CreateRiskItemInput[] = data.map((row): CreateRiskItemInput => ({
           risk_id: getValue(row, 'riskId'),
           description: getValue(row, 'description'),
           owner: getValue(row, 'owner'),
@@ -142,18 +147,64 @@ const RiskRegister: React.FC = () => {
           target_date: getValue(row, 'targetDate'),
           review_date: getValue(row, 'reviewDate'),
           notes: getValue(row, 'notes'),
-          entry_date: getValue(row, 'entryDate') || new Date().toISOString().split('T')[0],
+          entry_date: getValue(row, 'entryDate') || new Date().toISOString().split('T')[0] || '',
           entered_by: getValue(row, 'enteredBy')
         }));
 
-        // Send to backend one by one
-        for (const item of mappedData) {
-          await api.riskRegister.create(item as any);
+        // Send to backend with Promise.allSettled so a single failed row does
+        // not abort the whole import; show progress and a succeeded/failed
+        // summary (Req 24).
+        if (mappedData.length === 0) {
+          fetchRisks();
+          return;
         }
-        
+
+        const progressToast = toast.loading(
+          t('bulkImport.progress', { completed: 0, total: mappedData.length }),
+        );
+        setImportProgress({ completed: 0, total: mappedData.length });
+
+        const summary = await runBulkImport(
+          mappedData,
+          (item) => api.riskRegister.create(item),
+          (completed, total) => {
+            setImportProgress({ completed, total });
+            toast.loading(t('bulkImport.progress', { completed, total }), { id: progressToast });
+          },
+        );
+
+        setImportProgress(null);
+
+        if (summary.failed.length === 0) {
+          toast.success(t('bulkImport.allSucceeded', { count: summary.succeeded.length }), {
+            id: progressToast,
+          });
+        } else if (summary.succeeded.length === 0) {
+          toast.error(t('bulkImport.allFailed', { count: summary.failed.length }), {
+            id: progressToast,
+          });
+        } else {
+          toast.error(
+            t('bulkImport.partial', {
+              succeeded: summary.succeeded.length,
+              failed: summary.failed.length,
+            }),
+            { id: progressToast },
+          );
+        }
+
+        if (summary.failed.length > 0) {
+          logger.error('Bulk risk import had failures', {
+            succeeded: summary.succeeded.length,
+            failed: summary.failed.length,
+          });
+        }
+
         fetchRisks();
       } catch (error) {
+        setImportProgress(null);
         logger.error('Error parsing Excel:', error);
+        toast.error(t('errorOccurred'));
       }
     };
     reader.readAsArrayBuffer(validFiles[0]!);
@@ -189,6 +240,21 @@ const RiskRegister: React.FC = () => {
             <Upload size={20} />
             <span>{t('importExcel')}</span>
           </motion.button>
+          {importProgress && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="text-xs font-bold text-[var(--color-text-muted)] inline-flex items-center gap-2"
+            >
+              <LoadingSpinner size="sm" />
+              <span>
+                {t('bulkImport.progress', {
+                  completed: importProgress.completed,
+                  total: importProgress.total,
+                })}
+              </span>
+            </div>
+          )}
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -219,13 +285,23 @@ const RiskRegister: React.FC = () => {
           <p className="text-center text-[var(--color-text-muted)] font-bold mt-4 uppercase tracking-widest text-xs">{t('loadingRiskRegister')}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {(Array.isArray(risks) ? risks : []).map((risk, idx) => (
+        <VirtualizedList
+          items={Array.isArray(risks) ? risks : []}
+          rowHeight={620}
+          height={1000}
+          threshold={30}
+          getKey={(risk, idx) => risk.id ?? idx}
+          columnsByWidth={[
+            { minWidth: 1024, columns: 3 },
+            { minWidth: 768, columns: 2 },
+          ]}
+          rowClassName="gap-8 mb-8"
+          renderItem={(risk, idx) => (
             <motion.div 
               key={risk.id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.05 }}
+              transition={{ delay: getStaggerDelay(idx) }}
               whileHover={{ y: -10 }}
               className="glass-card p-10 flex flex-col group transition-all duration-500 hover:shadow-2xl hover:shadow-[var(--color-primary)]/10"
             >
@@ -294,8 +370,8 @@ const RiskRegister: React.FC = () => {
               {t('details')}
             </button>
           </motion.div>
-        ))}
-      </div>
+          )}
+        />
       )}
 
       <Modal

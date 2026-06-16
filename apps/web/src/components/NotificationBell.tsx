@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../context/PreferencesContext';
 import { useNotificationContext } from '../context/NotificationContext';
-import { Bell, Check, Trash2, ExternalLink, FileText, AlertTriangle, Info, UserPlus, Settings, Shield } from 'lucide-react';
+import { Notification } from '../types';
+import { Bell, Check, FileText, AlertTriangle, Info, UserPlus, Settings, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import InteractiveIcon from './InteractiveIcon';
@@ -30,8 +31,20 @@ const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleNotificationClick = (notification: any) => {
-    if (!notification.is_read && notification.status !== 'Read') {
+  // Close the open notification list/popover on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.is_read && notification.status !== 'Read' && notification.id != null) {
       markAsRead(notification.id);
     }
     if (notification.link) {
@@ -58,6 +71,16 @@ const NotificationBell: React.FC = () => {
       
       navigate(`/${tab}`);
       setIsOpen(false);
+    }
+  };
+
+  const handleNotificationKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+    notification: Notification,
+  ) => {
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      handleNotificationClick(notification);
     }
   };
 
@@ -150,8 +173,12 @@ const NotificationBell: React.FC = () => {
                   {(Array.isArray(recentNotifications) ? recentNotifications : []).map(notification => (
                     <div 
                       key={notification.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={getTranslatedNotificationMessage(notification.description, t, language)}
                       onClick={() => handleNotificationClick(notification)}
-                      className={`p-4 hover:bg-[var(--color-bg-soft)] transition-colors cursor-pointer ${(!notification.is_read && notification.status !== 'Read') ? 'bg-[var(--color-primary-light)]' : ''}`}
+                      onKeyDown={(event) => handleNotificationKeyDown(event, notification)}
+                      className={`p-4 hover:bg-[var(--color-bg-soft)] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-inset ${(!notification.is_read && notification.status !== 'Read') ? 'bg-[var(--color-primary-light)]' : ''}`}
                     >
                       <div className="flex gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${(!notification.is_read && notification.status !== 'Read') ? 'bg-[var(--color-card)] shadow-sm' : 'bg-[var(--color-bg-soft)]'}`}>

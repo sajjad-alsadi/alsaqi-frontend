@@ -149,7 +149,7 @@ const SystemErrorLogs: React.FC = () => {
               fetchLogsRef.current();
               fetchAnalyticsRef.current();
             }
-          } catch (e) {
+          } catch {
             // Ignore parse errors
           }
         };
@@ -165,7 +165,7 @@ const SystemErrorLogs: React.FC = () => {
         ws.onerror = () => {
           // Error handled by onclose
         };
-      } catch (e) {
+      } catch {
         // Token fetch failed - retry with backoff
         if (isComponentMounted) {
           const delay = Math.min(5000 * Math.pow(2, reconnectAttempts), 30000);
@@ -186,7 +186,7 @@ const SystemErrorLogs: React.FC = () => {
           if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
             ws.close();
           }
-        } catch (e) {
+        } catch {
           // Ignore close errors
         }
       }

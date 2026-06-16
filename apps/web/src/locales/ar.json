@@ -1,4 +1,10 @@
 {
+  "bulkImport": {
+    "progress": "جاري استيراد {{completed}} من {{total}}...",
+    "allSucceeded": "تم استيراد {{count}} سجل بنجاح",
+    "allFailed": "فشل استيراد {{count}} سجل",
+    "partial": "تم استيراد {{succeeded}} سجل، وفشل {{failed}}"
+  },
   "settingsSavedSuccessfully": "تم حفظ الإعدادات بنجاح",
   "deleteSuccess": "تم الحذف بنجاح",
   "createSuccess": "تمت الإضافة بنجاح",
@@ -226,7 +232,13 @@
     "Settings": "الإعدادات",
     "Dashboard": "لوحة التحكم",
     "SystemErrorLogs": "سجلات أخطاء النظام",
-    "OrgStructure": "الهيكل التنظيمي"
+    "OrgStructure": "الهيكل التنظيمي",
+    "AuditEvidence": "أدلة التدقيق",
+    "AuditFindings": "نتائج التدقيق",
+    "ComplianceMatrix": "مصفوفة الامتثال",
+    "Notifications": "الإشعارات",
+    "SystemLogs": "سجلات النظام",
+    "Analytics": "التحليلات"
   },
   "roles": {
     "label": "الأدوار",
@@ -1029,6 +1041,8 @@
     "addFinding": "إضافة ملاحظة",
     "writtenBy": "كتبها",
     "changeStatus": "تغيير الحالة",
+    "fieldRequired": "هذا الحقل مطلوب",
+    "saveFailed": "فشل في حفظ الملاحظة",
     "type": {
       "control_design_deficiency": "قصور في تصميم الرقابة",
       "operational_design_deficiency": "قصور في التصميم التشغيلي"
@@ -1258,7 +1272,9 @@
     "deleteMessage": "هل أنت متأكد من حذف هذه التوصية؟ لا يمكن التراجع عن هذا الإجراء.",
     "noRecommendationTextFound": "لم يتم العثور على نص التوصية",
     "noRecommendations": "لا توجد توصيات",
-    "save": "حفظ"
+    "save": "حفظ",
+    "fieldRequired": "هذا الحقل مطلوب",
+    "saveFailed": "فشل في حفظ التوصية"
   },
   "jobTitles": {
     "title": "المسميات الوظيفية",
@@ -1345,7 +1361,8 @@
       "rolesLabel": "الأدوار المعرفة",
       "permissionsLabel": "الصلاحيات المفعلة",
       "module": "النظام / القسم",
-      "matrix": "مصفوفة الصلاحيات"
+      "matrix": "مصفوفة الصلاحيات",
+      "previewMode": "(وضع المعاينة)"
     },
     "resets": {
       "title": "إدارة طلبات إعادة التعيين",
@@ -2492,7 +2509,10 @@
     "foundResults": "وجدت النتائج التالية المتعلقة ببحثك. يمكنك النقر على أي نتيجة للانتقال إليها:",
     "noResults": "عذراً، لم أجد أي سياسات أو قوانين مطابقة لبحثك.",
     "errorOccurred": "حدث خطأ أثناء البحث.",
-    "result": "نتيجة"
+    "result": "نتيجة",
+    "close": "إغلاق مساعد البحث",
+    "send": "إرسال الرسالة",
+    "open": "فتح مساعد البحث"
   },
   "pdfTemplates": {
     "auditReport": "تقرير التدقيق",

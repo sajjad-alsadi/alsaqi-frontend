@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type Dispatch, type SetStateAction } from 'react';
 
 interface OptimisticOptions<T> {
   /** The async operation to perform */
@@ -28,10 +28,12 @@ interface OptimisticOptions<T> {
  * Hook for optimistic UI updates.
  * Updates the UI immediately, then confirms with the server.
  *
- * On failure it reverts ONLY the affected item against the current list,
- * preserving any other concurrent updates (lost-update-safe). The full
- * pre-action snapshot is never restored (Req 22.3). When a precise inverse
- * is not possible, `revertItem` returns null and the data is refetched.
+ * On failure it reverts ONLY the affected item against the LIVE state using a
+ * functional setter (`setItems(prev => revertItem(prev))`), so any other
+ * optimistic update applied after this one — but before its rollback runs — is
+ * preserved (lost-update-safe). A pre-concurrency snapshot is never written
+ * back. When a precise inverse is not possible, `revertItem` returns null and
+ * the data is refetched instead.
  *
  * @example
  * const { execute, isLoading } = useOptimisticUpdate<AuditTask>();
@@ -56,7 +58,7 @@ export function useOptimisticUpdate<T>() {
   const execute = useCallback(async (
     options: OptimisticOptions<T>,
     currentItems: T[],
-    setItems: (items: T[]) => void
+    setItems: Dispatch<SetStateAction<T[]>>
   ) => {
     const { action, applyOptimistic, revertItem, refetch, onSuccess, onError } = options;
 
@@ -69,14 +71,19 @@ export function useOptimisticUpdate<T>() {
       await action();
       onSuccess?.();
     } catch (error) {
-      // Revert ONLY the affected item against the current (optimistic) list,
-      // preserving any other concurrent updates. Never restore a full snapshot.
-      const reverted = revertItem(optimisticItems);
-      if (reverted === null) {
+      // Probe whether a precise per-item inverse is possible. `revertItem`
+      // returns null categorically when it cannot invert (e.g. a delete), so
+      // the probe result does not depend on which list it is given.
+      if (revertItem(optimisticItems) === null) {
         // Precise inverse not possible: refetch the affected data instead.
         await refetch?.();
       } else {
-        setItems(reverted);
+        // Revert ONLY the affected item against the LIVE state via a functional
+        // setter (Req 14.1). `prev` is the latest state at rollback time, so a
+        // second optimistic update applied before this rollback runs is
+        // preserved (Req 14.2). The pre-concurrency `optimisticItems` snapshot
+        // is never written back (Req 14.3).
+        setItems((prev) => revertItem(prev) ?? prev);
       }
       onError?.(error);
     } finally {

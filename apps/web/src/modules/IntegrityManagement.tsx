@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale, AlertTriangle, Users, History, LayoutDashboard, ShieldAlert, Plus } from 'lucide-react';
+import { Scale, Users, LayoutDashboard, ShieldAlert, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../context/UserContext';
 import api from '../api/httpClient';

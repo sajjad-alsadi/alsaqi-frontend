@@ -2,12 +2,8 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { 
   Search, 
   Plus, 
-  Eye, 
   Download, 
-  MoreVertical,
-  Calendar,
   Building,
-  Tag,
   FileText,
   X,
   Send,

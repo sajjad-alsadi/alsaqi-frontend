@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   ShieldCheck, Search, Filter, Plus, Edit2, Trash2, Eye, 
   Download, FileText, CheckCircle, AlertTriangle, XCircle, AlertCircle,
-  LayoutGrid, List, BarChart3, ArrowRight, Calendar, User, Building,
+  LayoutGrid, List, BarChart3, Calendar, User, Building,
   Tag, Info, MoreHorizontal, ChevronRight, FileDown, Layers, Upload,
   type LucideIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import api from '../../api/httpClient';
 import { toList, toData } from '../../api/utils/envelope';
 import Modal from '../../components/Modal';
@@ -18,6 +18,8 @@ import logger from '../../utils/logger';
 import { Button } from '@/components/ui/button';
 import { useFileUploadValidation } from '../../hooks/useFileUploadValidation';
 import { TableSkeleton } from '../../components/SkeletonLoader';
+import VirtualizedTable from '../../components/VirtualizedTable';
+import { getStaggerDelay } from '../../utils/animation';
 
 // --- Types ---
 type ComplianceStatus = 'compliant' | 'partial' | 'non_compliant' | 'under_review';
@@ -418,9 +420,26 @@ export default function ComplianceMatrix() {
         </div>
       ) : (
       <div className="glass-card">
-        <div className="overflow-x-visible lg:overflow-x-auto">
-          <table className="w-full text-start">
-            <thead>
+        <VirtualizedTable
+          items={items}
+          rowHeight={85}
+          height={700}
+          threshold={30}
+          colSpan={7}
+          getKey={(item) => item.id}
+          containerClassName="overflow-x-visible lg:overflow-x-auto"
+          tableClassName="w-full text-start"
+          bodyClassName="divide-y divide-[var(--color-border-soft)]"
+          emptyState={
+            <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-card)]/20">
+              <div className="bg-[var(--color-bg-main)] p-6 rounded-full border-2 border-dashed border-[var(--color-border-strong)] mb-4 animate-pulse">
+                <ShieldCheck size={48} className="text-[var(--color-border-strong)]" />
+              </div>
+              <p className="text-[var(--color-text-muted)] font-bold">{t('complianceMatrix.noRecords')}</p>
+              <p className="text-[var(--color-text-muted)] text-sm mt-1">{t('complianceMatrix.tryAdjustFilters')}</p>
+            </div>
+          }
+          head={
               <tr className="border-b border-[var(--color-border-soft)] bg-[var(--color-bg-soft)]/50">
                 <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.ref')}</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.titleData')}</th>
@@ -430,15 +449,12 @@ export default function ComplianceMatrix() {
                 <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.review')}</th>
                 <th className="px-6 py-4 text-center text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{t('complianceMatrix.actions')}</th>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--color-border-soft)]">
-              <AnimatePresence mode="popLayout">
-                {items.map((item, idx) => (
+          }
+          renderRow={(item, idx) => (
                   <motion.tr 
-                    layout
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.03 }}
+                    transition={{ delay: getStaggerDelay(idx) }}
                     key={item.id} 
                     className="hover:bg-[var(--color-primary)]/5 transition-colors group"
                   >
@@ -511,20 +527,8 @@ export default function ComplianceMatrix() {
                       </div>
                     </td>
                   </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-          {items.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-card)]/20">
-              <div className="bg-[var(--color-bg-main)] p-6 rounded-full border-2 border-dashed border-[var(--color-border-strong)] mb-4 animate-pulse">
-                <ShieldCheck size={48} className="text-[var(--color-border-strong)]" />
-              </div>
-              <p className="text-[var(--color-text-muted)] font-bold">{t('complianceMatrix.noRecords')}</p>
-              <p className="text-[var(--color-text-muted)] text-sm mt-1">{t('complianceMatrix.tryAdjustFilters')}</p>
-            </div>
-          )}
-        </div>
+                )}
+        />
       </div>
       )}
     </div>
@@ -674,7 +678,7 @@ export default function ComplianceMatrix() {
                   <motion.div 
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
+                    transition={{ delay: getStaggerDelay(idx) }}
                     key={item.id} 
                     className="group flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl hover:border-amber-200 hover:bg-amber-50/20 transition-all shadow-sm"
                   >

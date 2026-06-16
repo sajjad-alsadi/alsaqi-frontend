@@ -49,7 +49,7 @@ describe('SecurityLogger', () => {
       const now = new Date('2024-01-15T10:30:00.000Z');
       vi.setSystemTime(now);
 
-      logger.log('login_attempt', { username: 'admin', ip: '192.168.1.1' });
+      logger.log('login_attempt', { username: 'admin', ip: '192.168.1.1', action: 'login' });
 
       // Flush to capture the buffered events
       await logger.flush();
@@ -65,8 +65,9 @@ describe('SecurityLogger', () => {
       expect(event.timestamp).toBe('2024-01-15T10:30:00.000Z');
       // Verify event type
       expect(event.type).toBe('login_attempt');
-      // Verify details
-      expect(event.details).toEqual({ username: 'admin', ip: '192.168.1.1' });
+      // Non-allowlisted fields (username, ip) are redacted before transmission
+      // (Req 10.1, 10.4); only allowlisted diagnostic fields survive.
+      expect(event.details).toEqual({ action: 'login' });
     });
 
     it('should include severity in the logged event', async () => {
@@ -176,7 +177,7 @@ describe('SecurityLogger', () => {
     });
 
     it('should log error events with severity "error"', async () => {
-      logger.error('token_expired', { tokenId: 'abc' });
+      logger.error('token_expired', { tokenId: 'abc', userId: '789' });
 
       await logger.flush();
 
@@ -185,7 +186,9 @@ describe('SecurityLogger', () => {
 
       expect(event.type).toBe('token_expired');
       expect(event.severity).toBe('error');
-      expect(event.details).toEqual({ tokenId: 'abc' });
+      // Token-like fields (tokenId) are excluded before transmission (Req 10.1, 10.4);
+      // allowlisted identifiers such as userId are retained.
+      expect(event.details).toEqual({ userId: '789' });
     });
 
     it('should log alert events with severity "alert" and flush immediately', async () => {

@@ -10,7 +10,6 @@ import StalePermissionsIndicator from './StalePermissionsIndicator';
 import { motion, AnimatePresence } from 'motion/react';
 import InteractiveIcon from './InteractiveIcon';
 import Logo from './Logo';
-import LanguageSwitcher from './LanguageSwitcher';
 import Chatbot from './Chatbot';
 import { useFormat } from '../utils/formatService';
 import { 

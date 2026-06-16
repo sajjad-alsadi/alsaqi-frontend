@@ -1,7 +1,7 @@
 import { 
   Document, Packer, Paragraph, TextRun, AlignmentType, Header, Footer, 
   Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, PageBreak, 
-  TextDirection, VerticalAlign, ShadingType
+  ShadingType
 } from 'docx';
 import { saveAs } from 'file-saver';
 import i18n from '../i18n';

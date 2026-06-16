@@ -971,4 +971,68 @@ describe('WebSocketClient', () => {
       expect(mockFetch.mock.calls.length).toBe(fetchCallsAtReconnect);
     });
   });
+
+  // ─── Transient token failure recovery (Requirement 21.1, 21.2) ───────────────
+
+  describe('Transient token failure (Requirement 21.1, 21.2)', () => {
+    it('schedules a reconnect when getToken() returns null on connect instead of staying disconnected', async () => {
+      // No jitter for predictable backoff timing.
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
+      config.getToken = async () => null;
+
+      const client = createWebSocketClient(config);
+      client.connect();
+      await flush();
+
+      // A null token is a TRANSIENT failure (Requirement 21.1): no socket is built,
+      // but a reconnect is scheduled rather than the client giving up permanently.
+      expect(mockWsInstances).toHaveLength(0);
+      expect(client.getReconnectAttempts()).toBe(1);
+      expect(client.getDisconnectedAt()).not.toBeNull();
+      // Not a permanent/terminal state — still eligible to recover.
+      expect(client.getState()).not.toBe('failed');
+
+      // Advancing past the first backoff delay fires another attempt; the token is
+      // still null, so the client keeps retrying (attempt count grows).
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(mockWsInstances).toHaveLength(0);
+      expect(client.getReconnectAttempts()).toBe(2);
+      expect(client.getState()).not.toBe('failed');
+    });
+
+    it('re-establishes the connection once getToken() resolves to a real token on a later attempt', async () => {
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
+
+      // First connect attempt has no token; subsequent attempts get a real token.
+      let tokenAvailable = false;
+      config.getToken = async () => (tokenAvailable ? 'real-jwt-token' : null);
+
+      const client = createWebSocketClient(config);
+      client.connect();
+      await flush();
+
+      // First attempt failed transiently — reconnect scheduled, no socket yet.
+      expect(mockWsInstances).toHaveLength(0);
+      expect(client.getReconnectAttempts()).toBe(1);
+
+      // The token becomes available before the scheduled retry fires.
+      tokenAvailable = true;
+
+      // Advance past the first backoff delay (1s) so the scheduled attempt runs.
+      await vi.advanceTimersByTimeAsync(1000);
+
+      // The retry now obtains a real token and constructs the socket (Requirement 21.2).
+      expect(mockWsInstances).toHaveLength(1);
+
+      // Opening the socket establishes the connection and resets reconnect state.
+      mockWsInstances[0].simulateOpen();
+      expect(client.getState()).toBe('connected');
+      expect(client.getReconnectAttempts()).toBe(0);
+      expect(client.getDisconnectedAt()).toBeNull();
+
+      // The auth token is sent as the first post-connect message, never in the URL.
+      expect(mockWsInstances[0].url).toBe('ws://localhost:3000/ws');
+      expect(sentOfType(mockWsInstances[0], 'auth')).toHaveLength(1);
+    });
+  });
 });

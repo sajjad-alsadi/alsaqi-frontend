@@ -5,7 +5,7 @@
  * for all consumers: DB seeder, middleware, frontend navigation, and admin UI.
  */
 
-import { ModuleDefinition, NavigationConfig, PermissionAction } from './types';
+import { ModuleDefinition, PermissionAction } from './types';
 import { UserRole } from '../constants';
 
 /** Navigation item returned by getNavigationConfig() */

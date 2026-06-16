@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { X, Download } from 'lucide-react';
 import { AuditProgram, AuditProcedure } from '../../types';
 import { useTranslation } from 'react-i18next';

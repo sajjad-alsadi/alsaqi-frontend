@@ -1,227 +1,118 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import fc from 'fast-check';
-import { DOMGuard } from '../DOMGuard';
+import { DOMGuard, initDOMGuard } from '../DOMGuard';
 
 /**
- * Property Test: DOMGuard removes all dangerous elements (Property 10)
+ * DOMGuard — new security posture (code-review-remediation, Requirement 11)
  *
- * Feature: comprehensive-testing
- * Property 10: DOMGuard يزيل جميع العناصر الخطرة
+ * NOTE: This file previously validated the OLD behavior (comprehensive-testing
+ * spec, Property 10): a document-wide MutationObserver that stripped dangerous
+ * attributes (onclick/onerror/onload/onmouseover) and flagged injected
+ * <script>/<iframe> elements as threats.
  *
- * **Validates: Requirements 18.2**
+ * That behavior has been removed. DOMGuard is now a no-op shim: the browser
+ * client is not a trust boundary, so document-wide DOM scrubbing provided no
+ * real security while breaking legitimate DOM behavior and harming performance.
+ * The Backend (server-side validation, output encoding, CSP) is the
+ * authoritative enforcement boundary.
  *
- * For any HTML content containing <script>, <iframe>, or event handlers
- * (onclick, onerror, onload, onmouseover), DOMGuard must remove or neutralize them.
- * Safe text content must be preserved.
+ * These tests assert the NEW posture:
+ *   - Req 11.2: DOMGuard registers no document-wide MutationObserver.
+ *   - DOMGuard no longer strips attributes or mutates the DOM.
+ *   - Injected <script>/<iframe> elements are left untouched (not "detected").
+ *   - Public API (construction, config inspection, destroy) remains stable.
  */
 
-// ─── Custom Arbitraries ──────────────────────────────────────────────────────
-
-/** Generates dangerous attribute names that DOMGuard blocks */
-const dangerousAttributeArb = fc.constantFrom('onerror', 'onload', 'onclick', 'onmouseover');
-
-/** Generates safe text content */
-const safeTextArb = fc
-  .string({ minLength: 1, maxLength: 100 })
-  .filter((s) => s.trim().length > 0 && !/<|>/.test(s));
-
-/** Generates safe tag names that DOMGuard should not interfere with */
-const safeTagArb = fc.constantFrom('div', 'span', 'p', 'strong', 'em', 'h1', 'h2', 'ul', 'li');
-
-/** Generates JavaScript payloads for event handlers (safe for jsdom - won't throw ReferenceErrors) */
-const jsPayloadArb = fc.constantFrom(
-  'void 0',
-  'void "xss"',
-  'void "steal"',
-  'void "hack"',
-  'void "evil"'
-);
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/**
- * Waits for MutationObserver to process pending mutations.
- * MutationObserver callbacks are microtasks, so we flush them.
- */
-async function flushMutationObserver(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}
-
-// ─── Tests ───────────────────────────────────────────────────────────────────
-
-describe('Property 10: DOMGuard removes all dangerous elements', () => {
+describe('DOMGuard new posture: no document-wide observation or DOM scrubbing (Req 11.2, 11.3)', () => {
+  let observeSpy: ReturnType<typeof vi.spyOn>;
+  let warnSpy: ReturnType<typeof vi.spyOn>;
   let guard: DOMGuard;
 
   beforeEach(() => {
-    // Reset the global flag so DOMGuard can initialize
-    (window as any).__domGuardInitialized = false;
-    // Suppress console warnings/errors from DOMGuard
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    // Mock fetch to prevent actual network calls from handleThreat
-    vi.spyOn(globalThis, 'fetch').mockImplementation(() => Promise.resolve(new Response()));
-    guard = new DOMGuard();
+    observeSpy = vi.spyOn(MutationObserver.prototype, 'observe');
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    guard = new DOMGuard({
+      sensitiveSelectors: ['input[type="password"]'],
+      blockedAttributes: ['onerror', 'onload', 'onclick', 'onmouseover'],
+    });
   });
 
   afterEach(() => {
     guard.destroy();
-    // Clean up any elements added during tests
     document.body.innerHTML = '';
     vi.restoreAllMocks();
   });
 
-  it('removes dangerous attributes (onclick, onerror, onload, onmouseover) from any element', async () => {
-    await fc.assert(
-      fc.asyncProperty(
-        dangerousAttributeArb,
-        safeTagArb,
-        jsPayloadArb,
-        async (attrName, tagName, payload) => {
-          // Create an element with a dangerous attribute
-          const element = document.createElement(tagName);
-          element.setAttribute(attrName, payload);
-          element.textContent = 'safe content';
+  it('does not register a document-wide MutationObserver on construction or init', () => {
+    // Construction in beforeEach plus the factory init must register nothing.
+    initDOMGuard({ blockedAttributes: ['onerror'] });
 
-          // Add to DOM - this triggers MutationObserver for attribute changes
-          document.body.appendChild(element);
-
-          // Now set the attribute again to trigger attribute mutation
-          // (The initial add triggers childList, attribute check happens on attribute mutations)
-          element.setAttribute(attrName, payload);
-
-          await flushMutationObserver();
-
-          // DOMGuard should have removed the dangerous attribute
-          expect(element.hasAttribute(attrName)).toBe(false);
-
-          // Safe text content should be preserved
-          expect(element.textContent).toBe('safe content');
-
-          // Cleanup
-          element.remove();
-        }
-      ),
-      { numRuns: 100 }
-    );
+    expect(observeSpy).not.toHaveBeenCalled();
   });
 
-  it('detects injected script elements as threats', async () => {
-    await fc.assert(
-      fc.asyncProperty(
-        fc.constantFrom(
-          'void 0',
-          'void "xss"',
-          'void "document.cookie"',
-          'void "steal-data"',
-          'void "eval-payload"'
-        ),
-        async (scriptContent) => {
-          const script = document.createElement('script');
-          script.textContent = scriptContent;
+  it('does NOT strip dangerous attributes from elements (Backend is the enforcement boundary)', async () => {
+    const element = document.createElement('div');
+    element.setAttribute('onclick', 'void 0');
+    element.textContent = 'safe content';
+    document.body.appendChild(element);
 
-          document.body.appendChild(script);
-          await flushMutationObserver();
+    // Give any (hypothetical) observer callback a microtask/macrotask to run.
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
-          // DOMGuard should have detected the script as a threat
-          // (console.warn is called with '[Security] Suspicious script detected:')
-          expect(console.warn).toHaveBeenCalled();
-
-          // Cleanup
-          script.remove();
-        }
-      ),
-      { numRuns: 20 }
-    );
+    // The dangerous attribute is intentionally left in place by the client.
+    expect(element.hasAttribute('onclick')).toBe(true);
+    expect(element.getAttribute('onclick')).toBe('void 0');
+    expect(element.textContent).toBe('safe content');
   });
 
-  it('detects hidden iframes as threats', async () => {
-    await fc.assert(
-      fc.asyncProperty(
-        fc.constantFrom(
-          'https://evil.example.com/phish',
-          'https://attacker.example.io/keylogger',
-          'https://malware.example.net/payload',
-          'https://phishing.example.org/fake-login'
-        ),
-        fc.constantFrom('none', 'hidden', '0'),
-        async (src, hideMethod) => {
-          const iframe = document.createElement('iframe');
-          iframe.src = src;
+  it('does NOT remove or flag injected <script> elements as threats', async () => {
+    const script = document.createElement('script');
+    script.textContent = 'void 0';
+    document.body.appendChild(script);
 
-          // Apply hiding technique
-          if (hideMethod === 'none') {
-            iframe.style.display = 'none';
-          } else if (hideMethod === 'hidden') {
-            iframe.style.visibility = 'hidden';
-          } else {
-            iframe.style.opacity = '0';
-          }
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
-          document.body.appendChild(iframe);
-          await flushMutationObserver();
-
-          // DOMGuard should detect hidden iframe as a threat
-          expect(console.warn).toHaveBeenCalled();
-
-          // Cleanup
-          iframe.remove();
-        }
-      ),
-      { numRuns: 20 }
-    );
+    // No detection/threat-reporting side effects.
+    expect(warnSpy).not.toHaveBeenCalled();
+    // The element is left untouched in the DOM.
+    expect(document.body.contains(script)).toBe(true);
   });
 
-  it('preserves safe text content in normal elements', async () => {
-    await fc.assert(
-      fc.asyncProperty(safeTagArb, safeTextArb, async (tagName, textContent) => {
-        const element = document.createElement(tagName);
-        element.textContent = textContent;
+  it('does NOT remove or flag injected <iframe> elements as threats', async () => {
+    const iframe = document.createElement('iframe');
+    iframe.src = 'https://example.com/embedded';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
 
-        document.body.appendChild(element);
-        await flushMutationObserver();
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
-        // Safe content should remain intact
-        expect(element.textContent).toBe(textContent);
-        // Element should still be in the DOM
-        expect(document.body.contains(element)).toBe(true);
-
-        // Cleanup
-        element.remove();
-      }),
-      { numRuns: 100 }
-    );
+    expect(warnSpy).not.toHaveBeenCalled();
+    expect(document.body.contains(iframe)).toBe(true);
   });
 
-  it('removes multiple dangerous attributes from the same element', async () => {
-    await fc.assert(
-      fc.asyncProperty(
-        safeTagArb,
-        fc.uniqueArray(dangerousAttributeArb, { minLength: 2, maxLength: 4 }),
-        async (tagName, attrs) => {
-          const element = document.createElement(tagName);
-          element.textContent = 'preserved text';
-          document.body.appendChild(element);
+  it('preserves safe text content in normal elements (no mutation)', async () => {
+    const element = document.createElement('p');
+    element.textContent = 'just some text';
+    document.body.appendChild(element);
 
-          // Set each dangerous attribute (triggers attribute mutation)
-          for (const attr of attrs) {
-            element.setAttribute(attr, 'malicious()');
-            await flushMutationObserver();
-          }
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
-          // All dangerous attributes should be removed
-          for (const attr of attrs) {
-            expect(element.hasAttribute(attr)).toBe(false);
-          }
+    expect(element.textContent).toBe('just some text');
+    expect(document.body.contains(element)).toBe(true);
+  });
 
-          // Text content should be preserved
-          expect(element.textContent).toBe('preserved text');
+  it('exposes configuration for inspection without activating monitoring', () => {
+    expect(guard.getSensitiveSelectors()).toEqual(['input[type="password"]']);
+    expect(guard.getBlockedAttributes()).toEqual([
+      'onerror',
+      'onload',
+      'onclick',
+      'onmouseover',
+    ]);
+  });
 
-          // Cleanup
-          element.remove();
-        }
-      ),
-      { numRuns: 50 }
-    );
+  it('destroy() is a safe no-op that registers nothing', () => {
+    expect(() => guard.destroy()).not.toThrow();
+    expect(observeSpy).not.toHaveBeenCalled();
   });
 });

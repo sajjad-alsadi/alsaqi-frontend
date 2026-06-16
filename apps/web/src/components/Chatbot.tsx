@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MessageSquare, X, Send, Bot, User, Loader2, Search, ExternalLink, FileText, Scale, BookOpen } from 'lucide-react';
+import { X, Send, Bot, User, Loader2, Search, ExternalLink, FileText, Scale, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/httpClient';
@@ -12,6 +12,16 @@ interface SearchResult {
   title: string;
   type: 'policy' | 'instruction' | 'law';
   path: string;
+}
+
+/** Compliance record returned by the `/compliance` search endpoints. */
+interface ComplianceRecord {
+  id: string | number;
+  title?: string;
+  department?: string;
+  description?: string;
+  instruction_number?: string;
+  law_number?: string;
 }
 
 interface Message {
@@ -74,44 +84,44 @@ const Chatbot: React.FC = () => {
       const searchTerm = userMsg.text.toLowerCase();
 
       // Extract data correctly based on response format (some might be wrapped in { data: [...] })
-      const allPolicies = policiesRes.data.data || (Array.isArray(policiesRes.data) ? policiesRes.data : []);
-      const allInstructions = instructionsRes.data.data || (Array.isArray(instructionsRes.data) ? instructionsRes.data : []);
-      const allLaws = lawBankRes.data.data || (Array.isArray(lawBankRes.data) ? lawBankRes.data : []);
+      const allPolicies: ComplianceRecord[] = policiesRes.data.data || (Array.isArray(policiesRes.data) ? policiesRes.data : []);
+      const allInstructions: ComplianceRecord[] = instructionsRes.data.data || (Array.isArray(instructionsRes.data) ? instructionsRes.data : []);
+      const allLaws: ComplianceRecord[] = lawBankRes.data.data || (Array.isArray(lawBankRes.data) ? lawBankRes.data : []);
 
       // Local filtering
-      const filteredPolicies = allPolicies.filter((p: any) => 
+      const filteredPolicies = allPolicies.filter((p) => 
         p.title?.toLowerCase().includes(searchTerm) || 
         p.department?.toLowerCase().includes(searchTerm)
       );
       
-      const filteredInstructions = allInstructions.filter((inst: any) => 
+      const filteredInstructions = allInstructions.filter((inst) => 
         inst.title?.toLowerCase().includes(searchTerm) || 
         inst.description?.toLowerCase().includes(searchTerm) ||
         inst.instruction_number?.toLowerCase().includes(searchTerm)
       );
 
-      const filteredLaws = allLaws.filter((law: any) => 
+      const filteredLaws = allLaws.filter((law) => 
         law.title?.toLowerCase().includes(searchTerm) || 
         law.description?.toLowerCase().includes(searchTerm) ||
         law.law_number?.toLowerCase().includes(searchTerm)
       );
 
       const results: SearchResult[] = [
-        ...filteredPolicies.map((p: any) => ({
+        ...filteredPolicies.map((p) => ({
           id: p.id,
-          title: p.title,
+          title: p.title ?? '',
           type: 'policy' as const,
           path: '/compliance-matrix'
         })),
-        ...filteredInstructions.map((inst: any) => ({
+        ...filteredInstructions.map((inst) => ({
           id: inst.id,
-          title: inst.title || inst.instruction_number,
+          title: inst.title || inst.instruction_number || '',
           type: 'instruction' as const,
           path: '/compliance-matrix'
         })),
-        ...filteredLaws.map((law: any) => ({
+        ...filteredLaws.map((law) => ({
           id: law.id,
-          title: law.title || law.law_number,
+          title: law.title || law.law_number || '',
           type: 'law' as const,
           path: '/compliance-matrix'
         }))
@@ -188,6 +198,7 @@ const Chatbot: React.FC = () => {
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
+                aria-label={t('chatbot.close')}
                 className="w-10 h-10 flex items-center justify-center hover:bg-[var(--color-card)]/20 rounded-full transition-all active:scale-90"
               >
                 <X size={20} />
@@ -281,6 +292,7 @@ const Chatbot: React.FC = () => {
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
+                  aria-label={t('chatbot.send')}
                   className="w-12 h-12 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-primary-hover)] transition-all shadow-md shadow-[var(--color-primary)]/20 active:scale-90 shrink-0"
                 >
                   <Send size={20} className={i18n.language === 'ar' ? '-scale-x-100' : ''} />
@@ -296,6 +308,8 @@ const Chatbot: React.FC = () => {
         whileHover={{ scale: 1.1, rotate: 5 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? t('chatbot.close') : t('chatbot.open')}
+        aria-expanded={isOpen}
         className="fixed bottom-8 end-8 w-16 h-16 bg-[var(--color-primary)] text-white rounded-xl shadow-2xl shadow-[var(--color-primary)]/40 flex items-center justify-center z-50 border-2 border-white/20 backdrop-blur-sm transition-all"
       >
         {isOpen ? <X size={28} /> : <Search size={28} />}

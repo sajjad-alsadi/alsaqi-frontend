@@ -39,7 +39,7 @@ export const useIdleTimeout = () => {
         // Store a flag in sessionStorage to show a specific message on login screen
         try {
           sessionStorage.setItem('idle_logout', 'true');
-        } catch (e) {}
+        } catch {}
         logout();
       }, timeoutMs);
     }

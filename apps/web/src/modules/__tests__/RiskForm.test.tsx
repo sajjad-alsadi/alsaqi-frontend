@@ -15,7 +15,7 @@ import React from 'react';
 // Mock react-hook-form with watch support for score calculation
 let mockErrors: Record<string, { message: string }> = {};
 let mockIsSubmitting = false;
-let mockFormValues: Record<string, any> = {
+const mockFormValues: Record<string, any> = {
   likelihood: 'Low',
   impact: 'Low',
   score: 0,

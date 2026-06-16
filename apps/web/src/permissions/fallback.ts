@@ -1,15 +1,19 @@
 /**
- * Narrowing permission fallback (Requirement 9).
+ * Narrowing permission fallback (Requirement 7).
  *
  * When the permissions API fails, the effective permission set must never widen
- * a user's access beyond what the server last confirmed. These helpers compute a
- * fallback that is always a subset of the confirmed permissions:
+ * a user's access beyond the role's static defaults. These helpers compute a
+ * fallback that is always a subset of the role's static defaults:
  *
  * - With confirmed permissions: intersect the static role defaults with the
  *   confirmed set, keeping only `(module, action)` pairs present in BOTH.
- * - With no confirmed permissions: apply a read-only permission set.
+ * - With no confirmed permissions (e.g. a cache outage on first load): intersect
+ *   the read-only permission set with the role's static defaults, so a
+ *   low-privilege role is granted at most `View` on the modules its static
+ *   defaults already include — and is denied admin modules such as
+ *   `UserManagement`/`SystemLogs` it never had (Req 7.1, 7.2, 7.3).
  *
- * The backend remains the authoritative access control (Req 9.5); these helpers
+ * The backend remains the authoritative access control (Req 7.4); these helpers
  * only constrain the client-side advisory state.
  */
 import { MODULES } from '../permissions';
@@ -77,17 +81,24 @@ export function intersect(a: UserPermissionSet, b: UserPermissionSet): UserPermi
 /**
  * Computes the effective fallback permission set when the permissions API fails.
  *
- * - When no confirmed permissions exist, returns the read-only set (Req 9.2).
+ * - When no confirmed permissions exist (e.g. the permissions cache is
+ *   unavailable on first load), returns the intersection of
+ *   `READ_ONLY_PERMISSION_SET` with the role's static defaults (Req 7.1). The
+ *   result grants at most `View` on modules the role's static defaults already
+ *   include, so it never widens beyond the static defaults (Req 7.2) and a
+ *   low-privilege role is denied admin modules such as `UserManagement` and
+ *   `SystemLogs` during the outage (Req 7.3).
  * - Otherwise returns the intersection of the static role defaults and the
- *   confirmed set (Req 9.1, 9.3), which is always a subset of the confirmed
- *   permissions (Req 9.4 — no privilege escalation).
+ *   confirmed set, which is always a subset of both — no privilege escalation.
+ *
+ * The backend remains the authoritative access control (Req 7.4).
  */
 export function computeFallback(
   confirmed: UserPermissionSet | null,
   staticDefaults: UserPermissionSet,
 ): UserPermissionSet {
   if (!confirmed) {
-    return READ_ONLY_PERMISSION_SET;
+    return intersect(READ_ONLY_PERMISSION_SET, staticDefaults);
   }
   return intersect(staticDefaults, confirmed);
 }

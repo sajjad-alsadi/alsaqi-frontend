@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, 
-  Archive, 
   Eye, 
   Download, 
   Mail, 
   Send,
-  Calendar,
-  Building,
-  Filter
+  Calendar
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';
