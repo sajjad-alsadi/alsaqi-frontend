@@ -1175,6 +1175,7 @@
     "loginTitle": "Login to System",
     "loginFailed": "Login failed. Please check your credentials.",
     "serverError": "A server error occurred. Please try again or contact support.",
+    "responseSchemaMismatch": "An unexpected technical error occurred in the server response. Please contact support.",
     "resetPassword": "Reset Password",
     "invalidCredentials": "Invalid username or password",
     "accountSuspended": "Your account has been suspended. Please contact the administrator.",

@@ -23,6 +23,7 @@ const ALL_AUTH_ERROR_CODES: readonly AuthErrorCode[] = [
   'rate_limited',
   'server_error',
   'network_error',
+  'response_schema_mismatch',
   'unknown',
 ];
 

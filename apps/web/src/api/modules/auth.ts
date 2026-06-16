@@ -3,7 +3,7 @@
  * Provides typed methods for authentication endpoints.
  */
 import axios from 'axios';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import type { ApiClient } from '../client';
 import type { User, LoginInput, RegisterInput } from '@alsaqi/shared';
 
@@ -21,6 +21,7 @@ export type AuthErrorCode =
   | 'rate_limited'
   | 'server_error'
   | 'network_error'
+  | 'response_schema_mismatch'
   | 'unknown';
 
 export interface AuthError {
@@ -99,6 +100,18 @@ function extractServerErrorCode(data: unknown): string | undefined {
  * @param error - The unknown error thrown by the API client (typically an Axios error).
  */
 export function mapAuthError(error: unknown): AuthError {
+  // Detect schema validation failure: the server responded successfully but its
+  // payload doesn't match the expected Zod schema. This is a developer/infra
+  // issue, not a credentials problem — surface a distinct code so the UI can
+  // show an appropriate message instead of the misleading "login failed".
+  if (error instanceof ZodError) {
+    console.error(
+      '[Auth] Login response failed schema validation — server response shape does not match expected schema.',
+      error.issues
+    );
+    return { code: 'response_schema_mismatch' };
+  }
+
   if (!axios.isAxiosError(error)) {
     return { code: 'unknown' };
   }

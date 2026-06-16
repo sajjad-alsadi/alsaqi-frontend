@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../context/AuthContext';
 import { AuditTrail } from '../types';
 import { History, Search, Filter } from 'lucide-react';
 import api from '../api/httpClient';
@@ -14,7 +13,6 @@ interface AuditTrailProps {
 }
 
 const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
-  const { token } = useAuth();
   const { t, i18n } = useTranslation();
   const { formatDateTime, translateName, translateAction, translateModule } = useFormat();
   const [logs, setLogs] = useState<AuditTrail[]>([]);
@@ -140,7 +138,7 @@ const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
         </div>
       </div>
 
-      <div className="glass-card overflow-hidden">
+      <div className="bg-[var(--color-card)] border border-[var(--color-border-soft)] shadow-sm rounded-2xl overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-start border-collapse">
             <thead>

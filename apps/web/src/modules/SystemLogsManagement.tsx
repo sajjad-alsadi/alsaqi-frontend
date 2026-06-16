@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { History, AlertCircle, Terminal, Activity, ShieldCheck, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -13,12 +13,11 @@ const SystemLogsManagement: React.FC = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'audit' | 'errors'>('audit');
   const [stats, setStats] = useState({ auditToday: 0, errorsCount: 0, healthPercent: 100, healthColor: 'text-[var(--color-success)]', healthStatus: 'stable' });
-  const [loading, setLoading] = useState(false);
   const [showHealthTooltip, setShowHealthTooltip] = useState(false);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   const fetchStats = async () => {
     try {
-      setLoading(true);
       const [auditRes, errorsRes] = await Promise.all([
         api.get('/audit-trail'),
         api.get('/system-errors')
@@ -61,8 +60,6 @@ const SystemLogsManagement: React.FC = () => {
       });
     } catch (error) {
       logger.error('Error fetching logs stats:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -70,10 +67,31 @@ const SystemLogsManagement: React.FC = () => {
     fetchStats();
   }, []);
 
+  // Close tooltip on Escape or click outside
+  useEffect(() => {
+    if (!showHealthTooltip) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowHealthTooltip(false);
+    };
+    const handleClick = (e: MouseEvent) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
+        setShowHealthTooltip(false);
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    document.addEventListener('mousedown', handleClick);
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener('mousedown', handleClick);
+    };
+  }, [showHealthTooltip]);
+
   const tabs = [
     { id: 'audit', label: t('SystemLogsAudit'), icon: History },
     { id: 'errors', label: t('SystemLogsErrors'), icon: AlertCircle },
   ] as const;
+
+  const tabPanelId = `tabpanel-${activeTab}`;
 
   return (
     <div className="space-y-6 pb-10">
@@ -90,9 +108,9 @@ const SystemLogsManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Strip — replaces the old overview tab */}
+      {/* KPI Strip */}
       <div className="flex flex-wrap items-center gap-6 px-5 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-sm">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" ref={tooltipRef}>
           <ShieldCheck size={16} className={stats.healthColor} />
           <span className={`text-sm font-semibold ${stats.healthColor}`}>
             {stats.healthPercent.toFixed(1)}%
@@ -102,12 +120,15 @@ const SystemLogsManagement: React.FC = () => {
             type="button"
             className="relative p-0.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
             aria-label={t('systemLogsManagement.healthExplanation')}
+            aria-expanded={showHealthTooltip}
             onClick={() => setShowHealthTooltip(!showHealthTooltip)}
-            onBlur={() => setShowHealthTooltip(false)}
           >
             <Info size={14} />
             {showHealthTooltip && (
-              <div className="absolute top-full start-0 mt-2 p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-lg text-xs text-[var(--color-text-main)] w-56 z-10">
+              <div 
+                role="tooltip"
+                className="absolute top-full start-0 mt-2 p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl shadow-lg text-xs text-[var(--color-text-main)] w-56 z-10"
+              >
                 {t('systemLogsManagement.healthTooltip')}
               </div>
             )}
@@ -127,14 +148,23 @@ const SystemLogsManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-1.5 p-1 bg-[var(--color-bg-soft)] rounded-xl w-fit border border-[var(--color-border-soft)]/50">
+      {/* Tabs with ARIA semantics */}
+      <div 
+        role="tablist" 
+        aria-label={t('SystemLogsManagement')}
+        className="flex flex-wrap gap-1.5 p-1 bg-[var(--color-bg-soft)] rounded-xl w-fit border border-[var(--color-border-soft)]/50"
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-selected={isActive}
+              aria-controls={`tabpanel-${tab.id}`}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${
                 isActive 
@@ -153,6 +183,9 @@ const SystemLogsManagement: React.FC = () => {
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
+          id={`tabpanel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`tab-${activeTab}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

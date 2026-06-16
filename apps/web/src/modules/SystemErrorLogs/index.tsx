@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/httpClient';
 import { toList, toPagination } from '../../api/utils/envelope';
-import { AlertCircle, RefreshCw, Trash2, Download, ChevronDown, ChevronUp, ShieldAlert } from 'lucide-react';
+import { AlertCircle, RefreshCw, Trash2, Download, ChevronDown, ChevronUp, ShieldAlert, Copy, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../utils/formatService';
 import Pagination from '../../components/Pagination';
@@ -23,6 +23,18 @@ interface SystemErrorLogsProps {
   embedded?: boolean;
 }
 
+const KNOWN_MODULES = ['auth', 'users', 'audit', 'compliance', 'risk', 'correspondence', 'settings', 'system'];
+
+// Debounce hook for text inputs
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
 const SystemErrorLogs: React.FC<SystemErrorLogsProps> = ({ embedded = false }) => {
   const { t, i18n } = useTranslation();
   const { formatDate } = useFormat();
@@ -39,10 +51,32 @@ const SystemErrorLogs: React.FC<SystemErrorLogsProps> = ({ embedded = false }) =
   const [endDate, setEndDate] = useState('');
   const [pagination, setPagination] = useState({ page: 1, pageSize: 20, total: 0, totalPages: 0 });
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  // Debounce the freetext filter (userId) to avoid firing on every keystroke
+  const debouncedUserIdFilter = useDebouncedValue(userIdFilter, 300);
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]);
   };
+
+  const copyStackTrace = useCallback(async (id: number, stack: string) => {
+    try {
+      await navigator.clipboard.writeText(stack);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = stack;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  }, []);
 
   const fetchLogs = async () => {
     try {
@@ -52,7 +86,7 @@ const SystemErrorLogs: React.FC<SystemErrorLogsProps> = ({ embedded = false }) =
           page: pagination.page,
           pageSize: pagination.pageSize,
           module: moduleFilter || undefined,
-          user_id: userIdFilter || undefined,
+          user_id: debouncedUserIdFilter || undefined,
           severity: severityFilter || undefined,
           start_date: startDate || undefined,
           end_date: endDate || undefined
@@ -119,7 +153,7 @@ const SystemErrorLogs: React.FC<SystemErrorLogsProps> = ({ embedded = false }) =
   useEffect(() => {
     fetchLogs();
     fetchAnalytics();
-  }, [pagination.page, pagination.pageSize, moduleFilter, userIdFilter, severityFilter, startDate, endDate]);
+  }, [pagination.page, pagination.pageSize, moduleFilter, debouncedUserIdFilter, severityFilter, startDate, endDate]);
 
   useEffect(() => {
     let ws: WebSocket;
@@ -279,14 +313,17 @@ const SystemErrorLogs: React.FC<SystemErrorLogsProps> = ({ embedded = false }) =
 
       {/* Search & Filters Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 p-4 bg-[var(--color-bg-soft)]/50 rounded-xl border border-[var(--color-border-soft)]/50">
-        <input 
-          type="text" 
-          placeholder={t('systemErrorLogs.filterByModule')} 
+        <select 
           value={moduleFilter} 
           onChange={(e) => setModuleFilter(e.target.value)} 
-          className="w-full p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all outline-none"
+          className="w-full p-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl text-sm text-[var(--color-text-main)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none cursor-pointer"
           aria-label={t('systemErrorLogs.filterByModule')}
-        />
+        >
+          <option value="">{t('common.allModules')}</option>
+          {KNOWN_MODULES.map(m => (
+            <option key={m} value={m}>{t(`common.modules.${m}`)}</option>
+          ))}
+        </select>
         
         <input 
           type="text" 
@@ -389,7 +426,27 @@ const SystemErrorLogs: React.FC<SystemErrorLogsProps> = ({ embedded = false }) =
                         <div className="bg-[var(--color-card)] p-5 rounded-xl border border-[var(--color-border-soft)] space-y-4">
                           {log.stack && (
                             <div className="flex flex-col gap-2">
-                              <h4 className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('systemErrorLogs.stackTrace')}</h4>
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('systemErrorLogs.stackTrace')}</h4>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); copyStackTrace(log.id, log.stack); }}
+                                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] bg-[var(--color-bg-soft)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-colors cursor-pointer"
+                                  aria-label={t('common.copy')}
+                                >
+                                  {copiedId === log.id ? (
+                                    <>
+                                      <Check size={12} className="text-[var(--color-success)]" />
+                                      <span className="text-[var(--color-success)]">{t('common.copied')}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy size={12} />
+                                      <span>{t('common.copy')}</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
                               <pre className="text-xs font-mono text-[var(--color-text-muted)] bg-[var(--color-bg-soft)] p-5 rounded-xl overflow-x-auto leading-relaxed border border-[var(--color-border-soft)]">
                                 {log.stack}
                               </pre>

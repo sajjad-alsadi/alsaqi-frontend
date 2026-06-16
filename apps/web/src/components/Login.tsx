@@ -97,6 +97,8 @@ const Login: React.FC = () => {
         return t('networkError', 'Network error');
       case 'server_error':
         return t('auth.serverError', t('serverError', 'Server error'));
+      case 'response_schema_mismatch':
+        return t('auth.responseSchemaMismatch');
       default:
         return t('auth.loginFailed');
     }
