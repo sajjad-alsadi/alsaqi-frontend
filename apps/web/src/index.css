@@ -386,14 +386,78 @@
 .interactive-card {
   @apply bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-2xl cursor-pointer;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 .interactive-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  /* Reduced from -2px → -1px to prevent sweep-instability across dense grids */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 .interactive-card:active {
   transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* === Tooltip === */
+/*
+ * CSS-only tooltip attached via [data-tooltip].
+ * Falls back to native `title` for screen readers / keyboard users.
+ * Tokens are pulled from the design system so it respects dark mode automatically.
+ */
+.kiro-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.kiro-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  /* Default: above the element */
+  bottom: calc(100% + 6px);
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  line-height: 1.4;
+  background-color: var(--color-text-main);
+  color: var(--color-card);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  /* Start slightly below final position */
+  translate: 0 4px;
+  z-index: 50;
+}
+
+.kiro-tooltip[data-tooltip-side="bottom"]::after {
+  bottom: auto;
+  top: calc(100% + 6px);
+  translate: 0 -4px;
+}
+
+.kiro-tooltip:hover::after,
+.kiro-tooltip:focus-within::after {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* RTL: translateX(-50%) works on both directions since we use inset-inline-start */
+[dir="rtl"] .kiro-tooltip::after {
+  transform: translateX(50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kiro-tooltip::after {
+    transition: opacity 0.01ms;
+  }
 }
 
 /* === Empty States === */
