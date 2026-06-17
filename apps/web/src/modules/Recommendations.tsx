@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../api/httpClient';
 import { useTranslation } from 'react-i18next';
 import { Recommendation, AuditFinding, AuditPlan } from '../types';
@@ -71,10 +71,11 @@ const RecommendationsModule: React.FC = () => {
   const getPlan = (id: string | number | undefined) => plans.find(p => String(p.id) === String(id));
 
   // unique departments from recommendations
-  const departments = [...new Set(recommendations.map(r => r.department).filter(Boolean))];
+  const departments = useMemo(() => [...new Set(recommendations.map(r => r.department).filter(Boolean))], [recommendations]);
   const statuses = ['Open', 'In Progress', 'Implemented', 'Overdue', 'Closed'];
 
-  const filteredRecs = (recommendations || []).filter(r => {
+  // Memoize filtered recommendations to avoid recomputation on unrelated state changes
+  const filteredRecs = useMemo(() => (recommendations || []).filter(r => {
     const finding = getFinding(r.finding_id);
     const matchSearch = (r.department?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                         (r.responsible?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -84,7 +85,7 @@ const RecommendationsModule: React.FC = () => {
     const matchPlan = !filterPlanId || String(r.plan_id) === String(filterPlanId) ||
                       String(finding?.audit_id) === String(filterPlanId);
     return matchSearch && matchDept && matchStatus && matchPlan;
-  });
+  }), [recommendations, findings, searchTerm, filterDepartment, filterStatus, filterPlanId]);
 
   return (
     <div className="space-y-10">

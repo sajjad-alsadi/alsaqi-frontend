@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Search, Plus, Edit2, Trash2, Archive } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -46,10 +46,10 @@ const JobTitles: React.FC = () => {
     }
   };
 
-  const filteredTitles = jobTitles.filter(j => 
+  const filteredTitles = useMemo(() => jobTitles.filter(j => 
     (j.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     j.department?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [jobTitles, searchTerm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

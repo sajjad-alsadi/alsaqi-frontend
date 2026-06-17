@@ -68,7 +68,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClose }) =>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('common.email')}</p>
-                  <p className="text-sm font-bold text-[var(--color-text-main)]">{user.email}</p>
+                  <p className="text-sm font-bold text-[var(--color-text-main)]">{user.email || '-'}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('common.department')}</p>

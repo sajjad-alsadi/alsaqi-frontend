@@ -1,5 +1,6 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QUERY_STALE_TIMES } from './lib/queryDefaults';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -15,12 +16,15 @@ import { RequirePermission } from './components/RequirePermission';
 import { SkipToContent } from './components/SkipToContent';
 import { LiveRegion } from './components/LiveRegion';
 import Login from './components/Login';
-import Layout from './components/Layout';
+import AppShellSkeleton from './components/AppShellSkeleton';
+import { UpdateNotification } from './components/UpdateNotification';
 import { UNAUTHORIZED_EVENT } from './api';
-import { Toaster } from 'react-hot-toast';
-import NotificationToast from './components/NotificationToast';
 
-// Lazy load modules for better performance
+// Auth-gated imports: Layout, Toaster, and NotificationToast are only imported
+// after authentication is confirmed, keeping vendor-toast out of the critical path.
+const Layout = lazy(() => import('./components/Layout'));
+
+// Lazy load modules — these only load when their route activates (authenticated)
 const Dashboard = lazy(() => import('./modules/Dashboard'));
 const AuditPlan = lazy(() => import('./modules/AuditPlan'));
 const RiskRegister = lazy(() => import('./modules/RiskRegister'));
@@ -44,7 +48,15 @@ const CorrespondenceSystem = lazy(() => import('./modules/Correspondence/Corresp
 const SystemErrorLogs = lazy(() => import('./modules/SystemErrorLogs'));
 const AuditProgramLibrary = lazy(() => import('./modules/AuditProgramLibrary'));
 
-const LoadingFallback = () => (
+// Deferred imports for vendor-toast: loaded only after authentication is confirmed.
+const Toaster = lazy(() => import('react-hot-toast').then(m => ({ default: m.Toaster })));
+const NotificationToast = lazy(() => import('./components/NotificationToast'));
+
+/**
+ * Route-level loading skeleton shown inside Layout's Suspense boundary
+ * while lazy route chunks are being fetched (authenticated state only).
+ */
+const RouteSkeleton = () => (
   <div className="flex items-center justify-center h-full min-h-[400px]">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
   </div>
@@ -83,64 +95,72 @@ const AppContent: React.FC = () => {
     setRouteAnnouncement(`Navigated to ${pageName}`);
   }, [location.pathname]);
 
+  // Phase 1: Session check — render CSS-only skeleton from critical CSS
+  // No external dependencies needed; renders instantly from inlined styles.
   if (isCheckingSession) {
-    return <LoadingFallback />;
+    return <AppShellSkeleton />;
   }
 
+  // Phase 2: Unauthenticated — render only Login.
+  // No Layout, no lazy routes, no vendor-forms, no vendor-toast chunks fetched.
   if (!user) {
     return <Login />;
   }
 
+  // Phase 3: Authenticated — full App Shell with Layout, deferred providers,
+  // and lazy routes. vendor-toast (Toaster) and Layout load here.
   return (
-    <Layout>
-      <Toaster position="top-center" reverseOrder={false} />
-      <NotificationToast />
-      <LiveRegion message={routeAnnouncement} politeness="polite" />
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-          <Route path="/dashboard" element={<ModuleErrorBoundary moduleName="Dashboard"><Dashboard /></ModuleErrorBoundary>} />
-          <Route path="/charter" element={<ModuleErrorBoundary moduleName="AuditCharter"><AuditCharter /></ModuleErrorBoundary>} />
-          <Route path="/plan" element={<ModuleErrorBoundary moduleName="AuditPlan"><AuditPlan /></ModuleErrorBoundary>} />
-          <Route path="/tasks" element={<ModuleErrorBoundary moduleName="AuditTasks"><AuditTasks /></ModuleErrorBoundary>} />
-          <Route path="/library" element={<ModuleErrorBoundary moduleName="AuditProgramLibrary"><AuditProgramLibrary /></ModuleErrorBoundary>} />
-          <Route path="/findings" element={<ModuleErrorBoundary moduleName="AuditFindings"><AuditFindings /></ModuleErrorBoundary>} />
-          <Route path="/evidence" element={<ModuleErrorBoundary moduleName="AuditEvidence"><AuditEvidence /></ModuleErrorBoundary>} />
-          <Route path="/recommendations" element={<ModuleErrorBoundary moduleName="Recommendations"><Recommendations /></ModuleErrorBoundary>} />
-          <Route path="/risks" element={<ModuleErrorBoundary moduleName="RiskRegister"><RiskRegister /></ModuleErrorBoundary>} />
-          <Route path="/org-structure" element={<ModuleErrorBoundary moduleName="OrgStructure"><OrgStructure /></ModuleErrorBoundary>} />
-          <Route path="/cms" element={<ModuleErrorBoundary moduleName="Correspondence"><CorrespondenceSystem language={language} /></ModuleErrorBoundary>} />
-          <Route path="/reports" element={<ModuleErrorBoundary moduleName="Reports"><Reports /></ModuleErrorBoundary>} />
-          <Route path="/integrity" element={<ModuleErrorBoundary moduleName="FraudLog"><IntegrityManagement /></ModuleErrorBoundary>} />
-          <Route path="/fraud" element={<Navigate to="/integrity" replace />} />
-          <Route path="/coi" element={<Navigate to="/integrity" replace />} />
-          <Route path="/compliance-matrix" element={<ModuleErrorBoundary moduleName="ComplianceMatrix"><ComplianceMatrix /></ModuleErrorBoundary>} />
-          <Route path="/notifications" element={<ModuleErrorBoundary moduleName="Notifications"><Notifications /></ModuleErrorBoundary>} />
-          <Route path="/departments" element={<DepartmentManagement />} />
-          
-          {/* Permission-gated Routes */}
-          <Route path="/system-logs" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><SystemLogsManagement /></RequirePermission>} />
-          <Route path="/system-errors" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><Navigate to="/system-logs" replace /></RequirePermission>} />
-          <Route path="/error-logs" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><SystemErrorLogs /></RequirePermission>} />
-          <Route path="/trail" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><AuditTrail /></RequirePermission>} />
-          <Route path="/users" element={<RequirePermission module={MODULES.USER_MANAGEMENT}><ModuleErrorBoundary moduleName="UserManagement"><UserManagement /></ModuleErrorBoundary></RequirePermission>} />
-          <Route path="/job-titles" element={<Navigate to="/departments" replace />} />
-          
-          <Route path="/settings" element={<ModuleErrorBoundary moduleName="Settings"><Settings /></ModuleErrorBoundary>} />
-          
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Suspense>
-    </Layout>
+    <Suspense fallback={<RouteSkeleton />}>
+      <Layout>
+        <Toaster position="top-center" reverseOrder={false} />
+        <NotificationToast />
+        <LiveRegion message={routeAnnouncement} politeness="polite" />
+        <Suspense fallback={<RouteSkeleton />}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+            <Route path="/dashboard" element={<ModuleErrorBoundary moduleName="Dashboard"><Dashboard /></ModuleErrorBoundary>} />
+            <Route path="/charter" element={<ModuleErrorBoundary moduleName="AuditCharter"><AuditCharter /></ModuleErrorBoundary>} />
+            <Route path="/plan" element={<ModuleErrorBoundary moduleName="AuditPlan"><AuditPlan /></ModuleErrorBoundary>} />
+            <Route path="/tasks" element={<ModuleErrorBoundary moduleName="AuditTasks"><AuditTasks /></ModuleErrorBoundary>} />
+            <Route path="/library" element={<ModuleErrorBoundary moduleName="AuditProgramLibrary"><AuditProgramLibrary /></ModuleErrorBoundary>} />
+            <Route path="/findings" element={<ModuleErrorBoundary moduleName="AuditFindings"><AuditFindings /></ModuleErrorBoundary>} />
+            <Route path="/evidence" element={<ModuleErrorBoundary moduleName="AuditEvidence"><AuditEvidence /></ModuleErrorBoundary>} />
+            <Route path="/recommendations" element={<ModuleErrorBoundary moduleName="Recommendations"><Recommendations /></ModuleErrorBoundary>} />
+            <Route path="/risks" element={<ModuleErrorBoundary moduleName="RiskRegister"><RiskRegister /></ModuleErrorBoundary>} />
+            <Route path="/org-structure" element={<ModuleErrorBoundary moduleName="OrgStructure"><OrgStructure /></ModuleErrorBoundary>} />
+            <Route path="/cms" element={<ModuleErrorBoundary moduleName="Correspondence"><CorrespondenceSystem language={language} /></ModuleErrorBoundary>} />
+            <Route path="/reports" element={<ModuleErrorBoundary moduleName="Reports"><Reports /></ModuleErrorBoundary>} />
+            <Route path="/integrity" element={<ModuleErrorBoundary moduleName="FraudLog"><IntegrityManagement /></ModuleErrorBoundary>} />
+            <Route path="/fraud" element={<Navigate to="/integrity" replace />} />
+            <Route path="/coi" element={<Navigate to="/integrity" replace />} />
+            <Route path="/compliance-matrix" element={<ModuleErrorBoundary moduleName="ComplianceMatrix"><ComplianceMatrix /></ModuleErrorBoundary>} />
+            <Route path="/notifications" element={<ModuleErrorBoundary moduleName="Notifications"><Notifications /></ModuleErrorBoundary>} />
+            <Route path="/departments" element={<DepartmentManagement />} />
+            
+            {/* Permission-gated Routes */}
+            <Route path="/system-logs" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><SystemLogsManagement /></RequirePermission>} />
+            <Route path="/system-errors" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><Navigate to="/system-logs" replace /></RequirePermission>} />
+            <Route path="/error-logs" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><SystemErrorLogs /></RequirePermission>} />
+            <Route path="/trail" element={<RequirePermission module={MODULES.SYSTEM_LOGS}><AuditTrail /></RequirePermission>} />
+            <Route path="/users" element={<RequirePermission module={MODULES.USER_MANAGEMENT}><ModuleErrorBoundary moduleName="UserManagement"><UserManagement /></ModuleErrorBoundary></RequirePermission>} />
+            <Route path="/job-titles" element={<Navigate to="/departments" replace />} />
+            
+            <Route path="/settings" element={<ModuleErrorBoundary moduleName="Settings"><Settings /></ModuleErrorBoundary>} />
+            
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Suspense>
+      </Layout>
+    </Suspense>
   );
 };
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: QUERY_STALE_TIMES.referenceData, // 5 min — global default (reference-data tier)
       retry: 1,
     },
   },
@@ -150,6 +170,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <SkipToContent />
+      <UpdateNotification />
       <QueryClientProvider client={queryClient}>
         {/* 
           Provider order is critical:

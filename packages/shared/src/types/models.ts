@@ -23,8 +23,8 @@ export interface User {
   username: string;
   password?: string;
   name: string;
-  email: string;
-  department: string;
+  email: string | null;
+  department: string | null;
   job_title?: string;
   role: `${UserRole}`;
   profile_picture?: string;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useRef, useCallback, useMemo } from 'react';
 import api from '../api/httpClient';
 import { Notification } from '../types';
 import { useUser } from './UserContext';
@@ -11,24 +11,142 @@ import {
 } from '../api/ws/websocket-client';
 import { playNotificationSound } from '../utils/notificationSound';
 
-interface NotificationContextType {
+// ─── State & Actions ──────────────────────────────────────────────────────────
+
+/** Read-only notification state exposed via value context. */
+export interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
   hasMore: boolean;
   isLoading: boolean;
+  latestNotification: Notification | null;
+  bellShake: boolean;
+}
+
+/** Dispatch functions exposed via dispatch context. */
+export interface NotificationDispatch {
   fetchNotifications: (reset?: boolean) => void;
   loadMore: () => void;
   markAsRead: (id: string | number) => void;
   markAllAsRead: () => void;
   deleteNotification: (id: string | number) => void;
-  /** New real-time notification that just arrived (for toast) */
-  latestNotification: Notification | null;
   clearLatest: () => void;
-  /** Bell should shake */
-  bellShake: boolean;
 }
 
+/** Legacy combined type for backward compatibility. */
+interface NotificationContextType extends NotificationState, NotificationDispatch {}
+
+// ─── Reducer ──────────────────────────────────────────────────────────────────
+
+type NotificationAction =
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_NOTIFICATIONS'; payload: { items: Notification[]; reset: boolean } }
+  | { type: 'APPEND_NOTIFICATIONS'; payload: Notification[] }
+  | { type: 'SET_HAS_MORE'; payload: boolean }
+  | { type: 'SET_UNREAD_COUNT'; payload: number }
+  | { type: 'INCREMENT_UNREAD' }
+  | { type: 'MARK_READ'; payload: string | number }
+  | { type: 'MARK_ALL_READ' }
+  | { type: 'DELETE_NOTIFICATION'; payload: string | number }
+  | { type: 'PREPEND_NOTIFICATION'; payload: Notification }
+  | { type: 'SET_LATEST'; payload: Notification | null }
+  | { type: 'SET_BELL_SHAKE'; payload: boolean }
+  | { type: 'RESET' };
+
+const defaultState: NotificationState = {
+  notifications: [],
+  unreadCount: 0,
+  hasMore: true,
+  isLoading: false,
+  latestNotification: null,
+  bellShake: false,
+};
+
+export function notificationReducer(state: NotificationState, action: NotificationAction): NotificationState {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload };
+    case 'SET_NOTIFICATIONS':
+      return {
+        ...state,
+        notifications: action.payload.reset
+          ? action.payload.items
+          : [...state.notifications, ...action.payload.items],
+        hasMore: action.payload.items.length === 20,
+      };
+    case 'APPEND_NOTIFICATIONS':
+      return {
+        ...state,
+        notifications: [...state.notifications, ...action.payload],
+        hasMore: action.payload.length === 20,
+      };
+    case 'SET_HAS_MORE':
+      return { ...state, hasMore: action.payload };
+    case 'SET_UNREAD_COUNT':
+      return { ...state, unreadCount: action.payload };
+    case 'INCREMENT_UNREAD':
+      return { ...state, unreadCount: state.unreadCount + 1 };
+    case 'MARK_READ': {
+      const notifications = state.notifications.map(n =>
+        n.id === action.payload ? { ...n, is_read: true, status: 'Read' as const } : n
+      );
+      return {
+        ...state,
+        notifications,
+        unreadCount: Math.max(0, state.unreadCount - (
+          state.notifications.find(n => n.id === action.payload && !n.is_read) ? 1 : 0
+        )),
+      };
+    }
+    case 'MARK_ALL_READ':
+      return {
+        ...state,
+        notifications: state.notifications.map(n => ({ ...n, is_read: true, status: 'Read' })),
+        unreadCount: 0,
+      };
+    case 'DELETE_NOTIFICATION': {
+      const target = state.notifications.find(n => n.id === action.payload);
+      const wasUnread = target && !target.is_read;
+      return {
+        ...state,
+        notifications: state.notifications.filter(n => n.id !== action.payload),
+        unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount,
+      };
+    }
+    case 'PREPEND_NOTIFICATION':
+      return {
+        ...state,
+        notifications: [action.payload, ...state.notifications],
+      };
+    case 'SET_LATEST':
+      return { ...state, latestNotification: action.payload };
+    case 'SET_BELL_SHAKE':
+      return { ...state, bellShake: action.payload };
+    case 'RESET':
+      return defaultState;
+    default:
+      return state;
+  }
+}
+
+// ─── Contexts ─────────────────────────────────────────────────────────────────
+
+const noopDispatch: NotificationDispatch = {
+  fetchNotifications: () => {},
+  loadMore: () => {},
+  markAsRead: () => {},
+  markAllAsRead: () => {},
+  deleteNotification: () => {},
+  clearLatest: () => {},
+};
+
+const NotificationValueContext = createContext<NotificationState>(defaultState);
+const NotificationDispatchContext = createContext<NotificationDispatch>(noopDispatch);
+
+// Legacy combined context for backward compatibility
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+
+// ─── Exported Pure Helpers ────────────────────────────────────────────────────
 
 /**
  * Authoritative unread count derived from a notification list.
@@ -45,77 +163,62 @@ export function recomputeUnread(list: Notification[]): number {
 
 /**
  * Pure unread-counter delta between two notification lists.
- *
- * Returns the signed change in unread count when transitioning from `prev` to
- * `next` (`next` unread total minus `prev` unread total). Computing the delta as
- * a pure function of the two lists lets callers derive the change *before* and
- * *outside* of any React state-updater callback, which keeps updates idempotent
- * under React StrictMode double-invocation. (Requirements 8.3, 8.4)
- *
- * Pure: depends only on its arguments and has no side effects.
  */
 export function unreadDelta(prev: Notification[], next: Notification[]): number {
   return recomputeUnread(next) - recomputeUnread(prev);
 }
 
+// ─── Provider ─────────────────────────────────────────────────────────────────
+
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useUser();
   const { isCheckingSession } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [latestNotification, setLatestNotification] = useState<Notification | null>(null);
-  const [bellShake, setBellShake] = useState(false);
+  const [state, dispatch] = useReducer(notificationReducer, defaultState);
+  const [page, setPage] = React.useState(1);
+
   /** Resilient WebSocket client (exponential backoff + jitter + HTTP polling fallback). */
   const wsClientRef = useRef<WebSocketClient | null>(null);
   const bellShakeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchNotifications = useCallback(async (reset = false) => {
-    if (!user || isLoading) return;
-    setIsLoading(true);
+    if (!user || state.isLoading) return;
+    dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const targetPage = reset ? 1 : page;
       const res = await api.get(`/notifications?page=${targetPage}&pageSize=20`);
-      // API returns { data: Notification[], pagination: {...} }
       const items: Notification[] = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
-      
+
+      dispatch({ type: 'SET_NOTIFICATIONS', payload: { items, reset } });
       if (reset) {
-        setNotifications(items);
         setPage(2);
       } else {
-        setNotifications(prev => [...prev, ...items]);
         setPage(prev => prev + 1);
       }
-      setHasMore(items.length === 20);
     } catch (err: any) {
       if (err.response?.status !== 401 && err.response?.status !== 403) {
         logger.error('Failed to fetch notifications:', err);
       }
     } finally {
-      setIsLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [user, page, isLoading]);
+  }, [user, page, state.isLoading]);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
     try {
       const res = await api.get('/notifications/unread-count');
-      setUnreadCount(res.data?.count || 0);
+      dispatch({ type: 'SET_UNREAD_COUNT', payload: res.data?.count || 0 });
     } catch { /* ignore */ }
   }, [user]);
 
   const loadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
+    if (state.hasMore && !state.isLoading) {
       fetchNotifications(false);
     }
-  }, [hasMore, isLoading, fetchNotifications]);
+  }, [state.hasMore, state.isLoading, fetchNotifications]);
 
   /**
    * Handle an incoming real-time notification from the WebSocket client.
-   * Maps the server payload onto the local Notification shape, prepends it,
-   * bumps the unread count, raises a toast, shakes the bell, and plays a sound.
    */
   const handleIncomingNotification = useCallback((payload: Notification) => {
     const newNotif: Notification = {
@@ -123,25 +226,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       is_read: false,
       status: 'Unread',
     };
-    setNotifications(prev => [newNotif, ...prev]);
-    setUnreadCount(prev => prev + 1);
-    setLatestNotification(newNotif);
-    setBellShake(true);
+    dispatch({ type: 'PREPEND_NOTIFICATION', payload: newNotif });
+    dispatch({ type: 'INCREMENT_UNREAD' });
+    dispatch({ type: 'SET_LATEST', payload: newNotif });
+    dispatch({ type: 'SET_BELL_SHAKE', payload: true });
     if (bellShakeTimeoutRef.current) clearTimeout(bellShakeTimeoutRef.current);
-    bellShakeTimeoutRef.current = setTimeout(() => setBellShake(false), 1000);
+    bellShakeTimeoutRef.current = setTimeout(() => dispatch({ type: 'SET_BELL_SHAKE', payload: false }), 1000);
     playNotificationSound();
   }, []);
 
   /**
    * Establish the real-time connection using the resilient WebSocketClient.
-   * A fresh short-lived ws-token is fetched per connection attempt via the
-   * client's async `getToken` (Requirement 7.1, 7.2) — no token is cached across
-   * attempts, so each reconnect uses a newly issued, non-expired token.
    */
   const connect = useCallback(async () => {
     if (!user) return;
 
-    // Tear down any existing client before opening a new connect cycle.
     if (wsClientRef.current) {
       wsClientRef.current.disconnect();
       wsClientRef.current = null;
@@ -156,7 +255,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       const client = createWebSocketClient({
         wsUrl,
-        // Fetch a FRESH short-lived ws-token on every connection attempt (no caching).
         getToken: async () => {
           try {
             const res = await api.get('/auth/ws-token');
@@ -188,9 +286,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [user, handleIncomingNotification]);
 
-  // Store callbacks in refs so the connection effect can re-run on auth
-  // user-state changes using current references without listing every callback
-  // as a dependency (fixes the stale-closure effect-dependency bug).
+  // Store callbacks in refs so the connection effect can re-run
   const connectRef = useRef(connect);
   const fetchNotificationsRef = useRef(fetchNotifications);
   const fetchUnreadCountRef = useRef(fetchUnreadCount);
@@ -217,70 +313,80 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (bellShakeTimeoutRef.current) clearTimeout(bellShakeTimeoutRef.current);
       };
     } else {
-      setNotifications([]);
-      setUnreadCount(0);
+      dispatch({ type: 'RESET' });
       setPage(1);
       if (wsClientRef.current) { wsClientRef.current.disconnect(); wsClientRef.current = null; }
     }
   }, [user, isCheckingSession]);
 
-  const markAsRead = async (id: string | number) => {
+  const markAsRead = useCallback(async (id: string | number) => {
     if (!user) return;
     try {
       await api.put(`/notifications/${id}/read`);
-      // Unread delta is derived from a pure projection of THIS operation (marking
-      // one item read). It depends only on whether the target was unread, so it is
-      // unaffected by concurrently-arriving notifications and stays StrictMode-safe
-      // (Req 8.1–8.4).
-      const projected = notifications.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' as const } : n);
-      const delta = unreadDelta(notifications, projected);
-      if (delta !== 0) setUnreadCount(c => Math.max(0, c + delta));
-      // Apply the read flag with a FUNCTIONAL updater that reads the LATEST state so
-      // a notification that arrives via WebSocket during the awaited request is
-      // retained rather than clobbered by a stale snapshot (Req 13.1, 13.3).
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true, status: 'Read' as const } : n));
+      dispatch({ type: 'MARK_READ', payload: id });
     } catch (err) { logger.error('Failed to mark notification as read:', err); }
-  };
+  }, [user]);
 
-  const markAllAsRead = async () => {
+  const markAllAsRead = useCallback(async () => {
     if (!user) return;
     try {
       await api.put('/notifications/mark-all-read');
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true, status: 'Read' })));
-      setUnreadCount(0);
+      dispatch({ type: 'MARK_ALL_READ' });
     } catch (err) { logger.error('Failed to mark all as read:', err); }
-  };
+  }, [user]);
 
-  const deleteNotification = async (id: string | number) => {
+  const deleteNotification = useCallback(async (id: string | number) => {
     if (!user) return;
     try {
       await api.delete(`/notifications/${id}`);
-      // Derive the unread delta from a pure projection of THIS delete operation,
-      // outside the state-updater path, so it is StrictMode-safe and idempotent
-      // (Req 8.3, 8.4).
-      const projected = notifications.filter(x => x.id !== id);
-      const delta = unreadDelta(notifications, projected);
-      if (delta !== 0) setUnreadCount(c => Math.max(0, c + delta));
-      // Apply the removal with a FUNCTIONAL updater that reads the LATEST state so a
-      // notification arriving via WebSocket during the awaited request is retained
-      // rather than clobbered by a stale snapshot (Req 13.2, 13.3).
-      setNotifications(prev => prev.filter(x => x.id !== id));
+      dispatch({ type: 'DELETE_NOTIFICATION', payload: id });
     } catch (err) { logger.error('Failed to dismiss notification:', err); }
-  };
+  }, [user]);
 
-  const clearLatest = () => setLatestNotification(null);
+  const clearLatest = useCallback(() => {
+    dispatch({ type: 'SET_LATEST', payload: null });
+  }, []);
+
+  // ── Dispatch object (stable reference: only changes when action callbacks change) ──
+  const dispatchActions = useMemo<NotificationDispatch>(() => ({
+    fetchNotifications,
+    loadMore,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearLatest,
+  }), [fetchNotifications, loadMore, markAsRead, markAllAsRead, deleteNotification, clearLatest]);
+
+  // Legacy combined value
+  const combined = useMemo<NotificationContextType>(() => ({
+    ...state,
+    ...dispatchActions,
+  }), [state, dispatchActions]);
 
   return (
-    <NotificationContext.Provider value={{
-      notifications, unreadCount, hasMore, isLoading,
-      fetchNotifications, loadMore, markAsRead, markAllAsRead, deleteNotification,
-      latestNotification, clearLatest, bellShake
-    }}>
-      {children}
+    <NotificationContext.Provider value={combined}>
+      <NotificationDispatchContext.Provider value={dispatchActions}>
+        <NotificationValueContext.Provider value={state}>
+          {children}
+        </NotificationValueContext.Provider>
+      </NotificationDispatchContext.Provider>
     </NotificationContext.Provider>
   );
 };
 
+// ─── Hooks ────────────────────────────────────────────────────────────────────
+
+/** Read-only notification state. Re-renders only when state values change. */
+export function useNotificationValue(): NotificationState {
+  return useContext(NotificationValueContext);
+}
+
+/** Notification dispatch actions. Stable reference — rarely causes re-renders. */
+export function useNotificationDispatch(): NotificationDispatch {
+  return useContext(NotificationDispatchContext);
+}
+
+/** Legacy hook — returns combined value + dispatch. Use useNotificationValue/useNotificationDispatch for selective subscriptions. */
 export const useNotificationContext = () => {
   const context = useContext(NotificationContext);
   if (!context) throw new Error('useNotificationContext must be used within NotificationProvider');

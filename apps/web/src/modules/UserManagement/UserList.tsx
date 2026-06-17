@@ -76,7 +76,7 @@ const UserList: React.FC<UserListProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
                 <Mail size={14} className="opacity-50 flex-shrink-0" />
-                <span className="text-[11px] font-bold truncate">{user.email}</span>
+                <span className="text-[11px] font-bold truncate">{user.email || '-'}</span>
               </div>
               <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
                 <Shield size={14} className="opacity-50 flex-shrink-0" />
@@ -84,7 +84,7 @@ const UserList: React.FC<UserListProps> = ({
               </div>
               <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
                 <Building size={14} className="opacity-50 flex-shrink-0" />
-                <span className="text-[11px] font-bold truncate">{user.department}</span>
+                <span className="text-[11px] font-bold truncate">{user.department || '-'}</span>
               </div>
             </div>
 

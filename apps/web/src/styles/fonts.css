@@ -1,0 +1,104 @@
+/**
+ * Self-hosted font declarations for Al-Saqi
+ *
+ * Fonts are subset by unicode-range so the browser downloads only the
+ * character set needed for the current content:
+ *   - Arabic users (primary): Arabic glyphs only
+ *   - Latin-only content: smaller Latin subset
+ *
+ * Generated with pyftsubset or glyphhanger from:
+ *   - Tajawal (Google Fonts) — weights 400, 700, 800
+ *   - Inter (Google Fonts) — weights 400, 700
+ *
+ * Requirements: 4.1 (self-host), 4.2 (unicode-range subsetting)
+ */
+
+/* ==========================================================================
+   Tajawal — Arabic subsets
+   Unicode ranges: Arabic (U+0600-06FF), Arabic Presentation Forms-A (U+FB50-FDFF),
+                   Arabic Presentation Forms-B (U+FE70-FEFF)
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/tajawal-arabic-400.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/tajawal-arabic-700.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/tajawal-arabic-800.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* ==========================================================================
+   Tajawal — Latin subsets
+   Unicode ranges: Basic Latin (U+0000-007F), Latin-1 Supplement (U+0080-00FF),
+                   Latin Extended-A (U+0100-024F)
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/tajawal-latin-400.woff2') format('woff2');
+  unicode-range: U+0000-007F, U+0080-00FF, U+0100-024F;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/tajawal-latin-700.woff2') format('woff2');
+  unicode-range: U+0000-007F, U+0080-00FF, U+0100-024F;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/tajawal-latin-800.woff2') format('woff2');
+  unicode-range: U+0000-007F, U+0080-00FF, U+0100-024F;
+}
+
+/* ==========================================================================
+   Inter — Latin fallback
+   Unicode ranges: Basic Latin (U+0000-007F), Latin-1 Supplement (U+0080-00FF),
+                   Latin Extended-A (U+0100-024F)
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-latin-400.woff2') format('woff2');
+  unicode-range: U+0000-007F, U+0080-00FF, U+0100-024F;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-700.woff2') format('woff2');
+  unicode-range: U+0000-007F, U+0080-00FF, U+0100-024F;
+}

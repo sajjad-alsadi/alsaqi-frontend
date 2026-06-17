@@ -6,6 +6,19 @@ import logger from '../utils/logger';
 import { clearAppStorage } from '../utils/clearAppStorage';
 import { markAuthenticated, markUnauthenticated } from '../utils/authGate';
 
+/** Value context — holds read-only state (token, session checking status). */
+interface AuthValueType {
+  token: string | null;
+  isCheckingSession: boolean;
+}
+
+/** Actions context — holds functions that mutate auth state. */
+interface AuthActionsType {
+  setToken: (token: string | null) => void;
+  logout: () => void;
+}
+
+/** Legacy combined type for backward compatibility. */
 interface AuthContextType {
   token: string | null;
   setToken: (token: string | null) => void;
@@ -13,6 +26,10 @@ interface AuthContextType {
   isCheckingSession: boolean;
 }
 
+const AuthValueContext = createContext<AuthValueType | undefined>(undefined);
+const AuthActionsContext = createContext<AuthActionsType | undefined>(undefined);
+
+// Legacy combined context (for backward compatibility during migration)
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -90,17 +107,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [setUser, queryClient]);
 
-  const value = useMemo(() => ({
+  const valueState = useMemo<AuthValueType>(() => ({
+    token, isCheckingSession
+  }), [token, isCheckingSession]);
+
+  const actions = useMemo<AuthActionsType>(() => ({
+    setToken, logout
+  }), [logout]);
+
+  // Legacy combined value for backward compat
+  const combined = useMemo<AuthContextType>(() => ({
     token, setToken, logout, isCheckingSession
   }), [token, logout, isCheckingSession]);
 
   return (
-    <AuthContext.Provider value={value}>
-      {children}
+    <AuthContext.Provider value={combined}>
+      <AuthValueContext.Provider value={valueState}>
+        <AuthActionsContext.Provider value={actions}>
+          {children}
+        </AuthActionsContext.Provider>
+      </AuthValueContext.Provider>
     </AuthContext.Provider>
   );
 };
 
+/** Read-only auth state (token, isCheckingSession). Does not re-render on action reference changes. */
+export const useAuthValue = (): AuthValueType => {
+  const context = useContext(AuthValueContext);
+  if (!context) throw new Error('useAuthValue must be used within AuthProvider');
+  return context;
+};
+
+/** Auth actions (setToken, logout). Does not re-render on value changes. */
+export const useAuthActions = (): AuthActionsType => {
+  const context = useContext(AuthActionsContext);
+  if (!context) throw new Error('useAuthActions must be used within AuthProvider');
+  return context;
+};
+
+/** Legacy hook — returns combined value + actions. Use useAuthValue/useAuthActions for selective subscriptions. */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within AuthProvider');

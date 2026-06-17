@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useUser } from '../context/UserContext';
@@ -24,9 +24,69 @@ import {
   X,
   PanelTopClose,
   PanelTop,
-  Settings2
+  Settings2,
 } from 'lucide-react';
 import { Language } from '../constants';
+import type { MenuItemResolved } from '../hooks/useNavigationItems';
+
+
+/**
+ * Memoized sidebar navigation item. Prevents re-rendering all nav items
+ * when only the active tab changes (only the previously-active and
+ * newly-active items re-render).
+ *
+ * **Validates: Requirement 3.7**
+ */
+interface SidebarNavItemProps {
+  item: MenuItemResolved;
+  isActive: boolean;
+  isCollapsed: boolean;
+  onNavigate: (path: string) => void;
+}
+
+const SidebarNavItem = memo<SidebarNavItemProps>(({ item, isActive, isCollapsed, onNavigate }) => (
+  <div className="relative group">
+    <button
+      onClick={() => onNavigate(item.path)}
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={isCollapsed ? item.label : undefined}
+      className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-2.5 rounded-xl transition-colors duration-150 relative active:scale-[0.98] ${
+        isActive 
+          ? 'text-white' 
+          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] hover:text-[var(--color-primary)] font-medium'
+      }`}
+    >
+      {/* Animated active background */}
+      {isActive && (
+        <motion.div
+          layoutId="sidebar-active-indicator"
+          className="absolute inset-0 bg-[var(--color-primary)] rounded-xl shadow-md shadow-[var(--color-primary)]/20"
+          transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+        />
+      )}
+      <item.icon size={18} className={`relative z-10 ${isActive ? 'text-white' : ''}`} />
+      {!isCollapsed && (
+        <span className="relative z-10 font-medium text-sm whitespace-nowrap overflow-hidden">
+          {item.label}
+        </span>
+      )}
+      {item.badge && (
+        <span className={`absolute ${isCollapsed ? '-top-1 -end-1' : 'end-3'} z-10 w-5 h-5 bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white`}>
+          {item.badge}
+        </span>
+      )}
+    </button>
+    
+    {/* Collapsed tooltip */}
+    {isCollapsed && (
+      <div className="absolute start-full ms-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[var(--color-text-main)] text-[var(--color-bg-main)] text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+        {item.label}
+      </div>
+    )}
+  </div>
+));
+
+SidebarNavItem.displayName = 'SidebarNavItem';
 
 
 interface LayoutProps {
@@ -57,6 +117,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Navigation items derived from ModuleRegistry with permission filtering and bilingual labels
   const menuItems = useNavigationItems();
 
+  // Derived active page label — memoized to avoid re-computing on every render
+  const activePageLabel = useMemo(() => {
+    return menuItems.find(m => m.id === activeTab)?.label || t('common.dashboard');
+  }, [menuItems, activeTab, t]);
+
   // Group menu items by section
   const groupedItems = useMemo(() => {
     const groups: Record<NavigationSection, typeof menuItems> = {
@@ -70,6 +135,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
     return groups;
   }, [menuItems]);
+
+  // Stable callback for sidebar navigation — passed to memoized SidebarNavItem
+  const handleNavItemClick = useCallback((path: string) => {
+    navigate(path);
+    setIsMobileMenuOpen(false);
+  }, [navigate]);
 
   // Close preferences popover when clicking outside
   useEffect(() => {
@@ -188,48 +259,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 
                 <div className="space-y-1">
                   {sectionItems.map((item) => (
-                    <div key={item.id} className="relative group">
-                      <button
-                        onClick={() => {
-                          navigate(item.path);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        aria-current={activeTab === item.id ? 'page' : undefined}
-                        aria-label={isCollapsed ? item.label : undefined}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-2.5 rounded-xl transition-colors duration-150 relative active:scale-[0.98] ${
-                          activeTab === item.id 
-                            ? 'text-white' 
-                            : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-main)] hover:text-[var(--color-primary)] font-medium'
-                        }`}
-                      >
-                        {/* Animated active background */}
-                        {activeTab === item.id && (
-                          <motion.div
-                            layoutId="sidebar-active-indicator"
-                            className="absolute inset-0 bg-[var(--color-primary)] rounded-xl shadow-md shadow-[var(--color-primary)]/20"
-                            transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                          />
-                        )}
-                        <item.icon size={18} className={`relative z-10 ${activeTab === item.id ? 'text-white' : ''}`} />
-                        {!isCollapsed && (
-                          <span className="relative z-10 font-medium text-sm whitespace-nowrap overflow-hidden">
-                            {item.label}
-                          </span>
-                        )}
-                        {item.badge && (
-                          <span className={`absolute ${isCollapsed ? '-top-1 -end-1' : 'end-3'} z-10 w-5 h-5 bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                      
-                      {/* Collapsed tooltip */}
-                      {isCollapsed && (
-                        <div className="absolute start-full ms-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[var(--color-text-main)] text-[var(--color-bg-main)] text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
-                          {item.label}
-                        </div>
-                      )}
-                    </div>
+                    <SidebarNavItem
+                      key={item.id}
+                      item={item}
+                      isActive={activeTab === item.id}
+                      isCollapsed={isCollapsed}
+                      onNavigate={handleNavItemClick}
+                    />
                   ))}
                 </div>
               </div>
@@ -312,7 +348,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
                 <h2 className="text-lg sm:text-2xl font-bold text-[var(--color-text-main)] tracking-tight">
-                  {menuItems.find(m => m.id === activeTab)?.label || t('common.dashboard')}
+                  {activePageLabel}
                 </h2>
               </div>
 
@@ -428,7 +464,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Menu size={20} />
               </button>
               <h2 className="text-sm font-bold text-[var(--color-text-main)] tracking-tight">
-                {menuItems.find(m => m.id === activeTab)?.label || t('common.dashboard')}
+                {activePageLabel}
               </h2>
             </div>
             <button

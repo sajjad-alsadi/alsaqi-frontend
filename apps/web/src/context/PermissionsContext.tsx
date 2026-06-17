@@ -45,6 +45,22 @@ export interface PermissionsContextValue {
   refetch(): Promise<void>;
 }
 
+/** Value context — holds read-only permission state. */
+interface PermissionsValueType {
+  permissions: UserPermissionSet | null;
+  isLoading: boolean;
+  isFallback: boolean;
+}
+
+/** Actions context — holds functions that mutate permission state. */
+interface PermissionsActionsType {
+  refetch(): Promise<void>;
+}
+
+const PermissionsValueContext = createContext<PermissionsValueType | undefined>(undefined);
+const PermissionsActionsContext = createContext<PermissionsActionsType | undefined>(undefined);
+const PermissionsContext = createContext<PermissionsContextValue | undefined>(undefined);
+
 /** Gets the localStorage cache key for a given user ID. */
 function getCacheKey(userId: string): string {
   return `${CACHE_KEY_PREFIX}${userId}`;
@@ -192,8 +208,6 @@ async function fetchResolvedPermissions(
   }
 }
 
-const PermissionsContext = createContext<PermissionsContextValue | undefined>(undefined);
-
 /**
  * Single source of truth for the current user's permissions (Req 11).
  *
@@ -237,21 +251,49 @@ export const PermissionsProvider: React.FC<{ children: ReactNode }> = ({ childre
     await queryRefetch();
   }, [userId, queryRefetch]);
 
-  const value = useMemo<PermissionsContextValue>(() => {
+  const valueState = useMemo<PermissionsValueType>(() => {
     const resolved = userId ? (query.data ?? null) : null;
     return {
       permissions: resolved?.permissions ?? null,
       isFallback: resolved?.isFallback ?? false,
       isLoading: !!userId && query.isLoading,
-      refetch,
     };
-  }, [userId, query.data, query.isLoading, refetch]);
+  }, [userId, query.data, query.isLoading]);
 
-  return <PermissionsContext.Provider value={value}>{children}</PermissionsContext.Provider>;
+  const actions = useMemo<PermissionsActionsType>(() => ({ refetch }), [refetch]);
+
+  const combined = useMemo<PermissionsContextValue>(() => ({
+    ...valueState,
+    refetch,
+  }), [valueState, refetch]);
+
+  return (
+    <PermissionsContext.Provider value={combined}>
+      <PermissionsValueContext.Provider value={valueState}>
+        <PermissionsActionsContext.Provider value={actions}>
+          {children}
+        </PermissionsActionsContext.Provider>
+      </PermissionsValueContext.Provider>
+    </PermissionsContext.Provider>
+  );
+};
+
+/** Read-only permission state. Does not re-render on action reference changes. */
+export const usePermissionsValue = (): PermissionsValueType => {
+  const context = useContext(PermissionsValueContext);
+  if (!context) throw new Error('usePermissionsValue must be used within PermissionsProvider');
+  return context;
+};
+
+/** Permission actions (refetch). Does not re-render on permission data changes. */
+export const usePermissionsActions = (): PermissionsActionsType => {
+  const context = useContext(PermissionsActionsContext);
+  if (!context) throw new Error('usePermissionsActions must be used within PermissionsProvider');
+  return context;
 };
 
 /**
- * Internal accessor for the shared permission state. `usePermissions` is the
+ * Legacy accessor for the shared permission state. `usePermissions` is the
  * public, ergonomic selector built on top of this.
  */
 export const usePermissionsContext = (): PermissionsContextValue => {

@@ -1,18 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import HttpBackend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-import ar from './locales/ar.json';
-import en from './locales/en.json';
-
 i18n
+  .use(HttpBackend)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      ar: { translation: ar },
-      en: { translation: en }
-    },
     // Arabic-first decision: this is an Arabic-primary application, so when no
     // persisted/detected language is available we default to Arabic (RTL). The
     // initial language prefers the persisted `i18nextLng` value, otherwise 'ar'.
@@ -21,7 +16,12 @@ i18n
     // `fallbackLng` remains 'ar' so any unsupported/undetected case lands on Arabic.
     lng: localStorage.getItem('i18nextLng') || 'ar',
     fallbackLng: 'ar',
-    supportedLngs: ['en', 'ar'],
+    supportedLngs: ['ar', 'en'],
+    backend: {
+      // Dynamic locale loading: only the active locale file is fetched on init.
+      // Translation files are served as static assets from public/locales/.
+      loadPath: '/locales/{{lng}}.json',
+    },
     interpolation: {
       escapeValue: false,
     },
@@ -34,7 +34,7 @@ i18n
       const currentLng = i18n.language || 'ar';
       const otherLng = currentLng === 'ar' ? 'en' : 'ar';
       const otherResources = i18n.getResourceBundle(otherLng, 'translation');
-      
+
       // Try to resolve the key from the other language
       const keys = key.split('.');
       let value: unknown = otherResources;
@@ -46,11 +46,11 @@ i18n
           break;
         }
       }
-      
+
       if (typeof value === 'string' && value.length > 0) {
         return `⚠️ ${value}`;
       }
-      
+
       // Show key ID with visual indicator if no translation found in either language
       return `⚠️ [${key}]`;
     },

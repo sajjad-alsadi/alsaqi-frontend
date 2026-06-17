@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Building, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -82,9 +82,10 @@ const DepartmentManagement: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredDepartments = departments.filter(dept => 
+  // Memoize filtered list to avoid re-computation on unrelated state changes
+  const filteredDepartments = useMemo(() => departments.filter(dept => 
     (dept.name?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-  );
+  ), [departments, searchTerm]);
 
   return (
     <div className="space-y-10">

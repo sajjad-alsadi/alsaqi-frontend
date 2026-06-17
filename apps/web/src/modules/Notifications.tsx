@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../context/PreferencesContext';
 import { useNotificationContext } from '../context/NotificationContext';
@@ -50,7 +50,8 @@ const Notifications: React.FC = () => {
 
   const isUnread = (n: any) => !n.is_read && n.status !== 'Read';
 
-  const filteredNotifications = (Array.isArray(notifications) ? notifications : []).filter(n => {
+  // Memoize filtered notifications to prevent re-computation on unrelated re-renders
+  const filteredNotifications = useMemo(() => (Array.isArray(notifications) ? notifications : []).filter(n => {
     const matchesFilter = filter === 'all' ? true : 
                           filter === 'unread' ? isUnread(n) : 
                           !isUnread(n);
@@ -58,7 +59,7 @@ const Notifications: React.FC = () => {
                           (n.related_module?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                           (n.title?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
-  });
+  }), [notifications, filter, searchTerm]);
 
   const getIcon = (type: string) => {
     switch (type) {

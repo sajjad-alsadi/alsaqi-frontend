@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useId, memo } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { AlertCircle } from 'lucide-react';
@@ -16,7 +16,14 @@ export interface FormFieldProps {
   hint?: string | undefined;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
+/**
+ * Memoized form field wrapper that skips re-rendering when props are unchanged.
+ * This prevents unnecessary reconciliation in forms with many fields where only
+ * one field's error/value changes at a time.
+ *
+ * **Validates: Requirement 3.7**
+ */
+export const FormField: React.FC<FormFieldProps> = memo(({
   label,
   error,
   required,
@@ -65,4 +72,6 @@ export const FormField: React.FC<FormFieldProps> = ({
       )}
     </div>
   );
-};
+});
+
+FormField.displayName = 'FormField';

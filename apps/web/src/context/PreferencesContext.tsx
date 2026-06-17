@@ -3,6 +3,21 @@ import api from '../api/httpClient';
 import { Language } from '../types';
 import { useTranslation } from 'react-i18next';
 
+/** Value context — holds read-only preference state. */
+interface PreferencesValueType {
+  language: Language;
+  theme: 'light' | 'dark';
+  dashboardLayout: 'standard' | 'compact' | 'detailed';
+}
+
+/** Actions context — holds functions that mutate preferences. */
+interface PreferencesActionsType {
+  setLanguage: (lang: Language) => void;
+  setTheme: (theme: 'light' | 'dark') => void;
+  setDashboardLayout: (layout: 'standard' | 'compact' | 'detailed') => void;
+}
+
+/** Legacy combined type for backward compatibility. */
 interface PreferencesContextType {
   language: Language;
   theme: 'light' | 'dark';
@@ -12,6 +27,8 @@ interface PreferencesContextType {
   setDashboardLayout: (layout: 'standard' | 'compact' | 'detailed') => void;
 }
 
+const PreferencesValueContext = createContext<PreferencesValueType | undefined>(undefined);
+const PreferencesActionsContext = createContext<PreferencesActionsType | undefined>(undefined);
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
 
 export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -106,17 +123,44 @@ export const PreferencesProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   }, []);
 
-  const value = useMemo(() => ({
+  const valueState = useMemo<PreferencesValueType>(() => ({
+    language, theme, dashboardLayout
+  }), [language, theme, dashboardLayout]);
+
+  const actions = useMemo<PreferencesActionsType>(() => ({
+    setLanguage, setTheme, setDashboardLayout
+  }), [setLanguage, setTheme, setDashboardLayout]);
+
+  const combined = useMemo<PreferencesContextType>(() => ({
     language, theme, dashboardLayout, setLanguage, setTheme, setDashboardLayout
   }), [language, theme, dashboardLayout, setLanguage, setTheme, setDashboardLayout]);
 
   return (
-    <PreferencesContext.Provider value={value}>
-      {children}
+    <PreferencesContext.Provider value={combined}>
+      <PreferencesValueContext.Provider value={valueState}>
+        <PreferencesActionsContext.Provider value={actions}>
+          {children}
+        </PreferencesActionsContext.Provider>
+      </PreferencesValueContext.Provider>
     </PreferencesContext.Provider>
   );
 };
 
+/** Read-only preferences state. Does not re-render on action reference changes. */
+export const usePreferencesValue = (): PreferencesValueType => {
+  const context = useContext(PreferencesValueContext);
+  if (!context) throw new Error('usePreferencesValue must be used within PreferencesProvider');
+  return context;
+};
+
+/** Preferences actions. Does not re-render on preference value changes. */
+export const usePreferencesActions = (): PreferencesActionsType => {
+  const context = useContext(PreferencesActionsContext);
+  if (!context) throw new Error('usePreferencesActions must be used within PreferencesProvider');
+  return context;
+};
+
+/** Legacy hook — returns combined value + actions. Use usePreferencesValue/usePreferencesActions for selective subscriptions. */
 export const usePreferences = () => {
   const context = useContext(PreferencesContext);
   if (!context) throw new Error('usePreferences must be used within PreferencesProvider');

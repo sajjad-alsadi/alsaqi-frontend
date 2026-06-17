@@ -1,0 +1,18 @@
+/* PLACEHOLDER: Tajawal Arabic Regular (400) - WOFF2 subset
+ *
+ * In production, generate this file using:
+ *   pyftsubset Tajawal-Regular.ttf \
+ *     --output-file=tajawal-arabic-400.woff2 \
+ *     --flavor=woff2 \
+ *     --unicodes="U+0600-06FF,U+FB50-FDFF,U+FE70-FEFF"
+ *
+ * Or using glyphhanger:
+ *   glyphhanger --subset=Tajawal-Regular.ttf \
+ *     --formats=woff2 \
+ *     --UNICODES="U+0600-06FF,U+FB50-FDFF,U+FE70-FEFF"
+ *
+ * Unicode ranges covered:
+ *   - Arabic (U+0600-06FF)
+ *   - Arabic Presentation Forms-A (U+FB50-FDFF)
+ *   - Arabic Presentation Forms-B (U+FE70-FEFF)
+ */

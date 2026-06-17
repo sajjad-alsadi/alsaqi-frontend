@@ -1,41 +1,26 @@
 /**
- * Property-based tests for the Web Vitals Reporter retry buffer.
+ * Property-based tests for the Web Vitals Reporter beacon-based reporting.
  *
- * Feature: web-production-readiness-remediation, Property 7: Web Vitals buffer is
- * capped and retains the most recent metrics
+ * Property: All flushed metrics are transmitted without data loss
+ *   For any sequence of metrics buffered in webVitalsMonitor, when the reporter
+ *   flushes, ALL metrics are included in the sendBeacon/fetch payload. No metrics
+ *   are silently dropped during the send process (when authenticated).
+ *   **Validates: Requirements 6.6**
  *
- * Property 7: Web Vitals buffer is capped and retains the most recent metrics
- *   For any sequence of captured metrics reported while the endpoint is failing,
- *   the retry buffer never exceeds MAX_BUFFER_SIZE (50) entries and retains the
- *   most recent metrics up to that cap.
- *   **Validates: Requirements 17.3**
+ * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fc from 'fast-check';
-import { WebVitalsReporter } from '../webVitalsReporter';
+import { WebVitalsReporter, sendMetrics } from '../webVitalsReporter';
 import {
   webVitalsMonitor,
-  type WebVitalMetric,
-  type MetricCallback,
+  type MetricReport,
   type MetricName,
   type MetricRating,
 } from '../webVitalsMonitor';
-
-/** Must mirror MAX_BUFFER_SIZE in webVitalsReporter.ts */
-const MAX_BUFFER_SIZE = 50;
+import { markAuthenticated, markUnauthenticated } from '../authGate';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * A fetch implementation that always rejects, simulating a failing endpoint.
- */
-const failingFetch = (() =>
-  Promise.reject(new Error('endpoint unavailable'))) as unknown as typeof fetch;
-
-/**
- * Flush pending microtasks (lets the rejected fetch's .catch run and re-buffer).
- */
-const flushAsync = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 
 const arbMetricName: fc.Arbitrary<MetricName> = fc.constantFrom(
   'LCP',
@@ -51,92 +36,135 @@ const arbMetricRating: fc.Arbitrary<MetricRating> = fc.constantFrom(
   'poor',
 );
 
-/**
- * Arbitrary for a single Web Vital metric. The `value` is overwritten with a
- * unique sequential index before feeding so recency can be asserted unambiguously.
- */
-const arbMetric: fc.Arbitrary<WebVitalMetric> = fc.record({
-  name: arbMetricName,
+const arbMetricReport: fc.Arbitrary<MetricReport> = fc.record({
+  name: arbMetricName as fc.Arbitrary<string>,
   value: fc.double({ min: 0, max: 10_000, noNaN: true }),
   rating: arbMetricRating,
-  route: fc.constantFrom('/', '/dashboard', '/findings', '/audit'),
-  timestamp: fc.constant('2024-01-01T00:00:00.000Z'),
+  delta: fc.double({ min: 0, max: 5000, noNaN: true }),
+  id: fc.string({ minLength: 3, maxLength: 10 }),
+  navigationType: fc.constantFrom('navigate', 'reload', 'back-forward', 'prerender'),
 });
 
-describe('Property 7: Web Vitals buffer is capped and retains the most recent metrics', () => {
-  const MAX_IDLE_TIME = 50;
-
+describe('Property: Web Vitals reporter transmits all flushed metrics without data loss', () => {
   beforeEach(() => {
-    // Make scheduleIdle run synchronously so flush() invokes sendMetrics inline.
-    (globalThis as unknown as { requestIdleCallback: unknown }).requestIdleCallback = (
-      cb: (deadline: { timeRemaining: () => number; didTimeout: boolean }) => void,
-    ) => {
-      cb({ timeRemaining: () => MAX_IDLE_TIME, didTimeout: false });
-      return 0;
-    };
+    markAuthenticated();
+    webVitalsMonitor.destroy();
   });
 
   afterEach(() => {
-    delete (globalThis as unknown as { requestIdleCallback?: unknown }).requestIdleCallback;
+    markUnauthenticated();
+    webVitalsMonitor.destroy();
     vi.restoreAllMocks();
   });
 
-  it('buffer never exceeds 50 and retains the most-recent metrics under a failing endpoint', async () => {
-    await fc.assert(
-      fc.asyncProperty(
-        // Generate sequences that may exceed the cap (up to 120 metrics).
-        fc.array(arbMetric, { minLength: 0, maxLength: 120 }),
-        async (rawMetrics) => {
-          // Tag each metric with a unique, monotonically increasing value so the
-          // "most recent" tail can be identified deterministically.
-          const metrics: WebVitalMetric[] = rawMetrics.map((m, i) => ({ ...m, value: i }));
+  it('sendMetrics includes all provided metrics in the beacon payload', () => {
+    fc.assert(
+      fc.property(
+        fc.array(arbMetricReport, { minLength: 1, maxLength: 100 }),
+        (metrics) => {
+          const beaconFn = vi.fn().mockReturnValue(true);
 
-          // Capture the reporter's metric callback instead of relying on the real
-          // monitor's PerformanceObserver plumbing.
-          let captured: MetricCallback | null = null;
-          const spy = vi
-            .spyOn(webVitalsMonitor, 'onMetric')
-            .mockImplementation((cb: MetricCallback) => {
-              captured = cb;
-              return () => {};
-            });
+          sendMetrics(metrics, '/api/metrics/web-vitals', beaconFn, undefined);
+
+          expect(beaconFn).toHaveBeenCalledOnce();
+
+          const payload = JSON.parse(beaconFn.mock.calls[0][1]);
+          // All metrics are present in the payload without loss
+          expect(payload.metrics).toHaveLength(metrics.length);
+          expect(payload.metrics).toEqual(metrics);
+          // Timestamp is included
+          expect(typeof payload.timestamp).toBe('number');
+
+          beaconFn.mockClear();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+
+  it('sendMetrics falls back to fetch with keepalive when sendBeacon is null', () => {
+    fc.assert(
+      fc.property(
+        fc.array(arbMetricReport, { minLength: 1, maxLength: 50 }),
+        (metrics) => {
+          const fetchFn = vi.fn().mockResolvedValue({ ok: true });
+
+          sendMetrics(metrics, '/api/metrics/web-vitals', null, fetchFn);
+
+          expect(fetchFn).toHaveBeenCalledOnce();
+
+          const callArgs = fetchFn.mock.calls[0];
+          expect(callArgs[0]).toBe('/api/metrics/web-vitals');
+          expect(callArgs[1].method).toBe('POST');
+          expect(callArgs[1].keepalive).toBe(true);
+
+          const payload = JSON.parse(callArgs[1].body);
+          expect(payload.metrics).toHaveLength(metrics.length);
+          expect(payload.metrics).toEqual(metrics);
+
+          fetchFn.mockClear();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+
+  it('sendMetrics does not transmit when unauthenticated (for any metrics)', () => {
+    markUnauthenticated();
+
+    fc.assert(
+      fc.property(
+        fc.array(arbMetricReport, { minLength: 1, maxLength: 50 }),
+        (metrics) => {
+          const beaconFn = vi.fn().mockReturnValue(true);
+          const fetchFn = vi.fn().mockResolvedValue({ ok: true });
+
+          sendMetrics(metrics, '/api/metrics/web-vitals', beaconFn, fetchFn);
+
+          expect(beaconFn).not.toHaveBeenCalled();
+          expect(fetchFn).not.toHaveBeenCalled();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+
+  it('reporter flushes all buffered monitor metrics on interval', () => {
+    fc.assert(
+      fc.property(
+        fc.array(arbMetricReport, { minLength: 0, maxLength: 80 }),
+        (metrics) => {
+          const beaconFn = vi.fn().mockReturnValue(true);
+
+          // Mock the monitor's flush to return our generated metrics
+          const flushSpy = vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue(metrics);
 
           const reporter = new WebVitalsReporter({
             endpoint: '/api/metrics/web-vitals',
-            intervalMs: 1_000_000, // large enough that the periodic timer never fires mid-test
-            fetchFn: failingFetch,
+            intervalMs: 10_000,
+            sendBeaconFn: beaconFn,
           });
 
-          try {
-            reporter.start();
-            expect(captured).not.toBeNull();
+          reporter.start();
+          // Manually trigger flush (simulates what the interval does)
+          reporter.flush();
 
-            // Emit the generated sequence of metrics through the captured callback.
-            for (const metric of metrics) {
-              captured!(metric);
-            }
-
-            // Attempt to report; the failing endpoint forces everything into the buffer.
-            reporter.flush();
-            await flushAsync();
-
-            const expectedSize = Math.min(metrics.length, MAX_BUFFER_SIZE);
-            const snapshot = reporter.getBufferSnapshot();
-
-            // Buffer is capped at MAX_BUFFER_SIZE.
-            expect(reporter.getBufferSize()).toBe(expectedSize);
-            expect(reporter.getBufferSize()).toBeLessThanOrEqual(MAX_BUFFER_SIZE);
-
-            // Buffer retains the MOST RECENT metrics (the tail of the sequence).
-            const expectedTail = metrics.slice(metrics.length - expectedSize);
-            expect(snapshot.map((b) => b.metric)).toEqual(expectedTail);
-          } finally {
-            reporter.destroy();
-            spy.mockRestore();
+          if (metrics.length === 0) {
+            // No metrics → no beacon call
+            expect(beaconFn).not.toHaveBeenCalled();
+          } else {
+            expect(beaconFn).toHaveBeenCalledOnce();
+            const payload = JSON.parse(beaconFn.mock.calls[0][1]);
+            expect(payload.metrics).toHaveLength(metrics.length);
+            expect(payload.metrics).toEqual(metrics);
           }
+
+          reporter.destroy();
+          flushSpy.mockRestore();
+          beaconFn.mockClear();
         },
       ),
-      { numRuns: 120 },
+      { numRuns: 100 },
     );
   });
 });

@@ -1,0 +1,13 @@
+/* PLACEHOLDER: Inter Latin Bold (700) - WOFF2 subset
+ *
+ * In production, generate this file using:
+ *   pyftsubset Inter-Bold.ttf \
+ *     --output-file=inter-latin-700.woff2 \
+ *     --flavor=woff2 \
+ *     --unicodes="U+0000-007F,U+0080-00FF,U+0100-024F"
+ *
+ * Unicode ranges covered:
+ *   - Basic Latin (U+0000-007F)
+ *   - Latin-1 Supplement (U+0080-00FF)
+ *   - Latin Extended-A (U+0100-024F)
+ */

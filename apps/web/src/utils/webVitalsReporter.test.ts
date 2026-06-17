@@ -2,11 +2,13 @@
  * Unit tests for webVitalsReporter.
  *
  * Validates:
- * - Async reporting without blocking main thread (>50ms)
- * - Retry buffer retains up to 50 entries on failure
- * - Errors are never surfaced to the user
+ * - Beacon-based reporting via navigator.sendBeacon
+ * - Fallback to fetch with keepalive when sendBeacon unavailable
+ * - Flush on visibilitychange (hidden)
+ * - Batching every 10 seconds via webVitalsMonitor.flush()
+ * - Auth gate prevents sending when unauthenticated
  *
- * Requirements: 7.4, 7.5
+ * Requirements: 6.6
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -15,55 +17,228 @@ import {
   initWebVitalsReporter,
   destroyWebVitalsReporter,
   getWebVitalsReporter,
+  sendMetrics,
 } from './webVitalsReporter';
-import { webVitalsMonitor, type WebVitalMetric } from './webVitalsMonitor';
+import { webVitalsMonitor, type MetricReport } from './webVitalsMonitor';
+import { markAuthenticated, markUnauthenticated } from './authGate';
 
-// Helper to create a mock metric
-function createMetric(overrides?: Partial<WebVitalMetric>): WebVitalMetric {
+// Helper to create a mock MetricReport
+function createMetricReport(overrides?: Partial<MetricReport>): MetricReport {
   return {
     name: 'LCP',
     value: 2000,
     rating: 'good',
-    route: '/dashboard',
-    timestamp: '2024-01-01T00:00:00.000Z',
+    delta: 2000,
+    id: 'v1-123',
+    navigationType: 'navigate',
     ...overrides,
   };
 }
 
 describe('WebVitalsReporter', () => {
-  let fetchMock: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.useFakeTimers();
-    fetchMock = vi.fn().mockResolvedValue({ ok: true });
     destroyWebVitalsReporter();
+    markAuthenticated();
+    webVitalsMonitor.destroy();
   });
 
   afterEach(() => {
     destroyWebVitalsReporter();
+    markUnauthenticated();
+    webVitalsMonitor.destroy();
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
-  describe('initialization', () => {
-    it('should create a reporter instance with start()', () => {
+  describe('sendMetrics function', () => {
+    it('should use sendBeacon when available', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
+      const metrics = [createMetricReport()];
+
+      sendMetrics(metrics, '/api/metrics/web-vitals', beaconFn, undefined);
+
+      expect(beaconFn).toHaveBeenCalledOnce();
+      expect(beaconFn).toHaveBeenCalledWith(
+        '/api/metrics/web-vitals',
+        expect.stringContaining('"metrics"'),
+      );
+    });
+
+    it('should include timestamp in payload', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
+      const metrics = [createMetricReport()];
+
+      sendMetrics(metrics, '/api/metrics/web-vitals', beaconFn, undefined);
+
+      const payload = JSON.parse(beaconFn.mock.calls[0][1]);
+      expect(payload).toHaveProperty('timestamp');
+      expect(typeof payload.timestamp).toBe('number');
+      expect(payload.metrics).toEqual(metrics);
+    });
+
+    it('should fall back to fetch with keepalive when sendBeacon is null', () => {
+      const fetchFn = vi.fn().mockResolvedValue({ ok: true });
+      const metrics = [createMetricReport()];
+
+      sendMetrics(metrics, '/api/metrics/web-vitals', null, fetchFn);
+
+      expect(fetchFn).toHaveBeenCalledOnce();
+      expect(fetchFn).toHaveBeenCalledWith('/api/metrics/web-vitals', {
+        method: 'POST',
+        body: expect.stringContaining('"metrics"'),
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+      });
+    });
+
+    it('should not send metrics when user is unauthenticated', () => {
+      markUnauthenticated();
+      const beaconFn = vi.fn().mockReturnValue(true);
+      const metrics = [createMetricReport()];
+
+      sendMetrics(metrics, '/api/metrics/web-vitals', beaconFn, undefined);
+
+      expect(beaconFn).not.toHaveBeenCalled();
+    });
+
+    it('should silently swallow fetch errors', async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error('Network error'));
+      const metrics = [createMetricReport()];
+
+      // Should not throw
+      expect(() =>
+        sendMetrics(metrics, '/api/metrics/web-vitals', null, fetchFn),
+      ).not.toThrow();
+    });
+  });
+
+  describe('periodic batching', () => {
+    it('should flush and send metrics every batch interval', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
       const reporter = new WebVitalsReporter({
         endpoint: '/api/metrics/web-vitals',
-        fetchFn: fetchMock,
+        intervalMs: 10_000,
+        sendBeaconFn: beaconFn,
       });
+
+      // Seed the monitor buffer with metrics
+      webVitalsMonitor.init();
+      // Manually push to the buffer via the flush mechanism
+      // We'll use the internal approach: init the monitor then push a report
+      const metric = createMetricReport({ name: 'FCP', value: 1200 });
+      // Access the monitor's buffer via its flush — but first we need to push data in
+      // Since we can't trigger real PerformanceObserver, we'll directly test via flush
+      // by spying on webVitalsMonitor.flush
+
+      const flushSpy = vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([metric]);
+
       reporter.start();
-      expect(reporter.getBufferSize()).toBe(0);
+
+      // Advance timer to trigger the interval
+      vi.advanceTimersByTime(10_000);
+
+      expect(flushSpy).toHaveBeenCalled();
+      expect(beaconFn).toHaveBeenCalledOnce();
+
       reporter.destroy();
     });
 
-    it('should only start once even if start() called multiple times', () => {
+    it('should not send when flush returns empty array', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
       const reporter = new WebVitalsReporter({
         endpoint: '/api/metrics/web-vitals',
-        fetchFn: fetchMock,
+        intervalMs: 10_000,
+        sendBeaconFn: beaconFn,
       });
+
+      vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([]);
+
       reporter.start();
-      reporter.start(); // no-op
-      expect(reporter.getBufferSize()).toBe(0);
+      vi.advanceTimersByTime(10_000);
+
+      expect(beaconFn).not.toHaveBeenCalled();
+
+      reporter.destroy();
+    });
+
+    it('should use default 10-second interval', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
+      const reporter = new WebVitalsReporter({
+        sendBeaconFn: beaconFn,
+      });
+
+      const metric = createMetricReport();
+      vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([metric]);
+
+      reporter.start();
+
+      // Should not fire at 9 seconds
+      vi.advanceTimersByTime(9_000);
+      expect(beaconFn).not.toHaveBeenCalled();
+
+      // Should fire at 10 seconds
+      vi.advanceTimersByTime(1_000);
+      expect(beaconFn).toHaveBeenCalledOnce();
+
+      reporter.destroy();
+    });
+  });
+
+  describe('visibilitychange flush', () => {
+    it('should flush metrics when page becomes hidden', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
+      const reporter = new WebVitalsReporter({
+        endpoint: '/api/metrics/web-vitals',
+        sendBeaconFn: beaconFn,
+      });
+
+      const metric = createMetricReport({ name: 'CLS', value: 0.05 });
+      vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([metric]);
+
+      reporter.start();
+
+      // Simulate visibilitychange to hidden
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'hidden',
+        writable: true,
+        configurable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+
+      expect(beaconFn).toHaveBeenCalledOnce();
+
+      // Restore
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        writable: true,
+        configurable: true,
+      });
+
+      reporter.destroy();
+    });
+
+    it('should not flush when page becomes visible', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
+      const reporter = new WebVitalsReporter({
+        endpoint: '/api/metrics/web-vitals',
+        sendBeaconFn: beaconFn,
+      });
+
+      vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([createMetricReport()]);
+
+      reporter.start();
+
+      // Simulate visibilitychange to visible (should NOT trigger flush)
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        writable: true,
+        configurable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+
+      expect(beaconFn).not.toHaveBeenCalled();
+
       reporter.destroy();
     });
   });
@@ -72,244 +247,107 @@ describe('WebVitalsReporter', () => {
     it('initWebVitalsReporter creates a singleton', () => {
       const reporter = initWebVitalsReporter({
         endpoint: '/api/metrics',
-        fetchFn: fetchMock,
+        sendBeaconFn: vi.fn().mockReturnValue(true),
       });
       expect(reporter).toBeDefined();
       expect(getWebVitalsReporter()).toBe(reporter);
     });
 
     it('initWebVitalsReporter returns same instance on repeated calls', () => {
-      const r1 = initWebVitalsReporter({ endpoint: '/a', fetchFn: fetchMock });
-      const r2 = initWebVitalsReporter({ endpoint: '/b', fetchFn: fetchMock });
+      const r1 = initWebVitalsReporter({ endpoint: '/a' });
+      const r2 = initWebVitalsReporter({ endpoint: '/b' });
       expect(r1).toBe(r2);
     });
 
     it('destroyWebVitalsReporter clears the singleton', () => {
-      initWebVitalsReporter({ endpoint: '/api', fetchFn: fetchMock });
+      initWebVitalsReporter({ endpoint: '/api' });
       destroyWebVitalsReporter();
       expect(getWebVitalsReporter()).toBeNull();
     });
   });
 
-  describe('metric collection from monitor', () => {
-    it('should collect metrics emitted by webVitalsMonitor', () => {
+  describe('start and stop', () => {
+    it('should only start once even if start() called multiple times', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
       const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
+        sendBeaconFn: beaconFn,
         intervalMs: 5000,
-        fetchFn: fetchMock,
       });
+
+      vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([createMetricReport()]);
+
       reporter.start();
+      reporter.start(); // no-op
 
-      // Simulate the monitor emitting a metric via its subscriber mechanism
-      // We access the subscribers indirectly via the onMetric callback
-      const metric = createMetric({ name: 'FCP', value: 1500 });
-
-      // The reporter subscribes internally; simulate by calling flush after adding to pending
-      // We test via the full integration path
-      const unsubscribe = webVitalsMonitor.onMetric(() => {
-        // This confirms the subscription mechanism works
-      });
-
-      unsubscribe();
-      reporter.destroy();
-    });
-  });
-
-  describe('async reporting (non-blocking)', () => {
-    it('should send metrics via POST to the configured endpoint', async () => {
-      const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics/web-vitals',
-        intervalMs: 1000,
-        fetchFn: fetchMock,
-      });
-      reporter.start();
-
-      // Manually push a metric via the monitor subscription
-      // Since we can't easily trigger PerformanceObserver, we test via the flush mechanism
-      // by accessing internals through the public API
-      const metric = createMetric();
-
-      // Simulate the onMetric callback by using the monitor's subscriber
-      // The reporter subscribes in start() — trigger via webVitalsMonitor
-      webVitalsMonitor.init();
-
-      // Advance timer to trigger the interval flush
-      vi.advanceTimersByTime(1000);
-
-      // Allow microtask (setTimeout/requestIdleCallback mock) to complete
-      await vi.advanceTimersByTimeAsync(0);
-
-      reporter.destroy();
-      webVitalsMonitor.destroy();
-    });
-
-    it('should use requestIdleCallback/setTimeout to avoid blocking main thread', () => {
-      // The implementation uses scheduleIdle which defers work
-      // We verify that flush() does NOT call fetchFn synchronously
-      const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 1000,
-        fetchFn: fetchMock,
-      });
-      reporter.start();
-
-      // Call flush — fetchMock should NOT be called synchronously
-      reporter.flush();
-      expect(fetchMock).not.toHaveBeenCalled();
-
-      reporter.destroy();
-    });
-  });
-
-  describe('retry buffer on endpoint failure', () => {
-    it('should retain metrics in buffer when endpoint fails', async () => {
-      const failingFetch = vi.fn().mockRejectedValue(new Error('Network error'));
-
-      const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 1000,
-        fetchFn: failingFetch,
-      });
-      reporter.start();
-
-      // Simulate metrics being received by triggering the monitor
-      // We need to get metrics into the reporter's pending queue
-      // Since the reporter subscribes to webVitalsMonitor.onMetric,
-      // we can emit metrics through the monitor's emit method via init
-      webVitalsMonitor.init();
-
-      // We'll test the buffer directly by triggering a flush cycle
-      vi.advanceTimersByTime(1000);
-      await vi.advanceTimersByTimeAsync(50);
-
-      // With no actual metrics emitted (no PerformanceObserver in test env),
-      // buffer should still be 0. Let's test with a custom reporter approach.
-      reporter.destroy();
-      webVitalsMonitor.destroy();
-    });
-
-    it('should cap buffer at 50 entries', async () => {
-      const failingFetch = vi.fn().mockRejectedValue(new Error('Network error'));
-
-      const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 500,
-        fetchFn: failingFetch,
-      });
-      reporter.start();
-
-      // We test the buffer cap by using the monitor's onMetric subscription
-      // The reporter registers an onMetric callback that pushes to pending
-      // We can trigger it by calling webVitalsMonitor's subscribers
-      // Access: the reporter's subscription is internal, but we can test
-      // by pushing many metrics through webVitalsMonitor
-
-      // Emit 60 metrics through the monitor (exceeds the 50 buffer cap)
-      for (let i = 0; i < 60; i++) {
-        // Force-emit through the monitor's subscriber mechanism
-        // Since we need to trigger the reporter's callback, we'll
-        // manually use the monitor's emit via its test interface
-        // The simplest approach: use the public subscriber list
-      }
+      vi.advanceTimersByTime(5000);
+      // Should only have one interval firing, not two
+      expect(beaconFn).toHaveBeenCalledTimes(1);
 
       reporter.destroy();
     });
 
-    it('should retry buffered metrics on next flush cycle', async () => {
-      let callCount = 0;
-      const sometimesFails = vi.fn().mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) {
-          return Promise.reject(new Error('First attempt fails'));
-        }
-        return Promise.resolve({ ok: true });
-      });
-
+    it('stop() should halt periodic reporting and remove visibilitychange listener', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
       const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 1000,
-        fetchFn: sometimesFails,
-      });
-      reporter.start();
-
-      // After first failed cycle, metrics go to buffer
-      // After second cycle, buffer metrics are retried and succeed
-      // This is validated through the fetchFn call count
-
-      reporter.destroy();
-    });
-  });
-
-  describe('error suppression', () => {
-    it('should never throw errors from flush()', () => {
-      const throwingFetch = vi.fn().mockImplementation(() => {
-        throw new Error('Synchronous error');
+        sendBeaconFn: beaconFn,
+        intervalMs: 5000,
       });
 
-      const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 1000,
-        fetchFn: throwingFetch,
-      });
-      reporter.start();
+      vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([createMetricReport()]);
 
-      // flush() should never throw
-      expect(() => reporter.flush()).not.toThrow();
-
-      reporter.destroy();
-    });
-
-    it('should not surface errors to the end user', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error');
-      const failingFetch = vi.fn().mockRejectedValue(new Error('Server down'));
-
-      const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 1000,
-        fetchFn: failingFetch,
-      });
-      reporter.start();
-
-      // Trigger flush
-      vi.advanceTimersByTime(1000);
-      await vi.advanceTimersByTimeAsync(50);
-
-      // Should not log errors to console
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
-
-      reporter.destroy();
-      consoleErrorSpy.mockRestore();
-    });
-  });
-
-  describe('stop and destroy', () => {
-    it('stop() should halt periodic reporting', () => {
-      const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 1000,
-        fetchFn: fetchMock,
-      });
       reporter.start();
       reporter.stop();
 
-      // After stop, timer should not fire
-      vi.advanceTimersByTime(5000);
-      expect(fetchMock).not.toHaveBeenCalled();
+      // Timer should not fire
+      vi.advanceTimersByTime(10_000);
+      expect(beaconFn).not.toHaveBeenCalled();
+
+      // Visibilitychange should not trigger
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'hidden',
+        writable: true,
+        configurable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+      expect(beaconFn).not.toHaveBeenCalled();
+
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        writable: true,
+        configurable: true,
+      });
 
       reporter.destroy();
     });
 
-    it('destroy() should clear all state', () => {
+    it('destroy() is safe to call multiple times', () => {
       const reporter = new WebVitalsReporter({
-        endpoint: '/api/metrics',
-        intervalMs: 1000,
-        fetchFn: fetchMock,
+        sendBeaconFn: vi.fn().mockReturnValue(true),
       });
       reporter.start();
       reporter.destroy();
+      expect(() => reporter.destroy()).not.toThrow();
+    });
+  });
 
-      expect(reporter.getBufferSize()).toBe(0);
-      expect(reporter.getBufferSnapshot()).toEqual([]);
+  describe('default endpoint', () => {
+    it('should default to /api/metrics/web-vitals', () => {
+      const beaconFn = vi.fn().mockReturnValue(true);
+      const reporter = new WebVitalsReporter({
+        sendBeaconFn: beaconFn,
+      });
+
+      vi.spyOn(webVitalsMonitor, 'flush').mockReturnValue([createMetricReport()]);
+
+      reporter.start();
+      vi.advanceTimersByTime(10_000);
+
+      expect(beaconFn).toHaveBeenCalledWith(
+        '/api/metrics/web-vitals',
+        expect.any(String),
+      );
+
+      reporter.destroy();
     });
   });
 });
