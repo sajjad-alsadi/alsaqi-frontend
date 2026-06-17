@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/httpClient';
 import { useTranslation } from 'react-i18next';
 import { Recommendation, AuditFinding, AuditPlan } from '../types';
@@ -16,10 +17,36 @@ import { getStaggerDelay } from '../utils/animation';
 const RecommendationsModule: React.FC = () => {
   const { t } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [findings, setFindings] = useState<AuditFinding[]>([]);
-  const [plans, setPlans] = useState<AuditPlan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data: recommendations = [], isLoading: loadingRecs } = useQuery({
+    queryKey: ['recommendations'],
+    queryFn: async () => {
+      const res = await api.get('/recommendations', { params: { pageSize: 200 } });
+      return (res.data?.data || (Array.isArray(res.data) ? res.data : [])) as Recommendation[];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: findings = [] } = useQuery({
+    queryKey: ['audit-findings-ref'],
+    queryFn: async () => {
+      const res = await api.get('/audit-findings', { params: { pageSize: 200 } });
+      return (res.data?.data || (Array.isArray(res.data) ? res.data : [])) as AuditFinding[];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: plans = [] } = useQuery({
+    queryKey: ['audit-plans-ref'],
+    queryFn: async () => {
+      const res = await api.get('/audit-plans');
+      return (res.data?.data || (Array.isArray(res.data) ? res.data : [])) as AuditPlan[];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const loading = loadingRecs;
   const [searchTerm, setSearchTerm] = useState('');
   // Filters
   const [filterDepartment, setFilterDepartment] = useState('');
@@ -28,27 +55,6 @@ const RecommendationsModule: React.FC = () => {
   const [editingRec, setEditingRec] = useState<Recommendation | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [recToDelete, setRecToDelete] = useState<string | number | null>(null);
-
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
-  const fetchAll = async () => {
-    try {
-      const [recRes, findRes, planRes] = await Promise.all([
-        api.get('/recommendations', { params: { pageSize: 200 } }),
-        api.get('/audit-findings', { params: { pageSize: 200 } }),
-        api.get('/audit-plans'),
-      ]);
-      setRecommendations(recRes.data?.data || (Array.isArray(recRes.data) ? recRes.data : []));
-      setFindings(findRes.data?.data || (Array.isArray(findRes.data) ? findRes.data : []));
-      setPlans(planRes.data?.data || (Array.isArray(planRes.data) ? planRes.data : []));
-    } catch (err) {
-      logger.error('Operation failed', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const initiateDelete = (id: string | number) => {
     setRecToDelete(id);
@@ -59,7 +65,7 @@ const RecommendationsModule: React.FC = () => {
     if (!recToDelete) return;
     try {
       await api.delete(`/recommendations/${recToDelete}`);
-      fetchAll();
+      queryClient.invalidateQueries({ queryKey: ['recommendations'] });
       setIsDeleteModalOpen(false);
       setRecToDelete(null);
     } catch (err) {

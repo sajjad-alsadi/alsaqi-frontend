@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
@@ -23,9 +24,40 @@ const AuditProgramLibrary: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const { formatDate } = useFormat();
+  const queryClient = useQueryClient();
   
-  const [programs, setPrograms] = useState<AuditProgram[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: programs = [], isLoading: loading } = useQuery({
+    queryKey: ['audit-programs'],
+    queryFn: async () => {
+      const res = await api.get('/audit-programs', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      return (Array.isArray(res.data) ? res.data : (res.data.data || [])) as AuditProgram[];
+    },
+    staleTime: 5 * 60_000,
+    enabled: !!token,
+  });
+
+  const { data: instructions = [] } = useQuery({
+    queryKey: ['compliance-instructions'],
+    queryFn: async () => {
+      const res = await api.get('/compliance?source_type=cbi_instruction', { headers: { 'Authorization': `Bearer ${token}` } });
+      return Array.isArray(res.data) ? res.data : (res.data.data || []);
+    },
+    staleTime: 30 * 60_000,
+    enabled: !!token,
+  });
+
+  const { data: laws = [] } = useQuery({
+    queryKey: ['compliance-laws'],
+    queryFn: async () => {
+      const res = await api.get('/compliance?source_type=law', { headers: { 'Authorization': `Bearer ${token}` } });
+      return Array.isArray(res.data) ? res.data : (res.data.data || []);
+    },
+    staleTime: 30 * 60_000,
+    enabled: !!token,
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -35,40 +67,10 @@ const AuditProgramLibrary: React.FC = () => {
   const [procedures, setProcedures] = useState<AuditProcedure[]>([]);
   const [isViewingProcedures, setIsViewingProcedures] = useState(false);
   const { departments } = useDepartments();
-  const [instructions, setInstructions] = useState<any[]>([]);
-  const [laws, setLaws] = useState<any[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{id: string | number | null, type: 'program' | 'procedure'}>({id: null, type: 'program'});
-
-  useEffect(() => {
-    fetchPrograms();
-    
-    if (token) {
-      api.get('/compliance?source_type=cbi_instruction', { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(res => setInstructions(Array.isArray(res.data) ? res.data : (res.data.data || [])))
-        .catch(() => setInstructions([]));
-
-      api.get('/compliance?source_type=law', { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(res => setLaws(Array.isArray(res.data) ? res.data : (res.data.data || [])))
-        .catch(() => setLaws([]));
-    }
-  }, [token]);
-
-  const fetchPrograms = async () => {
-    try {
-      const res = await api.get('/audit-programs', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setPrograms(Array.isArray(res.data) ? res.data : (res.data.data || []));
-    } catch (err) {
-      logger.error('Operation failed', err);
-      setPrograms([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchProcedures = async (programId: string | number) => {
     try {
@@ -104,7 +106,7 @@ const AuditProgramLibrary: React.FC = () => {
           if (err.response?.status === 404) {
             toast.error(t('program.programNotFound'));
             setIsEditing(false);
-            fetchPrograms();
+            queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
             return;
           }
           throw err;
@@ -117,7 +119,7 @@ const AuditProgramLibrary: React.FC = () => {
         toast.success(t('createSuccess'));
       }
       
-      fetchPrograms();
+      queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
       setIsEditing(false);
     } catch (err) {
       logger.error('Operation failed', err);
@@ -139,7 +141,7 @@ const AuditProgramLibrary: React.FC = () => {
         await api.delete(`/audit-programs/${idToDelete}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        fetchPrograms();
+        queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
       } else {
         await api.delete(`/audit-procedures/${idToDelete}`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -155,7 +157,7 @@ const AuditProgramLibrary: React.FC = () => {
         if (deleteType === 'procedure') {
           setProcedures(prev => prev.filter(p => p.id !== idToDelete));
         } else {
-          fetchPrograms();
+          queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
         }
         toast.success(t('deleteSuccess'));
         setShowDeleteConfirm({id: null, type: 'program'});
@@ -175,12 +177,12 @@ const AuditProgramLibrary: React.FC = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       toast.success(t('createSuccess'));
-      fetchPrograms();
+      queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
     } catch (err: any) {
       logger.error('Operation failed', err);
       if (err.response?.status === 404) {
         toast.error(t('program.programNotFound'));
-        fetchPrograms();
+        queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
       } else {
         toast.error(t('errorOccurred'));
       }
@@ -197,14 +199,14 @@ const AuditProgramLibrary: React.FC = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       toast.success(t('updateSuccess'));
-      fetchPrograms();
+      queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
       setIsEditing(false);
     } catch (err: any) {
       logger.error('Operation failed', err);
       if (err.response?.status === 404) {
         toast.error(t('program.programNotFound'));
         setIsEditing(false);
-        fetchPrograms();
+        queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
       } else {
         toast.error(t('errorOccurred'));
       }

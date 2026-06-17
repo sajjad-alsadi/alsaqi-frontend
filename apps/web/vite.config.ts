@@ -103,9 +103,7 @@ export default defineConfig(({ mode }) => {
       // WebSocket proxy is handled by Vite automatically when proxying to the backend
       // The browser connects to ws://localhost:5173 and Vite upgrades to ws://localhost:3000
     },
-    optimizeDeps: {
-      force: true,
-    },
+    optimizeDeps: {},
     build: {
       // Production source maps are disabled by default so dist/ emits no .map
       // files (Req 1.5, 1.6). When Sentry source map upload is enabled (CI with

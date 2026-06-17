@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +29,20 @@ const ConflictOfInterest: React.FC = () => {
   const { user } = useUser();
   const { t } = useTranslation();
   const { formatDate } = useFormat();
-  const [declarations, setDeclarations] = useState<COI[]>([]);
+  const queryClient = useQueryClient();
+
+  const { data: declarations = [], isLoading } = useQuery({
+    queryKey: ['coi'],
+    queryFn: async () => {
+      const res = await api.get('/coi');
+      if (res.data && res.data.data) {
+        return res.data.data as COI[];
+      }
+      return Array.isArray(res.data) ? res.data as COI[] : [];
+    },
+    staleTime: 5 * 60_000,
+  });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedCOI, setSelectedCOI] = useState<COI | null>(null);
@@ -43,31 +57,13 @@ const ConflictOfInterest: React.FC = () => {
     reviewer_notes: ''
   });
 
-  useEffect(() => {
-    fetchDeclarations();
-  }, []);
-
-  const fetchDeclarations = async () => {
-    try {
-      const res = await api.get('/coi');
-      if (res.data && res.data.data) {
-        setDeclarations(res.data.data);
-      } else {
-        setDeclarations(Array.isArray(res.data) ? res.data : []);
-      }
-    } catch (err) {
-      logger.error('Operation failed', err);
-      setDeclarations([]);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await api.post('/coi', formData);
       setIsModalOpen(false);
       setFormData({ description: '', related_party: '' });
-      fetchDeclarations();
+      queryClient.invalidateQueries({ queryKey: ['coi'] });
     } catch (err) {
       logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));
@@ -81,7 +77,7 @@ const ConflictOfInterest: React.FC = () => {
       await api.put(`/coi/${selectedCOI.id}`, reviewData);
       setIsReviewModalOpen(false);
       setSelectedCOI(null);
-      fetchDeclarations();
+      queryClient.invalidateQueries({ queryKey: ['coi'] });
     } catch (err) {
       logger.error('Operation failed', err);
       toast.error(t('errorOccurred'));

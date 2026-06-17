@@ -57,8 +57,9 @@ export const useIdleTimeout = () => {
     resetTimeout();
     lastActivityArmRef.current = Date.now();
 
-    // Events to track user activity
-    const events = ['mousemove', 'keydown', 'wheel', 'DOMMouseScroll', 'mouseWheel', 'mousedown', 'touchstart', 'touchmove', 'MSPointerDown', 'MSPointerMove'];
+    // Events to track user activity (legacy/redundant events removed:
+    // DOMMouseScroll/mouseWheel covered by 'wheel', MSPointer* covered by touch*)
+    const events = ['mousemove', 'keydown', 'wheel', 'mousedown', 'touchstart', 'touchmove'];
 
     // Leading-edge throttle: continuous high-frequency events (mousemove) re-arm
     // the idle timer at most once per ACTIVITY_THROTTLE_MS, and re-arm again once

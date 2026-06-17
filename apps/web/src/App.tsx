@@ -15,10 +15,14 @@ import { ModuleErrorBoundary } from './components/ModuleErrorBoundary';
 import { RequirePermission } from './components/RequirePermission';
 import { SkipToContent } from './components/SkipToContent';
 import { LiveRegion } from './components/LiveRegion';
-import Login from './components/Login';
 import AppShellSkeleton from './components/AppShellSkeleton';
 import { UpdateNotification } from './components/UpdateNotification';
 import { UNAUTHORIZED_EVENT } from './api';
+
+// Login is lazy-loaded so its dependencies (motion, auth modals) don't
+// bloat the initial parse cost. The AppShellSkeleton covers the session
+// check phase; Login loads once we know the user is unauthenticated.
+const Login = lazy(() => import('./components/Login'));
 
 // Auth-gated imports: Layout, Toaster, and NotificationToast are only imported
 // after authentication is confirmed, keeping vendor-toast out of the critical path.
@@ -104,7 +108,11 @@ const AppContent: React.FC = () => {
   // Phase 2: Unauthenticated — render only Login.
   // No Layout, no lazy routes, no vendor-forms, no vendor-toast chunks fetched.
   if (!user) {
-    return <Login />;
+    return (
+      <Suspense fallback={<AppShellSkeleton />}>
+        <Login />
+      </Suspense>
+    );
   }
 
   // Phase 3: Authenticated — full App Shell with Layout, deferred providers,

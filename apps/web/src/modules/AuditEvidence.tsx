@@ -1,4 +1,5 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { usePreferences } from '../context/PreferencesContext';
@@ -28,10 +29,35 @@ const AuditEvidence: React.FC = () => {
   const { user } = useUser();
   const { t } = useTranslation();
   const { formatDate, formatNumber } = useFormat();
-  const [evidence, setEvidence] = useState<AuditEvidenceType[]>([]);
-  const [audits, setAudits] = useState<AuditPlan[]>([]);
-  const [findings, setFindings] = useState<AuditFinding[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data: evidence = [], isLoading: loading } = useQuery({
+    queryKey: ['audit-evidence'],
+    queryFn: async () => {
+      const res = await api.get('/audit-evidence');
+      return (res.data.data || (Array.isArray(res.data) ? res.data : [])) as AuditEvidenceType[];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: audits = [] } = useQuery({
+    queryKey: ['audit-plans-ref'],
+    queryFn: async () => {
+      const res = await api.get('/audit-plans');
+      return (res.data.data || (Array.isArray(res.data) ? res.data : [])) as AuditPlan[];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: findings = [] } = useQuery({
+    queryKey: ['audit-findings-ref'],
+    queryFn: async () => {
+      const res = await api.get('/audit-findings');
+      return (res.data.data || (Array.isArray(res.data) ? res.data : [])) as AuditFinding[];
+    },
+    staleTime: 5 * 60_000,
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAudit, setSelectedAudit] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
@@ -51,28 +77,6 @@ const AuditEvidence: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { validateAndFilter } = useFileUploadValidation();
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const [evRes, audRes, findRes] = await Promise.all([
-        api.get('/audit-evidence'),
-        api.get('/audit-plans'),
-        api.get('/audit-findings')
-      ]);
-      
-      setEvidence(evRes.data.data || (Array.isArray(evRes.data) ? evRes.data : []));
-      setAudits(audRes.data.data || (Array.isArray(audRes.data) ? audRes.data : []));
-      setFindings(findRes.data.data || (Array.isArray(findRes.data) ? findRes.data : []));
-    } catch (err) {
-      logger.error('Operation failed', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -118,7 +122,7 @@ const AuditEvidence: React.FC = () => {
           await api.post(url, payload);
         }
 
-        fetchData();
+        queryClient.invalidateQueries({ queryKey: ['audit-evidence'] });
         setShowForm(false);
         setFormData({ type: 'Document' });
         setFile(null);
@@ -166,7 +170,7 @@ const AuditEvidence: React.FC = () => {
     if (itemToDelete === null) return;
     try {
       await api.delete(`/audit-evidence/${itemToDelete}`);
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ['audit-evidence'] });
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (err) {

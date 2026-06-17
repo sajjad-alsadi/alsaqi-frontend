@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Search, Plus, Edit2, Trash2, Archive } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -11,9 +12,18 @@ import { Button } from '@/components/ui/button';
 
 const JobTitles: React.FC = () => {
   const { t } = useTranslation();
-  const [jobTitles, setJobTitles] = useState<any[]>([]);
+  const queryClient = useQueryClient();
+
+  const { data: jobTitles = [], isLoading: loading } = useQuery({
+    queryKey: ['job-titles'],
+    queryFn: async () => {
+      const res = await api.get('/job-titles');
+      return Array.isArray(res.data) ? res.data : [];
+    },
+    staleTime: 5 * 60_000,
+  });
+
   const { departments } = useDepartments();
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
@@ -30,21 +40,6 @@ const JobTitles: React.FC = () => {
     reporting_to: '',
     status: 'Active'
   });
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const res = await api.get('/job-titles');
-      setJobTitles(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      logger.error('Operation failed', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filteredTitles = useMemo(() => jobTitles.filter(j => 
     (j.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -68,7 +63,7 @@ const JobTitles: React.FC = () => {
         await api.post(url, payload);
       }
 
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ['job-titles'] });
       setShowForm(false);
       setEditingId(null);
       setFormData({ name: '', department: '', job_level: 'Staff', description: '', reporting_to: '', status: 'Active' });
@@ -103,7 +98,7 @@ const JobTitles: React.FC = () => {
     setError(null);
     try {
       await api.delete(`/job-titles/${titleToDelete}`);
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ['job-titles'] });
       setIsDeleteModalOpen(false);
       setTitleToDelete(null);
     } catch (err: any) {
@@ -126,7 +121,7 @@ const JobTitles: React.FC = () => {
         ...titleToChangeStatus, 
         status: titleToChangeStatus.status === 'Active' ? 'Inactive' : 'Active' 
       });
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ['job-titles'] });
       setIsStatusModalOpen(false);
       setTitleToChangeStatus(null);
     } catch (err) {

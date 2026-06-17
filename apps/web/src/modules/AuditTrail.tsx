@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { AuditTrail } from '../types';
 import { History, Search, Filter } from 'lucide-react';
@@ -16,8 +17,6 @@ interface AuditTrailProps {
 const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
   const { t, i18n } = useTranslation();
   const { formatDateTime, translateName, translateAction, translateModule } = useFormat();
-  const [logs, setLogs] = useState<AuditTrail[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterModule, setFilterModule] = useState('all');
   const [filterAction, setFilterAction] = useState('all');
@@ -32,15 +31,9 @@ const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
     totalPages: 0
   });
 
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchLogs(controller.signal);
-    return () => controller.abort();
-  }, [pagination.page, pagination.pageSize, filterModule, filterAction, searchTerm]);
-
-  const fetchLogs = async (signal?: AbortSignal) => {
-    setLoading(true);
-    try {
+  const { data: queryResult, isLoading: loading } = useQuery({
+    queryKey: ['audit-trail', pagination.page, pagination.pageSize, filterModule, filterAction, searchTerm],
+    queryFn: async () => {
       const res = await api.get('/audit-trail', {
         params: {
           page: pagination.page,
@@ -49,27 +42,29 @@ const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
           action: filterAction !== 'all' ? filterAction : undefined,
           username: searchTerm || undefined
         },
-        ...(signal ? { signal } : {})
       });
       
       const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
       const pagin = res.data.pagination || { total: data.length, totalPages: 1 };
       
-      setLogs(data);
+      return { logs: data as AuditTrail[], pagination: pagin };
+    },
+    staleTime: 1 * 60_000, // volatile data tier
+    placeholderData: (prev) => prev,
+  });
+
+  const logs = queryResult?.logs ?? [];
+
+  // Update pagination totals from query result
+  React.useEffect(() => {
+    if (queryResult?.pagination) {
       setPagination(prev => ({
         ...prev,
-        total: pagin.total,
-        totalPages: pagin.totalPages
+        total: queryResult.pagination.total,
+        totalPages: queryResult.pagination.totalPages
       }));
-    } catch (err: any) {
-      if (err?.name !== 'CanceledError') {
-        logger.error('Operation failed', err);
-        toast.error(t('errorOccurred'));
-      }
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [queryResult?.pagination]);
 
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, page }));

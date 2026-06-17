@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
@@ -9,9 +9,11 @@ import { api } from '../api';
 import { authFetch } from '../api/authFetch';
 import { mapAuthError, type AuthErrorCode, type LoginResponse } from '../api/modules/auth';
 
-import ChangePasswordModal from './auth/ChangePasswordModal';
-import ContactAdminModal from './auth/ContactAdminModal';
-import ForgotPasswordModal from './auth/ForgotPasswordModal';
+// Lazy-load modals — only fetched when user triggers the modal flow
+const ChangePasswordModal = lazy(() => import('./auth/ChangePasswordModal'));
+const ContactAdminModal = lazy(() => import('./auth/ContactAdminModal'));
+const ForgotPasswordModal = lazy(() => import('./auth/ForgotPasswordModal'));
+
 import LoginIllustration from './Login/LoginIllustration';
 import LoginHeader from './Login/LoginHeader';
 import LoginForm from './Login/LoginForm';
@@ -670,35 +672,37 @@ const Login: React.FC = () => {
         </div>
       )}
 
-      <ForgotPasswordModal
-        isOpen={showForgotPasswordModal}
-        onClose={() => setShowForgotPasswordModal(false)}
-      />
+      <Suspense fallback={null}>
+        <ForgotPasswordModal
+          isOpen={showForgotPasswordModal}
+          onClose={() => setShowForgotPasswordModal(false)}
+        />
 
-      <ContactAdminModal 
-        isOpen={showContactModal}
-        onClose={() => setShowContactModal(false)}
-        t={t}
-        dir={language === Language.AR ? 'rtl' : 'ltr'}
-      />
+        <ContactAdminModal 
+          isOpen={showContactModal}
+          onClose={() => setShowContactModal(false)}
+          t={t}
+          dir={language === Language.AR ? 'rtl' : 'ltr'}
+        />
 
-      <ChangePasswordModal
-        isOpen={showChangeModal}
-        onClose={() => {
-          setShowChangeModal(false);
-          setNewPassword('');
-          setConfirmPassword('');
-          setChangeError('');
-        }}
-        onSubmit={handleChangeSubmit}
-        newPassword={newPassword}
-        setNewPassword={setNewPassword}
-        confirmPassword={confirmPassword}
-        setConfirmPassword={setConfirmPassword}
-        error={changeError}
-        loading={loading}
-        forced={true}
-      />
+        <ChangePasswordModal
+          isOpen={showChangeModal}
+          onClose={() => {
+            setShowChangeModal(false);
+            setNewPassword('');
+            setConfirmPassword('');
+            setChangeError('');
+          }}
+          onSubmit={handleChangeSubmit}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          error={changeError}
+          loading={loading}
+          forced={true}
+        />
+      </Suspense>
     </div>
   );
 };

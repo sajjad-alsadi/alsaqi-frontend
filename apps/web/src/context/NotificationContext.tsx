@@ -174,7 +174,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { user } = useUser();
   const { isCheckingSession } = useAuth();
   const [state, dispatch] = useReducer(notificationReducer, defaultState);
-  const [page, setPage] = React.useState(1);
+  const pageRef = React.useRef(1);
 
   /** Resilient WebSocket client (exponential backoff + jitter + HTTP polling fallback). */
   const wsClientRef = useRef<WebSocketClient | null>(null);
@@ -184,15 +184,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user || state.isLoading) return;
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const targetPage = reset ? 1 : page;
+      const targetPage = reset ? 1 : pageRef.current;
       const res = await api.get(`/notifications?page=${targetPage}&pageSize=20`);
       const items: Notification[] = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
 
       dispatch({ type: 'SET_NOTIFICATIONS', payload: { items, reset } });
       if (reset) {
-        setPage(2);
+        pageRef.current = 2;
       } else {
-        setPage(prev => prev + 1);
+        pageRef.current += 1;
       }
     } catch (err: any) {
       if (err.response?.status !== 401 && err.response?.status !== 403) {
@@ -201,7 +201,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [user, page, state.isLoading]);
+  }, [user, state.isLoading]);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
@@ -314,7 +314,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       };
     } else {
       dispatch({ type: 'RESET' });
-      setPage(1);
+      pageRef.current = 1;
       if (wsClientRef.current) { wsClientRef.current.disconnect(); wsClientRef.current = null; }
     }
   }, [user, isCheckingSession]);
