@@ -11,15 +11,14 @@ import {
   Building,
   Download,
   Plus,
-  X,
   ChevronRight
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 import api from '../../api/httpClient';
-import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../utils/formatService';
 import logger from '../../utils/logger';
-import Portal from '../../components/Portal';
+import Modal from '../../components/Modal';
 import { Button } from '@/components/ui/button';
 
 interface CorrespondenceDetailsProps {
@@ -41,7 +40,27 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
   const [showArchiveModal, setShowArchiveModal] = useState(false);
 
   useEffect(() => {
-    fetchDetails();
+    const controller = new AbortController();
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const endpoint = type === 'Incoming' 
+          ? `/correspondence/details/incoming/${id}` 
+          : `/correspondence/details/outgoing/${id}`;
+        const response = await api.get(endpoint, { signal: controller.signal });
+        setData(response.data);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          logger.error("Failed to fetch details", error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+    fetchData();
+    return () => { controller.abort(); };
   }, [type, id]);
 
   const fetchDetails = async () => {
@@ -106,11 +125,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="p-2 hover:bg-[var(--color-bg-main)] rounded-full transition-colors text-[var(--color-text-main)]"
-            aria-label={t('common.goBack') || 'Go back'}
-          >
+          <button onClick={onBack} className="p-2 hover:bg-[var(--color-bg-main)] rounded-full transition-colors text-[var(--color-text-main)]" aria-label={t('common.goBack') || 'Go back'}>
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <div>
@@ -129,36 +144,24 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
         <div className="flex flex-wrap gap-2">
           {type !== 'Outgoing' && (
             <>
-              <Button 
-                onClick={() => setShowStatusModal(true)}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
+              <Button onClick={() => setShowStatusModal(true)} variant="outline" className="flex items-center gap-2">
                 <Clock size={18} />
                 {t('correspondence.updateStatus')}
               </Button>
-              <Button 
-                onClick={() => setShowReferModal(true)}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
+              <Button onClick={() => setShowReferModal(true)} variant="outline" className="flex items-center gap-2">
                 <Share2 size={18} />
                 {t('correspondence.refer')}
               </Button>
             </>
           )}
-          <button 
-            onClick={() => setShowArchiveModal(true)}
-            className="px-4 py-2 bg-[var(--color-text-muted)] text-white rounded-lg hover:bg-[var(--color-text-main)] flex items-center gap-2 transition-colors font-bold"
-          >
+          <Button onClick={() => setShowArchiveModal(true)} variant="secondary" className="flex items-center gap-2">
             <Archive size={18} />
             {t('correspondence.archive')}
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Main Info */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-sm overflow-hidden">
             <div className="flex border-b border-[var(--color-border-soft)] overflow-x-auto">
@@ -231,7 +234,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
                                 <span className="text-sm text-[var(--color-text-main)] opacity-80">{r.to_user_name}</span>
                               </div>
                             )}
-                            <p className="text-sm text-[var(--color-text-main)] opacity-80 italic">"{r.instructions}"</p>
+                            <p className="text-sm text-[var(--color-text-main)] opacity-80 italic">&quot;{r.instructions}&quot;</p>
                           </div>
                           <div className="text-end">
                             <span className="text-xs text-[var(--color-text-muted)] block">{formatDate(r.referral_date)}</span>
@@ -248,10 +251,7 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
                 <div className="space-y-4">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-semibold text-[var(--color-text-main)]">{t('correspondence.attachedFiles')}</h3>
-                    <button 
-                      onClick={() => setShowUploadModal(true)}
-                      className="text-[var(--color-primary)] text-sm font-medium flex items-center gap-1 hover:underline"
-                    >
+                    <button onClick={() => setShowUploadModal(true)} className="text-[var(--color-primary)] text-sm font-medium flex items-center gap-1 hover:underline">
                       <Plus size={16} />
                       {t('correspondence.addAttachment')}
                     </button>
@@ -355,52 +355,22 @@ const CorrespondenceDetails: React.FC<CorrespondenceDetailsProps> = ({ type, id,
       </div>
 
       {/* Modals */}
-      <Portal>
-        <AnimatePresence>
-          {showStatusModal && (
-            <StatusUpdateModal 
-              language={language} 
-              id={id} 
-              type={type}
-              currentStatus={mainData.status}
-              onClose={() => setShowStatusModal(false)}
-              onSuccess={() => {
-                setShowStatusModal(false);
-                fetchDetails();
-              }}
-            />
-          )}
-          {showReferModal && (
-            <ReferralModal 
-              language={language} 
-              id={id} 
-              onClose={() => setShowReferModal(false)}
-              onSuccess={() => {
-                setShowReferModal(false);
-                fetchDetails();
-              }}
-            />
-          )}
-          {showArchiveModal && (
-            <ArchiveModal 
-              language={language} 
-              id={id} 
-              type={type}
-              onClose={() => setShowArchiveModal(false)}
-              onSuccess={() => {
-                setShowArchiveModal(false);
-                fetchDetails();
-              }}
-            />
-          )}
-        </AnimatePresence>
-      </Portal>
+      <StatusUpdateModal language={language} id={id} type={type} currentStatus={mainData.status} isOpen={showStatusModal} onClose={() => setShowStatusModal(false)} onSuccess={() => { setShowStatusModal(false); fetchDetails(); }} />
+      <ReferralModal language={language} id={id} isOpen={showReferModal} onClose={() => setShowReferModal(false)} onSuccess={() => { setShowReferModal(false); fetchDetails(); }} />
+      <ArchiveModal language={language} id={id} type={type} isOpen={showArchiveModal} onClose={() => setShowArchiveModal(false)} onSuccess={() => { setShowArchiveModal(false); fetchDetails(); }} />
     </div>
   );
 };
 
 // Helper Components
-const DetailTab = ({ active, onClick, label, icon }: any) => (
+interface DetailTabProps {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  icon: React.ReactNode;
+}
+
+const DetailTab: React.FC<DetailTabProps> = ({ active, onClick, label, icon }) => (
   <button
     onClick={onClick}
     className={`flex items-center gap-2 px-6 py-4.5 text-sm transition-all whitespace-nowrap ${
@@ -414,7 +384,13 @@ const DetailTab = ({ active, onClick, label, icon }: any) => (
   </button>
 );
 
-const InfoItem = ({ label, value, isStatus }: any) => (
+interface InfoItemProps {
+  label: string;
+  value: string | number;
+  isStatus?: boolean;
+}
+
+const InfoItem: React.FC<InfoItemProps> = ({ label, value, isStatus }) => (
   <div>
     <p className="text-xs text-[var(--color-text-muted)] mb-1 font-medium">{label}</p>
     {isStatus ? (
@@ -428,7 +404,16 @@ const InfoItem = ({ label, value, isStatus }: any) => (
 );
 
 // Modal Components
-const ArchiveModal = ({ language, id, type, onClose, onSuccess }: any) => {
+interface ArchiveModalProps {
+  language: 'ar' | 'en';
+  id: number;
+  type: 'Incoming' | 'Outgoing';
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const ArchiveModal: React.FC<ArchiveModalProps> = ({ id, type, isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
 
@@ -440,33 +425,36 @@ const ArchiveModal = ({ language, id, type, onClose, onSuccess }: any) => {
       onSuccess();
     } catch (error) {
       logger.error("Failed to archive", error);
+      toast.error(t('errorOccurred'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-xl overflow-hidden w-full max-w-md">
-        <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-main)]">
-          <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('correspondence.confirmArchive')}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-[var(--color-border-soft)] rounded-full text-[var(--color-text-main)]"><X size={20} /></button>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('correspondence.confirmArchive')} size="sm">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <p className="text-[var(--color-text-main)]">{t('correspondence.confirmArchiveMessage')}</p>
+        <div className="flex gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
+          <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.archive')}</Button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <p className="text-[var(--color-text-main)]">
-            {t('correspondence.confirmArchiveMessage')}
-          </p>
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
-            <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.archive')}</Button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
+      </form>
+    </Modal>
   );
 };
 
-const StatusUpdateModal = ({ language, id, type, currentStatus, onClose, onSuccess }: any) => {
+interface StatusUpdateModalProps {
+  language: 'ar' | 'en';
+  id: number;
+  type: 'Incoming' | 'Outgoing';
+  currentStatus: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ id, type, currentStatus, isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const [status, setStatus] = useState(currentStatus);
   const [notes, setNotes] = useState('');
@@ -482,113 +470,109 @@ const StatusUpdateModal = ({ language, id, type, currentStatus, onClose, onSucce
       onSuccess();
     } catch (error) {
       logger.error("Failed to update status", error);
+      toast.error(t('errorOccurred'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-xl overflow-hidden w-full max-w-md">
-        <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-main)]">
-          <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('correspondence.updateCorrespondenceStatus')}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-[var(--color-border-soft)] rounded-full text-[var(--color-text-main)]"><X size={20} /></button>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('correspondence.updateCorrespondenceStatus')} size="sm">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.newStatus')}</label>
+          <select className="input-field" value={status} onChange={(e) => setStatus(e.target.value)}>
+            {statuses.map(s => <option key={s} value={s}>{t('correspondence.' + s.toLowerCase().replace(/\s+/g, '_')) || s}</option>)}
+          </select>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.newStatus')}</label>
-            <select 
-              className="input-field"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              {statuses.map(s => <option key={s} value={s}>{t('correspondence.' + s.toLowerCase().replace(/\s+/g, '_')) || s}</option>)}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.updateNotes')}</label>
-            <textarea 
-              rows={3}
-              className="input-field"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder={t('correspondence.updateNotesPlaceholder')}
-            />
-          </div>
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
-            <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('common.update')}</Button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.updateNotes')}</label>
+          <textarea rows={3} className="input-field" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('correspondence.updateNotesPlaceholder')} />
+        </div>
+        <div className="flex gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
+          <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('common.update')}</Button>
+        </div>
+      </form>
+    </Modal>
   );
 };
 
-const ReferralModal = ({ language, id, onClose, onSuccess }: any) => {
+interface ReferralModalProps {
+  language: 'ar' | 'en';
+  id: number;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const ReferralModal: React.FC<ReferralModalProps> = ({ language, id, isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const [deptId, setDeptId] = useState('');
   const [userId, setUserId] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [departments, setDepartments] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<Array<{id: number; name_ar: string; name_en: string}>>([]);
+  const [users, setUsers] = useState<Array<{id: number; name: string}>>([]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchMeta = async () => {
-      const [d, u] = await Promise.all([api.get('/org-entities'), api.get('/users')]);
-      setDepartments(d.data);
-      setUsers(u.data);
+      try {
+        const [d, u] = await Promise.all([api.get('/org-entities'), api.get('/users')]);
+        setDepartments(d.data);
+        setUsers(u.data);
+      } catch (error) {
+        logger.error("Failed to fetch referral metadata", error);
+      }
     };
     fetchMeta();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!deptId) {
+      toast.error(t('correspondence.selectDeptRequired'));
+      return;
+    }
     try {
       setSubmitting(true);
       await api.post('/correspondence/refer', { incoming_id: id, to_dept_id: deptId, to_user_id: userId, instructions });
       onSuccess();
     } catch (error) {
       logger.error("Failed to refer", error);
+      toast.error(t('errorOccurred'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border-soft)] shadow-xl overflow-hidden w-full max-w-md">
-        <div className="p-6 border-b border-[var(--color-border-soft)] flex justify-between items-center bg-[var(--color-bg-main)]">
-          <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t('correspondence.referCorrespondence')}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-[var(--color-border-soft)] rounded-full text-[var(--color-text-main)]"><X size={20} /></button>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('correspondence.referCorrespondence')} size="sm">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.targetDeptRequired')}</label>
+          <select required className="input-field" value={deptId} onChange={(e) => setDeptId(e.target.value)}>
+            <option value="">{t('correspondence.selectDept')}</option>
+            {departments.map(d => <option key={d.id} value={d.id}>{language === 'ar' ? d.name_ar : d.name_en}</option>)}
+          </select>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.targetDeptRequired')}</label>
-            <select required className="input-field" value={deptId} onChange={(e) => setDeptId(e.target.value)}>
-              <option value="">{t('correspondence.selectDept')}</option>
-              {(Array.isArray(departments) ? departments : []).map(d => <option key={d.id} value={d.id}>{language === 'ar' ? d.name_ar : d.name_en}</option>)}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.userOptional')}</label>
-            <select className="input-field" value={userId} onChange={(e) => setUserId(e.target.value)}>
-              <option value="">{t('correspondence.selectUser')}</option>
-              {(Array.isArray(users) ? users : []).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.instructions')}</label>
-            <textarea rows={3} className="input-field" value={instructions} onChange={(e) => setInstructions(e.target.value)} />
-          </div>
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
-            <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.refer')}</Button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.userOptional')}</label>
+          <select className="input-field" value={userId} onChange={(e) => setUserId(e.target.value)}>
+            <option value="">{t('correspondence.selectUser')}</option>
+            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.instructions')}</label>
+          <textarea rows={3} className="input-field" value={instructions} onChange={(e) => setInstructions(e.target.value)} />
+        </div>
+        <div className="flex gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
+          <Button type="submit" disabled={submitting} className="flex-1 disabled:opacity-50">{submitting ? '...' : t('correspondence.refer')}</Button>
+        </div>
+      </form>
+    </Modal>
   );
 };
 

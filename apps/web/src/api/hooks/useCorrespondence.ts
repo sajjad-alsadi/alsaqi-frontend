@@ -18,33 +18,49 @@ import { api } from '../index';
  */
 type CorrespondenceQuery = NonNullable<Parameters<typeof api.correspondence.getIncoming>[0]> & {
   limit?: number;
+  /** Control which queries to enable. Default: all enabled */
+  enabled?: {
+    stats?: boolean;
+    incoming?: boolean;
+    outgoing?: boolean;
+    archive?: boolean;
+  };
 };
 
 export const useCorrespondence = (initialParams: CorrespondenceQuery = {}) => {
   const queryClient = useQueryClient();
+  const { enabled: enabledConfig, ...queryParams } = initialParams;
+  const enableStats = enabledConfig?.stats !== false;
+  const enableIncoming = enabledConfig?.incoming !== false;
+  const enableOutgoing = enabledConfig?.outgoing !== false;
+  const enableArchive = enabledConfig?.archive !== false;
 
   const statsQuery = useQuery({
     queryKey: ['correspondence-stats'],
     queryFn: () => api.correspondence.getStats(),
     staleTime: 2 * 60 * 1000,
+    enabled: enableStats,
   });
 
   const incomingQuery = useQuery({
-    queryKey: ['correspondence-incoming', initialParams],
-    queryFn: () => api.correspondence.getIncoming(initialParams),
+    queryKey: ['correspondence-incoming', queryParams],
+    queryFn: () => api.correspondence.getIncoming(queryParams),
     staleTime: 1 * 60 * 1000,
+    enabled: enableIncoming,
   });
 
   const outgoingQuery = useQuery({
-    queryKey: ['correspondence-outgoing', initialParams],
-    queryFn: () => api.correspondence.getOutgoing(initialParams),
+    queryKey: ['correspondence-outgoing', queryParams],
+    queryFn: () => api.correspondence.getOutgoing(queryParams),
     staleTime: 1 * 60 * 1000,
+    enabled: enableOutgoing,
   });
 
   const archiveQuery = useQuery({
-    queryKey: ['correspondence-archive', initialParams],
-    queryFn: () => api.correspondence.getArchive(initialParams),
+    queryKey: ['correspondence-archive', queryParams],
+    queryFn: () => api.correspondence.getArchive(queryParams),
     staleTime: 5 * 60 * 1000,
+    enabled: enableArchive,
   });
 
   const refreshAll = useCallback(() => {

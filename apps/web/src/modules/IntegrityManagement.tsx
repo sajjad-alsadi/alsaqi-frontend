@@ -1,21 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale, Users, LayoutDashboard, ShieldAlert, Plus } from 'lucide-react';
+import { Scale, Users, ShieldAlert, Plus, ChevronRight, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../context/UserContext';
 import api from '../api/httpClient';
 import { UserRole } from '../constants';
 import logger from '../utils/logger';
+import { useFormat } from '../utils/formatService';
 
 // Existing Module Logic
 import ConflictOfInterest from './ConflictOfInterest';
 import FraudLog from './FraudLog';
 
+interface IntegrityStats {
+  conflicts: { total: number; pending: number };
+  fraud: { total: number; open: number };
+  summary: { total: number; active: number };
+}
+
 const IntegrityManagement: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user } = useUser();
+  const { formatDate } = useFormat();
   const [activeTab, setActiveTab] = useState<'overview' | 'conflicts' | 'fraud'>('overview');
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<IntegrityStats>({
     conflicts: { total: 0, pending: 0 },
     fraud: { total: 0, open: 0 },
     summary: { total: 0, active: 0 }
@@ -39,141 +47,226 @@ const IntegrityManagement: React.FC = () => {
     }
   }, [activeTab]);
 
-  const getMonthName = () => {
-    return new Intl.DateTimeFormat(i18n.language || 'en', { month: 'long' }).format(new Date());
-  };
-
   const tabs = [
-    { id: 'overview', label: t('integrity.dashboard'), icon: LayoutDashboard },
-    { id: 'conflicts', label: t('integrity.conflicts'), icon: Users },
-    { id: 'fraud', label: t('integrity.fraud'), icon: ShieldAlert },
+    { id: 'overview' as const, label: t('integrity.dashboard'), icon: Scale },
+    { id: 'conflicts' as const, label: t('integrity.conflicts'), icon: Users },
+    { id: 'fraud' as const, label: t('integrity.fraud'), icon: ShieldAlert },
   ];
 
-  const isAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER;
-
   return (
-    <div className="space-y-8 pb-10">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="flex items-center gap-6">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/20">
-            <Scale size={32} />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.title')}</h2>
-            <p className="text-sm text-[var(--color-text-muted)] font-bold mt-2">{t('integrity.subTitle')}</p>
-          </div>
+    <div className="space-y-6 pb-10">
+      {/* Header — single source of truth for page identity */}
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-sm shadow-[var(--color-primary)]/15">
+          <Scale size={20} />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-[var(--color-text-main)]">{t('integrity.title')}</h1>
+          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{t('integrity.subTitle')}</p>
         </div>
       </div>
 
-      {/* Modern Tabs */}
-      <div className="flex flex-wrap gap-2 p-1.5 bg-[var(--color-card)] rounded-2xl w-fit self-start border border-[var(--color-border-soft)]">
+      {/* Tabs — proper ARIA tablist */}
+      <div
+        role="tablist"
+        aria-label={t('integrity.title')}
+        className="flex flex-wrap gap-1 p-1 bg-[var(--color-card)] rounded-xl w-fit border border-[var(--color-border-soft)]"
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                isActive 
-                  ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20' 
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-selected={isActive}
+              aria-controls={`panel-${tab.id}`}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                isActive
+                  ? 'bg-[var(--color-primary)] text-white shadow-sm shadow-[var(--color-primary)]/20'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-soft)]'
               }`}
             >
-              <Icon size={18} className={isActive ? 'text-white' : ''} />
+              <Icon size={16} />
               {tab.label}
             </button>
           );
         })}
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Panels */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 20 }}
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.2 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.15 }}
         >
           {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Quick Stats Bento Grid */}
-              <div className="interactive-card p-8 flex flex-col justify-between">
-                <div>
-                  <div className="w-12 h-12 rounded-2xl bg-[var(--color-warning)]/10 flex items-center justify-center text-[var(--color-warning)] mb-6">
-                    <Users size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('integrity.conflicts')}</h3>
-                  <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    {t('integrity.conflictsDesc')}
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setActiveTab('conflicts')}
-                  className="mt-8 flex items-center gap-2 text-[var(--color-primary)] font-semibold text-sm group cursor-pointer"
-                >
-                  {t('integrity.goToLog')} 
-                  <Plus size={16} className="group-hover:rotate-90 transition-transform" />
-                </button>
-              </div>
-
-              <div className="interactive-card p-8 flex flex-col justify-between">
-                <div>
-                  <div className="w-12 h-12 rounded-2xl bg-[var(--color-danger)]/10 flex items-center justify-center text-[var(--color-danger)] mb-6">
-                    <ShieldAlert size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('integrity.fraud')}</h3>
-                  <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    {t('integrity.fraudDesc')}
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setActiveTab('fraud')}
-                  className="mt-8 flex items-center gap-2 text-[var(--color-danger)] font-semibold text-sm group cursor-pointer"
-                >
-                  {t('integrity.goToLog')} 
-                  <Plus size={16} className="group-hover:rotate-90 transition-transform" />
-                </button>
-              </div>
-
-              <div className="interactive-card p-8 flex flex-col justify-between group overflow-hidden relative">
-                <div className="absolute top-0 end-0 p-8 opacity-[0.03] pointer-events-none">
-                  <Scale size={120} className="text-[var(--color-primary)]" />
-                </div>
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] mb-6 group-hover:scale-110 transition-transform">
-                    <Scale size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-2">{t('integrity.totalReports')}</h3>
-                  <p className="text-sm text-[var(--color-text-muted)]">{t('integrity.integrityActivity')} {getMonthName()} {new Date().getFullYear()}</p>
-                  <div className="mt-6 flex items-end gap-2">
-                    <span className="text-5xl font-bold tracking-tighter text-[var(--color-text-main)]">
-                      {loading ? '...' : stats.summary.total}
-                    </span>
-                    <span className="text-[var(--color-text-muted)] font-semibold mb-1 text-xs uppercase tracking-widest">{t('integrity.activeStatus')}</span>
-                  </div>
-                </div>
-                <div className="relative z-10 space-y-3 mt-8 pt-6 border-t border-[var(--color-border-soft)]">
-                  <div className="flex justify-between items-center text-xs font-semibold text-[var(--color-text-muted)]">
-                    <span>{t('integrity.conflictOfInterestLabel')}</span>
-                    <span>{loading ? '...' : stats.conflicts.total} {t('integrity.disclosures')}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs font-semibold text-[var(--color-danger)]">
-                    <span>{t('integrity.fraudLabel')}</span>
-                    <span>{loading ? '...' : stats.fraud.total} {t('integrity.cases')}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <OverviewPanel
+              stats={stats}
+              loading={loading}
+              onNavigate={setActiveTab}
+            />
           )}
-
           {activeTab === 'conflicts' && <ConflictOfInterest />}
           {activeTab === 'fraud' && <FraudLog />}
         </motion.div>
       </AnimatePresence>
     </div>
+  );
+};
+
+/* ─── Overview Panel: Activity-driven, not decorative ─── */
+
+interface OverviewPanelProps {
+  stats: IntegrityStats;
+  loading: boolean;
+  onNavigate: (tab: 'conflicts' | 'fraud') => void;
+}
+
+const OverviewPanel: React.FC<OverviewPanelProps> = ({ stats, loading, onNavigate }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-6">
+      {/* Compact stat summary — inline, not hero-metric */}
+      <div className="flex flex-wrap gap-4">
+        <StatChip
+          label={t('integrity.conflictOfInterestLabel')}
+          value={stats.conflicts.total}
+          accent={stats.conflicts.pending > 0 ? 'warning' : 'muted'}
+          sub={stats.conflicts.pending > 0 ? `${stats.conflicts.pending} ${t('integrity.pending')}` : undefined}
+          loading={loading}
+        />
+        <StatChip
+          label={t('integrity.fraudLabel')}
+          value={stats.fraud.total}
+          accent={stats.fraud.open > 0 ? 'danger' : 'muted'}
+          sub={stats.fraud.open > 0 ? `${stats.fraud.open} ${t('common.open')}` : undefined}
+          loading={loading}
+        />
+      </div>
+
+      {/* Action cards — task-oriented, not decorative */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ActionCard
+          icon={Users}
+          iconColor="var(--color-warning)"
+          title={t('integrity.conflicts')}
+          description={t('integrity.conflictsDesc')}
+          actionLabel={t('integrity.goToLog')}
+          onClick={() => onNavigate('conflicts')}
+          badge={stats.conflicts.pending > 0 ? String(stats.conflicts.pending) : undefined}
+          loading={loading}
+        />
+        <ActionCard
+          icon={ShieldAlert}
+          iconColor="var(--color-danger)"
+          title={t('integrity.fraud')}
+          description={t('integrity.fraudDesc')}
+          actionLabel={t('integrity.goToLog')}
+          onClick={() => onNavigate('fraud')}
+          badge={stats.fraud.open > 0 ? String(stats.fraud.open) : undefined}
+          loading={loading}
+        />
+      </div>
+    </div>
+  );
+};
+
+/* ─── Stat Chip: Compact inline indicator ─── */
+
+interface StatChipProps {
+  label: string;
+  value: number;
+  accent: 'warning' | 'danger' | 'muted';
+  sub?: string | undefined;
+  loading: boolean;
+}
+
+const StatChip: React.FC<StatChipProps> = ({ label, value, accent, sub, loading }) => {
+  const accentColors = {
+    warning: 'text-[var(--color-warning)]',
+    danger: 'text-[var(--color-danger)]',
+    muted: 'text-[var(--color-text-main)]',
+  };
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-[var(--color-card)] border border-[var(--color-border-soft)] rounded-xl">
+      <div className="flex flex-col">
+        <span className="text-xs text-[var(--color-text-muted)]">{label}</span>
+        <div className="flex items-baseline gap-2">
+          {loading ? (
+            <div className="h-5 w-8 rounded animate-shimmer" />
+          ) : (
+            <span className={`text-lg font-bold ${accentColors[accent]}`}>{value}</span>
+          )}
+          {sub && !loading && (
+            <span className="text-[10px] font-semibold text-[var(--color-text-muted)]">{sub}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Action Card: Navigate to sub-section ─── */
+
+interface ActionCardProps {
+  icon: React.ElementType;
+  iconColor: string;
+  title: string;
+  description: string;
+  actionLabel: string;
+  onClick: () => void;
+  badge?: string | undefined;
+  loading: boolean;
+}
+
+const ActionCard: React.FC<ActionCardProps> = ({
+  icon: Icon,
+  iconColor,
+  title,
+  description,
+  actionLabel,
+  onClick,
+  badge,
+  loading,
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className="glass-card p-5 flex items-start gap-4 text-start w-full group cursor-pointer hover:border-[var(--color-border-strong)] transition-colors"
+    >
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+        style={{ backgroundColor: `color-mix(in srgb, ${iconColor} 10%, transparent)`, color: iconColor }}
+      >
+        <Icon size={20} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-sm font-semibold text-[var(--color-text-main)]">{title}</span>
+          {badge && (
+            <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
+              {badge}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">{description}</p>
+        <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] group-hover:gap-2 transition-all">
+          {actionLabel}
+          <ChevronRight size={14} className="rtl:rotate-180" />
+        </span>
+      </div>
+    </button>
   );
 };
 

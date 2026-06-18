@@ -42,8 +42,8 @@ type IncomingFormValues = z.infer<typeof incomingSchema>;
 
 interface IncomingFormProps {
   language: 'ar' | 'en';
-  departments: any[];
-  users: any[];
+  departments: Array<{id: number; name_ar: string; name_en: string}>;
+  users: Array<{id: number; name: string}>;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -57,7 +57,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
     watch,
     formState: { errors, isSubmitting },
   } = useForm<IncomingFormValues>({
-    resolver: zodResolver(incomingSchema) as any,
+    resolver: zodResolver(incomingSchema),
     mode: 'onBlur',
     defaultValues: {
       sender_entity_type: EntityType.PRIVATE,
@@ -85,7 +85,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <FormField label={t('correspondence.originalLetterNo')} error={errors.letter_number?.message}>
           <Input {...register('letter_number')} defaultValue="" placeholder={t('correspondence.originalLetterNoPlaceholder')} />
@@ -142,7 +142,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
         <FormField label={t('correspondence.receivingDept')} error={errors.receiving_dept_id?.message}>
           <Select {...register('receiving_dept_id')}>
             <option value="">{t('correspondence.selectDepartment')}</option>
-            {(Array.isArray(departments) ? departments : []).map(d => (
+            {departments.map(d => (
               <option key={d.id} value={d.id}>{language === 'ar' ? d.name_ar : d.name_en}</option>
             ))}
           </Select>
@@ -151,7 +151,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
         <FormField label={t('correspondence.assignedDept')} error={errors.assigned_dept_id?.message}>
           <Select {...register('assigned_dept_id')}>
             <option value="">{t('correspondence.selectDepartment')}</option>
-            {(Array.isArray(departments) ? departments : []).map(d => (
+            {departments.map(d => (
               <option key={d.id} value={d.id}>{language === 'ar' ? d.name_ar : d.name_en}</option>
             ))}
           </Select>
@@ -160,7 +160,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
         <FormField label={t('correspondence.assignedUser')} error={errors.assigned_user_id?.message}>
           <Select {...register('assigned_user_id')}>
             <option value="">{t('correspondence.selectUser')}</option>
-            {(Array.isArray(users) ? users : []).map(u => (
+            {users.map(u => (
               <option key={u.id} value={u.id}>{u.name}</option>
             ))}
           </Select>

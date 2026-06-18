@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Lock, Plus, FileText } from 'lucide-react';
+import { Lock, Plus, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../../context/UserContext';
 import { UserRole } from '../../constants';
@@ -16,7 +16,6 @@ const FraudLog: React.FC = () => {
   const { t } = useTranslation();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
-  const [policyContent, setPolicyContent] = useState('');
 
   const isManager = user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER;
   
@@ -39,9 +38,9 @@ const FraudLog: React.FC = () => {
     savePolicy
   } = useFraudLog(isManager);
 
-  // Sync internal state for editing if needed
   const [editingPolicy, setEditingPolicy] = useState(currentPolicy);
 
+  // No access — show the access gate (which includes its own header)
   if (!hasAccess) {
     return (
       <AccessGate 
@@ -60,66 +59,65 @@ const FraudLog: React.FC = () => {
         policyContent={editingPolicy || currentPolicy}
         setPolicyContent={setEditingPolicy}
         savePolicy={savePolicy}
-        fetchPolicy={async () => {}} // Hook handles re-fetch on success inside savePolicy mostly or via effects
+        fetchPolicy={async () => {}}
       />
     );
   }
 
+  // Has access — show the fraud log content
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[var(--color-danger)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-danger)]/20">
-            <ShieldAlert size={32} />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-4xl font-bold text-[var(--color-text-main)] tracking-tight">{t('integrity.fraud')}</h2>
-            <p className="text-sm text-[var(--color-danger)] font-semibold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
-              <Lock size={14} />
-              {t('integrity.confidentialAccess')}
-            </p>
-          </div>
+    <div className="space-y-5">
+      {/* Action bar — no redundant page header, parent tab establishes context */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-danger)]">
+          <Lock size={13} />
+          <span className="uppercase tracking-wider">{t('integrity.confidentialAccess')}</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Button 
             variant="outline"
+            size="sm"
             onClick={() => setIsPolicyOpen(true)}
             className="flex items-center gap-2"
           >
-            <FileText size={18} />
+            <FileText size={15} />
             {t('integrity.viewPolicy')}
           </Button>
           {isManager && (
             <Button 
               variant="destructive"
+              size="sm"
               onClick={() => setIsAddModalOpen(true)}
               className="flex items-center gap-2"
             >
-              <Plus size={20} />
+              <Plus size={16} />
               {t('integrity.reportCase')}
             </Button>
           )}
         </div>
       </div>
 
-      <AccessGate 
-        isManager={isManager}
-        accessStatus={accessStatus}
-        myRequest={myRequest}
-        requests={requests}
-        isRequestModalOpen={isRequestModalOpen}
-        setIsRequestModalOpen={setIsRequestModalOpen}
-        requestReason={requestReason}
-        setRequestReason={setRequestReason}
-        requestError={requestError}
-        submitAccessRequest={submitAccessRequest}
-        approveRequest={approveRequest}
-        rejectRequest={rejectRequest}
-        policyContent={editingPolicy || currentPolicy}
-        setPolicyContent={setEditingPolicy}
-        savePolicy={savePolicy}
-        fetchPolicy={async () => {}}
-      />
+      {/* Pending access requests — only show for managers when there are pending items */}
+      {isManager && requests.filter(r => r.status === 'Pending').length > 0 && (
+        <AccessGate 
+          isManager={isManager}
+          accessStatus={accessStatus}
+          myRequest={myRequest}
+          requests={requests}
+          isRequestModalOpen={isRequestModalOpen}
+          setIsRequestModalOpen={setIsRequestModalOpen}
+          requestReason={requestReason}
+          setRequestReason={setRequestReason}
+          requestError={requestError}
+          submitAccessRequest={submitAccessRequest}
+          approveRequest={approveRequest}
+          rejectRequest={rejectRequest}
+          policyContent={editingPolicy || currentPolicy}
+          setPolicyContent={setEditingPolicy}
+          savePolicy={savePolicy}
+          fetchPolicy={async () => {}}
+        />
+      )}
 
       <FraudTable cases={cases} />
 

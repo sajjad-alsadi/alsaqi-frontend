@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { AuditProgram, AuditProcedure } from '../types';
@@ -19,7 +18,6 @@ import Modal from '../components/Modal';
 import { useDepartments } from '../api/hooks/useDepartments';
 
 const AuditProgramLibrary: React.FC = () => {
-  const { token } = useAuth();
   const { user } = useUser();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
@@ -29,33 +27,28 @@ const AuditProgramLibrary: React.FC = () => {
   const { data: programs = [], isLoading: loading } = useQuery({
     queryKey: ['audit-programs'],
     queryFn: async () => {
-      const res = await api.get('/audit-programs', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await api.get('/audit-programs');
       return (Array.isArray(res.data) ? res.data : (res.data.data || [])) as AuditProgram[];
     },
     staleTime: 5 * 60_000,
-    enabled: !!token,
   });
 
   const { data: instructions = [] } = useQuery({
     queryKey: ['compliance-instructions'],
     queryFn: async () => {
-      const res = await api.get('/compliance?source_type=cbi_instruction', { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await api.get('/compliance?source_type=cbi_instruction');
       return Array.isArray(res.data) ? res.data : (res.data.data || []);
     },
     staleTime: 30 * 60_000,
-    enabled: !!token,
   });
 
   const { data: laws = [] } = useQuery({
     queryKey: ['compliance-laws'],
     queryFn: async () => {
-      const res = await api.get('/compliance?source_type=law', { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await api.get('/compliance?source_type=law');
       return Array.isArray(res.data) ? res.data : (res.data.data || []);
     },
     staleTime: 30 * 60_000,
-    enabled: !!token,
   });
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,9 +91,7 @@ const AuditProgramLibrary: React.FC = () => {
 
       if (currentProgram.id) {
         try {
-          await api.put(`/audit-programs/${currentProgram.id}`, data, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          await api.put(`/audit-programs/${currentProgram.id}`, data);
           toast.success(t('updateSuccess'));
         } catch (err: any) {
           if (err.response?.status === 404) {
@@ -112,9 +103,7 @@ const AuditProgramLibrary: React.FC = () => {
           throw err;
         }
       } else {
-        const res = await api.post('/audit-programs', data, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await api.post('/audit-programs', data);
         setCurrentProgram(res.data);
         toast.success(t('createSuccess'));
       }
@@ -138,14 +127,10 @@ const AuditProgramLibrary: React.FC = () => {
     setIsDeleting(true);
     try {
       if (deleteType === 'program') {
-        await api.delete(`/audit-programs/${idToDelete}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        await api.delete(`/audit-programs/${idToDelete}`);
         queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
       } else {
-        await api.delete(`/audit-procedures/${idToDelete}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        await api.delete(`/audit-procedures/${idToDelete}`);
         setProcedures(prev => prev.filter(p => p.id !== idToDelete));
       }
       toast.success(t('deleteSuccess'));
@@ -173,9 +158,7 @@ const AuditProgramLibrary: React.FC = () => {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      await api.post(`/audit-programs/${id}/duplicate`, {}, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.post(`/audit-programs/${id}/duplicate`, {});
       toast.success(t('createSuccess'));
       queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
     } catch (err: any) {
@@ -195,9 +178,7 @@ const AuditProgramLibrary: React.FC = () => {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      await api.post(`/audit-programs/${id}/approve`, {}, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.post(`/audit-programs/${id}/approve`, {});
       toast.success(t('updateSuccess'));
       queryClient.invalidateQueries({ queryKey: ['audit-programs'] });
       setIsEditing(false);
@@ -231,9 +212,7 @@ const AuditProgramLibrary: React.FC = () => {
     };
 
     try {
-      const res = await api.post('/audit-procedures', newProc, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await api.post('/audit-procedures', newProc);
       toast.success(t('createSuccess'));
       setProcedures([...procedures, res.data]);
     } catch (err) {
@@ -244,9 +223,7 @@ const AuditProgramLibrary: React.FC = () => {
 
   const handleUpdateProcedure = async (id: string | number, data: Partial<AuditProcedure>) => {
     try {
-      await api.put(`/audit-procedures/${id}`, data, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.put(`/audit-procedures/${id}`, data);
       setProcedures(prev => prev.map(p => String(p.id) === String(id) ? { ...p, ...data } : p));
     } catch (err: any) {
       logger.error('Operation failed', err);

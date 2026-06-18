@@ -5,7 +5,9 @@ import {
   Download, 
   Mail, 
   Send,
-  Calendar
+  Calendar,
+  Archive,
+  AlertCircle
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';
@@ -17,6 +19,7 @@ import Pagination from '../../components/Pagination';
 import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import { Button } from '@/components/ui/button';
+import type { Correspondence } from '@alsaqi/shared';
 
 interface CorrespondenceArchiveProps {
   language: 'ar' | 'en';
@@ -26,8 +29,9 @@ interface CorrespondenceArchiveProps {
 const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language, onViewDetails }) => {
   const { t } = useTranslation();
   const { formatNumber, formatDate } = useFormat();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<Correspondence[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
   const [typeFilter, setTypeFilter] = useState<'All' | 'Incoming' | 'Outgoing'>('All');
@@ -40,6 +44,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
   const fetchArchived = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await api.get('/correspondence/archive', {
         params: {
           page: pagination.page,
@@ -54,6 +59,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
       setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
     } catch (error) {
       logger.error("Failed to fetch archived correspondence", error);
+      setError(t('correspondence.failedToLoad'));
       toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);
@@ -144,25 +150,66 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-[var(--color-bg-soft)]/50 border-b border-[var(--color-border-soft)]">
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.type')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.seqNumber')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.entity')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.archiveDate')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.type')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.seqNumber')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.entity')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.archiveDate')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-end">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]/50">
               {loading ? (
+                <>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i}>
+                      <td className="px-6 py-4"><div className="h-4 w-16 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-12 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-40 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-28 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-20 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-8 w-8 animate-pulse bg-[var(--color-border-soft)]/50 rounded-xl ms-auto" /></td>
+                    </tr>
+                  ))}
+                </>
+              ) : error && items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-[var(--color-text-muted)] font-bold text-sm">
-                    {t('common.loading')}
+                  <td colSpan={6}>
+                    <div className="flex flex-col items-center gap-3 text-center py-16">
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--color-danger)]/5 flex items-center justify-center">
+                        <AlertCircle size={24} className="text-[var(--color-danger)]" />
+                      </div>
+                      <p className="text-base font-semibold text-[var(--color-text-main)]">{t('correspondence.failedToLoad')}</p>
+                      <p className="text-sm text-[var(--color-text-muted)] max-w-sm">{t('correspondence.checkConnection')}</p>
+                      <Button variant="outline" onClick={fetchArchived}>
+                        {t('common.retry')}
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-[var(--color-text-muted)] font-bold text-sm">
-                    {t('correspondence.archiveIsEmpty')}
+                  <td colSpan={6}>
+                    {(debouncedSearch || typeFilter !== 'All') ? (
+                      <div className="flex flex-col items-center gap-3 text-center py-16">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/5 flex items-center justify-center">
+                          <Search size={24} className="text-[var(--color-primary)]" />
+                        </div>
+                        <p className="text-base font-semibold text-[var(--color-text-main)]">{t('correspondence.noFilterResults')}</p>
+                        <p className="text-sm text-[var(--color-text-muted)] max-w-sm">{t('correspondence.adjustFilters')}</p>
+                        <Button variant="outline" onClick={() => { setSearch(''); setTypeFilter('All'); }}>
+                          {t('correspondence.clearFilters')}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 text-center py-16">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/5 flex items-center justify-center">
+                          <Archive size={24} className="text-[var(--color-primary)]" />
+                        </div>
+                        <p className="text-base font-semibold text-[var(--color-text-main)]">{t('correspondence.archiveEmpty')}</p>
+                        <p className="text-sm text-[var(--color-text-muted)] max-w-sm">{t('correspondence.archiveDescription')}</p>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ) : (Array.isArray(items) ? items : []).map((item, idx) => (

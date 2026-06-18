@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { AuditTrail } from '../types';
 import { History, Search, Filter } from 'lucide-react';
 import api from '../api/httpClient';
-import toast from 'react-hot-toast';
 import { useFormat } from '../utils/formatService';
+import { useDebounce } from '../hooks/useDebounce';
 import Pagination from '../components/Pagination';
 import VirtualTable, { ColumnDef } from '../components/VirtualTable';
 import logger from '../utils/logger';
@@ -20,6 +20,7 @@ const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterModule, setFilterModule] = useState('all');
   const [filterAction, setFilterAction] = useState('all');
+  const debouncedSearch = useDebounce(searchTerm, 400);
   
   const modules = ['auth', 'users', 'audit', 'compliance', 'risk', 'correspondence', 'settings', 'system'];
   const actions = ['login', 'logout', 'created', 'updated', 'deleted', 'failed', 'approved', 'rejected'];
@@ -32,7 +33,7 @@ const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
   });
 
   const { data: queryResult, isLoading: loading } = useQuery({
-    queryKey: ['audit-trail', pagination.page, pagination.pageSize, filterModule, filterAction, searchTerm],
+    queryKey: ['audit-trail', pagination.page, pagination.pageSize, filterModule, filterAction, debouncedSearch],
     queryFn: async () => {
       const res = await api.get('/audit-trail', {
         params: {
@@ -40,7 +41,7 @@ const AuditTrailModule: React.FC<AuditTrailProps> = ({ embedded = false }) => {
           pageSize: pagination.pageSize,
           module: filterModule !== 'all' ? filterModule : undefined,
           action: filterAction !== 'all' ? filterAction : undefined,
-          username: searchTerm || undefined
+          username: debouncedSearch || undefined
         },
       });
       

@@ -5,16 +5,15 @@ import {
   Download, 
   Building,
   FileText,
-  X,
   Send,
   Trash2,
-  Edit2
+  Edit2,
+  AlertCircle
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/httpClient';
 import { toList, toPagination } from '../../api/utils/envelope';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'motion/react';
 import { useFormat } from '../../utils/formatService';
 import { useDebounce } from '../../hooks/useDebounce';
 import Modal from '../../components/Modal';
@@ -23,14 +22,31 @@ import Pagination from '../../components/Pagination';
 import { UserRole } from '../../constants';
 import logger from '../../utils/logger';
 import { buildCsv, downloadCsv } from '../../utils/csvExport';
-import Portal from '../../components/Portal';
 import { Button } from '@/components/ui/button';
+import type { Correspondence } from '@alsaqi/shared';
 
 import OutgoingForm from './OutgoingForm';
 
 // Lazy-load PdfViewer (and its react-pdf/pdfjs-dist dependencies) so the chunk
 // only loads when a PDF is actually previewed.
 const PdfViewer = React.lazy(() => import('../../components/PdfViewer'));
+
+/** Allowlist of safe URL protocols for attachment preview */
+const SAFE_PREVIEW_PROTOCOLS = ['https:', 'data:application/pdf', 'data:image/'];
+
+function isSafePreviewUrl(url: string): boolean {
+  if (!url) return false;
+  // Allow data URIs for images and PDFs
+  if (url.startsWith('data:image/') || url.startsWith('data:application/pdf')) return true;
+  // Allow HTTPS URLs
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:';
+  } catch {
+    // Relative URLs or non-parseable — allow only if it looks like a file path
+    return /^\/[\w\-/.]+$/.test(url);
+  }
+}
 
 interface OutgoingRegisterProps {
   language: 'ar' | 'en';
@@ -40,8 +56,9 @@ interface OutgoingRegisterProps {
 
 const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole, onViewDetails }) => {
   const { t } = useTranslation();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<Correspondence[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
@@ -59,6 +76,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
   const fetchData = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await api.get('/correspondence/outgoing', {
         params: {
           page: pagination.page,
@@ -71,13 +89,14 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
     } catch (error) {
       logger.error("Failed to fetch outgoing correspondence", error);
+      setError(t('correspondence.failedToLoad'));
       toast.error(t('errorOccurred'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (id: number) => {
     setItemToDelete(id);
     setIsDeleteModalOpen(true);
   };
@@ -96,7 +115,12 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
   };
 
   const handlePreview = (fileUrl: string) => {
-    setPreviewUrl(fileUrl);
+    if (isSafePreviewUrl(fileUrl)) {
+      setPreviewUrl(fileUrl);
+    } else {
+      logger.error("Blocked unsafe preview URL", { url: fileUrl });
+      toast.error(t('correspondence.unsafeAttachment'));
+    }
   };
 
   const handleExport = () => {
@@ -110,7 +134,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
     ];
 
     const csvData = items.map(item => [
-      item.sequence_number,
+      item.letter_number,
       item.letter_date,
       item.recipient_entity,
       item.subject,
@@ -122,10 +146,9 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
     downloadCsv(`outgoing_correspondence_${new Date().toISOString().split('T')[0]}.csv`, csv);
   };
 
-  const filteredItems = items;
-
   return (
     <div className="space-y-4">
+      {/* File Preview Modal */}
       <Modal
         isOpen={!!previewUrl}
         onClose={() => setPreviewUrl(null)}
@@ -141,7 +164,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                 className="max-w-full max-h-full object-contain mx-auto" 
                 referrerPolicy="no-referrer"
               />
-            ) : previewUrl.startsWith('data:application/pdf') || /\.pdf$/i.test(previewUrl) || (previewUrl && !previewUrl.startsWith('data:') && !previewUrl.startsWith('http') && !previewUrl.startsWith('/') && previewUrl.length > 100) ? (
+            ) : previewUrl.startsWith('data:application/pdf') || /\.pdf$/i.test(previewUrl) ? (
               <div className="w-full h-full">
                 <Suspense fallback={<LoadingSpinner />}>
                   <PdfViewer url={previewUrl} />
@@ -168,37 +191,36 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
         </div>
       </Modal>
 
-      <Portal>
-        {isDeleteModalOpen && (
-          <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[var(--color-bg-main)] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[var(--color-border-soft)]">
-              <h3 className="text-xl font-bold text-[var(--color-text-main)] mb-4">
-                {t('correspondence.confirmDelete')}
-              </h3>
-              <p className="text-[var(--color-text-muted)] mb-8">
-                {t('correspondence.deleteLetterConfirm')}
-              </p>
-              <div className="flex justify-end gap-3">
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    setIsDeleteModalOpen(false);
-                    setItemToDelete(null);
-                  }}
-                >
-                  {t('common.cancel')}
-                </Button>
-                <button 
-                  onClick={confirmDelete}
-                  className="px-6 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-900/20"
-                >
-                  {t('common.delete')}
-                </button>
-              </div>
-            </div>
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setItemToDelete(null); }}
+        title={t('correspondence.confirmDelete')}
+        size="sm"
+      >
+        <div className="space-y-6">
+          <p className="text-[var(--color-text-muted)]">
+            {t('correspondence.deleteLetterConfirm')}
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setItemToDelete(null);
+              }}
+            >
+              {t('common.cancel')}
+            </Button>
+            <button 
+              onClick={confirmDelete}
+              className="px-6 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-900/20"
+            >
+              {t('common.delete')}
+            </button>
           </div>
-        )}
-      </Portal>
+        </div>
+      </Modal>
 
       {/* Filters Bar */}
       <div className="bg-[var(--color-bg-soft)]/50 p-4 rounded-2xl border border-[var(--color-border-soft)] flex flex-wrap items-center gap-4">
@@ -240,34 +262,81 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
           <table className="w-full text-start border-collapse">
             <thead>
               <tr className="bg-[var(--color-bg-soft)]/50 border-b border-[var(--color-border-soft)]">
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">
                   {t('correspondence.seqNumber')}
                 </th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.recipient')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.classification')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.sendingMethod')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-center">{t('correspondence.attachment')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-center">{t('common.actions')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.date')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.recipient')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.subject')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.classification')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-start">{t('correspondence.sendingMethod')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-center">{t('correspondence.attachment')}</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] text-center">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]/50">
               {loading ? (
+                <>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i}>
+                      <td className="px-6 py-4"><div className="h-4 w-12 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-20 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-28 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-40 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-5 w-16 animate-pulse bg-[var(--color-border-soft)]/50 rounded-lg" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-16 animate-pulse bg-[var(--color-border-soft)]/50 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-8 w-8 animate-pulse bg-[var(--color-border-soft)]/50 rounded-xl mx-auto" /></td>
+                      <td className="px-6 py-4"><div className="h-8 w-8 animate-pulse bg-[var(--color-border-soft)]/50 rounded-xl mx-auto" /></td>
+                    </tr>
+                  ))}
+                </>
+              ) : error && items.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-[var(--color-text-muted)] font-bold text-sm">
-                    {t('common.loading')}
+                  <td colSpan={8}>
+                    <div className="flex flex-col items-center gap-3 text-center py-16">
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--color-danger)]/5 flex items-center justify-center">
+                        <AlertCircle size={24} className="text-[var(--color-danger)]" />
+                      </div>
+                      <p className="text-base font-semibold text-[var(--color-text-main)]">{t('correspondence.failedToLoad')}</p>
+                      <p className="text-sm text-[var(--color-text-muted)] max-w-sm">{t('correspondence.checkConnection')}</p>
+                      <Button variant="outline" onClick={fetchData}>
+                        {t('common.retry')}
+                      </Button>
+                    </div>
                   </td>
                 </tr>
-              ) : filteredItems.length === 0 ? (
+              ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-[var(--color-text-muted)] font-bold text-sm">
-                    {t('correspondence.noMatchingResults')}
+                  <td colSpan={8}>
+                    {debouncedSearch ? (
+                      <div className="flex flex-col items-center gap-3 text-center py-16">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/5 flex items-center justify-center">
+                          <Search size={24} className="text-[var(--color-primary)]" />
+                        </div>
+                        <p className="text-base font-semibold text-[var(--color-text-main)]">{t('correspondence.noFilterResults')}</p>
+                        <p className="text-sm text-[var(--color-text-muted)] max-w-sm">{t('correspondence.adjustFilters')}</p>
+                        <Button variant="outline" onClick={() => setSearch('')}>
+                          {t('correspondence.clearFilters')}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 text-center py-16">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/5 flex items-center justify-center">
+                          <Send size={24} className="text-[var(--color-primary)]" />
+                        </div>
+                        <p className="text-base font-semibold text-[var(--color-text-main)]">{t('correspondence.noOutgoingYet')}</p>
+                        <p className="text-sm text-[var(--color-text-muted)] max-w-sm">{t('correspondence.outgoingDescription')}</p>
+                        <Button onClick={() => setShowAddModal(true)}>
+                          <Plus size={16} />
+                          {t('correspondence.registerOutgoingLetter')}
+                        </Button>
+                      </div>
+                    )}
                   </td>
                 </tr>
-              ) : (Array.isArray(filteredItems) ? filteredItems : []).map((item) => (
-                <tr key={item.id} className="hover:bg-[var(--color-primary)]/5 transition-colors group cursor-pointer" onClick={() => onViewDetails('Outgoing', item.id)}>
-                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{formatNumber(item.sequence_number)}</td>
+              ) : items.map((item) => (
+                <tr key={item.id} className="hover:bg-[var(--color-primary)]/5 transition-colors group cursor-pointer" onClick={() => onViewDetails('Outgoing', Number(item.id))}>
+                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{formatNumber(item.letter_number)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">{formatDate(item.letter_date)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">
                     <div className="flex items-center gap-2">
@@ -307,7 +376,7 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
                           </button>
                           <button 
                             className="p-2 bg-[var(--color-card)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:text-red-500 rounded-xl shadow-sm transition-all" 
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => handleDelete(Number(item.id))}
                             title={t('common.delete')}
                           >
                             <Trash2 size={16} />
@@ -333,44 +402,16 @@ const OutgoingRegister: React.FC<OutgoingRegisterProps> = ({ language, userRole,
       />
 
       {/* Add Modal */}
-      <Portal>
-        <AnimatePresence>
-          {showAddModal && (
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-[var(--color-card)] rounded-3xl border border-[var(--color-border-soft)] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
-              >
-                <div className="p-6 border-b border-[var(--color-border-soft)] flex items-center justify-between bg-[var(--color-bg-main)]">
-                  <h2 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
-                    <Send className="text-[var(--color-primary)]" />
-                    {t('correspondence.registerOutgoingTitle')}
-                  </h2>
-                  <button 
-                    onClick={() => setShowAddModal(false)}
-                    className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-full hover:bg-[var(--color-border-soft)] transition-colors"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-                
-                <div className="p-6 overflow-y-auto flex-1">
-                  <OutgoingForm 
-                    language={language} 
-                    onSuccess={() => {
-                      setShowAddModal(false);
-                      fetchData();
-                    }}
-                    onCancel={() => setShowAddModal(false)}
-                  />
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-      </Portal>
+      <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title={t('correspondence.registerOutgoingTitle')} size="md">
+        <OutgoingForm 
+          language={language} 
+          onSuccess={() => {
+            setShowAddModal(false);
+            fetchData();
+          }}
+          onCancel={() => setShowAddModal(false)}
+        />
+      </Modal>
     </div>
   );
 };

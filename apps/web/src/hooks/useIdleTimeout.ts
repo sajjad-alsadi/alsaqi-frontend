@@ -17,6 +17,16 @@ export const useIdleTimeout = () => {
   const lastActivityArmRef = useRef<number>(0);
   const [timeoutMs, setTimeoutMs] = useState(DEFAULT_IDLE_TIMEOUT_MS);
 
+  // Keep current values in refs so the activity handler always reads the latest
+  // without needing to tear down and re-attach event listeners on every change.
+  const timeoutMsRef = useRef(timeoutMs);
+  const logoutRef = useRef(logout);
+  const userRef = useRef(user);
+
+  useEffect(() => { timeoutMsRef.current = timeoutMs; }, [timeoutMs]);
+  useEffect(() => { logoutRef.current = logout; }, [logout]);
+  useEffect(() => { userRef.current = user; }, [user]);
+
   // Fetch session_timeout_minutes from server settings
   useEffect(() => {
     if (!user) return;
@@ -34,14 +44,14 @@ export const useIdleTimeout = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    if (user) {
+    if (userRef.current) {
       timeoutRef.current = setTimeout(() => {
         // Store a flag in sessionStorage to show a specific message on login screen
         try {
           sessionStorage.setItem('idle_logout', 'true');
         } catch {}
-        logout();
-      }, timeoutMs);
+        logoutRef.current();
+      }, timeoutMsRef.current);
     }
   };
 

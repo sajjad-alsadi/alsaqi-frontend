@@ -1,6 +1,5 @@
 import React, { useState, Suspense } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import { usePreferences } from '../context/PreferencesContext';
 import api from '../api/httpClient';
@@ -24,7 +23,6 @@ import { useFileUploadValidation } from '../hooks/useFileUploadValidation';
 const PdfViewer = React.lazy(() => import('../components/PdfViewer'));
 
 const AuditEvidence: React.FC = () => {
-  const { token } = useAuth();
   const { language } = usePreferences();
   const { user } = useUser();
   const { t } = useTranslation();
@@ -180,6 +178,11 @@ const AuditEvidence: React.FC = () => {
 
   const handleDownload = (ev: AuditEvidenceType) => {
     if (!ev.file_data) {
+      setError(t('evidence.noFileDataAvailable'));
+      return;
+    }
+    // Only allow data: URIs to prevent javascript: or other XSS vectors
+    if (!ev.file_data.startsWith('data:')) {
       setError(t('evidence.noFileDataAvailable'));
       return;
     }

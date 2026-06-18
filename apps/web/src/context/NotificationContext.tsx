@@ -179,9 +179,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   /** Resilient WebSocket client (exponential backoff + jitter + HTTP polling fallback). */
   const wsClientRef = useRef<WebSocketClient | null>(null);
   const bellShakeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isFetchingRef = useRef(false);
+
+  // Ref-based loading guard: avoids depending on state.isLoading in the
+  // callback (which would destabilize its identity and risk stale closures
+  // when called via fetchNotificationsRef).
 
   const fetchNotifications = useCallback(async (reset = false) => {
-    if (!user || state.isLoading) return;
+    if (!user || isFetchingRef.current) return;
+    isFetchingRef.current = true;
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const targetPage = reset ? 1 : pageRef.current;
@@ -199,9 +205,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         logger.error('Failed to fetch notifications:', err);
       }
     } finally {
+      isFetchingRef.current = false;
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [user, state.isLoading]);
+  }, [user]);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
@@ -212,10 +219,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [user]);
 
   const loadMore = useCallback(() => {
-    if (state.hasMore && !state.isLoading) {
+    if (state.hasMore && !isFetchingRef.current) {
       fetchNotifications(false);
     }
-  }, [state.hasMore, state.isLoading, fetchNotifications]);
+  }, [state.hasMore, fetchNotifications]);
 
   /**
    * Handle an incoming real-time notification from the WebSocket client.

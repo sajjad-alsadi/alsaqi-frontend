@@ -37,13 +37,41 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
   const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'incoming' | 'outgoing' | 'archive'>('dashboard');
   const [selectedRecord, setSelectedRecord] = useState<{ type: CorrespondenceType, id: number | string } | null>(null);
   
-  const { stats: rawStats, incoming: recentIncoming, loading, error, fetchStats } = useCorrespondence({ limit: 5 });
+  const { stats: rawStats, incoming: recentIncoming, loading, error, fetchStats } = useCorrespondence({ limit: 5, enabled: { stats: true, incoming: true, outgoing: false, archive: false } });
   const stats = rawStats as CorrespondenceStats | null;
 
   if (loading && activeSubTab === 'dashboard' && !stats) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
+      <div className="space-y-6">
+        {/* Skeleton stat cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="glass-card p-5">
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-11 h-11 rounded-xl animate-pulse bg-[var(--color-border-soft)]/50" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 w-24 animate-pulse bg-[var(--color-border-soft)]/50 rounded" />
+                <div className="h-7 w-16 animate-pulse bg-[var(--color-border-soft)]/50 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Skeleton table */}
+        <div className="glass-card p-6">
+          <div className="h-5 w-48 animate-pulse bg-[var(--color-border-soft)]/50 rounded mb-4" />
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex justify-between items-center p-3 border border-[var(--color-border-soft)] rounded-xl">
+                <div className="space-y-1.5">
+                  <div className="h-4 w-16 animate-pulse bg-[var(--color-border-soft)]/50 rounded" />
+                  <div className="h-3 w-32 animate-pulse bg-[var(--color-border-soft)]/50 rounded" />
+                </div>
+                <div className="h-3 w-20 animate-pulse bg-[var(--color-border-soft)]/50 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -63,12 +91,17 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05, duration: 0.3, ease: 'easeOut' }}
             onClick={card.onClick}
-            className="interactive-card p-5 group hover:border-[var(--color-primary)]/20"
+            role={card.onClick ? 'button' : undefined}
+            aria-label={card.onClick ? card.title : undefined}
+            className={`${card.onClick ? 'interactive-card cursor-pointer' : 'glass-card'} p-5 group hover:border-[var(--color-primary)]/20`}
           >
             <div className="flex items-start justify-between mb-3">
               <div className={`w-11 h-11 rounded-xl ${card.color} flex items-center justify-center group-hover:scale-105 transition-transform duration-200`}>
                 {card.icon}
               </div>
+              {card.onClick && (
+                <ArrowRight size={16} className="text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 rtl:rotate-180" />
+              )}
             </div>
             <div>
               <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{card.title}</p>
@@ -86,9 +119,19 @@ const CorrespondenceSystem: React.FC<CorrespondenceSystemProps> = ({ language, u
           </h3>
           <div className="space-y-3">
             {(!Array.isArray(recentIncoming) || recentIncoming.length === 0) ? (
-              <p className="text-sm text-[var(--color-text-muted)] italic">
-                {t('correspondence.noIncomingCorrespondence')}
-              </p>
+              <div className="flex flex-col items-center gap-3 text-center py-8">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary)]/5 flex items-center justify-center">
+                  <Mail size={20} className="text-[var(--color-primary)]" />
+                </div>
+                <p className="text-sm font-semibold text-[var(--color-text-main)]">{t('correspondence.noRecentIncoming')}</p>
+                <button 
+                  onClick={() => setActiveSubTab('incoming')}
+                  className="text-sm text-[var(--color-primary)] font-medium hover:underline flex items-center gap-1"
+                >
+                  {t('correspondence.viewAll')}
+                  <ArrowRight size={14} className={language === Language.AR ? 'rotate-180' : ''} />
+                </button>
+              </div>
             ) : (
               recentIncoming.map((item) => (
                 <button
