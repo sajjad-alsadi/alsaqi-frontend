@@ -1,3 +1,4 @@
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Unit tests for observability wiring (Area G).
  *
