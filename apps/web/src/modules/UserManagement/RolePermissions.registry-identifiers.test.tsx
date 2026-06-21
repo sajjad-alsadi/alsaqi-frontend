@@ -186,9 +186,12 @@ describe('RolePermissions fallback rows — registry-matching identifiers (Req 2
     const expectedLabels = new Set(
       registryNames.map((name) => i18nInstance.t(`modules.${name}`)),
     );
+    // The first cell's label lives in the outer span; a nested tooltip span was
+    // added alongside it, so select the DIRECT child span only (not descendants)
+    // to read exactly one label per row.
     const renderedLabels = Array.from(
-      container.querySelectorAll('tbody tr td:first-child span'),
-    ).map((el) => (el.textContent ?? '').trim());
+      container.querySelectorAll('tbody tr td:first-child > span'),
+    ).map((el) => (el.firstChild?.textContent ?? '').trim());
 
     expect(renderedLabels.length).toBe(expectedLabels.size);
     for (const label of renderedLabels) {

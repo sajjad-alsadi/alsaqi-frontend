@@ -210,9 +210,10 @@ describe('Correspondence Module', () => {
 
     render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
-    // The component shows a loading spinner div
-    const spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    // While loading with no stats, the dashboard renders animated skeleton
+    // placeholders (animate-pulse), not a spinner.
+    const skeleton = document.querySelector('.animate-pulse');
+    expect(skeleton).toBeInTheDocument();
   });
 
   it('renders recent incoming letters on dashboard', () => {
@@ -230,7 +231,7 @@ describe('Correspondence Module', () => {
 
     render(<CorrespondenceSystem language={Language.EN} userRole="Admin" />);
 
-    expect(screen.getByText('correspondence.noIncomingCorrespondence')).toBeInTheDocument();
+    expect(screen.getByText('correspondence.noRecentIncoming')).toBeInTheDocument();
   });
 
   it('renders register buttons for incoming and outgoing', () => {

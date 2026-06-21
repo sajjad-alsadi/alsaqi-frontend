@@ -106,12 +106,19 @@ describe('Property 2: Envelope fidelity — through createApiClient (Requirement
         expect(parseSpy).toHaveBeenCalledTimes(1);
         const valuePassedToSchema = parseSpy.mock.calls[0]?.[0];
 
-        // The value validated by the caller equals `data` with identical key order.
-        expect(valuePassedToSchema).toEqual(data);
-        expect(JSON.stringify(valuePassedToSchema)).toBe(JSON.stringify(data));
+        // Compare against the JSON-normalized form of `data`. The end-to-end path
+        // serializes the response to JSON and parses it back, so values that JSON
+        // itself cannot represent are normalized by the transport, not the client
+        // (e.g. `-0` → `0`, and integer-like object keys are reordered). Asserting
+        // against `JSON.parse(JSON.stringify(data))` checks true client fidelity —
+        // that nothing is added/removed/altered beyond what JSON transport implies.
+        // The client's no-copy/no-reorder guarantee is proven separately at the
+        // helper level above via reference identity.
+        const jsonNormalized = JSON.parse(JSON.stringify(data));
+        expect(valuePassedToSchema).toEqual(jsonNormalized);
 
         // The returned (unwrapped) result is the data — never the envelope.
-        expect(result).toEqual(data);
+        expect(result).toEqual(jsonNormalized);
 
         mock.restore();
       }),

@@ -186,9 +186,10 @@ export function precacheManifestPlugin(config?: PrecacheManifestConfig): Plugin 
             type: 'chunk',
           });
         } else {
+          const assetName = output.names?.[0] ?? output.name;
           outputFiles.push({
             fileName,
-            name: output.names?.[0] ?? output.name,
+            ...(assetName !== undefined ? { name: assetName } : {}),
             type: 'asset',
           });
         }

@@ -112,7 +112,13 @@ const riskLevelArb = fc.record({
 
 /** An activity item: a record of string keys to primitive (round-trip-safe) values. */
 const activityItemArb = fc.dictionary(
-  fc.string({ minLength: 1 }),
+  // Exclude keys that alter object identity/prototype semantics ('__proto__',
+  // 'constructor', 'prototype'): as dictionary keys they don't round-trip through
+  // a plain-object deep-equality check the way ordinary data keys do, which would
+  // produce spurious property-test failures unrelated to schema validation.
+  fc.string({ minLength: 1 }).filter(
+    (k) => k !== '__proto__' && k !== 'constructor' && k !== 'prototype'
+  ),
   fc.oneof(fc.string(), fc.integer(), fc.boolean()),
   { maxKeys: 5 }
 );

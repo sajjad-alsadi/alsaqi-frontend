@@ -71,7 +71,7 @@ const IncomingRegister: React.FC<IncomingRegisterProps> = ({ language, onViewDet
       if (filters.end_date) params.append('end_date', filters.end_date);
 
       const response = await api.get(`/correspondence/incoming?${params.toString()}`);
-      const list = toList(response.data);
+      const list = toList<Correspondence>(response.data);
       setItems(list);
       setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
     } catch (error) {

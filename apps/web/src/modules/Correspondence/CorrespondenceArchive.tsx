@@ -28,7 +28,7 @@ interface CorrespondenceArchiveProps {
 
 const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language, onViewDetails }) => {
   const { t } = useTranslation();
-  const { formatNumber, formatDate } = useFormat();
+  const { formatDate } = useFormat();
   const [items, setItems] = useState<Correspondence[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +54,7 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
         }
       });
       
-      const list = toList(response.data);
+      const list = toList<Correspondence>(response.data);
       setItems(list);
       setPagination(prev => ({ ...prev, ...toPagination(response.data, list.length) }));
     } catch (error) {
@@ -75,12 +75,14 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
       t('correspondence.archiveDate')
     ];
 
+    // CSV cells use empty-string fallbacks (not the table's '-' placeholder) so
+    // exported data never contains a literal dash for missing values.
     const csvData = items.map(item => [
       item.type,
-      item.sequence_number,
+      item.letter_number,
       item.subject,
-      item.entity,
-      item.updated_at || ''
+      item.sender_entity ?? item.recipient_entity ?? '',
+      item.created_at || ''
     ]);
 
     const csv = buildCsv(headers, csvData);
@@ -224,19 +226,19 @@ const CorrespondenceArchive: React.FC<CorrespondenceArchiveProps> = ({ language,
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">{t(`correspondence.${item.type.toLowerCase()}`)}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{formatNumber(item.sequence_number)}</td>
+                  <td className="px-6 py-4 text-xs font-bold text-[var(--color-border-strong)] tracking-widest">{item.letter_number}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)] max-w-xs truncate">{item.subject}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">{item.entity}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">{item.sender_entity ?? item.recipient_entity ?? '-'}</td>
                   <td className="px-6 py-4 text-sm font-bold text-[var(--color-text-main)]">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-[var(--color-text-muted)]" />
-                      {formatDate(item.updated_at) || '-'}
+                      {formatDate(item.created_at) || '-'}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <button 
-                        onClick={() => onViewDetails(item.type, item.id)}
+                        onClick={() => onViewDetails(item.type, Number(item.id))}
                         className="p-2 bg-[var(--color-card)] text-[var(--color-primary)] border border-[var(--color-border-soft)] hover:border-[var(--color-primary)]/30 rounded-xl shadow-sm transition-all"
                         title={t('correspondence.viewDetails')}
                       >

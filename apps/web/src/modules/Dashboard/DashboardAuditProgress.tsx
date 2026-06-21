@@ -2,12 +2,13 @@ import React from 'react';
 import { Activity } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import type { TFunction } from 'i18next';
 import ChartContainer from '../../components/ChartContainer';
 import { useFormat } from '../../utils/formatService';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 interface DashboardAuditProgressProps {
-  t: (key: string, ...args: unknown[]) => string;
+  t: TFunction;
   isRtl: boolean;
   data: any[];
   totalPlanned?: number;

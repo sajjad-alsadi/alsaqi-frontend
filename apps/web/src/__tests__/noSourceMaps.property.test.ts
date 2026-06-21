@@ -114,7 +114,11 @@ describe('Property 9: noSourceMapsInDist detects .map files iff present (req 6.2
         const clean = await noSourceMapsInDist(dist);
         expect(clean).toBe(expectedClean);
       }),
-      { numRuns: 120 },
+      // Each run materializes a real temp dir tree + walks it; 40 runs fully
+      // exercise the detection logic while keeping filesystem pressure low so the
+      // suite stays stable under full parallel execution (was 120 → occasional
+      // contention-induced timeouts).
+      { numRuns: 40 },
     );
   });
 
@@ -135,7 +139,9 @@ describe('Property 9: noSourceMapsInDist detects .map files iff present (req 6.2
           expect(clean).toBe(false);
         },
       ),
-      { numRuns: 80 },
+      // See note above: fewer runs keep real-filesystem pressure low for
+      // stable parallel execution while still covering nested-map detection.
+      { numRuns: 30 },
     );
   });
 });

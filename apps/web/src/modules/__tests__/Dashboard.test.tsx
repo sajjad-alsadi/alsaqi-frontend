@@ -55,16 +55,23 @@ vi.mock('../Dashboard/DashboardHeader', () => ({
 }));
 
 vi.mock('../Dashboard/DashboardKpiGrid', () => ({
-  default: ({ cards }: any) => 
-    React.createElement('div', { 'data-testid': 'kpi-grid' },
-      cards.map((card: any) => 
-        React.createElement('div', { key: card.id, 'data-testid': `kpi-${card.id}` },
-          React.createElement('p', null, card.title),
-          React.createElement('p', null, String(card.value)),
-          card.trend && React.createElement('span', null, card.trend)
-        )
-      )
-    ),
+  default: ({ highlightCards = [], groups = [] }: any) => {
+    const renderCard = (card: any) =>
+      React.createElement('div', { key: card.id, 'data-testid': `kpi-${card.id}` },
+        React.createElement('p', null, card.title),
+        React.createElement('p', null, String(card.value)),
+        card.trend && React.createElement('span', null, card.trend)
+      );
+    // The real Dashboard passes `highlightCards` and grouped `groups[].cards`
+    // (not a flat `cards` prop). Render both so the KPI assertions can find
+    // every card's title/value/trend.
+    const groupCards = groups.flatMap((g: any) => g.cards ?? []);
+    return React.createElement(
+      'div',
+      { 'data-testid': 'kpi-grid' },
+      [...highlightCards, ...groupCards].map(renderCard)
+    );
+  },
 }));
 
 vi.mock('../Dashboard/DashboardAuditProgress', () => ({

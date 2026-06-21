@@ -46,10 +46,10 @@ const UserForm: React.FC<UserFormProps> = ({
   const fieldErrors = useMemo(() => {
     const errors: Record<string, string> = {};
     if (newUser.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newUser.email)) {
-      errors.email = t('userManagement.form.invalidEmail', 'Invalid email format');
+      errors['email'] = t('userManagement.form.invalidEmail', 'Invalid email format');
     }
     if (!editingUser && newUser.password && newUser.password.length < 8) {
-      errors.password = t('userManagement.form.passwordMinLength', 'Minimum 8 characters');
+      errors['password'] = t('userManagement.form.passwordMinLength', 'Minimum 8 characters');
     }
     return errors;
   }, [newUser.email, newUser.password, editingUser, t]);
@@ -85,7 +85,7 @@ const UserForm: React.FC<UserFormProps> = ({
         {!editingUser && (
           <div className="space-y-1">
             <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.password')}</label>
-            <input className={`input-field !py-2 !text-xs ${fieldErrors.password ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30' : ''}`} type="password" placeholder={t('userManagement.form.password')} value={newUser.password || ''} onChange={e => onUpdateNewUser({ password: e.target.value })} disabled={isFormDisabled} aria-invalid={!!fieldErrors.password} />
+            <input className={`input-field !py-2 !text-xs ${fieldErrors['password'] ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30' : ''}`} type="password" placeholder={t('userManagement.form.password')} value={newUser.password || ''} onChange={e => onUpdateNewUser({ password: e.target.value })} disabled={isFormDisabled} aria-invalid={!!fieldErrors['password']} />
             {newUser.password && (
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex-1 h-1 rounded-full bg-[var(--color-border-soft)] overflow-hidden">
@@ -94,8 +94,8 @@ const UserForm: React.FC<UserFormProps> = ({
                 <span className="text-[9px] font-bold" style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
               </div>
             )}
-            {fieldErrors.password && (
-              <p className="text-[10px] text-[var(--color-danger)] font-bold flex items-center gap-1 mt-0.5"><AlertCircle size={10} />{fieldErrors.password}</p>
+            {fieldErrors['password'] && (
+              <p className="text-[10px] text-[var(--color-danger)] font-bold flex items-center gap-1 mt-0.5"><AlertCircle size={10} />{fieldErrors['password']}</p>
             )}
           </div>
         )}
@@ -105,9 +105,9 @@ const UserForm: React.FC<UserFormProps> = ({
         </div>
         <div className="space-y-1">
           <label className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t('userManagement.form.email')}</label>
-          <input className={`input-field !py-2 !text-xs ${fieldErrors.email ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30' : ''}`} placeholder={t('userManagement.form.email')} value={newUser.email || ''} onChange={e => onUpdateNewUser({ email: e.target.value })} disabled={isFormDisabled} aria-invalid={!!fieldErrors.email} />
-          {fieldErrors.email && (
-            <p className="text-[10px] text-[var(--color-danger)] font-bold flex items-center gap-1 mt-0.5"><AlertCircle size={10} />{fieldErrors.email}</p>
+          <input className={`input-field !py-2 !text-xs ${fieldErrors['email'] ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30' : ''}`} placeholder={t('userManagement.form.email')} value={newUser.email || ''} onChange={e => onUpdateNewUser({ email: e.target.value })} disabled={isFormDisabled} aria-invalid={!!fieldErrors['email']} />
+          {fieldErrors['email'] && (
+            <p className="text-[10px] text-[var(--color-danger)] font-bold flex items-center gap-1 mt-0.5"><AlertCircle size={10} />{fieldErrors['email']}</p>
           )}
         </div>
         <div className="space-y-1">

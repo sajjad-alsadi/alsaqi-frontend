@@ -325,8 +325,8 @@ describe('Property 10: Preservation — create flow saves all twelve modal field
       responsible_person_id: fc.constantFrom('u-1', 'u-2'),
       department_id: fc.constantFrom('1', '2'),
       maturity_score: fc.integer({ min: 1, max: 100 }),
-      effective_date: fc.date({ min: new Date('2000-01-01'), max: new Date('2030-12-31') }).map(ISO),
-      review_date: fc.date({ min: new Date('2000-01-01'), max: new Date('2030-12-31') }).map(ISO),
+      effective_date: fc.date({ min: new Date('2000-01-01'), max: new Date('2030-12-31'), noInvalidDate: true }).map(ISO),
+      review_date: fc.date({ min: new Date('2000-01-01'), max: new Date('2030-12-31'), noInvalidDate: true }).map(ISO),
     });
 
     await fc.assert(

@@ -57,12 +57,15 @@ describe('Property 14: Web Vitals classification correctness', () => {
   describe('values in "needs-improvement" range → classified as needs-improvement', () => {
     for (const metric of METRICS) {
       it(`${metric.name}: value in (${metric.good}, ${metric.poor}] → 'needs-improvement'`, () => {
-        // Generate values strictly greater than good and up to poor
-        const minAboveGood = metric.good + Number.EPSILON;
+        // Generate values strictly greater than `good` and up to `poor`.
+        // `minExcluded` guarantees the lower bound is exclusive — adding
+        // Number.EPSILON is unreliable at large magnitudes (e.g. 2500) where it
+        // rounds back to the boundary itself.
         fc.assert(
           fc.property(
             fc.double({
-              min: minAboveGood,
+              min: metric.good,
+              minExcluded: true,
               max: metric.poor,
               noNaN: true,
             }),
@@ -81,14 +84,15 @@ describe('Property 14: Web Vitals classification correctness', () => {
   describe('values in "poor" range → classified as poor', () => {
     for (const metric of METRICS) {
       it(`${metric.name}: value > ${metric.poor} → 'poor'`, () => {
-        // Generate values strictly above the poor threshold
-        const minAbovePoor = metric.poor + Number.EPSILON;
-        // Use a reasonable max to avoid infinity issues
+        // Generate values strictly above the poor threshold. `minExcluded`
+        // makes the lower bound exclusive (Number.EPSILON is lost at large
+        // magnitudes, which previously yielded the boundary value itself).
         const maxValue = metric.poor * 10;
         fc.assert(
           fc.property(
             fc.double({
-              min: minAbovePoor,
+              min: metric.poor,
+              minExcluded: true,
               max: maxValue,
               noNaN: true,
             }),

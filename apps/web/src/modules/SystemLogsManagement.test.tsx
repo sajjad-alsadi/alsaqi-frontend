@@ -1,8 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render as rtlRender, screen, waitFor, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import fc from 'fast-check';
 import React from 'react';
+import { PreferencesProvider } from '../context/PreferencesContext';
 import SystemLogsManagement from './SystemLogsManagement';
+
+/**
+ * All renders wrap the component in the providers its embedded children need:
+ * - PreferencesProvider — AuditTrail / SystemErrorLogs call usePreferences()
+ * - QueryClientProvider — AuditTrail uses useQuery()
+ * Without these the children throw before any assertion can run.
+ */
+const render = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: 0, gcTime: 0 } },
+  });
+  return rtlRender(
+    <QueryClientProvider client={queryClient}>
+      <PreferencesProvider>{ui}</PreferencesProvider>
+    </QueryClientProvider>
+  );
+};
 
 /**
  * Bug Condition Exploration Test - Hardcoded Health Percentage
@@ -80,11 +99,13 @@ function createMockErrorsResponse(itemsInPage: number, paginationTotal?: number)
   };
 }
 
-// Helper to determine expected color based on health percentage
+// Helper to determine expected color class based on health percentage.
+// Mirrors the component's themeable CSS-variable classes (not hardcoded
+// Tailwind palette names).
 function getExpectedColor(health: number): string {
-  if (health >= 90) return 'text-emerald-500';
-  if (health >= 70) return 'text-amber-500';
-  return 'text-rose-500';
+  if (health >= 90) return 'text-[var(--color-success)]';
+  if (health >= 70) return 'text-[var(--color-warning)]';
+  return 'text-[var(--color-danger)]';
 }
 
 // Helper to determine expected status based on health percentage
@@ -92,6 +113,22 @@ function getExpectedStatus(health: number): string {
   if (health >= 90) return 'systemLogsManagement.stable';
   if (health >= 70) return 'systemLogsManagement.degraded';
   return 'systemLogsManagement.critical';
+}
+
+/**
+ * Match the health percentage span. The component renders
+ * `{value.toFixed(1)}%` which React splits into two text nodes ("50.0" + "%"),
+ * so a plain string matcher fails. This normalizes the element's full text
+ * content and matches the combined value.
+ */
+function getHealthByPercent(percent: string): HTMLElement {
+  return screen.getByText((_content, element) => {
+    if (!element) return false;
+    // Only consider the leaf span that carries the health color class.
+    const cls = element.getAttribute('class') ?? '';
+    if (!cls.includes('font-semibold')) return false;
+    return element.textContent?.replace(/\s+/g, '') === percent;
+  });
 }
 
 describe('Bug Condition Exploration: Hardcoded Health Percentage', () => {
@@ -120,10 +157,10 @@ describe('Bug Condition Exploration: Hardcoded Health Percentage', () => {
 
     // Wait for state update after API calls resolve
     await waitFor(() => {
-      // Expected: health = 50.0% with rose-500 color and "critical" status
-      const healthElement = screen.getByText('50.0%');
+      // Expected: health = 50.0% with danger color and "critical" status
+      const healthElement = getHealthByPercent('50.0%');
       expect(healthElement).toBeInTheDocument();
-      expect(healthElement).toHaveClass('text-rose-500');
+      expect(healthElement).toHaveClass('text-[var(--color-danger)]');
     });
 
     // Verify status text shows "critical"
@@ -150,10 +187,10 @@ describe('Bug Condition Exploration: Hardcoded Health Percentage', () => {
     });
 
     await waitFor(() => {
-      // Expected: health = 80.0% with amber-500 color and "degraded" status
-      const healthElement = screen.getByText('80.0%');
+      // Expected: health = 80.0% with warning color and "degraded" status
+      const healthElement = getHealthByPercent('80.0%');
       expect(healthElement).toBeInTheDocument();
-      expect(healthElement).toHaveClass('text-amber-500');
+      expect(healthElement).toHaveClass('text-[var(--color-warning)]');
     });
 
     expect(screen.getByText('systemLogsManagement.degraded')).toBeInTheDocument();
@@ -206,10 +243,10 @@ describe('Bug Condition Exploration: Hardcoded Health Percentage', () => {
     });
 
     await waitFor(() => {
-      // Expected: health = 100.0% with emerald-500 color and "stable" status
-      const healthElement = screen.getByText('100.0%');
+      // Expected: health = 100.0% with success color and "stable" status
+      const healthElement = getHealthByPercent('100.0%');
       expect(healthElement).toBeInTheDocument();
-      expect(healthElement).toHaveClass('text-emerald-500');
+      expect(healthElement).toHaveClass('text-[var(--color-success)]');
     });
 
     expect(screen.getByText('systemLogsManagement.stable')).toBeInTheDocument();
@@ -250,7 +287,7 @@ describe('Bug Condition Exploration: Hardcoded Health Percentage', () => {
           const expectedColor = getExpectedColor(expectedHealth);
 
           await waitFor(() => {
-            const healthElement = screen.getByText(expectedHealthStr);
+            const healthElement = getHealthByPercent(expectedHealthStr);
             expect(healthElement).toBeInTheDocument();
             expect(healthElement).toHaveClass(expectedColor);
           });
@@ -339,10 +376,10 @@ describe('Preservation Property: Non-Health Display Behavior', () => {
           // On fixed code: should show ~100% with emerald-500 and "stable"
           // Both cases: emerald-500 color and "stable" status when zero errors
           await waitFor(() => {
-            // The health element should have emerald-500 class
-            const healthSpan = screen.getByText(/99\.9%|100\.0%/);
+            // The health element should have the success color class.
+            const healthSpan = getHealthByPercent('100.0%');
             expect(healthSpan).toBeInTheDocument();
-            expect(healthSpan).toHaveClass('text-emerald-500');
+            expect(healthSpan).toHaveClass('text-[var(--color-success)]');
           });
 
           // Status should be "stable"
@@ -413,10 +450,13 @@ describe('Preservation Property: Non-Health Display Behavior', () => {
             expect(mockedApi.get).toHaveBeenCalledWith('/audit-trail');
           });
 
-          // Today's audit count should equal the number of items with today's date
+          // Today's audit count should equal the number of items with today's
+          // date. The component renders the count and its label in separate
+          // nodes, so locate the label then assert its preceding count node.
           await waitFor(() => {
-            const expectedText = `${todayCount} systemLogsManagement.actions`;
-            expect(screen.getByText(expectedText)).toBeInTheDocument();
+            const label = screen.getByText('systemLogsManagement.auditToday');
+            const countNode = label.previousElementSibling;
+            expect(countNode?.textContent).toBe(String(todayCount));
           });
 
           unmount();
@@ -481,10 +521,13 @@ describe('Preservation Property: Non-Health Display Behavior', () => {
             });
           });
 
-          // After resolution, component should render stats (loading is false)
+          // After resolution, component should render stats (loading is false).
+          // The KPI strip's "audit today" label is present once the component
+          // has mounted and rendered its stats section.
           await waitFor(() => {
-            // The stats section renders audit count - this proves loading completed
-            expect(screen.getByText(/systemLogsManagement.actions/)).toBeInTheDocument();
+            expect(
+              screen.getByText('systemLogsManagement.auditToday')
+            ).toBeInTheDocument();
           });
 
           unmount();
@@ -566,8 +609,13 @@ describe('Preservation Property: Non-Health Display Behavior', () => {
       expect(callOrder).toContain('/system-errors');
     });
 
-    // Both calls were made before we resolve anything — proves concurrency
-    expect(mockedApi.get).toHaveBeenCalledTimes(2);
+    // Both endpoints are initiated by fetchStats before either resolves. (The
+    // embedded AuditTrail child also queries /audit-trail via useQuery, so we
+    // assert on the presence/concurrency of both endpoints rather than the
+    // total call count.) fetchStats issues exactly one /system-errors call.
+    expect(callOrder).toContain('/audit-trail');
+    expect(callOrder).toContain('/system-errors');
+    expect(callOrder.filter((u) => u === '/system-errors').length).toBe(1);
 
     // Resolve to clean up
     await act(async () => {

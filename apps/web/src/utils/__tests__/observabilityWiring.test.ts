@@ -18,7 +18,8 @@ import { render, screen } from '@testing-library/react';
 import { initSentry } from '@/utils/sentry';
 import * as Sentry from '@sentry/react';
 import { WebVitalsReporter } from '@/utils/webVitalsReporter';
-import { webVitalsMonitor, type WebVitalMetric } from '@/utils/webVitalsMonitor';
+import { markAuthenticated, markUnauthenticated } from '@/utils/authGate';
+import { webVitalsMonitor } from '@/utils/webVitalsMonitor';
 import { FeatureFlagProvider, FeatureGate } from '@/featureFlags';
 import type { FeatureFlagConfig } from '@/featureFlags';
 
@@ -92,49 +93,49 @@ describe('observability wiring — Sentry init at startup', () => {
 /** Budget large enough to cover the reporter's idle/timeout deferral. */
 const MAX_IDLE_FLUSH_MS = 100;
 
-function createMetric(overrides?: Partial<WebVitalMetric>): WebVitalMetric {
-  return {
-    name: 'LCP',
-    value: 2000,
-    rating: 'good',
-    route: '/dashboard',
-    timestamp: '2024-01-01T00:00:00.000Z',
-    ...overrides,
-  };
-}
-
 describe('observability wiring — Web Vitals reporting endpoint', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // The reporter gates transmission behind the auth signal; mark the session
+    // authenticated so the POST is actually attempted.
+    markAuthenticated();
   });
 
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    markUnauthenticated();
   });
 
   it('POSTs a captured Web Vital to /api/metrics/web-vitals', async () => {
-    // Capture the callback the reporter registers with the monitor so we can
-    // emit a metric without needing real PerformanceObserver entries.
-    let capturedCallback: ((metric: WebVitalMetric) => void) | undefined;
-    vi.spyOn(webVitalsMonitor, 'onMetric').mockImplementation((cb) => {
-      capturedCallback = cb;
-      return () => undefined;
-    });
+    // The reporter sends whatever `webVitalsMonitor.flush()` returns, so stub the
+    // buffer drain to yield one metric without needing real PerformanceObserver
+    // entries. (The reporter reads the buffer, not the onMetric subscription.)
+    vi.spyOn(webVitalsMonitor, 'flush').mockReturnValueOnce([
+      {
+        name: 'LCP',
+        value: 2000,
+        rating: 'good',
+        delta: 2000,
+        id: 'v1-lcp',
+        navigationType: 'navigate',
+      },
+    ]);
 
     const fetchFn = vi.fn().mockResolvedValue({ ok: true });
     const reporter = new WebVitalsReporter({
       endpoint: '/api/metrics/web-vitals',
       intervalMs: 1_000_000, // keep the periodic timer out of the way
+      // Force the fetch+keepalive fallback path (no sendBeacon) so the POST is
+      // observable through the injected fetch implementation.
+      sendBeaconFn: null,
       fetchFn,
     });
 
     reporter.start();
-    // Emit a metric through the captured subscription, then flush.
-    capturedCallback?.(createMetric());
     reporter.flush();
 
-    // Allow the deferred (idle/timeout) send + async POST to settle.
+    // Allow the async POST to settle.
     await vi.advanceTimersByTimeAsync(MAX_IDLE_FLUSH_MS);
 
     expect(fetchFn).toHaveBeenCalledWith(
@@ -180,11 +181,14 @@ describe('observability wiring — feature gate visibility', () => {
 describe('observability wiring — log pipeline fallback', () => {
   beforeEach(() => {
     vi.resetModules();
+    // Forwarding is auth-gated; mark authenticated so entries are transmitted.
+    markAuthenticated();
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.restoreAllMocks();
+    markUnauthenticated();
   });
 
   it('forwards production error logs to /api/system-errors when no destination is configured', async () => {
@@ -194,6 +198,9 @@ describe('observability wiring — log pipeline fallback', () => {
 
     // Re-import after stubbing MODE so the module evaluates as production.
     const { logger, configureLogForwarding } = await import('@/utils/logger');
+    // resetModules() gives the logger a fresh authGate instance; mark THAT one.
+    const { markAuthenticated: markAuth } = await import('@/utils/authGate');
+    markAuth();
 
     // No destination → the fallback path is used directly.
     configureLogForwarding({ destination: undefined, forwardWarn: false });
@@ -219,6 +226,9 @@ describe('observability wiring — log pipeline fallback', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const { logger, configureLogForwarding } = await import('@/utils/logger');
+    // resetModules() gives the logger a fresh authGate instance; mark THAT one.
+    const { markAuthenticated: markAuth } = await import('@/utils/authGate');
+    markAuth();
 
     configureLogForwarding({ destination: 'https://logs.example.com/ingest', forwardWarn: false });
 

@@ -58,7 +58,12 @@ export const THRESHOLDS: Record<string, [number, number]> = {
  * Exported separately for isolated testing (Property 14).
  */
 export function classifyMetric(name: string, value: number): MetricRating {
-  const thresholds = THRESHOLDS[name];
+  // Use a safe own-property lookup: indexing a plain object can resolve
+  // inherited keys (e.g. 'constructor', 'toString') to non-threshold values,
+  // which would otherwise crash the destructure below.
+  const thresholds = Object.prototype.hasOwnProperty.call(THRESHOLDS, name)
+    ? THRESHOLDS[name]
+    : undefined;
   if (!thresholds) return 'good';
   const [good, poor] = thresholds;
   if (value <= good) return 'good';

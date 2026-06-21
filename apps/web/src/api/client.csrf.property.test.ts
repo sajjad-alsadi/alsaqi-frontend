@@ -67,19 +67,42 @@ function setCookieRow(row: string): void {
  * non-empty because the request interceptors only attach the header for a
  * truthy token.
  */
-const tokenArb: fc.Arbitrary<string> = fc.oneof(
-  fc.base64String({ minLength: 1, maxLength: 48 }),
-  fc
-    .array(
-      fc.constantFrom(
-        ...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=%&;: ?#[]@!$\'()*,.~-_'.split(
-          ''
-        )
-      ),
-      { minLength: 1, maxLength: 48 }
-    )
-    .map((chars) => chars.join(''))
-);
+/**
+ * Token-value arbitrary. Exercises the two interesting axes called out by the
+ * property:
+ *  - base64 strings (which carry `=` padding that a naive `split('=')[1]` would
+ *    truncate), and
+ *  - free-form strings over a safe BMP alphabet that includes URL-special and
+ *    cookie-meaningful characters (`= + / % & ; space :`), so `decodeURIComponent`
+ *    round-tripping is genuinely tested.
+ *
+ * All characters are within the BMP and contain no lone surrogates, so
+ * `encodeURIComponent` never throws when building the cookie row. Values are
+ * non-empty because the request interceptors only attach the header for a
+ * truthy token.
+ *
+ * Leading/trailing ASCII whitespace is excluded: HTTP header field values are
+ * trimmed of surrounding optional whitespace per RFC 7230, so a token like
+ * `" "` cannot survive a round-trip through a real request header (axios
+ * normalizes it to `""`). Such values are not realistic CSRF tokens, and the
+ * preservation contract is defined for the header-safe value.
+ */
+const tokenArb: fc.Arbitrary<string> = fc
+  .oneof(
+    fc.base64String({ minLength: 1, maxLength: 48 }),
+    fc
+      .array(
+        fc.constantFrom(
+          ...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=%&;: ?#[]@!$\'()*,.~-_'.split(
+            ''
+          )
+        ),
+        { minLength: 1, maxLength: 48 }
+      )
+      .map((chars) => chars.join(''))
+  )
+  // Keep only tokens whose value is unchanged by HTTP header trimming.
+  .filter((value) => value === value.trim() && value.length > 0);
 
 describe('Property 2: CSRF token parse preserves the full value and round-trips encoding (Requirements 6.1, 6.2, 6.3, 6.4)', () => {
   let config: ApiClientConfig;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { PieChart as RePieChart, Pie, Cell, Tooltip } from 'recharts';
+import type { TFunction } from 'i18next';
 import ChartContainer from '../../components/ChartContainer';
 import { useFormat } from '../../utils/formatService';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
@@ -11,7 +12,7 @@ interface RiskLevel {
 }
 
 interface RiskStats {
-  byLevel: RiskLevel[];
+  byLevel?: unknown[] | undefined;
   summary: {
     total: number;
     high?: number;
@@ -25,7 +26,7 @@ interface DashboardStats {
 }
 
 interface DashboardRiskOverviewProps {
-  t: (key: string, ...args: unknown[]) => string;
+  t: TFunction;
   stats: DashboardStats;
   colors: string[];
 }
@@ -45,7 +46,7 @@ const DashboardRiskOverview: React.FC<DashboardRiskOverviewProps> = React.memo((
           {(width, height) => (
             <RePieChart width={width} height={height}>
               <Pie
-                data={(Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []).map((r: RiskLevel) => ({ name: r.level, value: r.count }))}
+                data={((Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []) as RiskLevel[]).map((r: RiskLevel) => ({ name: r.level, value: r.count }))}
                 cx="50%"
                 cy="50%"
                 innerRadius={70}
@@ -57,7 +58,7 @@ const DashboardRiskOverview: React.FC<DashboardRiskOverviewProps> = React.memo((
                 animationDuration={800}
                 animationEasing="ease-out"
               >
-                {(Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []).map((entry: RiskLevel, index: number) => (
+                {((Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []) as RiskLevel[]).map((entry: RiskLevel, index: number) => (
                   <Cell key={`cell-${entry.level ?? index}`} fill={colors[index % colors.length] ?? '#888'} />
                 ))}
               </Pie>
@@ -79,7 +80,7 @@ const DashboardRiskOverview: React.FC<DashboardRiskOverviewProps> = React.memo((
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3 mt-6">
-        {(Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []).map((risk: RiskLevel, idx: number) => (
+        {((Array.isArray(stats.risks.byLevel) ? stats.risks.byLevel : []) as RiskLevel[]).map((risk: RiskLevel, idx: number) => (
           <div key={risk.level ?? idx} className="flex items-center gap-2 bg-[var(--color-bg-main)] p-2.5 rounded-xl">
             <div
               className="w-2.5 h-2.5 rounded-full flex-shrink-0"

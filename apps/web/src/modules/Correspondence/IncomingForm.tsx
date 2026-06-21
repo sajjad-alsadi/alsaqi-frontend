@@ -38,7 +38,8 @@ const incomingSchema = z.object({
   notes: z.string().optional(),
 });
 
-type IncomingFormValues = z.infer<typeof incomingSchema>;
+type IncomingFormInput = z.input<typeof incomingSchema>;
+type IncomingFormValues = z.output<typeof incomingSchema>;
 
 interface IncomingFormProps {
   language: 'ar' | 'en';
@@ -56,7 +57,7 @@ const IncomingForm: React.FC<IncomingFormProps> = ({ language, departments, user
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<IncomingFormValues>({
+  } = useForm<IncomingFormInput, unknown, IncomingFormValues>({
     resolver: zodResolver(incomingSchema),
     mode: 'onBlur',
     defaultValues: {

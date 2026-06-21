@@ -8,9 +8,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import type { TFunction } from 'i18next';
 import { useFormat } from '../../utils/formatService';
-
-type TFunction = (key: string, ...args: unknown[]) => string;
 
 interface QuickAction {
   label: string;

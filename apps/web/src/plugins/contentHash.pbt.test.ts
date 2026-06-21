@@ -35,24 +35,26 @@ export function isValidContentHashedFilename(filename: string): boolean {
  * Produces strings like "vendor-react", "app_entry", "styles", etc.
  */
 function arbAssetName(): fc.Arbitrary<string> {
-  return fc.stringOf(
-    fc.oneof(
-      fc.char().filter((c) => /[a-zA-Z0-9_-]/.test(c))
+  return fc.string({
+    unit: fc.constantFrom(
+      ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-'.split('')
     ),
-    { minLength: 1, maxLength: 20 }
-  );
+    minLength: 1,
+    maxLength: 20,
+  });
 }
 
 /**
  * Arbitrary generator for a valid content hash (8+ hex/alphanumeric chars).
  */
 function arbContentHash(): fc.Arbitrary<string> {
-  return fc.stringOf(
-    fc.oneof(
-      fc.char().filter((c) => /[a-zA-Z0-9]/.test(c))
+  return fc.string({
+    unit: fc.constantFrom(
+      ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('')
     ),
-    { minLength: 8, maxLength: 16 }
-  );
+    minLength: 8,
+    maxLength: 16,
+  });
 }
 
 /**
@@ -96,10 +98,13 @@ describe('Property 10: Content-hash fingerprints on all emitted assets', () => {
     fc.assert(
       fc.property(
         arbAssetName(),
-        fc.stringOf(
-          fc.char().filter((c) => /[a-zA-Z0-9]/.test(c)),
-          { minLength: 1, maxLength: 7 }
-        ),
+        fc.string({
+          unit: fc.constantFrom(
+            ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('')
+          ),
+          minLength: 1,
+          maxLength: 7,
+        }),
         arbExtension(),
         (name, shortHash, ext) => {
           const filename = `${name}.${shortHash}.${ext}`;

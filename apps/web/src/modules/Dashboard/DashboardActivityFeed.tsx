@@ -1,6 +1,7 @@
 import React from 'react';
 import { History, Briefcase, FileSearch, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import type { TFunction } from 'i18next';
 import { useFormat } from '../../utils/formatService';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 
@@ -14,8 +15,8 @@ interface ActivityItem {
 }
 
 interface DashboardActivityFeedProps {
-  t: (key: string, ...args: unknown[]) => string;
-  activity: ActivityItem[];
+  t: TFunction;
+  activity: unknown[];
 }
 
 const DashboardActivityFeed: React.FC<DashboardActivityFeedProps> = React.memo(
@@ -24,7 +25,7 @@ const DashboardActivityFeed: React.FC<DashboardActivityFeedProps> = React.memo(
     const { formatDateTime, translateName, translateAction, translateModule } = useFormat();
     const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
 
-    const items = Array.isArray(activity) ? activity : [];
+    const items = (Array.isArray(activity) ? activity : []) as ActivityItem[];
 
     return (
       <div

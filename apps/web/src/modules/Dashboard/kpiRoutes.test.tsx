@@ -33,11 +33,17 @@ const appSource = readFileSync(
   'utf8',
 );
 
-/** Extract the `link:` targets declared in the `kpiCards` array only. */
+/** Extract the `link:` targets declared across the Dashboard KPI cards. */
 function extractKpiLinks(source: string): string[] {
-  const start = source.indexOf('const kpiCards');
-  expect(start, 'kpiCards declaration should exist in Dashboard').toBeGreaterThan(-1);
-  // The KPI array ends before the next memoized list (quickActions).
+  // The Dashboard builds its KPI cards inside a single useMemo that declares
+  // `highlightCards` and the grouped cards, ending before the `quickActions`
+  // memo. Scan that whole block so every card link is validated regardless of
+  // how the cards are grouped.
+  const start = source.indexOf('const highlightCards');
+  expect(
+    start,
+    'highlightCards declaration should exist in Dashboard',
+  ).toBeGreaterThan(-1);
   const end = source.indexOf('const quickActions', start);
   const block = end > start ? source.slice(start, end) : source.slice(start);
   const links = [...block.matchAll(/link:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]);

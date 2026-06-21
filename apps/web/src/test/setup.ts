@@ -16,7 +16,16 @@ Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
-    i18n: { language: 'en', changeLanguage: vi.fn() },
+    i18n: {
+      language: 'en',
+      changeLanguage: vi.fn(),
+      // `exists` is consulted by formatService (translateModule/translateAction).
+      // Without it, any component tree that renders those helpers throws
+      // "i18n.exists is not a function" and fails to mount.
+      exists: () => false,
+      getResourceBundle: () => ({}),
+      hasResourceBundle: () => false,
+    },
   }),
   initReactI18next: {
     type: '3rdParty',
@@ -158,6 +167,21 @@ if (typeof window !== 'undefined') {
     writable: true,
     value: vi.fn(),
   });
+}
+
+// jsdom does not implement HTMLCanvasElement.getContext; libraries that probe a
+// 2D context (e.g. react-pdf / pdfjs in PdfViewer) otherwise log noisy
+// "Not implemented" errors and can destabilize the worker. Provide a minimal
+// stub returning null so callers take their no-canvas fallback path cleanly.
+if (typeof HTMLCanvasElement !== 'undefined') {
+  HTMLCanvasElement.prototype.getContext = vi.fn(() => null) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+}
+
+// jsdom does not implement Element.prototype.scrollIntoView; components that
+// auto-scroll (e.g. Chatbot message list) call it on a ref and would otherwise
+// throw "scrollIntoView is not a function" during render/update.
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = vi.fn();
 }
 
 // Mock URL.createObjectURL and URL.revokeObjectURL for file download/preview tests

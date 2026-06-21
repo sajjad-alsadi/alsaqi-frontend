@@ -42,6 +42,15 @@ beforeAll(async () => {
   if (!i18n.isInitialized) {
     await new Promise<void>((resolve) => i18n.on('initialized', () => resolve()));
   }
+  // Preload empty resource bundles so `changeLanguage` resolves synchronously
+  // instead of awaiting the HttpBackend fetch of `/locales/{{lng}}.json`, which
+  // never resolves under jsdom and would otherwise time out these tests.
+  if (!i18n.hasResourceBundle('ar', 'translation')) {
+    i18n.addResourceBundle('ar', 'translation', {});
+  }
+  if (!i18n.hasResourceBundle('en', 'translation')) {
+    i18n.addResourceBundle('en', 'translation', {});
+  }
 });
 
 describe('Property 6: Direction correctness (Req 5.1)', () => {

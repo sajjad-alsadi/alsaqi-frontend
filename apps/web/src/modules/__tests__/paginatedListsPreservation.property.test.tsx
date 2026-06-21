@@ -272,7 +272,7 @@ describe('Property 4: Preservation - non-enveloped { data, pagination } baseline
         await runBaselineScreen({
           element: <OutgoingRegister language="en" onViewDetails={() => {}} />,
           resp,
-          emptyKey: 'correspondence.noMatchingResults',
+          emptyKey: 'correspondence.noOutgoingYet',
         });
       }),
       { numRuns: 15 }
@@ -293,7 +293,7 @@ describe('Property 4: Preservation - non-enveloped { data, pagination } baseline
         await runBaselineScreen({
           element: <IncomingRegister language="en" onViewDetails={() => {}} />,
           resp,
-          emptyKey: 'correspondence.noMatchingResults',
+          emptyKey: 'correspondence.noIncomingYet',
         });
       }),
       { numRuns: 15 }
@@ -314,7 +314,7 @@ describe('Property 4: Preservation - non-enveloped { data, pagination } baseline
         await runBaselineScreen({
           element: <CorrespondenceArchive language="en" onViewDetails={() => {}} />,
           resp,
-          emptyKey: 'correspondence.archiveIsEmpty',
+          emptyKey: 'correspondence.archiveEmpty',
         });
       }),
       { numRuns: 15 }
@@ -404,7 +404,7 @@ describe('Property 4: Preservation - genuine request error surfaces existing err
     await waitFor(() => expect(mockApiGet).toHaveBeenCalled());
     await waitFor(() => {
       expect(
-        screen.getByText('correspondence.noMatchingResults')
+        screen.getByText('correspondence.failedToLoad')
       ).toBeInTheDocument();
     });
     // No crash — the pagination control is still mounted.

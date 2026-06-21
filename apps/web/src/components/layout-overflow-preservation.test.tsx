@@ -400,19 +400,23 @@ describe('Preservation — السلوكيات الأساسية المراد ال
     );
   });
 
-  // ── PRES-6: ظل على لوحة النموذج موجود ───────────────────────────────────
+  // ── PRES-6: لوحة النموذج في Login لها فاصل بصري ──────────────────────────
 
   /**
    * **Validates: Requirements 3.3, 3.6**
    *
-   * الملاحظة: لوحة النموذج في الكود الأصلي تملك shadow-[20px_0_50px...].
-   * نتحقق فقط من وجود ظل ما (أي كلاس يبدأ بـ "shadow") — الشكل قد يتغير بعد الإصلاح.
+   * الملاحظة: أُعيد تصميم Login إلى تخطيط بعمودين، فلوحة النموذج الآن تستخدم
+   * حدًّا فاصلاً (border-e) بدل ظل البطاقة القديم. نتحقق من وجود فاصل بصري
+   * (ظل أو حدّ) دون التقيّد بالشكل القديم تحديدًا.
    */
-  it('PRES-6: لوحة النموذج في Login تملك ظلاً (أي نوع)', () => {
+  it('PRES-6: لوحة النموذج في Login لها فاصل بصري (ظل أو حدّ)', () => {
     const { container } = renderLogin();
     const allDivs = Array.from(container.querySelectorAll('div'));
-    const hasShadow = allDivs.some((div) => div.className.includes('shadow'));
-    expect(hasShadow).toBe(true);
+    const hasVisualSeparator = allDivs.some(
+      (div) =>
+        div.className.includes('shadow') || div.className.includes('border')
+    );
+    expect(hasVisualSeparator).toBe(true);
   });
 
   // ── PRES-7: هيكل صفحة Login محفوظ ───────────────────────────────────────

@@ -126,11 +126,12 @@ describe('FraudLog Module', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the fraud log title and confidential label', () => {
+  it('renders the confidential access label when access is granted', () => {
     setupMock();
     render(<FraudLog />);
 
-    expect(screen.getByText('integrity.fraud')).toBeInTheDocument();
+    // The granted view intentionally omits a redundant page title (the parent
+    // tab establishes context); it surfaces the confidential-access label.
     expect(screen.getByText('integrity.confidentialAccess')).toBeInTheDocument();
   });
 

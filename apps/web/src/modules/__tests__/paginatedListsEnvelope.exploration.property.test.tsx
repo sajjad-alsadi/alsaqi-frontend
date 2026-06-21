@@ -278,7 +278,7 @@ describe('Property 2: Bug Condition - Paginated Lists Envelope-Agnostic Consumpt
           list,
           settle: () =>
             expect(screen.queryByText('common.loading')).not.toBeInTheDocument(),
-          emptyKey: 'correspondence.noMatchingResults',
+          emptyKey: 'correspondence.noOutgoingYet',
         });
       }),
       { numRuns: 15 }
@@ -302,7 +302,7 @@ describe('Property 2: Bug Condition - Paginated Lists Envelope-Agnostic Consumpt
           list,
           settle: () =>
             expect(screen.queryByText('common.loading')).not.toBeInTheDocument(),
-          emptyKey: 'correspondence.noMatchingResults',
+          emptyKey: 'correspondence.noIncomingYet',
         });
       }),
       { numRuns: 15 }
@@ -325,7 +325,7 @@ describe('Property 2: Bug Condition - Paginated Lists Envelope-Agnostic Consumpt
           list,
           settle: () =>
             expect(screen.queryByText('common.loading')).not.toBeInTheDocument(),
-          emptyKey: 'correspondence.archiveIsEmpty',
+          emptyKey: 'correspondence.archiveEmpty',
         });
       }),
       { numRuns: 15 }
