@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Integration Tests — RolePermissions matrix module i18n
  * ======================================================

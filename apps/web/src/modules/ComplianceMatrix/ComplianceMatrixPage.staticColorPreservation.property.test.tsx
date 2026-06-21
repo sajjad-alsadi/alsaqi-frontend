@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Phase 2 — Preservation Test for Defect 1 (Property 7).
  *

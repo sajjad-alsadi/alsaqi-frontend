@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Property 2: Bug Condition - Paginated Lists Envelope-Agnostic Consumption
  *                             with Pagination Fallback

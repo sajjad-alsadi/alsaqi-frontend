@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Property 1: Bug Condition - Compliance Matrix Envelope-Agnostic Consumption
  *

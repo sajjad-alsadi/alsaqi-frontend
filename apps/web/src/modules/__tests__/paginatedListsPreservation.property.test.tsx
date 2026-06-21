@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Property 4: Preservation - Paginated Non-Enveloped Baseline Unchanged
  *

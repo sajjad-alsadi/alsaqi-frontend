@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Accessibility tests for NotificationBell (Requirement 18.1, 18.2, 18.4).
  *

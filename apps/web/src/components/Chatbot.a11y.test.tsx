@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Accessibility tests for Chatbot (Requirement 18.3, 18.4).
  *

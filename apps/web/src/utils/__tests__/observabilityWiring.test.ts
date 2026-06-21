@@ -16,13 +16,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { initSentry } from '@/utils/sentry';
+import { initSentry } from '../sentry';
 import * as Sentry from '@sentry/react';
-import { WebVitalsReporter } from '@/utils/webVitalsReporter';
-import { markAuthenticated, markUnauthenticated } from '@/utils/authGate';
-import { webVitalsMonitor } from '@/utils/webVitalsMonitor';
-import { FeatureFlagProvider, FeatureGate } from '@/featureFlags';
-import type { FeatureFlagConfig } from '@/featureFlags';
+import { WebVitalsReporter } from '../webVitalsReporter';
+import { markAuthenticated, markUnauthenticated } from '../authGate';
+import { webVitalsMonitor } from '../webVitalsMonitor';
+import { FeatureFlagProvider, FeatureGate } from '../../featureFlags';
+import type { FeatureFlagConfig } from '../../featureFlags';
 
 // Mock the Sentry SDK so `init` never reaches the network during tests.
 vi.mock('@sentry/react', () => ({
@@ -151,12 +151,9 @@ describe('observability wiring — Web Vitals reporting endpoint', () => {
 // ─── 3. Feature gate renders children only when enabled — Req 15.2 ──────────────
 
 function renderGate(config: FeatureFlagConfig) {
+  const gate = React.createElement(FeatureGate, { flag: 'beta-feature', children: 'gated-content' });
   return render(
-    React.createElement(
-      FeatureFlagProvider,
-      { config },
-      React.createElement(FeatureGate, { flag: 'beta-feature' }, 'gated-content'),
-    ),
+    React.createElement(FeatureFlagProvider, { config, children: gate }),
   );
 }
 
@@ -198,9 +195,9 @@ describe('observability wiring — log pipeline fallback', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     // Re-import after stubbing MODE so the module evaluates as production.
-    const { logger, configureLogForwarding } = await import('@/utils/logger');
+    const { logger, configureLogForwarding } = await import('../logger');
     // resetModules() gives the logger a fresh authGate instance; mark THAT one.
-    const { markAuthenticated: markAuth } = await import('@/utils/authGate');
+    const { markAuthenticated: markAuth } = await import('../authGate');
     markAuth();
 
     // No destination → the fallback path is used directly.
@@ -226,9 +223,9 @@ describe('observability wiring — log pipeline fallback', () => {
       .mockResolvedValueOnce({ ok: true });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { logger, configureLogForwarding } = await import('@/utils/logger');
+    const { logger, configureLogForwarding } = await import('../logger');
     // resetModules() gives the logger a fresh authGate instance; mark THAT one.
-    const { markAuthenticated: markAuth } = await import('@/utils/authGate');
+    const { markAuthenticated: markAuth } = await import('../authGate');
     markAuth();
 
     configureLogForwarding({ destination: 'https://logs.example.com/ingest', forwardWarn: false });

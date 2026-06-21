@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Unit Tests — RolePermissions registry-matching identifiers + preview label
  * ==========================================================================

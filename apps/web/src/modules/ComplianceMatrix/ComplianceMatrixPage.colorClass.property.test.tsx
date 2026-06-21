@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Phase 1 — Exploratory Bug Condition Test for Defect 1.
  *

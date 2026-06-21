@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/// <reference types="@testing-library/jest-dom/vitest" />
 /**
  * Property 3: Preservation - Compliance Matrix Unchanged Behavior
  *
