@@ -23,7 +23,7 @@ export function createDashboardApi(client: ApiClient): DashboardApi {
   return {
     getStats(department) {
       const params = department && department !== 'all' ? { department } : undefined;
-      return client.get('/v1/dashboard-stats', DashboardStatsSchema, { params });
+      return client.get('/dashboard-stats', DashboardStatsSchema, { params });
     },
   };
 }

@@ -41,23 +41,23 @@ export interface RiskRegisterApi {
 export function createRiskRegisterApi(client: ApiClient): RiskRegisterApi {
   return {
     list(query) {
-      return client.get('/v1/risk-register', RiskItemListSchema, { params: query });
+      return client.get('/risk-register', RiskItemListSchema, { params: query });
     },
 
     getById(id) {
-      return client.get(`/v1/risk-register/${id}`, RiskItemSchema);
+      return client.get(`/risk-register/${id}`, RiskItemSchema);
     },
 
     create(data) {
-      return client.post('/v1/risk-register', RiskItemSchema, data);
+      return client.post('/risk-register', RiskItemSchema, data);
     },
 
     update(id, data) {
-      return client.put(`/v1/risk-register/${id}`, RiskItemSchema, data);
+      return client.put(`/risk-register/${id}`, RiskItemSchema, data);
     },
 
     delete(id) {
-      return client.delete(`/v1/risk-register/${id}`, DeleteResponseSchema);
+      return client.delete(`/risk-register/${id}`, DeleteResponseSchema);
     },
   };
 }

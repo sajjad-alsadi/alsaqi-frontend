@@ -93,71 +93,71 @@ export interface UserManagementApi {
 export function createUserManagementApi(client: ApiClient): UserManagementApi {
   return {
     init() {
-      return client.get('/v1/users/init', GenericObjectSchema);
+      return client.get('/users/init', GenericObjectSchema);
     },
 
     getSummary() {
-      return client.get('/v1/users/summary', UserSummarySchema);
+      return client.get('/users/summary', UserSummarySchema);
     },
 
     getRoles() {
-      return client.get('/v1/roles', RoleListSchema);
+      return client.get('/roles', RoleListSchema);
     },
 
     getPermissions() {
-      return client.get('/v1/permissions', PermissionListSchema);
+      return client.get('/permissions', PermissionListSchema);
     },
 
     getSessions() {
-      return client.get('/v1/user-sessions', SessionListSchema);
+      return client.get('/user-sessions', SessionListSchema);
     },
 
     getSettings() {
-      return client.get('/v1/user-management-settings', SettingsSchema);
+      return client.get('/user-management-settings', SettingsSchema);
     },
 
     getLoginHistory(params) {
-      return client.get('/v1/login-history', LoginHistorySchema, { params });
+      return client.get('/login-history', LoginHistorySchema, { params });
     },
 
     getAuditTrail(params) {
-      return client.get('/v1/audit-trail', AuditTrailSchema, { params });
+      return client.get('/audit-trail', AuditTrailSchema, { params });
     },
 
     getJobTitles() {
-      return client.get('/v1/job-titles', JobTitleListSchema);
+      return client.get('/job-titles', JobTitleListSchema);
     },
 
     getResetRequests() {
-      return client.get('/v1/auth/reset-requests', GenericListSchema);
+      return client.get('/auth/reset-requests', GenericListSchema);
     },
 
     suspendUser(id) {
-      return client.post(`/v1/users/${id}/suspend`, GenericObjectSchema);
+      return client.post(`/users/${id}/suspend`, GenericObjectSchema);
     },
 
     resetPassword(id, data) {
-      return client.post(`/v1/users/${id}/reset-password`, GenericObjectSchema, data);
+      return client.post(`/users/${id}/reset-password`, GenericObjectSchema, data);
     },
 
     unlockUser(id) {
-      return client.post(`/v1/users/${id}/unlock`, GenericObjectSchema);
+      return client.post(`/users/${id}/unlock`, GenericObjectSchema);
     },
 
     approveReset(data) {
-      return client.post('/v1/auth/approve-reset', GenericObjectSchema, data);
+      return client.post('/auth/approve-reset', GenericObjectSchema, data);
     },
 
     updateRolePermissions(roleId, data) {
-      return client.post(`/v1/roles/${roleId}/permissions`, GenericObjectSchema, data);
+      return client.post(`/roles/${roleId}/permissions`, GenericObjectSchema, data);
     },
 
     updateSettings(data) {
-      return client.put('/v1/user-management-settings', SettingsSchema, data);
+      return client.put('/user-management-settings', SettingsSchema, data);
     },
 
     revokeSession(sessionId) {
-      return client.delete(`/v1/user-sessions/${sessionId}`, DeleteResponseSchema);
+      return client.delete(`/user-sessions/${sessionId}`, DeleteResponseSchema);
     },
   };
 }

@@ -95,23 +95,23 @@ export interface UsersApi {
 export function createUsersApi(client: ApiClient): UsersApi {
   return {
     list(query) {
-      return client.get('/v1/users', UserListPayloadSchema, { params: query }) as Promise<User[]>;
+      return client.get('/users', UserListPayloadSchema, { params: query }) as Promise<User[]>;
     },
 
     getById(id) {
-      return client.get(`/v1/users/${id}`, UserSchema) as Promise<User>;
+      return client.get(`/users/${id}`, UserSchema) as Promise<User>;
     },
 
     create(data) {
-      return client.post('/v1/users', UserSchema, data) as Promise<User>;
+      return client.post('/users', UserSchema, data) as Promise<User>;
     },
 
     update(id, data) {
-      return client.put(`/v1/users/${id}`, UserSchema, data) as Promise<User>;
+      return client.put(`/users/${id}`, UserSchema, data) as Promise<User>;
     },
 
     delete(id) {
-      return client.delete(`/v1/users/${id}`, DeleteResponseSchema);
+      return client.delete(`/users/${id}`, DeleteResponseSchema);
     },
   };
 }

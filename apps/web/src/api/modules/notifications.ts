@@ -30,6 +30,11 @@ const NotificationSchema: z.ZodType<Notification> = z.object({
 
 const NotificationListSchema = z.array(NotificationSchema);
 
+/**
+ * The bulk mark-read (`PUT /notifications/mark-read`) and mark-all-read
+ * (`PUT /notifications/mark-all-read`) endpoints return `{ updated: number }`
+ * (the count of notifications changed to read) per the unified contract.
+ */
 const MarkReadResponseSchema = z.object({
   updated: z.number(),
 });
@@ -42,6 +47,11 @@ export interface NotificationsApi {
     pageSize?: number;
     status?: string;
   }): Promise<Notification[]>;
+  /**
+   * Bulk-mark the given notifications as read in a single call via the
+   * `PUT /notifications/mark-read` endpoint. Resolves with the count actually
+   * marked read for the current user (`data.updated`).
+   */
   markRead(notificationIds: Array<string | number>): Promise<{ updated: number }>;
   markAllRead(): Promise<{ updated: number }>;
 }
@@ -51,17 +61,17 @@ export interface NotificationsApi {
 export function createNotificationsApi(client: ApiClient): NotificationsApi {
   return {
     list(query) {
-      return client.get('/v1/notifications', NotificationListSchema, { params: query });
+      return client.get('/notifications', NotificationListSchema, { params: query });
     },
 
     markRead(notificationIds) {
-      return client.put('/v1/notifications/mark-read', MarkReadResponseSchema, {
+      return client.put('/notifications/mark-read', MarkReadResponseSchema, {
         notification_ids: notificationIds,
       });
     },
 
     markAllRead() {
-      return client.put('/v1/notifications/mark-all-read', MarkReadResponseSchema);
+      return client.put('/notifications/mark-all-read', MarkReadResponseSchema);
     },
   };
 }

@@ -34,19 +34,19 @@ export interface RegulatoryApi {
 export function createRegulatoryApi(client: ApiClient): RegulatoryApi {
   return {
     list() {
-      return client.get('/v1/central-bank-instructions', InstructionListSchema) as Promise<CentralBankInstruction[]>;
+      return client.get('/central-bank-instructions', InstructionListSchema) as Promise<CentralBankInstruction[]>;
     },
 
     create(data) {
-      return client.post('/v1/central-bank-instructions', InstructionSchema, data) as Promise<CentralBankInstruction>;
+      return client.post('/central-bank-instructions', InstructionSchema, data) as Promise<CentralBankInstruction>;
     },
 
     update(id, data) {
-      return client.put(`/v1/central-bank-instructions/${id}`, InstructionSchema, data) as Promise<CentralBankInstruction>;
+      return client.put(`/central-bank-instructions/${id}`, InstructionSchema, data) as Promise<CentralBankInstruction>;
     },
 
     delete(id) {
-      return client.delete(`/v1/central-bank-instructions/${id}`, DeleteResponseSchema);
+      return client.delete(`/central-bank-instructions/${id}`, DeleteResponseSchema);
     },
   };
 }

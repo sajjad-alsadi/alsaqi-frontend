@@ -82,67 +82,67 @@ export interface CorrespondenceApi {
 export function createCorrespondenceApi(client: ApiClient): CorrespondenceApi {
   return {
     list(query) {
-      return client.get('/v1/correspondence', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
+      return client.get('/correspondence', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
     },
 
     getById(id) {
-      return client.get(`/v1/correspondence/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
+      return client.get(`/correspondence/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
     },
 
     getStats() {
-      return client.get('/v1/correspondence/stats', StatsResponseSchema);
+      return client.get('/correspondence/stats', StatsResponseSchema);
     },
 
     getIncoming(query) {
-      return client.get('/v1/correspondence/incoming', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
+      return client.get('/correspondence/incoming', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
     },
 
     getOutgoing(query) {
-      return client.get('/v1/correspondence/outgoing', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
+      return client.get('/correspondence/outgoing', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
     },
 
     getArchive(query) {
-      return client.get('/v1/correspondence/archive', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
+      return client.get('/correspondence/archive', CorrespondenceListSchema, { params: query }) as Promise<Correspondence[]>;
     },
 
     getDetails(type, id) {
-      return client.get(`/v1/correspondence/details/${type}/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
+      return client.get(`/correspondence/details/${type}/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
     },
 
     createIncoming(data) {
-      return client.post('/v1/correspondence/incoming', CorrespondenceSchema, data) as Promise<Correspondence>;
+      return client.post('/correspondence/incoming', CorrespondenceSchema, data) as Promise<Correspondence>;
     },
 
     updateIncoming(id, data) {
-      return client.put(`/v1/correspondence/incoming/${id}`, CorrespondenceSchema, data) as Promise<Correspondence>;
+      return client.put(`/correspondence/incoming/${id}`, CorrespondenceSchema, data) as Promise<Correspondence>;
     },
 
     createOutgoing(data) {
-      return client.post('/v1/correspondence/outgoing', CorrespondenceSchema, data) as Promise<Correspondence>;
+      return client.post('/correspondence/outgoing', CorrespondenceSchema, data) as Promise<Correspondence>;
     },
 
     updateOutgoing(id, data) {
-      return client.put(`/v1/correspondence/outgoing/${id}`, CorrespondenceSchema, data) as Promise<Correspondence>;
+      return client.put(`/correspondence/outgoing/${id}`, CorrespondenceSchema, data) as Promise<Correspondence>;
     },
 
     delete(id) {
-      return client.delete(`/v1/correspondence/${id}`, DeleteResponseSchema);
+      return client.delete(`/correspondence/${id}`, DeleteResponseSchema);
     },
 
     deleteIncoming(id) {
-      return client.delete(`/v1/correspondence/incoming/${id}`, DeleteResponseSchema);
+      return client.delete(`/correspondence/incoming/${id}`, DeleteResponseSchema);
     },
 
     deleteOutgoing(id) {
-      return client.delete(`/v1/correspondence/outgoing/${id}`, DeleteResponseSchema);
+      return client.delete(`/correspondence/outgoing/${id}`, DeleteResponseSchema);
     },
 
     archiveIncoming(id) {
-      return client.put(`/v1/correspondence/archive/incoming/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
+      return client.put(`/correspondence/archive/incoming/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
     },
 
     archiveOutgoing(id) {
-      return client.put(`/v1/correspondence/archive/outgoing/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
+      return client.put(`/correspondence/archive/outgoing/${id}`, CorrespondenceSchema) as Promise<Correspondence>;
     },
   };
 }

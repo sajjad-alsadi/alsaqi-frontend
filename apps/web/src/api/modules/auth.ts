@@ -192,7 +192,7 @@ const LoginUserSchema = z
 /**
  * Login response schema.
  *
- * The `/v1/auth/login` endpoint has more than one success shape: a normal login
+ * The `/auth/login` endpoint has more than one success shape: a normal login
  * resolves with a user and a session token, a password-change-required login
  * resolves with a user flagged `requires_password_change`, and a 2FA-gated login
  * resolves with `requires2FA` + a `tempToken` (and no user yet). All fields are
@@ -231,7 +231,7 @@ const ChangePasswordResponseSchema = z.object({
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /**
- * The possible success payloads of `POST /v1/auth/login`.
+ * The possible success payloads of `POST /auth/login`.
  *
  * - Normal login: `{ user, token }`.
  * - Password-change-required: `{ user, token }` where `user.requires_password_change` is true.
@@ -267,30 +267,30 @@ export interface AuthApi {
 export function createAuthApi(client: ApiClient): AuthApi {
   return {
     login(data) {
-      return client.post('/v1/auth/login', LoginResponseSchema, data) as Promise<LoginResponse>;
+      return client.post('/auth/login', LoginResponseSchema, data) as Promise<LoginResponse>;
     },
 
     logout() {
-      return client.post('/v1/auth/logout', LogoutResponseSchema);
+      return client.post('/auth/logout', LogoutResponseSchema);
     },
 
     refresh(data) {
-      return client.post('/v1/auth/refresh', RefreshResponseSchema, data);
+      return client.post('/auth/refresh', RefreshResponseSchema, data);
     },
 
     register(data) {
-      return client.post('/v1/auth/register', RegisterResponseSchema, data) as Promise<{
+      return client.post('/auth/register', RegisterResponseSchema, data) as Promise<{
         user: User;
       }>;
     },
 
     changePassword(data) {
-      return client.post('/v1/auth/change-password', ChangePasswordResponseSchema, data);
+      return client.post('/auth/change-password', ChangePasswordResponseSchema, data);
     },
 
     async getCurrentUser() {
       try {
-        const response = await client.get('/v1/auth/me', z.object({ user: UserSchema }));
+        const response = await client.get('/auth/me', z.object({ user: UserSchema }));
         return response.user as User;
       } catch {
         return null;

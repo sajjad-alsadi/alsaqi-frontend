@@ -287,7 +287,7 @@ describe('Epic 15: consolidation invariants guard (Req 3.1, 3.2, 3.6, 4.1, 4.2, 
   it('has no raw fetch to /api/auth/login anywhere in src (Req 4.1, 4.2, 4.3)', () => {
     // Match a `fetch(...)` whose URL argument references the legacy login path,
     // and, independently, any occurrence of the raw `/api/auth/login` literal.
-    // The Auth_Module targets `/v1/auth/login`, which this guard does not match.
+    // The Auth_Module targets `/auth/login`, which this guard does not match.
     const fetchLoginRe = /fetch\s*\(\s*[^)]*\/api\/auth\/login/;
     const rawPathRe = /['"`][^'"`]*\/api\/auth\/login/;
 

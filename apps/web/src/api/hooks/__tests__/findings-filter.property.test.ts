@@ -3,7 +3,7 @@
  *
  * Exercises the real request boundary: `useFindings` forwards its
  * `FindingsListParams` to `api.findings.list(params)`, and the Findings module
- * (`modules/findings.ts`) issues `client.get('/v1/findings', schema, { params })`.
+ * (`modules/findings.ts`) issues `client.get('/audit-findings', schema, { params })`.
  * The Axios adapter is stubbed (axios-mock-adapter) so the per-request `params`
  * sent to the server can be captured and compared against the generated filter
  * criteria, and so the number of network requests can be counted to prove the
@@ -100,7 +100,7 @@ describe('Property 20: Server-side findings filtering', () => {
         const capturedParams: Array<unknown> = [];
         let requestCount = 0;
 
-        mock.onGet('/v1/findings').reply((reqConfig) => {
+        mock.onGet('/audit-findings').reply((reqConfig) => {
           requestCount += 1;
           capturedParams.push(reqConfig.params);
           return [200, ENVELOPE];

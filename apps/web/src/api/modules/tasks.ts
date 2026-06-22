@@ -63,23 +63,23 @@ export interface TasksApi {
 export function createTasksApi(client: ApiClient): TasksApi {
   return {
     list(query) {
-      return client.get('/v1/tasks', TaskListSchema, { params: query });
+      return client.get('/audit-tasks', TaskListSchema, { params: query });
     },
 
     getById(id) {
-      return client.get(`/v1/tasks/${id}`, TaskSchema);
+      return client.get(`/audit-tasks/${id}`, TaskSchema);
     },
 
     create(data) {
-      return client.post('/v1/tasks', TaskSchema, data);
+      return client.post('/audit-tasks', TaskSchema, data);
     },
 
     update(id, data) {
-      return client.put(`/v1/tasks/${id}`, TaskSchema, data);
+      return client.put(`/audit-tasks/${id}`, TaskSchema, data);
     },
 
     delete(id) {
-      return client.delete(`/v1/tasks/${id}`, DeleteResponseSchema);
+      return client.delete(`/audit-tasks/${id}`, DeleteResponseSchema);
     },
   };
 }
