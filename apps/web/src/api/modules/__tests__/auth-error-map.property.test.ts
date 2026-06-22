@@ -39,7 +39,7 @@ function makeAxiosError(
   serverCode: string | undefined,
   message: string
 ): AxiosError {
-  const config = { url: '/v1/auth/login' } as never;
+  const config = { url: '/auth/login' } as never;
   const data: Record<string, unknown> = {
     error: {
       ...(serverCode !== undefined ? { code: serverCode } : {}),
@@ -88,7 +88,7 @@ const anyErrorInputArb = fc.oneof(
   // Network error: AxiosError with no response.
   fc
     .string()
-    .map((m) => new AxiosError(m, 'ERR_NETWORK', { url: '/v1/auth/login' } as never, {})),
+    .map((m) => new AxiosError(m, 'ERR_NETWORK', { url: '/auth/login' } as never, {})),
   // Response-bearing Axios error with random status, server code, and message.
   fc
     .tuple(fc.integer({ min: 100, max: 599 }), serverCodeArb, fc.string())
@@ -134,13 +134,13 @@ describe('Property 5: auth error mapping is message-independent', () => {
         const errorA = new AxiosError(
           messageA,
           'ERR_NETWORK',
-          { url: '/v1/auth/login' } as never,
+          { url: '/auth/login' } as never,
           {}
         );
         const errorB = new AxiosError(
           messageB,
           'ERR_NETWORK',
-          { url: '/v1/auth/login' } as never,
+          { url: '/auth/login' } as never,
           {}
         );
 

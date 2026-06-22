@@ -50,19 +50,19 @@ export interface FindingsApi {
 export function createFindingsApi(client: ApiClient): FindingsApi {
   return {
     list(query) {
-      return client.get('/v1/findings', FindingListSchema, { params: query });
+      return client.get('/audit-findings', FindingListSchema, { params: query });
     },
 
     create(data) {
-      return client.post('/v1/findings', FindingSchema, data);
+      return client.post('/audit-findings', FindingSchema, data);
     },
 
     update(id, data) {
-      return client.put(`/v1/findings/${id}`, FindingSchema, data);
+      return client.put(`/audit-findings/${id}`, FindingSchema, data);
     },
 
     delete(id) {
-      return client.delete(`/v1/findings/${id}`, DeleteResponseSchema);
+      return client.delete(`/audit-findings/${id}`, DeleteResponseSchema);
     },
   };
 }

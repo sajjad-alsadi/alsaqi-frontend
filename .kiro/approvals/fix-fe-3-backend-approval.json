@@ -1,0 +1,10 @@
+{
+  "approval": "fix-fe-3-backend-approval",
+  "scope": "packages/shared/src/types/endpoints/",
+  "reason": "Backend team aligned the unified @alsaqi/shared contract for notifications and auth endpoints. This frontend repo synchronizes its endpoint-contract declarations to match, per the backend handoff document 'frontend-notifications-contract-handoff.md'. Changes are confined to endpoint-contract type declarations under packages/shared/src/types/endpoints/.",
+  "approvedBy": "backend-team (handoff: frontend-notifications-contract-handoff.md)",
+  "date": "2026-06-18",
+  "affectedFiles": [
+    "packages/shared/src/types/endpoints/notifications.ts"
+  ]
+}

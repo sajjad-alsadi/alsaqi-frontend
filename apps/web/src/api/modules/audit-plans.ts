@@ -69,7 +69,7 @@ export function createAuditPlansApi(client: ApiClient): AuditPlansApi {
     async list(query) {
       // Forward page/pageSize (and filters) to the server (Req 21.3) and read
       // the pagination totals from the envelope meta rather than the page length.
-      const { data, meta } = await client.getWithMeta('/v1/audit-plans', AuditPlanListSchema, {
+      const { data, meta } = await client.getWithMeta('/audit-plans', AuditPlanListSchema, {
         params: query,
       });
       const items = data as AuditPlan[];
@@ -78,19 +78,19 @@ export function createAuditPlansApi(client: ApiClient): AuditPlansApi {
     },
 
     getById(id) {
-      return client.get(`/v1/audit-plans/${id}`, AuditPlanSchema) as Promise<AuditPlan>;
+      return client.get(`/audit-plans/${id}`, AuditPlanSchema) as Promise<AuditPlan>;
     },
 
     create(data) {
-      return client.post('/v1/audit-plans', AuditPlanSchema, data) as Promise<AuditPlan>;
+      return client.post('/audit-plans', AuditPlanSchema, data) as Promise<AuditPlan>;
     },
 
     update(id, data) {
-      return client.put(`/v1/audit-plans/${id}`, AuditPlanSchema, data) as Promise<AuditPlan>;
+      return client.put(`/audit-plans/${id}`, AuditPlanSchema, data) as Promise<AuditPlan>;
     },
 
     delete(id) {
-      return client.delete(`/v1/audit-plans/${id}`, DeleteResponseSchema);
+      return client.delete(`/audit-plans/${id}`, DeleteResponseSchema);
     },
   };
 }

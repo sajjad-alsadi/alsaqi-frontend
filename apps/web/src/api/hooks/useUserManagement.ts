@@ -14,7 +14,7 @@ import { api } from '../index';
 import toast from 'react-hot-toast';
 
 /**
- * Query params accepted by the User Management screen. Combines the `/v1/users`
+ * Query params accepted by the User Management screen. Combines the `/users`
  * list query with the screen-specific pagination cursors (`historyPage`,
  * `auditPage`) read directly off the params object.
  */

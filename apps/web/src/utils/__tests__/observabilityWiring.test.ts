@@ -151,9 +151,9 @@ describe('observability wiring — Web Vitals reporting endpoint', () => {
 // ─── 3. Feature gate renders children only when enabled — Req 15.2 ──────────────
 
 function renderGate(config: FeatureFlagConfig) {
-  const gate = React.createElement(FeatureGate, { flag: 'beta-feature', children: 'gated-content' });
+  const gate = React.createElement(FeatureGate, { flag: 'beta-feature' }, 'gated-content');
   return render(
-    React.createElement(FeatureFlagProvider, { config, children: gate }),
+    React.createElement(FeatureFlagProvider, { config }, gate),
   );
 }
 

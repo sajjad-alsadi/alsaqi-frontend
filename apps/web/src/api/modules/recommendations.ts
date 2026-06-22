@@ -62,23 +62,23 @@ export interface RecommendationsApi {
 export function createRecommendationsApi(client: ApiClient): RecommendationsApi {
   return {
     list(query) {
-      return client.get('/v1/recommendations', RecommendationListSchema, { params: query });
+      return client.get('/recommendations', RecommendationListSchema, { params: query });
     },
 
     getById(id) {
-      return client.get(`/v1/recommendations/${id}`, RecommendationSchema);
+      return client.get(`/recommendations/${id}`, RecommendationSchema);
     },
 
     create(data) {
-      return client.post('/v1/recommendations', RecommendationSchema, data);
+      return client.post('/recommendations', RecommendationSchema, data);
     },
 
     update(id, data) {
-      return client.put(`/v1/recommendations/${id}`, RecommendationSchema, data);
+      return client.put(`/recommendations/${id}`, RecommendationSchema, data);
     },
 
     delete(id) {
-      return client.delete(`/v1/recommendations/${id}`, DeleteResponseSchema);
+      return client.delete(`/recommendations/${id}`, DeleteResponseSchema);
     },
   };
 }

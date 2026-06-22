@@ -85,23 +85,23 @@ export interface DepartmentsApi {
 export function createDepartmentsApi(client: ApiClient): DepartmentsApi {
   return {
     list(query) {
-      return client.get('/v1/departments', DepartmentListSchema, { params: query });
+      return client.get('/departments', DepartmentListSchema, { params: query });
     },
 
     getById(id) {
-      return client.get(`/v1/departments/${id}`, DepartmentSchema);
+      return client.get(`/departments/${id}`, DepartmentSchema);
     },
 
     create(data) {
-      return client.post('/v1/departments', DepartmentSchema, data);
+      return client.post('/departments', DepartmentSchema, data);
     },
 
     update(id, data) {
-      return client.put(`/v1/departments/${id}`, DepartmentSchema, data);
+      return client.put(`/departments/${id}`, DepartmentSchema, data);
     },
 
     delete(id) {
-      return client.delete(`/v1/departments/${id}`, DeleteResponseSchema);
+      return client.delete(`/departments/${id}`, DeleteResponseSchema);
     },
   };
 }
